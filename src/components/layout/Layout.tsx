@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { cn } from '@/components/ui';
+import { cn } from '@/utils/cn';
 import { initializeAccessibility } from '@/utils/accessibility';
 
 interface LayoutProps {

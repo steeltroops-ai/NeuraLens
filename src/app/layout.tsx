@@ -13,7 +13,8 @@ export const metadata: Metadata = {
     default: 'NeuroLens-X | Neurological Risk Assessment',
     template: '%s | NeuroLens-X',
   },
-  description: 'Multi-modal neurological risk assessment platform for early detection of neurological disorders through AI-powered speech, retinal, and risk analysis.',
+  description:
+    'Multi-modal neurological risk assessment platform for early detection of neurological disorders through AI-powered speech, retinal, and risk analysis.',
   keywords: [
     'neurology',
     'neurological assessment',
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     'retinal imaging',
     'risk assessment',
     'dementia screening',
-    'Parkinson\'s detection',
+    "Parkinson's detection",
     'cognitive health',
   ],
   authors: [{ name: 'NeuroLens-X Team' }],
@@ -44,7 +45,8 @@ export const metadata: Metadata = {
     url: 'https://neurolens-x.com',
     siteName: 'NeuroLens-X',
     title: 'NeuroLens-X | Neurological Risk Assessment',
-    description: 'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
+    description:
+      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
     images: [
       {
         url: '/og-image.png',
@@ -57,7 +59,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'NeuroLens-X | Neurological Risk Assessment',
-    description: 'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
+    description:
+      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
     images: ['/twitter-image.png'],
     creator: '@neurolens_x',
   },
@@ -115,17 +118,39 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="152x152"
+          href="/icons/icon-152x152.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/icons/icon-180x180.png"
+        />
 
         {/* Favicons */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
         <link rel="shortcut icon" href="/favicon.ico" />
 
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         {/* DNS Prefetch */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
@@ -142,9 +167,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
         {/* Security Headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-Frame-Options" content="DENY" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-        <meta httpEquiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+        <meta
+          httpEquiv="Referrer-Policy"
+          content="strict-origin-when-cross-origin"
+        />
 
         {/* Performance Hints */}
         <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
@@ -180,13 +207,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* Skip Links for Accessibility */}
         <a
           href="#main-content"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-500 focus:text-white focus:rounded-md focus:shadow-lg"
+          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
         >
           Skip to main content
         </a>
         <a
           href="#main-navigation"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-32 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-500 focus:text-white focus:rounded-md focus:shadow-lg"
+          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
         >
           Skip to navigation
         </a>

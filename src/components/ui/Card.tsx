@@ -1,7 +1,8 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { CardProps, cn } from '@/types/design-system';
+import type { CardProps } from '@/types/design-system';
+import { cn } from '@/utils/cn';
 
 /**
  * Clinical-grade Card component with multiple variants and accessibility support

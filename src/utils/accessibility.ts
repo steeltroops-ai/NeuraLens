@@ -106,7 +106,7 @@ export class FocusManager {
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleTabKey = (event: KeyboardEvent) => {
-      if (event.key === 'Tab') {
+      if (event.key === 'Tab' && firstElement && lastElement) {
         if (event.shiftKey) {
           // Shift + Tab
           if (document.activeElement === firstElement) {
@@ -573,6 +573,17 @@ export class LiveRegionManager {
       this.regions.delete(regionId);
     }
   }
+
+  clearAll(): void {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
+    this.regions.forEach((_, id) => {
+      this.removeRegion(id);
+    });
+  }
 }
 
 // Global instances - lazy loaded to avoid SSR issues
@@ -658,9 +669,5 @@ export const cleanupAccessibility = (): void => {
   voiceNavigation.stop?.();
 
   // Clear all live regions
-  if (liveRegionManager.regions) {
-    liveRegionManager.regions.forEach((_, id) => {
-      liveRegionManager.removeRegion?.(id);
-    });
-  }
+  liveRegionManager.clearAll?.();
 };

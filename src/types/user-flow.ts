@@ -2,7 +2,7 @@
 
 /* ===== NAVIGATION TYPES ===== */
 
-export type RouteId = 
+export type RouteId =
   | 'home'
   | 'assessment-intro'
   | 'assessment-speech'
@@ -104,14 +104,21 @@ export interface StepTransition {
 export interface FormField {
   id: string;
   name: string;
-  type: 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'file' | 'textarea';
+  type:
+    | 'text'
+    | 'number'
+    | 'select'
+    | 'checkbox'
+    | 'radio'
+    | 'file'
+    | 'textarea';
   label: string;
   placeholder?: string;
   required: boolean;
   validation?: ValidationRule[];
-  options?: Array<{ value: string; label: string; }>;
+  options?: Array<{ value: string; label: string }>;
   helpText?: string;
-  dependencies?: Array<{ field: string; value: any; }>;
+  dependencies?: Array<{ field: string; value: any }>;
   accessibility?: {
     ariaLabel?: string;
     ariaDescribedBy?: string;
@@ -154,7 +161,7 @@ export interface AccessibilityState {
   focusManagement: {
     currentFocus?: string;
     focusHistory: string[];
-    skipLinks: Array<{ target: string; label: string; }>;
+    skipLinks: Array<{ target: string; label: string }>;
   };
   preferences: {
     reducedMotion: boolean;
@@ -331,7 +338,8 @@ export const ROUTES: Record<RouteId, Route> = {
 export const ASSESSMENT_JOURNEY: UserJourney = {
   id: 'neurological-assessment',
   name: 'Neurological Risk Assessment',
-  description: 'Complete multi-modal assessment to evaluate neurological health risk',
+  description:
+    'Complete multi-modal assessment to evaluate neurological health risk',
   totalEstimatedDuration: 495, // 8 minutes 15 seconds
   steps: [
     {
@@ -401,7 +409,8 @@ export const ASSESSMENT_JOURNEY: UserJourney = {
           id: 'no-retinal-image',
           condition: 'user has no retinal image available',
           targetRoute: 'assessment-risk',
-          message: 'You can continue without retinal imaging, but results may be less comprehensive',
+          message:
+            'You can continue without retinal imaging, but results may be less comprehensive',
         },
       ],
     },
@@ -483,27 +492,40 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
 
 /* ===== HELPER FUNCTIONS ===== */
 
-export const getNextStep = (currentStepId: string, journey: UserJourney): UserFlowStep | null => {
-  const currentIndex = journey.steps.findIndex(step => step.id === currentStepId);
+export const getNextStep = (
+  currentStepId: string,
+  journey: UserJourney
+): UserFlowStep | null => {
+  const currentIndex = journey.steps.findIndex(
+    (step) => step.id === currentStepId
+  );
   if (currentIndex === -1 || currentIndex === journey.steps.length - 1) {
     return null;
   }
-  return journey.steps[currentIndex + 1];
+  return journey.steps[currentIndex + 1] || null;
 };
 
-export const getPreviousStep = (currentStepId: string, journey: UserJourney): UserFlowStep | null => {
-  const currentIndex = journey.steps.findIndex(step => step.id === currentStepId);
+export const getPreviousStep = (
+  currentStepId: string,
+  journey: UserJourney
+): UserFlowStep | null => {
+  const currentIndex = journey.steps.findIndex(
+    (step) => step.id === currentStepId
+  );
   if (currentIndex <= 0) {
     return null;
   }
-  return journey.steps[currentIndex - 1];
+  return journey.steps[currentIndex - 1] || null;
 };
 
-export const calculateProgress = (completedSteps: string[], journey: UserJourney): ProgressState => {
+export const calculateProgress = (
+  completedSteps: string[],
+  journey: UserJourney
+): ProgressState => {
   const totalSteps = journey.steps.length;
   const completed = completedSteps.length;
   const percentage = Math.round((completed / totalSteps) * 100);
-  
+
   return {
     currentStep: completed + 1,
     totalSteps,
@@ -511,7 +533,7 @@ export const calculateProgress = (completedSteps: string[], journey: UserJourney
     percentage,
     timeElapsed: 0, // To be calculated based on actual timing
     estimatedTimeRemaining: journey.totalEstimatedDuration,
-    milestones: journey.steps.map(step => ({
+    milestones: journey.steps.map((step) => ({
       id: step.id,
       label: step.title,
       completed: completedSteps.includes(step.id),
@@ -519,13 +541,17 @@ export const calculateProgress = (completedSteps: string[], journey: UserJourney
   };
 };
 
-export const validateStep = (stepId: string, data: any, journey: UserJourney): ValidationRule[] => {
-  const step = journey.steps.find(s => s.id === stepId);
+export const validateStep = (
+  stepId: string,
+  data: any,
+  journey: UserJourney
+): ValidationRule[] => {
+  const step = journey.steps.find((s) => s.id === stepId);
   if (!step || !step.validationRules) {
     return [];
   }
-  
-  return step.validationRules.filter(rule => {
+
+  return step.validationRules.filter((rule) => {
     if (rule.type === 'required') {
       return !data[rule.field];
     }

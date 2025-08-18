@@ -51,8 +51,8 @@ export type {
 } from '@/types/design-system';
 
 // Re-export utility functions
+export { cn } from '@/utils/cn';
 export {
-  cn,
   getRiskLevel,
   getRiskColor,
   formatConfidence,

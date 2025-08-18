@@ -1,7 +1,8 @@
 'use client';
 
 import React, { forwardRef, useState } from 'react';
-import { InputProps, cn } from '@/types/design-system';
+import type { InputProps } from '@/types/design-system';
+import { cn } from '@/utils/cn';
 
 /**
  * Clinical-grade Input component with validation and accessibility support

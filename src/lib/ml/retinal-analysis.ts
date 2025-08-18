@@ -3,46 +3,46 @@
 
 export interface RetinalFeatures {
   // Vascular Features
-  vesselDensity: number;        // Vessel density (%)
-  vesselTortuosity: number;     // Average vessel tortuosity
-  vesselWidth: number;          // Average vessel width (pixels)
-  branchingAngle: number;       // Average branching angle (degrees)
-  
+  vesselDensity: number; // Vessel density (%)
+  vesselTortuosity: number; // Average vessel tortuosity
+  vesselWidth: number; // Average vessel width (pixels)
+  branchingAngle: number; // Average branching angle (degrees)
+
   // Optic Disc Features
-  opticDiscArea: number;        // Optic disc area (pixels²)
-  cupDiscRatio: number;         // Cup-to-disc ratio
-  rimArea: number;              // Neuroretinal rim area
-  
+  opticDiscArea: number; // Optic disc area (pixels²)
+  cupDiscRatio: number; // Cup-to-disc ratio
+  rimArea: number; // Neuroretinal rim area
+
   // Macula Features
-  maculaArea: number;           // Macula area (pixels²)
-  fovealThickness: number;      // Estimated foveal thickness
-  maculaPigmentation: number;   // Pigmentation density
-  
+  maculaArea: number; // Macula area (pixels²)
+  fovealThickness: number; // Estimated foveal thickness
+  maculaPigmentation: number; // Pigmentation density
+
   // Pathological Indicators
-  microaneurysms: number;       // Count of microaneurysms
-  hemorrhages: number;          // Count of hemorrhages
-  exudates: number;             // Count of hard exudates
-  cottonWoolSpots: number;      // Count of cotton wool spots
-  
+  microaneurysms: number; // Count of microaneurysms
+  hemorrhages: number; // Count of hemorrhages
+  exudates: number; // Count of hard exudates
+  cottonWoolSpots: number; // Count of cotton wool spots
+
   // Neurological Markers
-  retinalNerveLayer: number;    // RNFL thickness estimate
-  ganglionCellLayer: number;    // GCL thickness estimate
-  vascularComplexity: number;   // Fractal dimension of vasculature
-  
+  retinalNerveLayer: number; // RNFL thickness estimate
+  ganglionCellLayer: number; // GCL thickness estimate
+  vascularComplexity: number; // Fractal dimension of vasculature
+
   // Image Quality Metrics
-  imageSharpness: number;       // Sharpness score (0-1)
-  illumination: number;         // Illumination uniformity (0-1)
-  contrast: number;             // Image contrast (0-1)
+  imageSharpness: number; // Sharpness score (0-1)
+  illumination: number; // Illumination uniformity (0-1)
+  contrast: number; // Image contrast (0-1)
 }
 
 export interface RetinalAnalysisResult {
   features: RetinalFeatures;
-  riskScore: number;            // 0-100 neurological risk score
-  confidence: number;           // Confidence interval (±%)
-  findings: string[];           // Clinical findings
-  processingTime: number;       // Analysis time (ms)
-  imageQuality: number;         // Overall image quality (0-1)
-  recommendations: string[];    // Clinical recommendations
+  riskScore: number; // 0-100 neurological risk score
+  confidence: number; // Confidence interval (±%)
+  findings: string[]; // Clinical findings
+  processingTime: number; // Analysis time (ms)
+  imageQuality: number; // Overall image quality (0-1)
+  recommendations: string[]; // Clinical recommendations
 }
 
 export class RetinalAnalyzer {
@@ -64,31 +64,35 @@ export class RetinalAnalyzer {
    */
   async analyzeRetinalImage(imageFile: File): Promise<RetinalAnalysisResult> {
     const startTime = performance.now();
-    
+
     try {
       // Load and preprocess image
       const imageData = await this.loadAndPreprocessImage(imageFile);
-      
+
       // Extract features
       const features = await this.extractRetinalFeatures(imageData);
-      
+
       // Calculate risk score
       const riskScore = this.calculateRiskScore(features);
-      
+
       // Generate clinical findings
       const findings = this.generateFindings(features, riskScore);
-      
-      // Generate recommendations
-      const recommendations = this.generateRecommendations(features, riskScore);
-      
+
       // Calculate confidence
       const confidence = this.calculateConfidence(features);
-      
+
       // Assess image quality
       const imageQuality = this.assessImageQuality(imageData);
-      
+
+      // Generate recommendations
+      const recommendations = this.generateRecommendations(
+        features,
+        riskScore,
+        imageQuality
+      );
+
       const processingTime = performance.now() - startTime;
-      
+
       return {
         features,
         riskScore,
@@ -100,7 +104,9 @@ export class RetinalAnalyzer {
       };
     } catch (error) {
       console.error('Retinal analysis failed:', error);
-      throw new Error('Failed to analyze retinal image: ' + (error as Error).message);
+      throw new Error(
+        'Failed to analyze retinal image: ' + (error as Error).message
+      );
     }
   }
 
@@ -132,10 +138,15 @@ export class RetinalAnalyzer {
         this.ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
 
         // Get image data
-        const imageData = this.ctx.getImageData(0, 0, this.imageSize, this.imageSize);
+        const imageData = this.ctx.getImageData(
+          0,
+          0,
+          this.imageSize,
+          this.imageSize
+        );
         resolve(imageData);
       };
-      
+
       img.onerror = () => reject(new Error('Failed to load image'));
       img.src = URL.createObjectURL(imageFile);
     });
@@ -144,40 +155,48 @@ export class RetinalAnalyzer {
   /**
    * Extract comprehensive retinal features
    */
-  private async extractRetinalFeatures(imageData: ImageData): Promise<RetinalFeatures> {
+  private async extractRetinalFeatures(
+    imageData: ImageData
+  ): Promise<RetinalFeatures> {
     // Convert to grayscale for analysis
     const grayscale = this.convertToGrayscale(imageData);
-    
+
     // Enhance image contrast
     const enhanced = this.enhanceContrast(grayscale);
-    
+
     // Segment blood vessels
     const vesselMask = this.segmentBloodVessels(enhanced);
-    
+
     // Detect optic disc
     const opticDisc = this.detectOpticDisc(enhanced);
-    
+
     // Detect macula
     const macula = this.detectMacula(enhanced);
-    
+
     // Extract vascular features
     const vascularFeatures = this.extractVascularFeatures(vesselMask);
-    
+
     // Extract optic disc features
-    const opticDiscFeatures = this.extractOpticDiscFeatures(enhanced, opticDisc);
-    
+    const opticDiscFeatures = this.extractOpticDiscFeatures(
+      enhanced,
+      opticDisc
+    );
+
     // Extract macula features
     const maculaFeatures = this.extractMaculaFeatures(enhanced, macula);
-    
+
     // Detect pathological features
     const pathologicalFeatures = this.detectPathologicalFeatures(enhanced);
-    
+
     // Extract neurological markers
-    const neurologicalFeatures = this.extractNeurologicalMarkers(enhanced, vesselMask);
-    
+    const neurologicalFeatures = this.extractNeurologicalMarkers(
+      enhanced,
+      vesselMask
+    );
+
     // Assess image quality
     const qualityMetrics = this.assessImageQualityMetrics(imageData);
-    
+
     return {
       ...vascularFeatures,
       ...opticDiscFeatures,
@@ -194,12 +213,12 @@ export class RetinalAnalyzer {
   private convertToGrayscale(imageData: ImageData): Uint8Array {
     const grayscale = new Uint8Array(imageData.width * imageData.height);
     const data = imageData.data;
-    
+
     for (let i = 0; i < data.length; i += 4) {
       // Use green channel for retinal images (better vessel contrast)
-      grayscale[i / 4] = data[i + 1];
+      grayscale[i / 4] = data[i + 1] || 0;
     }
-    
+
     return grayscale;
   }
 
@@ -208,26 +227,32 @@ export class RetinalAnalyzer {
    */
   private enhanceContrast(grayscale: Uint8Array): Uint8Array {
     const enhanced = new Uint8Array(grayscale.length);
-    
+
     // Simple histogram equalization
     const histogram = new Array(256).fill(0);
     for (let i = 0; i < grayscale.length; i++) {
-      histogram[grayscale[i]]++;
+      const value = grayscale[i];
+      if (value !== undefined) {
+        histogram[value]++;
+      }
     }
-    
+
     // Calculate cumulative distribution
     const cdf = new Array(256);
     cdf[0] = histogram[0];
     for (let i = 1; i < 256; i++) {
       cdf[i] = cdf[i - 1] + histogram[i];
     }
-    
+
     // Normalize and apply
     const total = grayscale.length;
     for (let i = 0; i < grayscale.length; i++) {
-      enhanced[i] = Math.round((cdf[grayscale[i]] / total) * 255);
+      const value = grayscale[i];
+      if (value !== undefined) {
+        enhanced[i] = Math.round((cdf[value] / total) * 255);
+      }
     }
-    
+
     return enhanced;
   }
 
@@ -238,37 +263,49 @@ export class RetinalAnalyzer {
     const width = this.imageSize;
     const height = this.imageSize;
     const vessels = new Uint8Array(enhanced.length);
-    
+
     // Apply top-hat transform (simplified)
     const structuringElement = this.createCircularKernel(15);
-    const opened = this.morphologicalOpening(enhanced, structuringElement, width, height);
-    
+    const opened = this.morphologicalOpening(
+      enhanced,
+      structuringElement,
+      width,
+      height
+    );
+
     // Subtract to get vessels
     for (let i = 0; i < enhanced.length; i++) {
-      vessels[i] = Math.max(0, enhanced[i] - opened[i]);
+      const enhancedValue = enhanced[i] || 0;
+      const openedValue = opened[i] || 0;
+      vessels[i] = Math.max(0, enhancedValue - openedValue);
     }
-    
+
     // Threshold to binary
     const threshold = this.calculateOtsuThreshold(vessels);
     for (let i = 0; i < vessels.length; i++) {
-      vessels[i] = vessels[i] > threshold ? 255 : 0;
+      const value = vessels[i] || 0;
+      vessels[i] = value > threshold ? 255 : 0;
     }
-    
+
     return vessels;
   }
 
   /**
    * Detect optic disc location and boundaries
    */
-  private detectOpticDisc(enhanced: Uint8Array): { x: number; y: number; radius: number } {
+  private detectOpticDisc(enhanced: Uint8Array): {
+    x: number;
+    y: number;
+    radius: number;
+  } {
     const width = this.imageSize;
     const height = this.imageSize;
-    
+
     // Find brightest region (simplified optic disc detection)
     let maxBrightness = 0;
     let maxX = 0;
     let maxY = 0;
-    
+
     const windowSize = 50;
     for (let y = windowSize; y < height - windowSize; y += 10) {
       for (let x = windowSize; x < width - windowSize; x += 10) {
@@ -276,10 +313,10 @@ export class RetinalAnalyzer {
         for (let dy = -windowSize; dy <= windowSize; dy++) {
           for (let dx = -windowSize; dx <= windowSize; dx++) {
             const idx = (y + dy) * width + (x + dx);
-            brightness += enhanced[idx];
+            brightness += enhanced[idx] || 0;
           }
         }
-        
+
         if (brightness > maxBrightness) {
           maxBrightness = brightness;
           maxX = x;
@@ -287,17 +324,21 @@ export class RetinalAnalyzer {
         }
       }
     }
-    
+
     return { x: maxX, y: maxY, radius: 80 }; // Typical optic disc radius
   }
 
   /**
    * Detect macula location
    */
-  private detectMacula(enhanced: Uint8Array): { x: number; y: number; radius: number } {
+  private detectMacula(enhanced: Uint8Array): {
+    x: number;
+    y: number;
+    radius: number;
+  } {
     // Macula is typically 2-3 disc diameters temporal to optic disc
     const opticDisc = this.detectOpticDisc(enhanced);
-    
+
     return {
       x: opticDisc.x + 200, // Approximate temporal offset
       y: opticDisc.y,
@@ -310,18 +351,18 @@ export class RetinalAnalyzer {
    */
   private extractVascularFeatures(vesselMask: Uint8Array) {
     const totalPixels = vesselMask.length;
-    const vesselPixels = vesselMask.filter(pixel => pixel > 0).length;
+    const vesselPixels = vesselMask.filter((pixel) => pixel > 0).length;
     const vesselDensity = (vesselPixels / totalPixels) * 100;
-    
+
     // Calculate vessel tortuosity (simplified)
     const vesselTortuosity = this.calculateVesselTortuosity(vesselMask);
-    
+
     // Calculate average vessel width
     const vesselWidth = this.calculateAverageVesselWidth(vesselMask);
-    
+
     // Calculate branching angles
     const branchingAngle = this.calculateBranchingAngles(vesselMask);
-    
+
     return {
       vesselDensity,
       vesselTortuosity,
@@ -333,15 +374,18 @@ export class RetinalAnalyzer {
   /**
    * Extract optic disc features
    */
-  private extractOpticDiscFeatures(enhanced: Uint8Array, opticDisc: { x: number; y: number; radius: number }) {
+  private extractOpticDiscFeatures(
+    enhanced: Uint8Array,
+    opticDisc: { x: number; y: number; radius: number }
+  ) {
     const opticDiscArea = Math.PI * opticDisc.radius * opticDisc.radius;
-    
+
     // Simplified cup-to-disc ratio calculation
     const cupDiscRatio = this.calculateCupDiscRatio(enhanced, opticDisc);
-    
+
     // Calculate rim area
     const rimArea = opticDiscArea * (1 - cupDiscRatio);
-    
+
     return {
       opticDiscArea,
       cupDiscRatio,
@@ -352,15 +396,21 @@ export class RetinalAnalyzer {
   /**
    * Extract macula features
    */
-  private extractMaculaFeatures(enhanced: Uint8Array, macula: { x: number; y: number; radius: number }) {
+  private extractMaculaFeatures(
+    enhanced: Uint8Array,
+    macula: { x: number; y: number; radius: number }
+  ) {
     const maculaArea = Math.PI * macula.radius * macula.radius;
-    
+
     // Estimate foveal thickness (simplified)
     const fovealThickness = this.estimateFovealThickness(enhanced, macula);
-    
+
     // Calculate pigmentation density
-    const maculaPigmentation = this.calculateMaculaPigmentation(enhanced, macula);
-    
+    const maculaPigmentation = this.calculateMaculaPigmentation(
+      enhanced,
+      macula
+    );
+
     return {
       maculaArea,
       fovealThickness,
@@ -377,7 +427,7 @@ export class RetinalAnalyzer {
     const hemorrhages = this.detectHemorrhages(enhanced);
     const exudates = this.detectExudates(enhanced);
     const cottonWoolSpots = this.detectCottonWoolSpots(enhanced);
-    
+
     return {
       microaneurysms,
       hemorrhages,
@@ -389,16 +439,19 @@ export class RetinalAnalyzer {
   /**
    * Extract neurological markers
    */
-  private extractNeurologicalMarkers(enhanced: Uint8Array, vesselMask: Uint8Array) {
+  private extractNeurologicalMarkers(
+    enhanced: Uint8Array,
+    vesselMask: Uint8Array
+  ) {
     // Estimate retinal nerve fiber layer thickness
     const retinalNerveLayer = this.estimateRNFLThickness(enhanced);
-    
+
     // Estimate ganglion cell layer thickness
     const ganglionCellLayer = this.estimateGCLThickness(enhanced);
-    
+
     // Calculate vascular complexity using fractal dimension
     const vascularComplexity = this.calculateFractalDimension(vesselMask);
-    
+
     return {
       retinalNerveLayer,
       ganglionCellLayer,
@@ -411,16 +464,16 @@ export class RetinalAnalyzer {
    */
   private assessImageQualityMetrics(imageData: ImageData) {
     const grayscale = this.convertToGrayscale(imageData);
-    
+
     // Calculate sharpness using Laplacian variance
     const imageSharpness = this.calculateSharpness(grayscale);
-    
+
     // Calculate illumination uniformity
     const illumination = this.calculateIlluminationUniformity(grayscale);
-    
+
     // Calculate contrast
     const contrast = this.calculateContrast(grayscale);
-    
+
     return {
       imageSharpness,
       illumination,
@@ -434,51 +487,59 @@ export class RetinalAnalyzer {
   private calculateRiskScore(features: RetinalFeatures): number {
     let riskScore = 0;
     let weightSum = 0;
-    
+
     // Vessel density (normal: 15-25%)
-    const vesselDensityRisk = features.vesselDensity < 12 || features.vesselDensity > 28 ? 
-      Math.abs(features.vesselDensity - 20) / 20 : 0;
+    const vesselDensityRisk =
+      features.vesselDensity < 12 || features.vesselDensity > 28
+        ? Math.abs(features.vesselDensity - 20) / 20
+        : 0;
     riskScore += vesselDensityRisk * 20;
     weightSum += 20;
-    
+
     // Vessel tortuosity (higher = more risk)
     const tortuosityRisk = Math.min(features.vesselTortuosity / 2, 1);
     riskScore += tortuosityRisk * 15;
     weightSum += 15;
-    
+
     // Cup-to-disc ratio (normal: <0.3)
-    const cupDiscRisk = features.cupDiscRatio > 0.3 ? 
-      (features.cupDiscRatio - 0.3) / 0.4 : 0;
+    const cupDiscRisk =
+      features.cupDiscRatio > 0.3 ? (features.cupDiscRatio - 0.3) / 0.4 : 0;
     riskScore += cupDiscRisk * 25;
     weightSum += 25;
-    
+
     // RNFL thickness (thinner = more risk)
-    const rnflRisk = features.retinalNerveLayer < 80 ? 
-      (100 - features.retinalNerveLayer) / 100 : 0;
+    const rnflRisk =
+      features.retinalNerveLayer < 80
+        ? (100 - features.retinalNerveLayer) / 100
+        : 0;
     riskScore += rnflRisk * 20;
     weightSum += 20;
-    
+
     // Pathological features
     const pathologyRisk = Math.min(
-      (features.microaneurysms + features.hemorrhages + features.exudates) / 10, 1
+      (features.microaneurysms + features.hemorrhages + features.exudates) / 10,
+      1
     );
     riskScore += pathologyRisk * 15;
     weightSum += 15;
-    
+
     // Vascular complexity (abnormal patterns)
     const complexityRisk = Math.abs(features.vascularComplexity - 1.7) / 0.3;
     riskScore += Math.min(complexityRisk, 1) * 5;
     weightSum += 5;
-    
+
     return Math.min(Math.round((riskScore / weightSum) * 100), 100);
   }
 
   /**
    * Generate clinical findings
    */
-  private generateFindings(features: RetinalFeatures, riskScore: number): string[] {
+  private generateFindings(
+    features: RetinalFeatures,
+    _riskScore: number
+  ): string[] {
     const findings: string[] = [];
-    
+
     if (features.vesselDensity < 12) {
       findings.push('Reduced retinal vessel density');
     }
@@ -500,20 +561,24 @@ export class RetinalAnalyzer {
     if (features.exudates > 1) {
       findings.push('Hard exudates detected');
     }
-    
+
     if (findings.length === 0) {
       findings.push('No significant retinal abnormalities detected');
     }
-    
+
     return findings;
   }
 
   /**
    * Generate clinical recommendations
    */
-  private generateRecommendations(features: RetinalFeatures, riskScore: number): string[] {
+  private generateRecommendations(
+    _features: RetinalFeatures,
+    riskScore: number,
+    imageQuality: number
+  ): string[] {
     const recommendations: string[] = [];
-    
+
     if (riskScore > 75) {
       recommendations.push('Urgent ophthalmological evaluation recommended');
       recommendations.push('Consider neurological consultation');
@@ -525,11 +590,11 @@ export class RetinalAnalyzer {
     } else {
       recommendations.push('Routine screening as per age guidelines');
     }
-    
-    if (features.imageQuality < 0.7) {
+
+    if (imageQuality < 0.7) {
       recommendations.push('Consider repeat imaging with better quality');
     }
-    
+
     return recommendations;
   }
 
@@ -538,12 +603,12 @@ export class RetinalAnalyzer {
    */
   private calculateConfidence(features: RetinalFeatures): number {
     let confidence = 90;
-    
+
     // Reduce confidence for poor image quality
     if (features.imageSharpness < 0.5) confidence -= 20;
     if (features.illumination < 0.6) confidence -= 15;
     if (features.contrast < 0.4) confidence -= 10;
-    
+
     return Math.max(confidence, 50);
   }
 
@@ -552,11 +617,11 @@ export class RetinalAnalyzer {
    */
   private assessImageQuality(imageData: ImageData): number {
     const grayscale = this.convertToGrayscale(imageData);
-    
+
     const sharpness = this.calculateSharpness(grayscale);
     const illumination = this.calculateIlluminationUniformity(grayscale);
     const contrast = this.calculateContrast(grayscale);
-    
+
     return (sharpness + illumination + contrast) / 3;
   }
 
@@ -565,20 +630,24 @@ export class RetinalAnalyzer {
     const size = radius * 2 + 1;
     const kernel = new Array(size * size);
     const center = radius;
-    
+
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         const distance = Math.sqrt((x - center) ** 2 + (y - center) ** 2);
         kernel[y * size + x] = distance <= radius;
       }
     }
-    
+
     return kernel;
   }
 
-  private morphologicalOpening(image: Uint8Array, kernel: boolean[], width: number, height: number): Uint8Array {
+  private morphologicalOpening(
+    image: Uint8Array,
+    _kernel: boolean[],
+    _width: number,
+    _height: number
+  ): Uint8Array {
     // Simplified morphological opening (erosion followed by dilation)
-    const result = new Uint8Array(image.length);
     // Implementation would go here - simplified for demo
     return image; // Placeholder
   }
@@ -587,44 +656,47 @@ export class RetinalAnalyzer {
     // Simplified Otsu's thresholding
     const histogram = new Array(256).fill(0);
     for (let i = 0; i < image.length; i++) {
-      histogram[image[i]]++;
+      const value = image[i];
+      if (value !== undefined) {
+        histogram[value]++;
+      }
     }
-    
+
     let total = image.length;
     let sum = 0;
     for (let i = 0; i < 256; i++) {
       sum += i * histogram[i];
     }
-    
+
     let sumB = 0;
     let wB = 0;
     let wF = 0;
     let varMax = 0;
     let threshold = 0;
-    
+
     for (let i = 0; i < 256; i++) {
       wB += histogram[i];
       if (wB === 0) continue;
-      
+
       wF = total - wB;
       if (wF === 0) break;
-      
+
       sumB += i * histogram[i];
       let mB = sumB / wB;
       let mF = (sum - sumB) / wF;
-      
+
       let varBetween = wB * wF * (mB - mF) * (mB - mF);
-      
+
       if (varBetween > varMax) {
         varMax = varBetween;
         threshold = i;
       }
     }
-    
+
     return threshold;
   }
 
-  private calculateVesselTortuosity(vesselMask: Uint8Array): number {
+  private calculateVesselTortuosity(_vesselMask: Uint8Array): number {
     // Simplified tortuosity calculation
     return 1.2; // Placeholder
   }
@@ -639,17 +711,26 @@ export class RetinalAnalyzer {
     return 75; // Placeholder
   }
 
-  private calculateCupDiscRatio(enhanced: Uint8Array, opticDisc: { x: number; y: number; radius: number }): number {
+  private calculateCupDiscRatio(
+    enhanced: Uint8Array,
+    opticDisc: { x: number; y: number; radius: number }
+  ): number {
     // Simplified cup-to-disc ratio calculation
     return 0.25; // Placeholder
   }
 
-  private estimateFovealThickness(enhanced: Uint8Array, macula: { x: number; y: number; radius: number }): number {
+  private estimateFovealThickness(
+    enhanced: Uint8Array,
+    macula: { x: number; y: number; radius: number }
+  ): number {
     // Simplified foveal thickness estimation
     return 180; // Placeholder (micrometers)
   }
 
-  private calculateMaculaPigmentation(enhanced: Uint8Array, macula: { x: number; y: number; radius: number }): number {
+  private calculateMaculaPigmentation(
+    enhanced: Uint8Array,
+    macula: { x: number; y: number; radius: number }
+  ): number {
     // Simplified pigmentation calculation
     return 0.6; // Placeholder
   }

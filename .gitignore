@@ -218,7 +218,7 @@ yarn-error.log*
 # Sentry Config File
 .sentryclirc
 
-# Augment AI Rules (not needed for hackathon submission)
+# Augment Rules
 .augment/
 .augment/rules/
 

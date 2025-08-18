@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ProgressProps, cn, getRiskLevel, getRiskColor } from '@/types/design-system';
+import type { ProgressProps } from '@/types/design-system';
+import { cn } from '@/utils/cn';
+import { getRiskLevel, getRiskColor } from '@/types/design-system';
 
 /**
  * Clinical-grade Progress component with risk-based coloring and accessibility
@@ -19,7 +21,7 @@ export const Progress: React.FC<ProgressProps> = ({
 }) => {
   // Normalize value to percentage
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-  
+
   // Base progress container classes
   const containerClasses = [
     'progress-bar',
@@ -73,18 +75,15 @@ export const Progress: React.FC<ProgressProps> = ({
   );
 
   // Combine fill classes
-  const progressFillClasses = cn(
-    ...fillBaseClasses,
-    variantClasses[variant]
-  );
+  const progressFillClasses = cn(...fillBaseClasses, variantClasses[variant]);
 
   return (
     <div className="space-y-2">
       {/* Label */}
       {showLabel && (
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex items-center justify-between text-sm">
           <span className="text-text-secondary">Progress</span>
-          <span className="text-text-primary font-medium">
+          <span className="font-medium text-text-primary">
             {Math.round(percentage)}%
           </span>
         </div>
@@ -105,10 +104,10 @@ export const Progress: React.FC<ProgressProps> = ({
           className={progressFillClasses}
           style={{ width: `${percentage}%` }}
         />
-        
+
         {/* Animated shimmer effect for loading states */}
         {animated && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" />
+          <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         )}
       </div>
     </div>
@@ -157,7 +156,10 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
 
   return (
     <div
-      className={cn('relative inline-flex items-center justify-center', className)}
+      className={cn(
+        'relative inline-flex items-center justify-center',
+        className
+      )}
       style={{ width: size, height: size }}
       role="progressbar"
       aria-valuenow={value}
@@ -168,11 +170,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
       {...props}
     >
       {/* Background Circle */}
-      <svg
-        className="transform -rotate-90"
-        width={size}
-        height={size}
-      >
+      <svg className="-rotate-90 transform" width={size} height={size}>
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -181,7 +179,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeWidth={strokeWidth}
           fill="transparent"
         />
-        
+
         {/* Progress Circle */}
         <circle
           cx={size / 2}
@@ -241,15 +239,15 @@ export const StepProgress: React.FC<StepProgressProps> = ({
     <div className={cn('space-y-4', className)} data-testid={testId}>
       {/* Progress Bar */}
       <div className="relative">
-        <div className="flex justify-between items-center mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <span className="text-sm text-text-secondary">
             Step {currentStep} of {totalSteps}
           </span>
-          <span className="text-sm text-text-primary font-medium">
+          <span className="text-sm font-medium text-text-primary">
             {Math.round(progressPercentage)}% Complete
           </span>
         </div>
-        
+
         <Progress
           value={progressPercentage}
           variant="clinical"
@@ -265,7 +263,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({
             const stepNumber = index + 1;
             const isCompleted = step.completed || stepNumber < currentStep;
             const isCurrent = stepNumber === currentStep;
-            
+
             return (
               <div
                 key={step.id}
@@ -274,26 +272,37 @@ export const StepProgress: React.FC<StepProgressProps> = ({
                 {/* Step Circle */}
                 <div
                   className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200',
+                    'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all duration-200',
                     isCompleted && 'bg-success text-white',
-                    isCurrent && 'bg-primary-500 text-white ring-2 ring-primary-500/30',
-                    !isCompleted && !isCurrent && 'bg-neutral-700 text-text-muted'
+                    isCurrent &&
+                      'bg-primary-500 text-white ring-2 ring-primary-500/30',
+                    !isCompleted &&
+                      !isCurrent &&
+                      'bg-neutral-700 text-text-muted'
                   )}
                 >
                   {isCompleted ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   ) : (
                     stepNumber
                   )}
                 </div>
-                
+
                 {/* Step Label */}
                 <span
                   className={cn(
-                    'text-xs text-center max-w-20',
-                    isCurrent && 'text-text-primary font-medium',
+                    'max-w-20 text-center text-xs',
+                    isCurrent && 'font-medium text-text-primary',
                     isCompleted && 'text-text-secondary',
                     !isCompleted && !isCurrent && 'text-text-muted'
                   )}
@@ -345,13 +354,11 @@ export const NRIProgress: React.FC<NRIProgressProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Score Display */}
-      <div className="text-center space-y-2">
+      <div className="space-y-2 text-center">
         <div className="text-6xl font-black text-primary-500">
           {Math.round(score)}
         </div>
-        <div className="text-lg text-text-muted">
-          / 100 NRI Score
-        </div>
+        <div className="text-lg text-text-muted">/ 100 NRI Score</div>
         {confidence && (
           <div className="text-sm text-text-muted">
             Confidence: ±{confidence}%
@@ -361,7 +368,7 @@ export const NRIProgress: React.FC<NRIProgressProps> = ({
 
       {/* Risk Level Progress */}
       <div className="space-y-2">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-text-primary">
             {riskLabels[riskLevel]}
           </span>
@@ -369,16 +376,11 @@ export const NRIProgress: React.FC<NRIProgressProps> = ({
             {Math.round(score)}%
           </span>
         </div>
-        
-        <Progress
-          value={score}
-          variant="risk"
-          size="lg"
-          animated={animated}
-        />
-        
+
+        <Progress value={score} variant="risk" size="lg" animated={animated} />
+
         {showDetails && (
-          <p className="text-sm text-text-secondary text-center">
+          <p className="text-center text-sm text-text-secondary">
             {riskDescriptions[riskLevel]}
           </p>
         )}
@@ -388,19 +390,19 @@ export const NRIProgress: React.FC<NRIProgressProps> = ({
       {showDetails && (
         <div className="grid grid-cols-4 gap-2 text-xs">
           <div className="text-center">
-            <div className="w-full h-2 bg-success rounded mb-1" />
+            <div className="mb-1 h-2 w-full rounded bg-success" />
             <span className="text-text-muted">0-25</span>
           </div>
           <div className="text-center">
-            <div className="w-full h-2 bg-warning rounded mb-1" />
+            <div className="mb-1 h-2 w-full rounded bg-warning" />
             <span className="text-text-muted">26-50</span>
           </div>
           <div className="text-center">
-            <div className="w-full h-2 bg-orange-500 rounded mb-1" />
+            <div className="mb-1 h-2 w-full rounded bg-orange-500" />
             <span className="text-text-muted">51-75</span>
           </div>
           <div className="text-center">
-            <div className="w-full h-2 bg-error rounded mb-1" />
+            <div className="mb-1 h-2 w-full rounded bg-error" />
             <span className="text-text-muted">76-100</span>
           </div>
         </div>
