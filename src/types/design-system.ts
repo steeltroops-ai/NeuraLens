@@ -2,72 +2,179 @@
 
 /* ===== COLOR SYSTEM TYPES ===== */
 
-export type PrimaryColor = 
-  | 'primary-50' | 'primary-100' | 'primary-200' | 'primary-300' | 'primary-400'
-  | 'primary-500' | 'primary-600' | 'primary-700' | 'primary-800' | 'primary-900' | 'primary-950';
+export type PrimaryColor =
+  | 'primary-50'
+  | 'primary-100'
+  | 'primary-200'
+  | 'primary-300'
+  | 'primary-400'
+  | 'primary-500'
+  | 'primary-600'
+  | 'primary-700'
+  | 'primary-800'
+  | 'primary-900'
+  | 'primary-950';
 
-export type NeutralColor = 
-  | 'neutral-50' | 'neutral-100' | 'neutral-200' | 'neutral-300' | 'neutral-400'
-  | 'neutral-500' | 'neutral-600' | 'neutral-700' | 'neutral-800' | 'neutral-900' | 'neutral-950';
+export type NeutralColor =
+  | 'neutral-50'
+  | 'neutral-100'
+  | 'neutral-200'
+  | 'neutral-300'
+  | 'neutral-400'
+  | 'neutral-500'
+  | 'neutral-600'
+  | 'neutral-700'
+  | 'neutral-800'
+  | 'neutral-900'
+  | 'neutral-950';
 
 export type SemanticColor = 'success' | 'warning' | 'error' | 'info';
 
-export type RiskColor = 'risk-low' | 'risk-moderate' | 'risk-high' | 'risk-critical';
+export type RiskColor =
+  | 'risk-low'
+  | 'risk-moderate'
+  | 'risk-high'
+  | 'risk-critical';
 
-export type SurfaceColor = 
-  | 'surface-background' | 'surface-primary' | 'surface-secondary' 
-  | 'surface-tertiary' | 'surface-overlay' | 'surface-glass';
+export type SurfaceColor =
+  | 'surface-background'
+  | 'surface-primary'
+  | 'surface-secondary'
+  | 'surface-tertiary'
+  | 'surface-overlay'
+  | 'surface-glass';
 
-export type TextColor = 'text-primary' | 'text-secondary' | 'text-muted' | 'text-inverse';
+export type TextColor =
+  | 'text-primary'
+  | 'text-secondary'
+  | 'text-muted'
+  | 'text-inverse';
 
-export type ColorToken = PrimaryColor | NeutralColor | SemanticColor | RiskColor | SurfaceColor | TextColor;
+export type ColorToken =
+  | PrimaryColor
+  | NeutralColor
+  | SemanticColor
+  | RiskColor
+  | SurfaceColor
+  | TextColor;
 
 /* ===== TYPOGRAPHY TYPES ===== */
 
 export type FontFamily = 'font-display' | 'font-body' | 'font-mono';
 
-export type FontSize = 
-  | 'text-xs' | 'text-sm' | 'text-base' | 'text-lg' | 'text-xl' | 'text-2xl'
-  | 'text-3xl' | 'text-4xl' | 'text-5xl' | 'text-6xl' | 'text-7xl' | 'text-8xl' | 'text-9xl';
+export type FontSize =
+  | 'text-xs'
+  | 'text-sm'
+  | 'text-base'
+  | 'text-lg'
+  | 'text-xl'
+  | 'text-2xl'
+  | 'text-3xl'
+  | 'text-4xl'
+  | 'text-5xl'
+  | 'text-6xl'
+  | 'text-7xl'
+  | 'text-8xl'
+  | 'text-9xl';
 
-export type FontWeight = 
-  | 'font-thin' | 'font-extralight' | 'font-light' | 'font-normal' | 'font-medium'
-  | 'font-semibold' | 'font-bold' | 'font-extrabold' | 'font-black';
+export type FontWeight =
+  | 'font-thin'
+  | 'font-extralight'
+  | 'font-light'
+  | 'font-normal'
+  | 'font-medium'
+  | 'font-semibold'
+  | 'font-bold'
+  | 'font-extrabold'
+  | 'font-black';
 
-export type LineHeight = 
-  | 'leading-none' | 'leading-tight' | 'leading-snug' | 'leading-normal' 
-  | 'leading-relaxed' | 'leading-loose';
+export type LineHeight =
+  | 'leading-none'
+  | 'leading-tight'
+  | 'leading-snug'
+  | 'leading-normal'
+  | 'leading-relaxed'
+  | 'leading-loose';
 
-export type LetterSpacing = 
-  | 'tracking-tighter' | 'tracking-tight' | 'tracking-normal' 
-  | 'tracking-wide' | 'tracking-wider' | 'tracking-widest';
+export type LetterSpacing =
+  | 'tracking-tighter'
+  | 'tracking-tight'
+  | 'tracking-normal'
+  | 'tracking-wide'
+  | 'tracking-wider'
+  | 'tracking-widest';
 
 /* ===== SPACING TYPES ===== */
 
-export type SpacingToken = 
-  | 'space-0' | 'space-px' | 'space-0-5' | 'space-1' | 'space-1-5' | 'space-2' | 'space-2-5'
-  | 'space-3' | 'space-3-5' | 'space-4' | 'space-5' | 'space-6' | 'space-7' | 'space-8'
-  | 'space-9' | 'space-10' | 'space-11' | 'space-12' | 'space-14' | 'space-16' | 'space-20'
-  | 'space-24' | 'space-28' | 'space-32' | 'space-36' | 'space-40' | 'space-44' | 'space-48'
-  | 'space-52' | 'space-56' | 'space-60' | 'space-64' | 'space-72' | 'space-80' | 'space-96';
+export type SpacingToken =
+  | 'space-0'
+  | 'space-px'
+  | 'space-0-5'
+  | 'space-1'
+  | 'space-1-5'
+  | 'space-2'
+  | 'space-2-5'
+  | 'space-3'
+  | 'space-3-5'
+  | 'space-4'
+  | 'space-5'
+  | 'space-6'
+  | 'space-7'
+  | 'space-8'
+  | 'space-9'
+  | 'space-10'
+  | 'space-11'
+  | 'space-12'
+  | 'space-14'
+  | 'space-16'
+  | 'space-20'
+  | 'space-24'
+  | 'space-28'
+  | 'space-32'
+  | 'space-36'
+  | 'space-40'
+  | 'space-44'
+  | 'space-48'
+  | 'space-52'
+  | 'space-56'
+  | 'space-60'
+  | 'space-64'
+  | 'space-72'
+  | 'space-80'
+  | 'space-96';
 
-export type ComponentPadding = 
-  | 'component-padding-sm' | 'component-padding-md' 
-  | 'component-padding-lg' | 'component-padding-xl';
+export type ComponentPadding =
+  | 'component-padding-sm'
+  | 'component-padding-md'
+  | 'component-padding-lg'
+  | 'component-padding-xl';
 
-export type LayoutGap = 
-  | 'layout-gap-sm' | 'layout-gap-md' | 'layout-gap-lg' | 'layout-gap-xl';
+export type LayoutGap =
+  | 'layout-gap-sm'
+  | 'layout-gap-md'
+  | 'layout-gap-lg'
+  | 'layout-gap-xl';
 
 /* ===== ANIMATION TYPES ===== */
 
-export type AnimationDuration = 
-  | 'duration-instant' | 'duration-fast' | 'duration-normal' 
-  | 'duration-slow' | 'duration-slower' | 'duration-slowest';
+export type AnimationDuration =
+  | 'duration-instant'
+  | 'duration-fast'
+  | 'duration-normal'
+  | 'duration-slow'
+  | 'duration-slower'
+  | 'duration-slowest';
 
-export type AnimationEasing = 
-  | 'ease-linear' | 'ease-in' | 'ease-out' | 'ease-in-out'
-  | 'ease-out-quint' | 'ease-in-out-cubic' | 'ease-in-cubic' 
-  | 'ease-spring' | 'ease-bounce';
+export type AnimationEasing =
+  | 'ease-linear'
+  | 'ease-in'
+  | 'ease-out'
+  | 'ease-in-out'
+  | 'ease-out-quint'
+  | 'ease-in-out-cubic'
+  | 'ease-in-cubic'
+  | 'ease-spring'
+  | 'ease-bounce';
 
 /* ===== COMPONENT TYPES ===== */
 
@@ -82,15 +189,30 @@ export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'error';
 
 /* ===== BORDER RADIUS TYPES ===== */
 
-export type BorderRadius = 
-  | 'radius-none' | 'radius-sm' | 'radius-base' | 'radius-md' | 'radius-lg'
-  | 'radius-xl' | 'radius-2xl' | 'radius-3xl' | 'radius-full';
+export type BorderRadius =
+  | 'radius-none'
+  | 'radius-sm'
+  | 'radius-base'
+  | 'radius-md'
+  | 'radius-lg'
+  | 'radius-xl'
+  | 'radius-2xl'
+  | 'radius-3xl'
+  | 'radius-full';
 
 /* ===== SHADOW TYPES ===== */
 
-export type ShadowToken = 
-  | 'shadow-sm' | 'shadow-base' | 'shadow-md' | 'shadow-lg' | 'shadow-xl'
-  | 'shadow-2xl' | 'shadow-inner' | 'shadow-clinical' | 'shadow-clinical-hover' | 'shadow-glass';
+export type ShadowToken =
+  | 'shadow-sm'
+  | 'shadow-base'
+  | 'shadow-md'
+  | 'shadow-lg'
+  | 'shadow-xl'
+  | 'shadow-2xl'
+  | 'shadow-inner'
+  | 'shadow-clinical'
+  | 'shadow-clinical-hover'
+  | 'shadow-glass';
 
 /* ===== BREAKPOINT TYPES ===== */
 
@@ -98,10 +220,22 @@ export type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 /* ===== Z-INDEX TYPES ===== */
 
-export type ZIndex = 
-  | 'z-0' | 'z-10' | 'z-20' | 'z-30' | 'z-40' | 'z-50' | 'z-auto'
-  | 'z-dropdown' | 'z-sticky' | 'z-fixed' | 'z-modal-backdrop' | 'z-modal'
-  | 'z-popover' | 'z-tooltip' | 'z-toast';
+export type ZIndex =
+  | 'z-0'
+  | 'z-10'
+  | 'z-20'
+  | 'z-30'
+  | 'z-40'
+  | 'z-50'
+  | 'z-auto'
+  | 'z-dropdown'
+  | 'z-sticky'
+  | 'z-fixed'
+  | 'z-modal-backdrop'
+  | 'z-modal'
+  | 'z-popover'
+  | 'z-tooltip'
+  | 'z-toast';
 
 /* ===== COMPONENT PROP INTERFACES ===== */
 
@@ -146,6 +280,9 @@ export interface InputProps extends BaseComponentProps {
   helperText?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -212,7 +349,7 @@ export interface FileUploadProps extends BaseComponentProps {
   onFileSelect: (files: File[]) => void;
   onError: (error: string) => void;
   showDemoOption?: boolean;
-  demoFiles?: Array<{ name: string; url: string; description?: string; }>;
+  demoFiles?: Array<{ name: string; url: string; description?: string }>;
   dragActive?: boolean;
 }
 
@@ -371,6 +508,8 @@ export const formatDuration = (seconds: number): string => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
-export const cn = (...classes: (string | undefined | null | false)[]): string => {
+export const cn = (
+  ...classes: (string | undefined | null | false)[]
+): string => {
   return classes.filter(Boolean).join(' ');
 };

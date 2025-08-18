@@ -19,6 +19,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       helperText,
       leftIcon,
       rightIcon,
+      min,
+      max,
+      step,
       className,
       testId,
       onChange,
@@ -60,11 +63,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     // State-dependent classes
     const stateClasses = error
-      ? [
-          'border-error',
-          'focus:ring-error',
-          'bg-error/5',
-        ]
+      ? ['border-error', 'focus:ring-error', 'bg-error/5']
       : [
           'border-neutral-700',
           'hover:border-neutral-600',
@@ -106,7 +105,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="relative">
         {/* Left Icon */}
         {leftIcon && (
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-muted pointer-events-none">
+          <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transform text-text-muted">
             {leftIcon}
           </div>
         )}
@@ -121,22 +120,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           defaultValue={defaultValue}
           disabled={disabled}
           required={required}
+          min={min}
+          max={max}
+          step={step}
           className={inputClasses}
           data-testid={testId}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
           aria-invalid={Boolean(error)}
-          aria-describedby={cn(
-            errorId,
-            helperId
-          ).trim() || undefined}
+          aria-describedby={cn(errorId, helperId).trim() || undefined}
           {...props}
         />
 
         {/* Right Icon */}
         {rightIcon && (
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-muted pointer-events-none">
+          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-text-muted">
             {rightIcon}
           </div>
         )}
@@ -146,18 +145,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              'absolute left-4 transition-all duration-200 pointer-events-none',
+              'pointer-events-none absolute left-4 transition-all duration-200',
               'text-text-muted',
-              (isFocused || hasValue) ? [
-                'top-2 text-xs',
-                'text-primary-500',
-              ] : [
-                'top-1/2 -translate-y-1/2 text-base',
-              ]
+              isFocused || hasValue
+                ? 'top-2 text-xs text-primary-500'
+                : 'top-1/2 -translate-y-1/2 text-base'
             )}
           >
             {props['aria-label'] || 'Input'}
-            {required && <span className="text-error ml-1">*</span>}
+            {required && <span className="ml-1 text-error">*</span>}
           </label>
         )}
 
@@ -165,12 +161,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <div
             id={errorId}
-            className="mt-2 text-sm text-error flex items-center gap-2"
+            className="mt-2 flex items-center gap-2 text-sm text-error"
             role="alert"
             aria-live="polite"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="h-4 w-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <span>{error}</span>
           </div>
@@ -178,10 +182,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Helper Text */}
         {helperText && !error && (
-          <div
-            id={helperId}
-            className="mt-2 text-sm text-text-muted"
-          >
+          <div id={helperId} className="mt-2 text-sm text-text-muted">
             {helperText}
           </div>
         )}
@@ -195,7 +196,8 @@ Input.displayName = 'Input';
 /**
  * Textarea component with similar styling and functionality
  */
-interface TextareaProps extends Omit<InputProps, 'type' | 'leftIcon' | 'rightIcon'> {
+interface TextareaProps
+  extends Omit<InputProps, 'type' | 'leftIcon' | 'rightIcon'> {
   rows?: number;
   resize?: 'none' | 'vertical' | 'horizontal' | 'both';
 }
@@ -221,8 +223,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref
   ) => {
-    const [isFocused, setIsFocused] = useState(false);
-
     // Generate unique IDs for accessibility
     const textareaId = React.useId();
     const errorId = error ? `${textareaId}-error` : undefined;
@@ -252,11 +252,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // State-dependent classes
     const stateClasses = error
-      ? [
-          'border-error',
-          'focus:ring-error',
-          'bg-error/5',
-        ]
+      ? ['border-error', 'focus:ring-error', 'bg-error/5']
       : [
           'border-neutral-700',
           'hover:border-neutral-600',
@@ -280,12 +276,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     );
 
     const handleFocus = (event: React.FocusEvent<HTMLTextAreaElement>) => {
-      setIsFocused(true);
       onFocus?.(event as any);
     };
 
     const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
-      setIsFocused(false);
       onBlur?.(event as any);
     };
 
@@ -307,10 +301,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           onBlur={handleBlur}
           onFocus={handleFocus}
           aria-invalid={Boolean(error)}
-          aria-describedby={cn(
-            errorId,
-            helperId
-          ).trim() || undefined}
+          aria-describedby={cn(errorId, helperId).trim() || undefined}
           {...props}
         />
 
@@ -318,12 +309,20 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {error && (
           <div
             id={errorId}
-            className="mt-2 text-sm text-error flex items-center gap-2"
+            className="mt-2 flex items-center gap-2 text-sm text-error"
             role="alert"
             aria-live="polite"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="h-4 w-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <span>{error}</span>
           </div>
@@ -331,10 +330,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         {/* Helper Text */}
         {helperText && !error && (
-          <div
-            id={helperId}
-            className="mt-2 text-sm text-text-muted"
-          >
+          <div id={helperId} className="mt-2 text-sm text-text-muted">
             {helperText}
           </div>
         )}
@@ -370,7 +366,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     const newValue = event.target.value;
     setSearchValue(newValue);
     onChange?.(event);
-    
+
     // Debounced search
     const timeoutId = setTimeout(() => {
       onSearch?.(newValue);
@@ -382,7 +378,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   const handleClear = () => {
     setSearchValue('');
     onClear?.();
-    
+
     // Create synthetic event for onChange
     const syntheticEvent = {
       target: { value: '' },
@@ -391,23 +387,32 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   const searchIcon = (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fillRule="evenodd"
+        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+        clipRule="evenodd"
+      />
     </svg>
   );
 
-  const clearIcon = showClearButton && searchValue ? (
-    <button
-      type="button"
-      onClick={handleClear}
-      className="text-text-muted hover:text-text-primary transition-colors"
-      aria-label="Clear search"
-    >
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-      </svg>
-    </button>
-  ) : null;
+  const clearIcon =
+    showClearButton && searchValue ? (
+      <button
+        type="button"
+        onClick={handleClear}
+        className="text-text-muted transition-colors hover:text-text-primary"
+        aria-label="Clear search"
+      >
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+    ) : null;
 
   return (
     <Input
@@ -417,7 +422,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       onChange={handleChange}
       leftIcon={searchIcon}
       rightIcon={clearIcon}
-      className={className}
+      {...(className && { className })}
       {...props}
     />
   );

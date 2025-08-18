@@ -2,8 +2,15 @@
 // Unified interface for all ML models with performance optimization
 
 import { speechAnalyzer, type SpeechAnalysisResult } from './speech-analysis';
-import { retinalAnalyzer, type RetinalAnalysisResult } from './retinal-analysis';
-import { riskAssessmentCalculator, type RiskAssessmentResult, type RiskAssessmentData } from './risk-assessment';
+import {
+  retinalAnalyzer,
+  type RetinalAnalysisResult,
+} from './retinal-analysis';
+import {
+  riskAssessmentCalculator,
+  type RiskAssessmentResult,
+  type RiskAssessmentData,
+} from './risk-assessment';
 import { nriFusionCalculator, type NRIFusionResult } from './nri-fusion';
 
 export interface AssessmentRequest {
@@ -55,7 +62,7 @@ export class MLModelIntegrator {
     onProgress?: ProgressCallback
   ): Promise<CompleteAssessmentResult> {
     const startTime = performance.now();
-    
+
     try {
       // Initialize progress tracking
       const progress: AssessmentProgress = {
@@ -66,21 +73,29 @@ export class MLModelIntegrator {
         completedModalities: [],
         errors: [],
       };
-      
+
       this.activeAssessments.set(request.sessionId, progress);
       this.updateProgress(progress, onProgress);
-      
+
       // Process modalities in parallel for performance
-      const modalityPromises = this.createModalityPromises(request, progress, onProgress);
-      
+      const modalityPromises = this.createModalityPromises(
+        request,
+        progress,
+        onProgress
+      );
+
       // Wait for all modalities to complete
-      const modalityResults = await this.executeModalityAnalysis(modalityPromises, progress, onProgress);
-      
+      const modalityResults = await this.executeModalityAnalysis(
+        modalityPromises,
+        progress,
+        onProgress
+      );
+
       // Update progress for fusion step
       progress.currentStep = 'Calculating NRI Score';
       progress.progress = 85;
       this.updateProgress(progress, onProgress);
-      
+
       // Perform NRI fusion
       const nriResult = await nriFusionCalculator.calculateNRI(
         modalityResults.speech,
@@ -88,14 +103,14 @@ export class MLModelIntegrator {
         modalityResults.risk,
         modalityResults.motor
       );
-      
+
       // Finalize results
       progress.currentStep = 'Finalizing Results';
       progress.progress = 95;
       this.updateProgress(progress, onProgress);
-      
+
       const totalProcessingTime = performance.now() - startTime;
-      
+
       const completeResult: CompleteAssessmentResult = {
         sessionId: request.sessionId,
         nriResult,
@@ -107,21 +122,20 @@ export class MLModelIntegrator {
           dataQuality: this.calculateOverallDataQuality(modalityResults),
         },
       };
-      
+
       // Cache result
       this.resultCache.set(request.sessionId, completeResult);
-      
+
       // Complete progress
       progress.currentStep = 'Complete';
       progress.progress = 100;
       progress.estimatedTimeRemaining = 0;
       this.updateProgress(progress, onProgress);
-      
+
       // Cleanup
       this.activeAssessments.delete(request.sessionId);
-      
+
       return completeResult;
-      
     } catch (error) {
       // Handle errors
       const progress = this.activeAssessments.get(request.sessionId);
@@ -129,7 +143,7 @@ export class MLModelIntegrator {
         progress.errors.push((error as Error).message);
         this.updateProgress(progress, onProgress);
       }
-      
+
       this.activeAssessments.delete(request.sessionId);
       throw error;
     }
@@ -144,27 +158,43 @@ export class MLModelIntegrator {
     onProgress?: ProgressCallback
   ) {
     const promises: Record<string, Promise<any>> = {};
-    
+
     // Speech analysis
     if (request.audioFile) {
-      promises.speech = this.processSpeechAnalysis(request.audioFile, progress, onProgress);
+      promises.speech = this.processSpeechAnalysis(
+        request.audioFile,
+        progress,
+        onProgress
+      );
     }
-    
+
     // Retinal analysis
     if (request.retinalImage) {
-      promises.retinal = this.processRetinalAnalysis(request.retinalImage, progress, onProgress);
+      promises.retinal = this.processRetinalAnalysis(
+        request.retinalImage,
+        progress,
+        onProgress
+      );
     }
-    
+
     // Risk assessment
     if (request.riskData) {
-      promises.risk = this.processRiskAssessment(request.riskData, progress, onProgress);
+      promises.risk = this.processRiskAssessment(
+        request.riskData,
+        progress,
+        onProgress
+      );
     }
-    
+
     // Motor analysis (future implementation)
     if (request.motorData) {
-      promises.motor = this.processMotorAnalysis(request.motorData, progress, onProgress);
+      promises.motor = this.processMotorAnalysis(
+        request.motorData,
+        progress,
+        onProgress
+      );
     }
-    
+
     return promises;
   }
 
@@ -179,26 +209,28 @@ export class MLModelIntegrator {
     const modalityResults: any = {};
     const modalityNames = Object.keys(promises);
     const totalModalities = modalityNames.length;
-    
+
     // Process modalities with progress updates
     for (let i = 0; i < modalityNames.length; i++) {
       const modalityName = modalityNames[i];
-      
+      if (!modalityName) continue;
+
       try {
         progress.currentStep = `Processing ${modalityName} analysis`;
         progress.progress = 10 + (i / totalModalities) * 70; // 10-80% range
         this.updateProgress(progress, onProgress);
-        
+
         modalityResults[modalityName] = await promises[modalityName];
         progress.completedModalities.push(modalityName);
-        
       } catch (error) {
         console.error(`${modalityName} analysis failed:`, error);
-        progress.errors.push(`${modalityName} analysis failed: ${(error as Error).message}`);
+        progress.errors.push(
+          `${modalityName} analysis failed: ${(error as Error).message}`
+        );
         modalityResults[modalityName] = null;
       }
     }
-    
+
     return modalityResults;
   }
 
@@ -208,20 +240,20 @@ export class MLModelIntegrator {
   private async processSpeechAnalysis(
     audioFile: File,
     progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback
   ): Promise<SpeechAnalysisResult | null> {
     try {
       // Convert file to ArrayBuffer
       const arrayBuffer = await audioFile.arrayBuffer();
-      
+
       // Analyze speech
       const result = await speechAnalyzer.analyzeSpeech(arrayBuffer);
-      
+
       // Validate result quality
       if (result.qualityScore < 0.3) {
         progress.errors.push('Audio quality too low for reliable analysis');
       }
-      
+
       return result;
     } catch (error) {
       console.error('Speech analysis error:', error);
@@ -235,22 +267,24 @@ export class MLModelIntegrator {
   private async processRetinalAnalysis(
     retinalImage: File,
     progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback
   ): Promise<RetinalAnalysisResult | null> {
     try {
       // Validate image file
       if (!retinalImage.type.startsWith('image/')) {
         throw new Error('Invalid image file format');
       }
-      
+
       // Analyze retinal image
       const result = await retinalAnalyzer.analyzeRetinalImage(retinalImage);
-      
+
       // Validate result quality
       if (result.imageQuality < 0.4) {
-        progress.errors.push('Retinal image quality too low for reliable analysis');
+        progress.errors.push(
+          'Retinal image quality too low for reliable analysis'
+        );
       }
-      
+
       return result;
     } catch (error) {
       console.error('Retinal analysis error:', error);
@@ -263,16 +297,16 @@ export class MLModelIntegrator {
    */
   private async processRiskAssessment(
     riskData: RiskAssessmentData,
-    progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    _progress: AssessmentProgress,
+    _onProgress?: ProgressCallback
   ): Promise<RiskAssessmentResult | null> {
     try {
       // Validate required fields
       this.validateRiskData(riskData);
-      
+
       // Calculate risk assessment
       const result = await riskAssessmentCalculator.calculateRisk(riskData);
-      
+
       return result;
     } catch (error) {
       console.error('Risk assessment error:', error);
@@ -284,9 +318,9 @@ export class MLModelIntegrator {
    * Process motor analysis (placeholder for future implementation)
    */
   private async processMotorAnalysis(
-    motorData: any,
-    progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    _motorData: any,
+    _progress: AssessmentProgress,
+    _onProgress?: ProgressCallback
   ): Promise<any | null> {
     // Placeholder for future motor analysis implementation
     return null;
@@ -296,14 +330,18 @@ export class MLModelIntegrator {
    * Validate risk assessment data
    */
   private validateRiskData(riskData: RiskAssessmentData): void {
-    if (!riskData.demographics?.age || riskData.demographics.age < 18 || riskData.demographics.age > 120) {
+    if (
+      !riskData.demographics?.age ||
+      riskData.demographics.age < 18 ||
+      riskData.demographics.age > 120
+    ) {
       throw new Error('Invalid age provided');
     }
-    
+
     if (!riskData.demographics?.sex) {
       throw new Error('Sex information required');
     }
-    
+
     // Add more validation as needed
   }
 
@@ -312,38 +350,48 @@ export class MLModelIntegrator {
    */
   private calculateOverallDataQuality(modalityResults: any): number {
     const qualities: number[] = [];
-    
+
     if (modalityResults.speech?.qualityScore) {
       qualities.push(modalityResults.speech.qualityScore);
     }
-    
+
     if (modalityResults.retinal?.imageQuality) {
       qualities.push(modalityResults.retinal.imageQuality);
     }
-    
+
     if (modalityResults.risk) {
       qualities.push(0.9); // Risk assessment typically high quality
     }
-    
+
     if (modalityResults.motor?.quality) {
       qualities.push(modalityResults.motor.quality);
     }
-    
-    return qualities.length > 0 ? 
-      qualities.reduce((sum, q) => sum + q, 0) / qualities.length : 0.5;
+
+    return qualities.length > 0
+      ? qualities.reduce((sum, q) => sum + q, 0) / qualities.length
+      : 0.5;
   }
 
   /**
    * Update progress and notify callback
    */
-  private updateProgress(progress: AssessmentProgress, onProgress?: ProgressCallback): void {
+  private updateProgress(
+    progress: AssessmentProgress,
+    onProgress?: ProgressCallback
+  ): void {
     // Update estimated time remaining
     if (progress.progress > 0) {
-      const elapsedTime = Date.now() - (this.activeAssessments.get(progress.sessionId)?.estimatedTimeRemaining || Date.now());
+      const elapsedTime =
+        Date.now() -
+        (this.activeAssessments.get(progress.sessionId)
+          ?.estimatedTimeRemaining || Date.now());
       const estimatedTotal = elapsedTime / (progress.progress / 100);
-      progress.estimatedTimeRemaining = Math.max(0, (estimatedTotal - elapsedTime) / 1000);
+      progress.estimatedTimeRemaining = Math.max(
+        0,
+        (estimatedTotal - elapsedTime) / 1000
+      );
     }
-    
+
     // Notify callback
     if (onProgress) {
       onProgress(progress);
@@ -383,17 +431,18 @@ export class MLModelIntegrator {
   } {
     const activeCount = this.activeAssessments.size;
     const cacheSize = this.resultCache.size;
-    
+
     // Simple health check
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
     if (activeCount > 10) status = 'degraded';
     if (activeCount > 20) status = 'unhealthy';
-    
+
+    const memoryUsage = this.getMemoryUsage();
     return {
       status,
       activeAssessments: activeCount,
       cacheSize,
-      memoryUsage: this.getMemoryUsage(),
+      ...(memoryUsage !== undefined && { memoryUsage }),
     };
   }
 
@@ -401,7 +450,11 @@ export class MLModelIntegrator {
    * Get memory usage (if available)
    */
   private getMemoryUsage(): number | undefined {
-    if (typeof window !== 'undefined' && 'performance' in window && 'memory' in performance) {
+    if (
+      typeof window !== 'undefined' &&
+      'performance' in window &&
+      'memory' in performance
+    ) {
       return (performance as any).memory.usedJSHeapSize;
     }
     return undefined;
@@ -410,9 +463,10 @@ export class MLModelIntegrator {
   /**
    * Cleanup old cache entries
    */
-  cleanupCache(maxAge: number = 3600000): void { // 1 hour default
+  cleanupCache(maxAge: number = 3600000): void {
+    // 1 hour default
     const now = Date.now();
-    
+
     for (const [sessionId, result] of this.resultCache.entries()) {
       const age = now - result.metadata.timestamp.getTime();
       if (age > maxAge) {
@@ -452,24 +506,26 @@ export const generateSessionId = (): string => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const validateAssessmentRequest = (request: AssessmentRequest): string[] => {
+export const validateAssessmentRequest = (
+  request: AssessmentRequest
+): string[] => {
   const errors: string[] = [];
-  
+
   if (!request.sessionId) {
     errors.push('Session ID is required');
   }
-  
+
   if (!request.audioFile && !request.retinalImage && !request.riskData) {
     errors.push('At least one assessment modality is required');
   }
-  
+
   if (request.audioFile && !request.audioFile.type.startsWith('audio/')) {
     errors.push('Invalid audio file format');
   }
-  
+
   if (request.retinalImage && !request.retinalImage.type.startsWith('image/')) {
     errors.push('Invalid image file format');
   }
-  
+
   return errors;
 };

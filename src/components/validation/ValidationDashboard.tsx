@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Button, Progress } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import { PerformanceMetrics } from './PerformanceMetrics';
 import { ClinicalValidation } from './ClinicalValidation';
 import { AccuracyMetrics } from './AccuracyMetrics';

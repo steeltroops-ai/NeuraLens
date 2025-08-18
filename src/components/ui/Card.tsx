@@ -71,24 +71,28 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     };
 
     // Hover effects
-    const hoverClasses = hover ? [
-      'hover:border-neutral-700',
-      'hover:shadow-xl',
-      'hover:-translate-y-1',
-      'hover:scale-[1.01]',
-      'cursor-pointer',
-    ] : [];
+    const hoverClasses = hover
+      ? [
+          'hover:border-neutral-700',
+          'hover:shadow-xl',
+          'hover:-translate-y-1',
+          'hover:scale-[1.01]',
+          'cursor-pointer',
+        ]
+      : [];
 
     // Interactive classes for clickable cards
-    const interactiveClasses = onClick ? [
-      'cursor-pointer',
-      'focus:outline-none',
-      'focus:ring-2',
-      'focus:ring-primary-500',
-      'focus:ring-offset-2',
-      'focus:ring-offset-surface-background',
-      'active:scale-[0.99]',
-    ] : [];
+    const interactiveClasses = onClick
+      ? [
+          'cursor-pointer',
+          'focus:outline-none',
+          'focus:ring-2',
+          'focus:ring-primary-500',
+          'focus:ring-offset-2',
+          'focus:ring-offset-surface-background',
+          'active:scale-[0.99]',
+        ]
+      : [];
 
     // Combine all classes
     const cardClasses = cn(
@@ -142,15 +146,9 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   actions,
 }) => {
   return (
-    <div className={cn('flex items-center justify-between mb-4', className)}>
-      <div className="flex-1">
-        {children}
-      </div>
-      {actions && (
-        <div className="flex items-center gap-2 ml-4">
-          {actions}
-        </div>
-      )}
+    <div className={cn('mb-4 flex items-center justify-between', className)}>
+      <div className="flex-1">{children}</div>
+      {actions && <div className="ml-4 flex items-center gap-2">{actions}</div>}
     </div>
   );
 };
@@ -170,7 +168,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   level = 3,
 }) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-  
+
   const levelClasses = {
     1: 'text-3xl font-bold',
     2: 'text-2xl font-bold',
@@ -181,13 +179,15 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   };
 
   return (
-    <Tag className={cn(
-      'text-text-primary',
-      'leading-tight',
-      'mb-2',
-      levelClasses[level],
-      className
-    )}>
+    <Tag
+      className={cn(
+        'text-text-primary',
+        'leading-tight',
+        'mb-2',
+        levelClasses[level],
+        className
+      )}
+    >
       {children}
     </Tag>
   );
@@ -206,13 +206,15 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
   className,
 }) => {
   return (
-    <p className={cn(
-      'text-text-secondary',
-      'text-sm',
-      'leading-relaxed',
-      'mb-0',
-      className
-    )}>
+    <p
+      className={cn(
+        'text-text-secondary',
+        'text-sm',
+        'leading-relaxed',
+        'mb-0',
+        className
+      )}
+    >
       {children}
     </p>
   );
@@ -230,11 +232,7 @@ export const CardContent: React.FC<CardContentProps> = ({
   children,
   className,
 }) => {
-  return (
-    <div className={cn('space-y-4', className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn('space-y-4', className)}>{children}</div>;
 };
 
 /**
@@ -259,17 +257,19 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   };
 
   return (
-    <div className={cn(
-      'flex',
-      'items-center',
-      'gap-3',
-      'mt-6',
-      'pt-4',
-      'border-t',
-      'border-neutral-800',
-      justifyClasses[justify],
-      className
-    )}>
+    <div
+      className={cn(
+        'flex',
+        'items-center',
+        'gap-3',
+        'mt-6',
+        'pt-4',
+        'border-t',
+        'border-neutral-800',
+        justifyClasses[justify],
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -315,7 +315,7 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
     <Card
       variant="default"
       hover={status === 'pending' || status === 'current'}
-      onClick={onStart}
+      {...(onStart && { onClick: onStart })}
       className={cn(
         'transition-all duration-300',
         statusClasses[status],
@@ -325,28 +325,24 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
     >
       <CardHeader>
         <div className="flex items-center gap-4">
-          <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-primary-500/10">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-500/10">
             {icon}
           </div>
           <div className="flex-1">
             <CardTitle level={4}>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
-          <div className="flex-shrink-0 text-2xl">
-            {statusIcons[status]}
-          </div>
+          <div className="flex-shrink-0 text-2xl">{statusIcons[status]}</div>
         </div>
       </CardHeader>
-      
+
       {estimatedTime && (
         <CardFooter justify="between">
           <span className="text-sm text-text-muted">
             Estimated time: {estimatedTime}
           </span>
           {(status === 'pending' || status === 'current') && (
-            <span className="text-sm text-primary-400">
-              Click to start →
-            </span>
+            <span className="text-sm text-primary-400">Click to start →</span>
           )}
         </CardFooter>
       )}
@@ -391,11 +387,7 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
   return (
     <Card
       variant="results"
-      className={cn(
-        'border-l-4',
-        categoryColors[category],
-        className
-      )}
+      className={cn('border-l-4', categoryColors[category], className)}
       {...props}
     >
       <CardHeader>
@@ -416,7 +408,7 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
       </CardHeader>
 
       <CardContent>
-        <div className="w-full bg-neutral-800 rounded-full h-2 mb-4">
+        <div className="mb-4 h-2 w-full rounded-full bg-neutral-800">
           <div
             className={cn(
               'h-2 rounded-full transition-all duration-1000',
@@ -431,13 +423,16 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
 
         {findings.length > 0 && (
           <div>
-            <h5 className="text-sm font-medium text-text-primary mb-2">
+            <h5 className="mb-2 text-sm font-medium text-text-primary">
               Key Findings:
             </h5>
             <ul className="space-y-1">
               {findings.map((finding, index) => (
-                <li key={index} className="text-sm text-text-secondary flex items-start gap-2">
-                  <span className="text-primary-400 mt-1">•</span>
+                <li
+                  key={index}
+                  className="flex items-start gap-2 text-sm text-text-secondary"
+                >
+                  <span className="mt-1 text-primary-400">•</span>
                   <span>{finding}</span>
                 </li>
               ))}

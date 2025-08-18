@@ -161,13 +161,9 @@ export const RetinalAssessmentStep: React.FC<RetinalAssessmentStepProps> = ({
                       id="retinal-upload"
                     />
                     <label htmlFor="retinal-upload">
-                      <Button
-                        as="span"
-                        size="lg"
-                        className="cursor-pointer px-8"
-                      >
+                      <span className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-primary-500 px-8 py-3 text-lg font-medium text-white transition-colors duration-200 hover:bg-primary-600">
                         Browse Files
-                      </Button>
+                      </span>
                     </label>
                   </div>
                 </div>

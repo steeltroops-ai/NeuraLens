@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Progress } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import { NRIScoreDisplay } from './NRIScoreDisplay';
 import { ModalityBreakdown } from './ModalityBreakdown';
 import { ClinicalRecommendations } from './ClinicalRecommendations';
