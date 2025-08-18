@@ -1,0 +1,455 @@
+/* NeuroLens-X Animation System */
+
+/* ===== CLINICAL-GRADE ANIMATIONS ===== */
+
+/* NRI Score Reveal Animation */
+@keyframes nriScoreReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.nri-score-reveal {
+  animation: nriScoreReveal 1.2s var(--ease-out-quint) forwards;
+}
+
+/* Progress Bar Fill Animation */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width, 0%);
+  }
+}
+
+.progress-fill-animated {
+  animation: progressFill var(--duration-slow) var(--ease-out-quint) forwards;
+}
+
+/* Processing Status Animations */
+@keyframes processingPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+.processing-pulse {
+  animation: processingPulse 2s var(--ease-in-out) infinite;
+}
+
+@keyframes processingSpinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.processing-spinner {
+  animation: processingSpinner 1s linear infinite;
+}
+
+/* Card Hover Animations */
+@keyframes cardHover {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--shadow-lg);
+  }
+  100% {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+.card-hover:hover {
+  animation: cardHover var(--duration-normal) var(--ease-out-quint) forwards;
+}
+
+/* Button Press Animation */
+@keyframes buttonPress {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(1px) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.btn-press:active {
+  animation: buttonPress var(--duration-fast) var(--ease-out);
+}
+
+/* Stagger Animation for Lists */
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: staggerFadeIn var(--duration-normal) var(--ease-out-quint) forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 100ms; }
+.stagger-item:nth-child(3) { animation-delay: 200ms; }
+.stagger-item:nth-child(4) { animation-delay: 300ms; }
+.stagger-item:nth-child(5) { animation-delay: 400ms; }
+.stagger-item:nth-child(6) { animation-delay: 500ms; }
+
+/* Modal/Dialog Animations */
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-backdrop {
+  animation: modalBackdropFadeIn var(--duration-normal) var(--ease-out);
+}
+
+.modal-content {
+  animation: modalSlideIn var(--duration-normal) var(--ease-out-quint);
+}
+
+/* Toast Notification Animations */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.toast-enter {
+  animation: toastSlideIn var(--duration-normal) var(--ease-out-quint);
+}
+
+.toast-exit {
+  animation: toastSlideOut var(--duration-normal) var(--ease-in-cubic);
+}
+
+/* Loading Skeleton Animation */
+@keyframes skeletonPulse {
+  0% {
+    background-color: var(--neutral-800);
+  }
+  50% {
+    background-color: var(--neutral-700);
+  }
+  100% {
+    background-color: var(--neutral-800);
+  }
+}
+
+.skeleton {
+  animation: skeletonPulse 1.5s var(--ease-in-out) infinite;
+  border-radius: var(--radius-base);
+}
+
+/* Ripple Effect Animation */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-fast), height var(--duration-fast);
+}
+
+.ripple-effect:active::before {
+  width: 300px;
+  height: 300px;
+  animation: ripple var(--duration-normal) var(--ease-out);
+}
+
+/* Floating Action Button Animation */
+@keyframes fabFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.fab-float {
+  animation: fabFloat 3s var(--ease-in-out) infinite;
+}
+
+/* Assessment Step Transition */
+@keyframes stepTransition {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.step-enter {
+  animation: stepTransition var(--duration-normal) var(--ease-out-quint);
+}
+
+/* Audio Waveform Animation */
+@keyframes waveform {
+  0%, 100% {
+    height: 20%;
+  }
+  25% {
+    height: 80%;
+  }
+  50% {
+    height: 40%;
+  }
+  75% {
+    height: 60%;
+  }
+}
+
+.waveform-bar {
+  animation: waveform 1.5s var(--ease-in-out) infinite;
+}
+
+.waveform-bar:nth-child(1) { animation-delay: 0ms; }
+.waveform-bar:nth-child(2) { animation-delay: 100ms; }
+.waveform-bar:nth-child(3) { animation-delay: 200ms; }
+.waveform-bar:nth-child(4) { animation-delay: 300ms; }
+.waveform-bar:nth-child(5) { animation-delay: 400ms; }
+
+/* Confidence Interval Animation */
+@keyframes confidenceGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.confidence-glow {
+  animation: confidenceGlow 2s var(--ease-in-out) infinite;
+}
+
+/* Page Transition Animations */
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.page-enter {
+  animation: pageSlideIn var(--duration-normal) var(--ease-out-quint);
+}
+
+.page-exit {
+  animation: pageSlideOut var(--duration-normal) var(--ease-in-cubic);
+}
+
+/* Clinical Status Indicator Animations */
+@keyframes statusBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+.status-processing {
+  animation: statusBlink 1s linear infinite;
+}
+
+@keyframes statusSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.status-complete {
+  animation: statusSuccess var(--duration-normal) var(--ease-out-quint);
+}
+
+/* Utility Animation Classes */
+.animate-none {
+  animation: none !important;
+}
+
+.animate-pause {
+  animation-play-state: paused !important;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+.animate-delay-700 { animation-delay: 700ms; }
+.animate-delay-1000 { animation-delay: 1000ms; }
+
+/* Hover-only animations for non-touch devices */
+@media (hover: hover) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    transition: box-shadow var(--duration-fast) var(--ease-out);
+  }
+}
+
+/* Performance Optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* GPU Acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduced Motion Overrides */
+@media (prefers-reduced-motion: reduce) {
+  .nri-score-reveal,
+  .progress-fill-animated,
+  .processing-pulse,
+  .processing-spinner,
+  .card-hover:hover,
+  .stagger-item,
+  .modal-backdrop,
+  .modal-content,
+  .toast-enter,
+  .toast-exit,
+  .skeleton,
+  .fab-float,
+  .step-enter,
+  .waveform-bar,
+  .confidence-glow,
+  .page-enter,
+  .page-exit,
+  .status-processing,
+  .status-complete {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-glow:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
