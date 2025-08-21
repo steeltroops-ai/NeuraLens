@@ -171,7 +171,7 @@ export default function DashboardSidebar({
   return (
     <aside className="h-screen w-64 overflow-y-auto border-r border-slate-200 bg-white">
       <div className="p-6">
-        {/* Clean Header */}
+        {/* Clean Header - Updated */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-slate-900">NeuroLens</h2>
           <p className="text-sm text-slate-600">Assessment Platform</p>
