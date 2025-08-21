@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Mic, 
-  MicOff, 
-  Play, 
-  Square, 
+import {
+  Mic,
+  MicOff,
+  Play,
+  Square,
   Upload,
   Activity,
   Clock,
@@ -14,7 +14,7 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
-  Volume2
+  Volume2,
 } from 'lucide-react';
 
 interface SpeechAssessmentProps {
@@ -37,7 +37,9 @@ interface SpeechResult {
   recommendations: string[];
 }
 
-export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmentProps) {
+export default function SpeechAssessment({
+  onProcessingChange,
+}: SpeechAssessmentProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [result, setResult] = useState<SpeechResult | null>(null);
@@ -61,32 +63,33 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
-      
+
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
-      
+
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/wav',
+        });
         setAudioBlob(audioBlob);
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
-      
+
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
       setError(null);
-      
+
       // Start timer
       timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
-      
     } catch (err) {
       setError('Failed to access microphone. Please check permissions.');
     }
@@ -96,7 +99,7 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      
+
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -106,27 +109,26 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
 
   const analyzeAudio = async () => {
     if (!audioBlob) return;
-    
+
     setIsAnalyzing(true);
     onProcessingChange(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.wav');
-      
+
       const response = await fetch('/api/speech/analyze', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Analysis failed');
       }
-      
+
       const result: SpeechResult = await response.json();
       setResult(result);
-      
     } catch (err) {
       setError('Analysis failed. Please try again.');
     } finally {
@@ -152,53 +154,66 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
   };
 
   const getRiskLevel = (score: number) => {
-    if (score < 0.25) return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50' };
-    if (score < 0.5) return { level: 'Moderate', color: 'text-yellow-600', bg: 'bg-yellow-50' };
-    if (score < 0.75) return { level: 'High', color: 'text-orange-600', bg: 'bg-orange-50' };
+    if (score < 0.25)
+      return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50' };
+    if (score < 0.5)
+      return {
+        level: 'Moderate',
+        color: 'text-yellow-600',
+        bg: 'bg-yellow-50',
+      };
+    if (score < 0.75)
+      return { level: 'High', color: 'text-orange-600', bg: 'bg-orange-50' };
     return { level: 'Very High', color: 'text-red-600', bg: 'bg-red-50' };
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
-            <Mic className="h-6 w-6 text-white" />
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-4 flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0">
+          <div className="w-fit rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 p-3">
+            <Mic className="h-5 w-5 text-white sm:h-6 sm:w-6" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Speech Analysis</h1>
-            <p className="text-slate-600">Analyze speech patterns for neurological indicators</p>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
+              Speech Analysis
+            </h1>
+            <p className="text-sm text-slate-600 sm:text-base">
+              Analyze speech patterns for neurological indicators
+            </p>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center space-x-2 text-slate-600">
-            <Clock className="h-4 w-4" />
-            <span>Processing Time: ~11.7ms</span>
+
+        <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4 sm:text-sm lg:grid-cols-3">
+          <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
+            <Clock className="h-4 w-4 flex-shrink-0" />
+            <span>Processing: ~11.7ms</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-600">
-            <Activity className="h-4 w-4" />
+          <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
+            <Activity className="h-4 w-4 flex-shrink-0" />
             <span>Accuracy: 95%</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-600">
-            <TrendingUp className="h-4 w-4" />
+          <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:col-span-2 sm:p-3 lg:col-span-1">
+            <TrendingUp className="h-4 w-4 flex-shrink-0" />
             <span>Real-time Analysis</span>
           </div>
         </div>
       </div>
 
       {/* Recording Interface */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Audio Recording</h2>
-        
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+          Audio Recording
+        </h2>
+
         <div className="space-y-4">
           {/* Recording Controls */}
-          <div className="flex items-center justify-center space-x-4">
+          <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
             {!isRecording ? (
               <motion.button
                 onClick={startRecording}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 sm:w-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -208,7 +223,7 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
             ) : (
               <motion.button
                 onClick={stopRecording}
-                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition-colors hover:bg-red-700 sm:w-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -216,23 +231,25 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
                 <span>Stop Recording</span>
               </motion.button>
             )}
-            
+
             <div className="text-center">
-              <div className="text-2xl font-mono font-bold text-slate-900">
+              <div className="font-mono text-xl font-bold text-slate-900 sm:text-2xl">
                 {formatTime(recordingTime)}
               </div>
-              <div className="text-sm text-slate-500">Recording Time</div>
+              <div className="text-xs text-slate-500 sm:text-sm">
+                Recording Time
+              </div>
             </div>
           </div>
 
           {/* Recording Indicator */}
           {isRecording && (
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center space-x-2 text-red-600"
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             >
-              <div className="w-3 h-3 bg-red-600 rounded-full"></div>
+              <div className="h-3 w-3 rounded-full bg-red-600"></div>
               <span className="font-medium">Recording in progress...</span>
             </motion.div>
           )}
@@ -240,8 +257,10 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
           {/* File Upload Alternative */}
           <div className="border-t pt-4">
             <div className="text-center">
-              <p className="text-sm text-slate-600 mb-2">Or upload an audio file</p>
-              <label className="inline-flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg cursor-pointer transition-colors">
+              <p className="mb-2 text-sm text-slate-600">
+                Or upload an audio file
+              </p>
+              <label className="inline-flex cursor-pointer items-center space-x-2 rounded-lg bg-slate-100 px-4 py-2 text-slate-700 transition-colors hover:bg-slate-200">
                 <Upload className="h-4 w-4" />
                 <span>Choose File</span>
                 <input
@@ -256,9 +275,11 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
 
           {/* Audio Preview */}
           {audioBlob && (
-            <div className="bg-slate-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-700">Audio Ready</span>
+            <div className="rounded-lg bg-slate-50 p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  Audio Ready
+                </span>
                 <span className="text-xs text-slate-500">
                   {(audioBlob.size / 1024).toFixed(1)} KB
                 </span>
@@ -273,7 +294,7 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
           {audioBlob && !isAnalyzing && (
             <motion.button
               onClick={analyzeAudio}
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-lg font-medium transition-all"
+              className="w-full rounded-lg bg-gradient-to-r from-green-600 to-green-700 py-3 font-medium text-white transition-all hover:from-green-700 hover:to-green-800"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -283,15 +304,15 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
 
           {/* Processing Indicator */}
           {isAnalyzing && (
-            <div className="flex items-center justify-center space-x-2 text-blue-600 py-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+            <div className="flex items-center justify-center space-x-2 py-3 text-blue-600">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
               <span className="font-medium">Analyzing speech patterns...</span>
             </div>
           )}
 
           {/* Error Display */}
           {error && (
-            <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+            <div className="flex items-center space-x-2 rounded-lg bg-red-50 p-3 text-red-600">
               <AlertCircle className="h-5 w-5" />
               <span>{error}</span>
             </div>
@@ -309,29 +330,35 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
             className="space-y-6"
           >
             {/* Risk Assessment */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Risk Assessment</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-slate-900">
+                Risk Assessment
+              </h2>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div className="text-center">
-                  <div className={`text-3xl font-bold ${getRiskLevel(result.risk_score).color} mb-2`}>
+                  <div
+                    className={`text-3xl font-bold ${getRiskLevel(result.risk_score).color} mb-2`}
+                  >
                     {(result.risk_score * 100).toFixed(1)}%
                   </div>
                   <div className="text-sm text-slate-600">Risk Score</div>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${getRiskLevel(result.risk_score).color} ${getRiskLevel(result.risk_score).bg}`}>
+                  <div
+                    className={`mt-2 inline-block rounded-full px-3 py-1 text-sm font-medium ${getRiskLevel(result.risk_score).color} ${getRiskLevel(result.risk_score).bg}`}
+                  >
                     {getRiskLevel(result.risk_score).level} Risk
                   </div>
                 </div>
-                
+
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                  <div className="mb-2 text-3xl font-bold text-blue-600">
                     {(result.confidence * 100).toFixed(1)}%
                   </div>
                   <div className="text-sm text-slate-600">Confidence</div>
                 </div>
-                
+
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
+                  <div className="mb-2 text-3xl font-bold text-green-600">
                     {result.processing_time.toFixed(1)}ms
                   </div>
                   <div className="text-sm text-slate-600">Processing Time</div>
@@ -340,10 +367,12 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
             </div>
 
             {/* Biomarkers */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Speech Biomarkers</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-slate-900">
+                Speech Biomarkers
+              </h2>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <BiomarkerCard
                   title="Fluency Score"
                   value={result.biomarkers.fluency_score}
@@ -372,14 +401,21 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
             </div>
 
             {/* Recommendations */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Clinical Recommendations</h2>
-              
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-slate-900">
+                Clinical Recommendations
+              </h2>
+
               <div className="space-y-3">
                 {result.recommendations.map((recommendation, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-slate-700">{recommendation}</span>
+                  <div
+                    key={index}
+                    className="flex items-start space-x-3 rounded-lg bg-blue-50 p-3"
+                  >
+                    <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
+                    <span className="text-sm text-slate-700">
+                      {recommendation}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -392,15 +428,15 @@ export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmen
 }
 
 // Biomarker Card Component
-function BiomarkerCard({ 
-  title, 
-  value, 
-  description, 
-  unit 
-}: { 
-  title: string; 
-  value: number; 
-  description: string; 
+function BiomarkerCard({
+  title,
+  value,
+  description,
+  unit,
+}: {
+  title: string;
+  value: number;
+  description: string;
   unit: string;
 }) {
   const getValueColor = (val: number) => {
@@ -410,8 +446,8 @@ function BiomarkerCard({
   };
 
   return (
-    <div className="bg-slate-50 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-2">
+    <div className="rounded-lg bg-slate-50 p-4">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-900">{title}</h3>
         <span className={`text-lg font-bold ${getValueColor(value)}`}>
           {unit === 'WPM' ? value.toFixed(0) : (value * 100).toFixed(1)}

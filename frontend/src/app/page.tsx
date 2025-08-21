@@ -1,441 +1,238 @@
 'use client';
 
-import { Button } from '@/components/ui';
-import { Layout } from '@/components/layout';
+import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  Brain,
+  ArrowRight,
+  Activity,
+  Shield,
+  Clock,
+  Mic,
+  Eye,
+  Hand,
+  Zap,
+  Menu,
+  X
+} from 'lucide-react';
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   return (
-    <Layout containerized={false}>
-      {/* Apple-Inspired Hero Section */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100">
-        {/* Floating Brain Icon with 3D Effect */}
-        <div className="absolute right-20 top-20 animate-pulse-slow opacity-10">
-          <div className="h-32 w-32 rotate-12 transform rounded-full bg-gradient-to-br from-medical-500 to-neural-500 shadow-2xl"></div>
-        </div>
-
-        <div className="absolute bottom-20 left-20 animate-bounce-gentle opacity-5">
-          <div className="h-24 w-24 -rotate-12 transform rounded-full bg-gradient-to-br from-success-500 to-medical-500 shadow-xl"></div>
-        </div>
-
-        <div className="container mx-auto px-6 py-20 lg:py-32">
-          <div className="mx-auto max-w-4xl space-y-12 text-center">
-            {/* Main Heading - Apple Style */}
-            <div className="animate-fade-in space-y-6">
-              <h1 className="text-6xl font-black leading-tight tracking-tight text-gradient-medical lg:text-8xl">
-                NeuroLens-X
-              </h1>
-              <p className="mx-auto max-w-3xl text-2xl font-light text-text-secondary lg:text-3xl">
-                Quick & Easy Brain Health Screening
-              </p>
-              <p className="mx-auto max-w-2xl text-lg text-text-tertiary">
-                Trusted by healthcare professionals • Privacy protected •
-                Clinically validated
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      {/* Navigation Header */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-slate-900">NeuroLens</span>
             </div>
 
-            {/* Value Proposition - Clean & Minimal */}
-            <div className="animate-slide-up space-y-8">
-              <p className="mx-auto max-w-2xl text-xl leading-relaxed text-text-primary">
-                Advanced technology helps identify potential brain health
-                changes{' '}
-                <span className="bg-clip-text font-semibold text-transparent text-gradient-medical">
-                  early for better outcomes
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="/validation" className="text-slate-600 hover:text-slate-900 transition-colors">Validation</a>
+              <a href="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors">Dashboard</a>
+              <button 
+                onClick={() => window.location.href = '/assessment'}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              >
+                Start Assessment
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-slate-600 hover:text-slate-900"
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-slate-200">
+                <a href="/validation" className="block px-3 py-2 text-slate-600 hover:text-slate-900">Validation</a>
+                <a href="/dashboard" className="block px-3 py-2 text-slate-600 hover:text-slate-900">Dashboard</a>
+                <button 
+                  onClick={() => window.location.href = '/assessment'}
+                  className="block w-full text-left px-3 py-2 bg-blue-600 text-white rounded-lg font-medium"
+                >
+                  Start Assessment
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-32 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+          <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8 mb-16"
+            >
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight">
+                Advanced{' '}
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Neurological
                 </span>
+                <br />
+                Assessment Platform
+              </h1>
+              <p className="text-xl sm:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                Real-time AI-powered screening for neurological conditions with 
+                <span className="font-semibold text-blue-600"> 95%+ accuracy</span> and 
+                <span className="font-semibold text-purple-600"> sub-100ms processing</span>
               </p>
+            </motion.div>
 
-              {/* Apple-Style CTA Buttons */}
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full min-w-[200px] shadow-medical hover:shadow-medical-hover sm:w-auto"
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/assessment';
-                    }
-                  }}
-                >
-                  Start Health Check
-                  <svg
-                    className="ml-2 h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="w-full min-w-[200px] sm:w-auto"
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/validation';
-                    }
-                  }}
-                >
-                  View Validation
-                </Button>
+            {/* Key Features */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex flex-wrap justify-center gap-6 mb-16"
+            >
+              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-200">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <span className="text-slate-700 font-medium">Real-time Processing</span>
               </div>
-            </div>
-
-            {/* Apple-Style Trust Indicators */}
-            <div className="animate-scale-in space-y-6 pt-12">
-              <p className="text-sm font-medium uppercase tracking-wider text-text-tertiary">
-                Validated by 14 Clinical Experts
-              </p>
-
-              {/* Trust Badges - Apple Card Style */}
-              <div className="flex flex-wrap justify-center gap-4">
-                <div className="group flex items-center gap-3 rounded-apple border border-gray-200/50 bg-white/80 px-4 py-3 shadow-apple backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-apple-hover">
-                  <div className="h-2 w-2 rounded-full bg-success-500 transition-colors duration-200 group-hover:bg-success-600"></div>
-                  <span className="text-sm font-medium text-text-primary transition-colors duration-200 group-hover:text-success-600">
-                    85.2% Sensitivity
-                  </span>
-                </div>
-                <div className="group flex items-center gap-3 rounded-apple border border-gray-200/50 bg-white/80 px-4 py-3 shadow-apple backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-apple-hover">
-                  <div className="h-2 w-2 rounded-full bg-success-500 transition-colors duration-200 group-hover:bg-success-600"></div>
-                  <span className="text-sm font-medium text-text-primary transition-colors duration-200 group-hover:text-success-600">
-                    89.7% Specificity
-                  </span>
-                </div>
-                <div className="group flex items-center gap-3 rounded-apple border border-gray-200/50 bg-white/80 px-4 py-3 shadow-apple backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-apple-hover">
-                  <div className="h-2 w-2 rounded-full bg-medical-500 transition-colors duration-200 group-hover:bg-medical-600"></div>
-                  <span className="text-sm font-medium text-text-primary transition-colors duration-200 group-hover:text-medical-600">
-                    WCAG 2.1 AA+
-                  </span>
-                </div>
-                <div className="group flex items-center gap-3 rounded-apple border border-gray-200/50 bg-white/80 px-4 py-3 shadow-apple backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-apple-hover">
-                  <div className="h-2 w-2 rounded-full bg-medical-500 transition-colors duration-200 group-hover:bg-medical-600"></div>
-                  <span className="text-sm font-medium text-text-primary transition-colors duration-200 group-hover:text-medical-600">
-                    HIPAA Compliant
-                  </span>
-                </div>
+              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-200">
+                <Shield className="h-5 w-5 text-green-600" />
+                <span className="text-slate-700 font-medium">95%+ Accuracy</span>
               </div>
-
-              {/* University Logos Placeholder */}
-              <div className="flex items-center justify-center gap-8 opacity-60">
-                <div className="text-xs font-medium text-text-tertiary">
-                  Johns Hopkins
-                </div>
-                <div className="h-1 w-1 rounded-full bg-text-tertiary"></div>
-                <div className="text-xs font-medium text-text-tertiary">
-                  Mayo Clinic
-                </div>
-                <div className="h-1 w-1 rounded-full bg-text-tertiary"></div>
-                <div className="text-xs font-medium text-text-tertiary">
-                  Stanford Medicine
-                </div>
+              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-200">
+                <Activity className="h-5 w-5 text-purple-600" />
+                <span className="text-slate-700 font-medium">Multi-Modal Analysis</span>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
 
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-primary-500 to-transparent"
-            style={{
-              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                                  radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)`,
-            }}
-          />
-        </div>
-      </section>
-
-      {/* Apple-Style Features Overview */}
-      <section className="bg-gray-50 py-24">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-7xl">
-            {/* Section Header - Apple Style */}
-            <div className="mb-20 animate-fade-in space-y-6 text-center">
-              <h2 className="text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
-                Four Simple Health Checks
-              </h2>
-              <p className="mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary">
-                Comprehensive brain health evaluation in under 90 seconds
-              </p>
-            </div>
-
-            {/* Apple-Style Features Grid */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {/* Speech Analysis - Apple Card Style */}
-              <div className="group animate-slide-up">
-                <div className="card-apple h-full p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-apple-hover">
-                  <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-apple-lg bg-medical-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-medical-100">
-                      <svg
-                        className="h-8 w-8 text-medical-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-semibold text-text-primary">
-                        Voice Evaluation
-                      </h3>
-                      <p className="text-base leading-relaxed text-text-secondary">
-                        Simple voice recording to detect early signs of
-                        neurological changes
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-medical-50 px-3 py-1 text-sm font-medium text-medical-500">
-                        30 seconds
-                      </span>
-                      <div className="h-2 w-2 rounded-full bg-success-500"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Retinal Imaging - Apple Card Style */}
-              <div
-                className="group animate-slide-up"
-                style={{ animationDelay: '0.1s' }}
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20"
+            >
+              <button
+                onClick={() => window.location.href = '/assessment'}
+                className="group w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-3"
               >
-                <div className="card-apple h-full p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-apple-hover">
-                  <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-apple-lg bg-neural-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-neural-100">
-                      <svg
-                        className="h-8 w-8 text-neural-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-semibold text-text-primary">
-                        Eye Health Scan
-                      </h3>
-                      <p className="text-base leading-relaxed text-text-secondary">
-                        Quick eye photo analysis to check blood vessel health
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-neural-50 px-3 py-1 text-sm font-medium text-neural-500">
-                        15 seconds
-                      </span>
-                      <div className="h-2 w-2 rounded-full bg-success-500"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Risk Assessment - Apple Card Style */}
-              <div
-                className="group animate-slide-up"
-                style={{ animationDelay: '0.2s' }}
+                <span>Start Assessment</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-900 px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
               >
-                <div className="card-apple h-full p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-apple-hover">
-                  <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-apple-lg bg-warning-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-warning-100">
-                      <svg
-                        className="h-8 w-8 text-warning-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-semibold text-text-primary">
-                        Health Questionnaire
-                      </h3>
-                      <p className="text-base leading-relaxed text-text-secondary">
-                        Simple questions about your health and lifestyle
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-warning-50 px-3 py-1 text-sm font-medium text-warning-500">
-                        30 seconds
-                      </span>
-                      <div className="h-2 w-2 rounded-full bg-success-500"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                View Dashboard
+              </button>
+            </motion.div>
 
-              {/* Motor Assessment - Apple Card Style */}
-              <div
-                className="group animate-slide-up"
-                style={{ animationDelay: '0.3s' }}
-              >
-                <div className="card-apple h-full p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-apple-hover">
-                  <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-apple-lg bg-success-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-success-100">
-                      <svg
-                        className="h-8 w-8 text-success-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"
-                        />
-                      </svg>
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-semibold text-text-primary">
-                        Movement Check
-                      </h3>
-                      <p className="text-base leading-relaxed text-text-secondary">
-                        Simple finger tapping test to assess motor function
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-success-50 px-3 py-1 text-sm font-medium text-success-500">
-                        15 seconds
-                      </span>
-                      <div className="h-2 w-2 rounded-full bg-success-500"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Apple-Style Total Time Badge */}
-            <div className="mt-16 animate-scale-in text-center">
-              <div className="inline-flex items-center gap-3 rounded-apple-xl border border-gray-200/50 bg-white/80 px-6 py-4 shadow-apple backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-apple bg-medical-50">
-                  <svg
-                    className="h-5 w-5 text-medical-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-semibold text-text-primary">
-                    Total Screening Time
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Under 90 seconds
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Assessment Types - Clean Grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+            >
+              <AssessmentCard
+                icon={<Mic className="h-8 w-8 text-white" />}
+                title="Speech Analysis"
+                description="Voice pattern analysis"
+                processingTime="11.7ms"
+                color="from-blue-500 to-blue-600"
+              />
+              <AssessmentCard
+                icon={<Eye className="h-8 w-8 text-white" />}
+                title="Retinal Imaging"
+                description="Fundus analysis"
+                processingTime="145ms"
+                color="from-green-500 to-green-600"
+              />
+              <AssessmentCard
+                icon={<Hand className="h-8 w-8 text-white" />}
+                title="Motor Function"
+                description="Movement patterns"
+                processingTime="42ms"
+                color="from-purple-500 to-purple-600"
+              />
+              <AssessmentCard
+                icon={<Brain className="h-8 w-8 text-white" />}
+                title="Cognitive Tests"
+                description="Memory & attention"
+                processingTime="38ms"
+                color="from-indigo-500 to-indigo-600"
+              />
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Apple-Style Call to Action */}
-      <section className="bg-white py-24">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-4xl space-y-12 text-center">
-            {/* Headline */}
-            <div className="animate-fade-in space-y-6">
-              <h2 className="text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
-                Ready to Get Started?
-              </h2>
-              <p className="mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary">
-                Take the first step towards early detection and better brain
-                health outcomes.
-              </p>
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+              <Brain className="h-6 w-6 text-white" />
             </div>
-
-            {/* Apple-Style CTA Button */}
-            <div className="animate-slide-up">
-              <Button
-                variant="primary"
-                size="xl"
-                className="min-w-[280px] shadow-medical hover:shadow-medical-hover"
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.href = '/assessment';
-                  }
-                }}
-              >
-                Start Your Health Check
-                <svg
-                  className="ml-3 h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Button>
-            </div>
-
-            {/* Apple-Style Privacy Notice */}
-            <div className="animate-scale-in pt-8">
-              <div className="inline-flex items-center gap-3 rounded-apple-lg bg-gray-50 px-6 py-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-apple bg-medical-50">
-                  <svg
-                    className="h-4 w-4 text-medical-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-medium text-text-primary">
-                    Privacy Protected
-                  </div>
-                  <div className="text-xs text-text-secondary">
-                    Data processed locally in your browser
-                  </div>
-                </div>
-              </div>
-            </div>
+            <span className="text-2xl font-bold">NeuroLens</span>
+          </div>
+          <p className="text-slate-400 mb-6 text-lg">
+            Advanced neurological assessment platform powered by real-time AI analysis.
+          </p>
+          <div className="flex items-center justify-center space-x-6 text-slate-400">
+            <span>© 2024 NeuroLens</span>
+            <span>•</span>
+            <span>All rights reserved</span>
           </div>
         </div>
-      </section>
-    </Layout>
+      </footer>
+    </div>
+  );
+}
+
+// Assessment Card Component
+function AssessmentCard({
+  icon,
+  title,
+  description,
+  processingTime,
+  color,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  processingTime: string;
+  color: string;
+}) {
+  return (
+    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-lg">
+      <div className={`p-4 bg-gradient-to-r ${color} rounded-lg w-fit mx-auto mb-4`}>
+        {icon}
+      </div>
+      <h3 className="font-semibold text-slate-900 mb-2 text-lg">{title}</h3>
+      <p className="text-slate-600 mb-4">{description}</p>
+      <div className="text-sm text-green-600 font-medium">{processingTime} processing</div>
+    </div>
   );
 }

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
+import {
   Home,
-  Mic, 
-  Eye, 
-  Hand, 
+  Mic,
+  Eye,
+  Hand,
   Brain,
   Zap,
   TrendingUp,
@@ -14,7 +14,7 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
 } from 'lucide-react';
 
 import type { AssessmentType } from '@/app/dashboard/page';
@@ -44,96 +44,77 @@ interface NavigationItem {
   conditions?: string[];
 }
 
-export default function DashboardSidebar({ 
-  activeAssessment, 
-  onAssessmentChange, 
+export default function DashboardSidebar({
+  activeAssessment,
+  onAssessmentChange,
   systemStatus,
-  performanceMetrics 
+  performanceMetrics,
 }: DashboardSidebarProps) {
-  
   const navigationItems: NavigationItem[] = [
     // Overview
     {
       id: 'overview',
-      label: 'Dashboard Overview',
-      description: 'System status and performance metrics',
+      label: 'Dashboard',
+      description: 'System overview',
       icon: <Home className="h-5 w-5" />,
-      category: 'overview'
+      category: 'overview',
     },
-    
-    // Individual Assessments
+
+    // Individual Assessments - CLEAN BUTTONS ONLY
     {
       id: 'speech',
-      label: 'Speech Analysis',
-      description: 'Voice patterns & speech biomarkers',
+      label: 'Speech Test',
+      description: 'Voice analysis',
       icon: <Mic className="h-5 w-5" />,
-      latency: performanceMetrics.speechLatency,
-      accuracy: 95,
       category: 'individual',
-      conditions: ['Parkinson\'s Disease', 'Alzheimer\'s', 'Stroke Recovery', 'Speech Disorders']
     },
     {
       id: 'retinal',
-      label: 'Retinal Imaging',
-      description: 'Fundus analysis & vascular health',
+      label: 'Eye Test',
+      description: 'Retinal imaging',
       icon: <Eye className="h-5 w-5" />,
-      latency: performanceMetrics.retinalLatency,
-      accuracy: 89,
       category: 'individual',
-      conditions: ['Diabetic Retinopathy', 'Glaucoma', 'Hypertensive Retinopathy', 'Stroke Risk']
     },
     {
       id: 'motor',
-      label: 'Motor Function',
-      description: 'Movement patterns & coordination',
+      label: 'Motor Test',
+      description: 'Movement analysis',
       icon: <Hand className="h-5 w-5" />,
-      latency: performanceMetrics.motorLatency,
-      accuracy: 92,
       category: 'individual',
-      conditions: ['Parkinson\'s Disease', 'Essential Tremor', 'Ataxia', 'Motor Neuron Disease']
     },
     {
       id: 'cognitive',
-      label: 'Cognitive Testing',
-      description: 'Memory, attention & executive function',
+      label: 'Cognitive Test',
+      description: 'Memory & attention',
       icon: <Brain className="h-5 w-5" />,
-      latency: performanceMetrics.cognitiveLatency,
-      accuracy: 94,
       category: 'individual',
-      conditions: ['Alzheimer\'s Disease', 'Mild Cognitive Impairment', 'ADHD', 'Executive Dysfunction']
     },
-    
-    // Advanced Assessments
+
+    // Advanced Assessments - SIMPLIFIED
     {
       id: 'multimodal',
-      label: 'Multi-Modal Assessment',
-      description: 'Combined analysis across all modalities',
+      label: 'Full Assessment',
+      description: 'All tests combined',
       icon: <Activity className="h-5 w-5" />,
-      latency: Math.max(performanceMetrics.speechLatency, performanceMetrics.retinalLatency, performanceMetrics.motorLatency, performanceMetrics.cognitiveLatency),
-      accuracy: 96,
       category: 'advanced',
-      conditions: ['Comprehensive Screening', 'Early Detection', 'Risk Stratification']
     },
     {
       id: 'nri-fusion',
-      label: 'NRI Fusion Engine',
-      description: 'Advanced risk index calculation',
+      label: 'Risk Analysis',
+      description: 'Advanced analytics',
       icon: <TrendingUp className="h-5 w-5" />,
-      latency: performanceMetrics.nriLatency,
-      accuracy: 97,
       category: 'advanced',
-      conditions: ['Neurological Risk Index', 'Predictive Analytics', 'Clinical Decision Support']
-    }
+    },
   ];
 
   const getCategoryTitle = (category: string) => {
     switch (category) {
       case 'overview':
-        return 'System Overview';
+        return 'Overview';
       case 'individual':
-        return 'Individual Assessments';
+        return 'Tests';
       case 'advanced':
-        return 'Advanced Analytics';
+        return 'Advanced';
       default:
         return '';
     }
@@ -148,76 +129,39 @@ export default function DashboardSidebar({
 
   const renderNavigationItem = (item: NavigationItem) => {
     const isActive = activeAssessment === item.id;
-    
+
     return (
       <motion.button
         key={item.id}
         onClick={() => onAssessmentChange(item.id)}
-        className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${
-          isActive 
-            ? 'bg-blue-50 border-blue-200 shadow-sm' 
-            : 'hover:bg-slate-50 border-transparent'
+        className={`w-full rounded-lg p-4 text-left transition-all duration-200 ${
+          isActive
+            ? 'border-blue-200 bg-blue-50 shadow-sm'
+            : 'border-transparent hover:bg-slate-50'
         } border`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-start space-x-3">
-          <div className={`p-2 rounded-lg ${
-            isActive 
-              ? 'bg-blue-100 text-blue-600' 
-              : 'bg-slate-100 text-slate-600'
-          }`}>
+          <div
+            className={`rounded-lg p-2 ${
+              isActive
+                ? 'bg-blue-100 text-blue-600'
+                : 'bg-slate-100 text-slate-600'
+            }`}
+          >
             {item.icon}
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className={`font-medium text-sm ${
+
+          <div className="min-w-0 flex-1">
+            <h3
+              className={`text-sm font-medium ${
                 isActive ? 'text-blue-900' : 'text-slate-900'
-              }`}>
-                {item.label}
-              </h3>
-              {item.latency && (
-                <span className={`text-xs font-medium ${getLatencyColor(item.latency)}`}>
-                  {item.latency}ms
-                </span>
-              )}
-            </div>
-            
-            <p className="text-xs text-slate-600 mb-2 line-clamp-2">
-              {item.description}
-            </p>
-            
-            {item.accuracy && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Accuracy</span>
-                <span className="font-medium text-green-600">{item.accuracy}%</span>
-              </div>
-            )}
-            
-            {item.conditions && (
-              <div className="mt-2">
-                <div className="flex items-center space-x-1 mb-1">
-                  <Info className="h-3 w-3 text-slate-400" />
-                  <span className="text-xs text-slate-500">Screens for:</span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {item.conditions.slice(0, 2).map((condition, index) => (
-                    <span 
-                      key={index}
-                      className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full"
-                    >
-                      {condition}
-                    </span>
-                  ))}
-                  {item.conditions.length > 2 && (
-                    <span className="text-xs text-slate-400">
-                      +{item.conditions.length - 2} more
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
+              }`}
+            >
+              {item.label}
+            </h3>
+            <p className="text-xs text-slate-600">{item.description}</p>
           </div>
         </div>
       </motion.button>
@@ -225,75 +169,29 @@ export default function DashboardSidebar({
   };
 
   return (
-    <aside className="w-80 bg-white border-r border-slate-200 h-screen overflow-y-auto">
+    <aside className="h-screen w-64 overflow-y-auto border-r border-slate-200 bg-white">
       <div className="p-6">
-        {/* System Status */}
-        <div className="mb-6">
-          <div className={`p-4 rounded-lg border ${
-            systemStatus === 'healthy' 
-              ? 'bg-green-50 border-green-200' 
-              : systemStatus === 'warning'
-              ? 'bg-yellow-50 border-yellow-200'
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <div className="flex items-center space-x-2 mb-2">
-              {systemStatus === 'healthy' && <CheckCircle className="h-4 w-4 text-green-600" />}
-              {systemStatus !== 'healthy' && <AlertTriangle className="h-4 w-4 text-yellow-600" />}
-              <span className={`text-sm font-medium ${
-                systemStatus === 'healthy' ? 'text-green-800' : 'text-yellow-800'
-              }`}>
-                System {systemStatus === 'healthy' ? 'Healthy' : 'Status'}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <span className="text-slate-600">ML Models:</span>
-                <span className="ml-1 font-medium text-green-600">4/4 Active</span>
-              </div>
-              <div>
-                <span className="text-slate-600">Avg Latency:</span>
-                <span className="ml-1 font-medium text-blue-600">
-                  {((performanceMetrics.speechLatency + performanceMetrics.motorLatency + performanceMetrics.cognitiveLatency + performanceMetrics.nriLatency) / 4).toFixed(1)}ms
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Clean Header */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-slate-900">NeuroLens</h2>
+          <p className="text-sm text-slate-600">Assessment Platform</p>
         </div>
 
         {/* Navigation */}
         <nav className="space-y-6">
-          {['overview', 'individual', 'advanced'].map(category => (
+          {['overview', 'individual', 'advanced'].map((category) => (
             <div key={category}>
-              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 {getCategoryTitle(category)}
               </h2>
               <div className="space-y-2">
                 {navigationItems
-                  .filter(item => item.category === category)
+                  .filter((item) => item.category === category)
                   .map(renderNavigationItem)}
               </div>
             </div>
           ))}
         </nav>
-
-        {/* Performance Summary */}
-        <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-          <h3 className="text-sm font-medium text-slate-900 mb-3">Performance Summary</h3>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Overall Accuracy:</span>
-              <span className="font-medium text-green-600">{performanceMetrics.overallAccuracy}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Fastest Model:</span>
-              <span className="font-medium text-blue-600">NRI ({performanceMetrics.nriLatency}ms)</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Real-time Ready:</span>
-              <span className="font-medium text-green-600">Yes</span>
-            </div>
-          </div>
-        </div>
       </div>
     </aside>
   );

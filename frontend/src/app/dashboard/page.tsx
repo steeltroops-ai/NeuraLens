@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  Mic, 
-  Eye, 
-  Hand, 
+import {
+  Brain,
+  Mic,
+  Eye,
+  Hand,
   Zap,
   Activity,
   Shield,
@@ -14,7 +14,7 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
 } from 'lucide-react';
 
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -26,7 +26,14 @@ import MultiModalAssessment from '@/components/dashboard/MultiModalAssessment';
 import NRIFusionDashboard from '@/components/dashboard/NRIFusionDashboard';
 import PerformanceMetrics from '@/components/dashboard/PerformanceMetrics';
 
-export type AssessmentType = 'overview' | 'speech' | 'retinal' | 'motor' | 'cognitive' | 'multimodal' | 'nri-fusion';
+export type AssessmentType =
+  | 'overview'
+  | 'speech'
+  | 'retinal'
+  | 'motor'
+  | 'cognitive'
+  | 'multimodal'
+  | 'nri-fusion';
 
 interface DashboardState {
   activeAssessment: AssessmentType;
@@ -40,7 +47,7 @@ export default function Dashboard() {
     activeAssessment: 'overview',
     isProcessing: false,
     lastUpdate: null,
-    systemStatus: 'healthy'
+    systemStatus: 'healthy',
   });
 
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -49,7 +56,7 @@ export default function Dashboard() {
     motorLatency: 42.3,
     cognitiveLatency: 38.1,
     nriLatency: 0.3,
-    overallAccuracy: 95.2
+    overallAccuracy: 95.2,
   });
 
   // System health check
@@ -59,12 +66,16 @@ export default function Dashboard() {
         // Check backend health
         const response = await fetch('/api/health');
         if (response.ok) {
-          setDashboardState(prev => ({ ...prev, systemStatus: 'healthy', lastUpdate: new Date() }));
+          setDashboardState((prev) => ({
+            ...prev,
+            systemStatus: 'healthy',
+            lastUpdate: new Date(),
+          }));
         } else {
-          setDashboardState(prev => ({ ...prev, systemStatus: 'warning' }));
+          setDashboardState((prev) => ({ ...prev, systemStatus: 'warning' }));
         }
       } catch (error) {
-        setDashboardState(prev => ({ ...prev, systemStatus: 'error' }));
+        setDashboardState((prev) => ({ ...prev, systemStatus: 'error' }));
       }
     };
 
@@ -75,48 +86,78 @@ export default function Dashboard() {
   }, []);
 
   const handleAssessmentChange = (assessment: AssessmentType) => {
-    setDashboardState(prev => ({ ...prev, activeAssessment: assessment }));
+    setDashboardState((prev) => ({ ...prev, activeAssessment: assessment }));
   };
 
   const handleProcessingStateChange = (isProcessing: boolean) => {
-    setDashboardState(prev => ({ ...prev, isProcessing }));
+    setDashboardState((prev) => ({ ...prev, isProcessing }));
   };
 
   const renderMainContent = () => {
     switch (dashboardState.activeAssessment) {
       case 'speech':
-        return <SpeechAssessment onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <SpeechAssessment onProcessingChange={handleProcessingStateChange} />
+        );
       case 'retinal':
-        return <RetinalAssessment onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <RetinalAssessment onProcessingChange={handleProcessingStateChange} />
+        );
       case 'motor':
-        return <MotorAssessment onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <MotorAssessment onProcessingChange={handleProcessingStateChange} />
+        );
       case 'cognitive':
-        return <CognitiveAssessment onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <CognitiveAssessment
+            onProcessingChange={handleProcessingStateChange}
+          />
+        );
       case 'multimodal':
-        return <MultiModalAssessment onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <MultiModalAssessment
+            onProcessingChange={handleProcessingStateChange}
+          />
+        );
       case 'nri-fusion':
-        return <NRIFusionDashboard onProcessingChange={handleProcessingStateChange} />;
+        return (
+          <NRIFusionDashboard
+            onProcessingChange={handleProcessingStateChange}
+          />
+        );
       default:
-        return <DashboardOverview metrics={performanceMetrics} systemStatus={dashboardState.systemStatus} />;
+        return (
+          <DashboardOverview
+            metrics={performanceMetrics}
+            systemStatus={dashboardState.systemStatus}
+          />
+        );
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-40">
-        <div className="px-6 py-4">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
+        <div className="px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                <Brain className="h-6 w-6 text-white" />
+              <div className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-2">
+                <Brain className="h-5 w-5 text-white sm:h-6 sm:w-6" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">NeuroLens Dashboard</h1>
-                <p className="text-sm text-slate-600">Real-time Neurological Assessment Platform</p>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold text-slate-900 sm:text-xl">
+                  NeuroLens Dashboard
+                </h1>
+                <p className="text-xs text-slate-600 sm:text-sm">
+                  Real-time Neurological Assessment Platform
+                </p>
+              </div>
+              <div className="sm:hidden">
+                <h1 className="text-lg font-bold text-slate-900">NeuroLens</h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* System Status */}
               <div className="flex items-center space-x-2">
@@ -143,31 +184,57 @@ export default function Dashboard() {
               {/* Processing Indicator */}
               {dashboardState.isProcessing && (
                 <div className="flex items-center space-x-2 text-blue-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
                   <span className="text-sm font-medium">Processing...</span>
                 </div>
               )}
 
               {/* Performance Badge */}
-              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                {performanceMetrics.overallAccuracy}% Accuracy
+              <div className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 sm:px-3 sm:text-sm">
+                <span className="hidden sm:inline">
+                  {performanceMetrics.overallAccuracy}% Accuracy
+                </span>
+                <span className="sm:hidden">
+                  {performanceMetrics.overallAccuracy}%
+                </span>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <DashboardSidebar
-          activeAssessment={dashboardState.activeAssessment}
-          onAssessmentChange={handleAssessmentChange}
-          systemStatus={dashboardState.systemStatus}
-          performanceMetrics={performanceMetrics}
-        />
+      <div className="flex flex-col lg:flex-row">
+        {/* Sidebar - Hidden on mobile, shown as overlay when needed */}
+        <div className="hidden lg:block">
+          <DashboardSidebar
+            activeAssessment={dashboardState.activeAssessment}
+            onAssessmentChange={handleAssessmentChange}
+            systemStatus={dashboardState.systemStatus}
+            performanceMetrics={performanceMetrics}
+          />
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="border-b border-slate-200 bg-white p-4 lg:hidden">
+          <select
+            value={dashboardState.activeAssessment}
+            onChange={(e) =>
+              handleAssessmentChange(e.target.value as AssessmentType)
+            }
+            className="w-full rounded-lg border border-slate-200 bg-white p-3 font-medium text-slate-900"
+          >
+            <option value="overview">Dashboard Overview</option>
+            <option value="speech">Speech Analysis</option>
+            <option value="retinal">Retinal Imaging</option>
+            <option value="motor">Motor Function</option>
+            <option value="cognitive">Cognitive Tests</option>
+            <option value="multimodal">Multi-Modal Assessment</option>
+            <option value="nri-fusion">NRI Fusion Engine</option>
+          </select>
+        </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 sm:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={dashboardState.activeAssessment}
@@ -187,24 +254,25 @@ export default function Dashboard() {
 }
 
 // Dashboard Overview Component
-function DashboardOverview({ 
-  metrics, 
-  systemStatus 
-}: { 
-  metrics: any; 
+function DashboardOverview({
+  metrics,
+  systemStatus,
+}: {
+  metrics: any;
   systemStatus: 'healthy' | 'warning' | 'error';
 }) {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            <h2 className="mb-2 text-2xl font-bold text-slate-900">
               Welcome to NeuroLens
             </h2>
-            <p className="text-slate-600 text-lg mb-4">
-              Advanced neurological assessment platform with real-time AI analysis
+            <p className="mb-4 text-lg text-slate-600">
+              Advanced neurological assessment platform with real-time AI
+              analysis
             </p>
             <div className="flex items-center space-x-6 text-sm text-slate-500">
               <div className="flex items-center space-x-1">
@@ -222,7 +290,9 @@ function DashboardOverview({
             </div>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold text-blue-600">{metrics.overallAccuracy}%</div>
+            <div className="text-3xl font-bold text-blue-600">
+              {metrics.overallAccuracy}%
+            </div>
             <div className="text-sm text-slate-500">Overall Accuracy</div>
           </div>
         </div>
@@ -232,7 +302,7 @@ function DashboardOverview({
       <PerformanceMetrics metrics={metrics} />
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-3">
         <QuickActionCard
           icon={<Mic className="h-6 w-6" />}
           title="Speech Assessment"
@@ -281,12 +351,12 @@ function DashboardOverview({
 }
 
 // Quick Action Card Component
-function QuickActionCard({ 
-  icon, 
-  title, 
-  description, 
-  latency, 
-  color 
+function QuickActionCard({
+  icon,
+  title,
+  description,
+  latency,
+  color,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -300,16 +370,18 @@ function QuickActionCard({
     purple: 'from-purple-500 to-purple-600',
     indigo: 'from-indigo-500 to-indigo-600',
     yellow: 'from-yellow-500 to-yellow-600',
-    red: 'from-red-500 to-red-600'
+    red: 'from-red-500 to-red-600',
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow cursor-pointer">
-      <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${colorClasses[color as keyof typeof colorClasses]} text-white mb-4`}>
+    <div className="cursor-pointer rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+      <div
+        className={`inline-flex rounded-lg bg-gradient-to-r p-3 ${colorClasses[color as keyof typeof colorClasses]} mb-4 text-white`}
+      >
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
-      <p className="text-slate-600 text-sm mb-3">{description}</p>
+      <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
+      <p className="mb-3 text-sm text-slate-600">{description}</p>
       <div className="flex items-center justify-between text-xs">
         <span className="text-slate-500">Processing Time</span>
         <span className="font-medium text-green-600">{latency}ms</span>
