@@ -77,7 +77,7 @@ const nextConfig = {
 
   // Experimental features
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // Disabled to fix critters module error
     optimizePackageImports: ['lucide-react', 'recharts'],
   },
 

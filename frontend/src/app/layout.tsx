@@ -10,19 +10,19 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'NeuroLens-X | Neurological Risk Assessment',
+    default: 'NeuroLens-X | Brain Health Screening',
     template: '%s | NeuroLens-X',
   },
   description:
-    'Multi-modal neurological risk assessment platform for early detection of neurological disorders through AI-powered speech, retinal, and risk analysis.',
+    'AI-powered brain health screening platform for early detection of neurological conditions through voice evaluation, eye health scans, and health questionnaires.',
   keywords: [
-    'neurology',
-    'neurological assessment',
+    'brain health',
+    'neurological screening',
     'early detection',
     'AI healthcare',
-    'speech analysis',
-    'retinal imaging',
-    'risk assessment',
+    'voice evaluation',
+    'eye health scan',
+    'health questionnaire',
     'dementia screening',
     "Parkinson's detection",
     'cognitive health',
@@ -221,24 +221,26 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* PWA Install Prompt */}
         <div id="pwa-install-prompt" className="pwa-install-prompt" />
 
-        {/* Service Worker Registration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
-              }
-            `,
-          }}
-        />
+        {/* Service Worker Registration - Disabled in Development */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                      })
+                      .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                      });
+                  });
+                }
+              `,
+            }}
+          />
+        )}
 
         {/* Accessibility Initialization */}
         <script
