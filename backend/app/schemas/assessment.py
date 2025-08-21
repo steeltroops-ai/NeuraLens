@@ -69,7 +69,7 @@ class RetinalAnalysisRequest(BaseAssessmentRequest):
     """Request schema for retinal analysis"""
     image_format: Optional[str] = None
     image_size: Optional[tuple] = None
-    eye: str = Field(default="unknown", regex="^(left|right|unknown)$")
+    eye: str = Field(default="unknown", pattern="^(left|right|unknown)$")
     
     @validator('eye')
     def validate_eye(cls, v):
@@ -84,8 +84,6 @@ class RetinalBiomarkers(BaseModel):
     av_ratio: float = Field(gt=0.0, description="Arteriovenous ratio")
     cup_disc_ratio: float = Field(ge=0.0, le=1.0, description="Cup-to-disc ratio")
     vessel_density: float = Field(ge=0.0, le=1.0, description="Vessel density")
-    hemorrhage_count: int = Field(ge=0, description="Number of hemorrhages detected")
-    exudate_area: float = Field(ge=0.0, description="Total exudate area")
 
 
 class RetinalAnalysisResponse(BaseAssessmentResponse):
@@ -101,19 +99,20 @@ class RetinalAnalysisResponse(BaseAssessmentResponse):
 # Motor Assessment Schemas
 class MotorAssessmentRequest(BaseAssessmentRequest):
     """Request schema for motor assessment"""
-    assessment_type: str = Field(regex="^(finger_tapping|hand_movement|tremor|gait)$")
+    assessment_type: str = Field(pattern="^(finger_tapping|hand_movement|tremor|gait)$")
+    sensor_data: Dict[str, Any] = Field(description="Sensor data from accelerometer and gyroscope")
     duration: Optional[float] = None
     device_info: Optional[Dict[str, Any]] = None
 
 
 class MotorBiomarkers(BaseModel):
     """Motor biomarker measurements"""
-    movement_speed: float = Field(ge=0.0, description="Movement speed index")
-    rhythm_stability: float = Field(ge=0.0, le=1.0, description="Rhythm stability")
+    movement_frequency: float = Field(ge=0.0, description="Movement frequency (Hz)")
     amplitude_variation: float = Field(ge=0.0, le=1.0, description="Amplitude variation")
-    tremor_amplitude: float = Field(ge=0.0, description="Tremor amplitude")
-    tremor_frequency: float = Field(ge=0.0, description="Tremor frequency (Hz)")
-    coordination_score: float = Field(ge=0.0, le=1.0, description="Motor coordination")
+    coordination_index: float = Field(ge=0.0, le=1.0, description="Motor coordination index")
+    tremor_severity: float = Field(ge=0.0, le=1.0, description="Tremor severity")
+    fatigue_index: float = Field(ge=0.0, le=1.0, description="Motor fatigue index")
+    asymmetry_score: float = Field(ge=0.0, le=1.0, description="Movement asymmetry")
 
 
 class MotorAssessmentResponse(BaseAssessmentResponse):
@@ -121,7 +120,7 @@ class MotorAssessmentResponse(BaseAssessmentResponse):
     biomarkers: MotorBiomarkers
     risk_score: float = Field(ge=0.0, le=1.0)
     assessment_type: str
-    movement_quality: str = Field(regex="^(excellent|good|fair|poor)$")
+    movement_quality: str = Field(pattern="^(excellent|good|fair|poor)$")
     recommendations: List[str] = []
 
 
@@ -129,7 +128,8 @@ class MotorAssessmentResponse(BaseAssessmentResponse):
 class CognitiveAssessmentRequest(BaseAssessmentRequest):
     """Request schema for cognitive assessment"""
     test_battery: List[str] = ["memory", "attention", "executive", "language"]
-    difficulty_level: str = Field(default="standard", regex="^(easy|standard|hard)$")
+    test_results: Dict[str, Any] = Field(description="Test results for each cognitive domain")
+    difficulty_level: str = Field(default="standard", pattern="^(easy|standard|hard)$")
 
 
 class CognitiveBiomarkers(BaseModel):
@@ -138,8 +138,8 @@ class CognitiveBiomarkers(BaseModel):
     attention_score: float = Field(ge=0.0, le=1.0, description="Attention performance")
     executive_score: float = Field(ge=0.0, le=1.0, description="Executive function")
     language_score: float = Field(ge=0.0, le=1.0, description="Language abilities")
-    processing_speed: float = Field(ge=0.0, description="Processing speed index")
-    reaction_time: float = Field(gt=0.0, description="Average reaction time (ms)")
+    processing_speed: float = Field(ge=0.0, le=1.0, description="Processing speed index")
+    cognitive_flexibility: float = Field(ge=0.0, le=1.0, description="Cognitive flexibility")
 
 
 class CognitiveAssessmentResponse(BaseAssessmentResponse):
@@ -156,8 +156,10 @@ class NRIFusionRequest(BaseModel):
     """Request schema for NRI fusion"""
     session_id: str
     modalities: List[str] = Field(min_items=1)
+    modality_scores: Dict[str, float] = Field(description="Risk scores from each modality (0.0-1.0)")
+    modality_confidences: Optional[Dict[str, float]] = Field(default=None, description="Confidence scores for each modality")
     user_profile: Optional[Dict[str, Any]] = {}
-    fusion_method: str = Field(default="bayesian", regex="^(bayesian|weighted|ensemble)$")
+    fusion_method: str = Field(default="bayesian", pattern="^(bayesian|weighted|ensemble)$")
 
 
 class ModalityContribution(BaseModel):
@@ -166,7 +168,7 @@ class ModalityContribution(BaseModel):
     risk_score: float = Field(ge=0.0, le=1.0)
     confidence: float = Field(ge=0.0, le=1.0)
     weight: float = Field(ge=0.0, le=1.0)
-    biomarker_count: int = Field(ge=0)
+    contribution: float = Field(ge=0.0, le=1.0, description="Relative contribution to final NRI")
 
 
 class NRIFusionResponse(BaseModel):
@@ -174,7 +176,7 @@ class NRIFusionResponse(BaseModel):
     session_id: str
     nri_score: float = Field(ge=0.0, le=100.0, description="Neurological Risk Index (0-100)")
     confidence: float = Field(ge=0.0, le=1.0)
-    risk_category: str = Field(regex="^(low|moderate|high|very_high)$")
+    risk_category: str = Field(pattern="^(low|moderate|high|very_high)$")
     modality_contributions: List[ModalityContribution]
     consistency_score: float = Field(ge=0.0, le=1.0, description="Cross-modal consistency")
     uncertainty: float = Field(ge=0.0, le=1.0, description="Prediction uncertainty")
@@ -188,7 +190,7 @@ class NRIFusionResponse(BaseModel):
 class RiskFactorData(BaseModel):
     """Traditional risk factor data"""
     age: int = Field(ge=18, le=120)
-    sex: str = Field(regex="^(male|female|other)$")
+    sex: str = Field(pattern="^(male|female|other)$")
     education_years: int = Field(ge=0, le=30)
     family_history: Dict[str, bool] = {}
     medical_history: Dict[str, bool] = {}

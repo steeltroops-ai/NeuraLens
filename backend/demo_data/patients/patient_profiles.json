@@ -1,0 +1,264 @@
+[
+  {
+    "patient_id": "DEMO_001",
+    "demographics": {
+      "age": 80,
+      "gender": "male",
+      "education_years": 10,
+      "handedness": "left"
+    },
+    "medical_history": {
+      "conditions": [],
+      "medications": [],
+      "family_history": true
+    },
+    "risk_profile": {
+      "target_risk_level": "low",
+      "base_risk_score": 0.2097964284112288,
+      "assessment_date": "2025-08-05T01:49:49.984497"
+    }
+  },
+  {
+    "patient_id": "DEMO_002",
+    "demographics": {
+      "age": 77,
+      "gender": "female",
+      "education_years": 9,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [],
+      "medications": [],
+      "family_history": true
+    },
+    "risk_profile": {
+      "target_risk_level": "moderate",
+      "base_risk_score": 0.37614015131402356,
+      "assessment_date": "2025-07-27T01:49:49.985543"
+    }
+  },
+  {
+    "patient_id": "DEMO_003",
+    "demographics": {
+      "age": 70,
+      "gender": "male",
+      "education_years": 18,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "stroke_history"
+      ],
+      "medications": [
+        "clopidogrel",
+        "aspirin"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "high",
+      "base_risk_score": 0.5548135180356822,
+      "assessment_date": "2025-08-19T01:49:49.985782"
+    }
+  },
+  {
+    "patient_id": "DEMO_004",
+    "demographics": {
+      "age": 66,
+      "gender": "female",
+      "education_years": 15,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "multiple_strokes",
+        "parkinson_moderate"
+      ],
+      "medications": [
+        "pramipexole",
+        "carbidopa_levodopa"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "very_high",
+      "base_risk_score": 0.7986693693122535,
+      "assessment_date": "2025-08-09T01:49:49.985984"
+    }
+  },
+  {
+    "patient_id": "DEMO_005",
+    "demographics": {
+      "age": 48,
+      "gender": "female",
+      "education_years": 18,
+      "handedness": "left"
+    },
+    "medical_history": {
+      "conditions": [],
+      "medications": [],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "low",
+      "base_risk_score": 0.22220809903745592,
+      "assessment_date": "2025-08-14T01:49:49.986153"
+    }
+  },
+  {
+    "patient_id": "DEMO_006",
+    "demographics": {
+      "age": 71,
+      "gender": "female",
+      "education_years": 14,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "diabetes"
+      ],
+      "medications": [
+        "metformin",
+        "insulin"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "moderate",
+      "base_risk_score": 0.28168188935098487,
+      "assessment_date": "2025-07-30T01:49:49.986580"
+    }
+  },
+  {
+    "patient_id": "DEMO_007",
+    "demographics": {
+      "age": 51,
+      "gender": "female",
+      "education_years": 11,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "parkinson_early"
+      ],
+      "medications": [
+        "carbidopa_levodopa"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "high",
+      "base_risk_score": 0.7112080326237722,
+      "assessment_date": "2025-08-17T01:49:49.986863"
+    }
+  },
+  {
+    "patient_id": "DEMO_008",
+    "demographics": {
+      "age": 83,
+      "gender": "male",
+      "education_years": 19,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "parkinson_moderate"
+      ],
+      "medications": [
+        "pramipexole",
+        "carbidopa_levodopa"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "very_high",
+      "base_risk_score": 0.8396411444760836,
+      "assessment_date": "2025-07-29T01:49:49.987077"
+    }
+  },
+  {
+    "patient_id": "DEMO_009",
+    "demographics": {
+      "age": 51,
+      "gender": "female",
+      "education_years": 8,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [],
+      "medications": [],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "low",
+      "base_risk_score": 0.1625779420367654,
+      "assessment_date": "2025-08-17T01:49:49.987191"
+    }
+  },
+  {
+    "patient_id": "DEMO_010",
+    "demographics": {
+      "age": 64,
+      "gender": "male",
+      "education_years": 16,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [],
+      "medications": [],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "moderate",
+      "base_risk_score": 0.2746890610066543,
+      "assessment_date": "2025-08-14T01:49:49.987362"
+    }
+  },
+  {
+    "patient_id": "DEMO_011",
+    "demographics": {
+      "age": 51,
+      "gender": "male",
+      "education_years": 13,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "alzheimer_mci"
+      ],
+      "medications": [
+        "donepezil"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "high",
+      "base_risk_score": 0.5290870706802353,
+      "assessment_date": "2025-08-13T01:49:49.987684"
+    }
+  },
+  {
+    "patient_id": "DEMO_012",
+    "demographics": {
+      "age": 69,
+      "gender": "male",
+      "education_years": 12,
+      "handedness": "right"
+    },
+    "medical_history": {
+      "conditions": [
+        "parkinson_moderate"
+      ],
+      "medications": [
+        "pramipexole",
+        "carbidopa_levodopa"
+      ],
+      "family_history": false
+    },
+    "risk_profile": {
+      "target_risk_level": "very_high",
+      "base_risk_score": 0.8526713786806515,
+      "assessment_date": "2025-08-10T01:49:49.987924"
+    }
+  }
+]

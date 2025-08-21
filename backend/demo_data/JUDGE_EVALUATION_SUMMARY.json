@@ -1,0 +1,61 @@
+{
+  "dataset_info": {
+    "generation_date": "2025-08-22T01:49:51.697584",
+    "total_patients": 12,
+    "modalities_included": [
+      "speech"
+    ],
+    "purpose": "NeuraVia Hacks 2025 Judge Evaluation"
+  },
+  "patient_distribution": {
+    "low": 3,
+    "moderate": 3,
+    "high": 3,
+    "very_high": 3
+  },
+  "performance_metrics": {
+    "risk_score_by_level": {
+      "low": {
+        "mean": 0.26067771880853385,
+        "std": 0.0038619630061559286,
+        "count": 3
+      },
+      "moderate": {
+        "mean": 0.25067454531163164,
+        "std": 0.005405107448428793,
+        "count": 3
+      },
+      "high": {
+        "mean": 0.2526287677598272,
+        "std": 0.0045870161827564265,
+        "count": 3
+      },
+      "very_high": {
+        "mean": 0.26036564034711124,
+        "std": 0.0064349239578072705,
+        "count": 3
+      }
+    },
+    "overall_statistics": {
+      "mean_risk_score": 0.256086668056776,
+      "risk_score_range": [
+        0.2441587387897709,
+        0.2668060460429243
+      ]
+    }
+  },
+  "usage_instructions": {
+    "for_judges": [
+      "Each patient has a realistic profile with medical history",
+      "Audio files demonstrate different levels of neurological risk",
+      "Analysis results show ML model performance across risk levels",
+      "Use patient DEMO_001 (low risk) and DEMO_003 (high risk) for quick demo"
+    ],
+    "quick_demo_patients": [
+      "DEMO_001",
+      "DEMO_003",
+      "DEMO_006",
+      "DEMO_009"
+    ]
+  }
+}

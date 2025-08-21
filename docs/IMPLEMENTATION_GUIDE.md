@@ -4,17 +4,16 @@
 
 ### **Current vs Documented Architecture**
 
-| Component                 | Documented      | Actual Status      | Action Required                 |
-| ------------------------- | --------------- | ------------------ | ------------------------------- |
-| **Frontend Components**   | ✅ Complete     | ⚠️ Partial         | Connect to working backend APIs |
-| **Backend API Endpoints** | ✅ 6 endpoints  | ❌ Only 1 exists   | Implement 5 missing endpoints   |
-| **ML Model Pipeline**     | ✅ 4 modalities | ❌ Interface only  | Implement working ML inference  |
-| **Database Models**       | ✅ Complete     | ⚠️ Uncertain       | Verify and complete models      |
-| **PWA Features**          | ✅ Documented   | ❌ Not implemented | Implement service worker        |
-| **Demo Data**             | ✅ Planned      | ❌ Missing         | Generate synthetic datasets     |
+| Component | Documented | Actual Status | Action Required |
+|-----------|------------|---------------|-----------------|
+| **Frontend Components** | ✅ Complete | ⚠️ Partial | Connect to working backend APIs |
+| **Backend API Endpoints** | ✅ 6 endpoints | ❌ Only 1 exists | Implement 5 missing endpoints |
+| **ML Model Pipeline** | ✅ 4 modalities | ❌ Interface only | Implement working ML inference |
+| **Database Models** | ✅ Complete | ⚠️ Uncertain | Verify and complete models |
+| **PWA Features** | ✅ Documented | ❌ Not implemented | Implement service worker |
+| **Demo Data** | ✅ Planned | ❌ Missing | Generate synthetic datasets |
 
 ### **Critical Gap Analysis**
-
 - **Functionality Gap**: System may not work end-to-end for judges
 - **Demo Gap**: No test data available for judge evaluation
 - **Integration Gap**: Frontend-backend connection uncertain
@@ -31,26 +30,26 @@ graph TB
         UI[React/Next.js UI]
         SW[Service Worker]
     end
-
+    
     subgraph "API Gateway"
         API[FastAPI Backend]
         AUTH[Authentication]
         RATE[Rate Limiting]
     end
-
+    
     subgraph "ML Pipeline"
         SPEECH[Speech Analysis]
         RETINAL[Retinal Classification]
         RISK[Risk Assessment]
         FUSION[NRI Fusion]
     end
-
+    
     subgraph "Data Layer"
         DB[(PostgreSQL)]
         REDIS[(Redis Cache)]
         FILES[File Storage]
     end
-
+    
     PWA --> API
     API --> SPEECH
     API --> RETINAL
@@ -68,7 +67,6 @@ graph TB
 ## 💻 **FRONTEND ARCHITECTURE**
 
 ### **Technology Stack**
-
 ```typescript
 // Core Framework
 ├── Next.js 14 (App Router)
@@ -91,7 +89,6 @@ graph TB
 ```
 
 ### **Component Architecture**
-
 ```typescript
 // Component Hierarchy
 src/
@@ -119,27 +116,26 @@ src/
 ```
 
 ### **PWA Configuration**
-
 ```typescript
 // next.config.js
-const withPWA = require("next-pwa")({
-  dest: "public",
+const withPWA = require('next-pwa')({
+  dest: 'public',
   register: true,
   skipWaiting: true,
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/api\.neurolens-x\.com\/.*/,
-      handler: "NetworkFirst",
+      handler: 'NetworkFirst',
       options: {
-        cacheName: "api-cache",
+        cacheName: 'api-cache',
         networkTimeoutSeconds: 10,
       },
     },
     {
       urlPattern: /\.(?:png|jpg|jpeg|svg)$/,
-      handler: "CacheFirst",
+      handler: 'CacheFirst',
       options: {
-        cacheName: "images",
+        cacheName: 'images',
         expiration: {
           maxEntries: 100,
           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
@@ -147,7 +143,7 @@ const withPWA = require("next-pwa")({
       },
     },
   ],
-});
+})
 ```
 
 ---
@@ -155,7 +151,6 @@ const withPWA = require("next-pwa")({
 ## 🔧 **BACKEND ARCHITECTURE**
 
 ### **Technology Stack**
-
 ```python
 # Core Framework
 ├── FastAPI (Async Web Framework)
@@ -180,7 +175,6 @@ const withPWA = require("next-pwa")({
 ```
 
 ### **API Structure**
-
 ```python
 # FastAPI Application Structure
 app/
@@ -217,7 +211,6 @@ app/
 ```
 
 ### **Database Schema**
-
 ```sql
 -- Core Tables
 CREATE TABLE users (
@@ -262,7 +255,6 @@ CREATE TABLE uploaded_files (
 ## 🧠 **ML PIPELINE ARCHITECTURE**
 
 ### **Model Pipeline Overview**
-
 ```python
 # ML Pipeline Structure
 ml_pipeline/
@@ -291,7 +283,6 @@ ml_pipeline/
 ```
 
 ### **Speech Analysis Pipeline**
-
 ```python
 # Speech Processing Architecture
 class SpeechAnalyzer:
@@ -299,20 +290,20 @@ class SpeechAnalyzer:
         self.feature_extractor = AudioFeatureExtractor()
         self.model = XGBoostClassifier()
         self.uncertainty_estimator = UncertaintyQuantifier()
-
+    
     def analyze(self, audio_file: bytes) -> SpeechResult:
         # 1. Audio preprocessing
         audio_data = self.preprocess_audio(audio_file)
-
+        
         # 2. Feature extraction
         features = self.feature_extractor.extract(audio_data)
-
+        
         # 3. Model inference
         prediction = self.model.predict_proba(features)
-
+        
         # 4. Uncertainty quantification
         confidence = self.uncertainty_estimator.estimate(features, prediction)
-
+        
         return SpeechResult(
             score=prediction[1] * 100,
             confidence_interval=confidence,
@@ -321,7 +312,6 @@ class SpeechAnalyzer:
 ```
 
 ### **Retinal Classification Pipeline**
-
 ```python
 # Retinal Processing Architecture
 class RetinalAnalyzer:
@@ -329,20 +319,20 @@ class RetinalAnalyzer:
         self.preprocessor = ImagePreprocessor()
         self.model = CNNClassifier()
         self.vessel_analyzer = VesselAnalyzer()
-
+    
     def analyze(self, image_file: bytes) -> RetinalResult:
         # 1. Image preprocessing
         image = self.preprocessor.process(image_file)
-
+        
         # 2. CNN classification
         pathology_score = self.model.predict(image)
-
+        
         # 3. Vessel analysis
         vessel_metrics = self.vessel_analyzer.analyze(image)
-
+        
         # 4. Combined scoring
         combined_score = self.combine_scores(pathology_score, vessel_metrics)
-
+        
         return RetinalResult(
             score=combined_score,
             pathology_probability=pathology_score,
@@ -351,7 +341,6 @@ class RetinalAnalyzer:
 ```
 
 ### **NRI Fusion Algorithm**
-
 ```python
 # Multi-Modal Fusion Architecture
 class NRIFusion:
@@ -363,29 +352,29 @@ class NRIFusion:
             'motor': 0.10
         }
         self.uncertainty_propagator = UncertaintyPropagator()
-
-    def calculate_nri(self,
+    
+    def calculate_nri(self, 
                      speech_result: SpeechResult,
                      retinal_result: RetinalResult,
                      risk_result: RiskResult) -> NRIResult:
-
+        
         # 1. Weighted combination
         nri_score = (
             self.weights['speech'] * speech_result.score +
             self.weights['retinal'] * retinal_result.score +
             self.weights['risk'] * risk_result.score
         )
-
+        
         # 2. Uncertainty propagation
         confidence_interval = self.uncertainty_propagator.propagate([
             speech_result.confidence_interval,
             retinal_result.confidence_interval,
             risk_result.confidence_interval
         ])
-
+        
         # 3. Risk stratification
         risk_category = self.stratify_risk(nri_score)
-
+        
         return NRIResult(
             nri_score=nri_score,
             risk_category=risk_category,
@@ -399,7 +388,6 @@ class NRIFusion:
 ## 🔒 **SECURITY ARCHITECTURE**
 
 ### **Authentication & Authorization**
-
 ```python
 # Security Configuration
 SECURITY_CONFIG = {
@@ -421,7 +409,6 @@ CORS_CONFIG = {
 ```
 
 ### **Data Privacy & Compliance**
-
 ```python
 # Privacy Configuration
 PRIVACY_CONFIG = {
@@ -447,7 +434,6 @@ UPLOAD_CONFIG = {
 ## 📊 **MONITORING & OBSERVABILITY**
 
 ### **Performance Monitoring**
-
 ```python
 # Monitoring Configuration
 MONITORING_CONFIG = {
@@ -468,7 +454,6 @@ KPI_METRICS = {
 ```
 
 ### **Logging Strategy**
-
 ```python
 # Logging Configuration
 LOGGING_CONFIG = {
@@ -485,7 +470,6 @@ LOGGING_CONFIG = {
 ## 🚀 **DEPLOYMENT ARCHITECTURE**
 
 ### **Containerization**
-
 ```dockerfile
 # Multi-stage Docker build
 FROM node:18-alpine AS frontend-builder
@@ -505,10 +489,9 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### **Infrastructure as Code**
-
 ```yaml
 # Docker Compose for local development
-version: "3.8"
+version: '3.8'
 services:
   frontend:
     build: ./frontend
@@ -516,7 +499,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-
+  
   backend:
     build: ./backend
     ports:
@@ -527,7 +510,7 @@ services:
     depends_on:
       - db
       - redis
-
+  
   db:
     image: postgres:15
     environment:
@@ -536,7 +519,7 @@ services:
       - POSTGRES_PASSWORD=pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  
   redis:
     image: redis:7-alpine
     ports:
@@ -548,4 +531,4 @@ volumes:
 
 ---
 
-_This architecture ensures scalable, secure, and maintainable development while supporting the 50-hour hackathon timeline._
+*This architecture ensures scalable, secure, and maintainable development while supporting the 50-hour hackathon timeline.*
