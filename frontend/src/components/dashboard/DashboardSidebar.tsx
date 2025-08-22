@@ -17,7 +17,7 @@ import {
   Info,
 } from 'lucide-react';
 
-import type { AssessmentType } from '@/app/dashboard/page';
+import type { AssessmentType } from '@/types/dashboard';
 
 interface DashboardSidebarProps {
   activeAssessment: AssessmentType;

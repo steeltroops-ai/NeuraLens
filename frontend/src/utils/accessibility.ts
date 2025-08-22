@@ -260,8 +260,9 @@ export class KeyboardNavigation {
     this.registerShortcut(
       'alt+h',
       () => {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/';
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.pushState(null, '', '/');
+          window.dispatchEvent(new PopStateEvent('popstate'));
         }
       },
       'Go to home page'
@@ -270,7 +271,10 @@ export class KeyboardNavigation {
     this.registerShortcut(
       'alt+a',
       () => {
-        window.location.href = '/assessment';
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.pushState(null, '', '/assessment');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
       },
       'Start assessment'
     );

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button, cn } from '@/components/ui';
 
 interface NavigationItem {
@@ -37,8 +37,28 @@ const navigationItems: NavigationItem[] = [
     ),
   },
   {
+    id: 'dashboard',
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'assessment',
-    label: 'Health Check',
+    label: 'Start Test',
     href: '/assessment',
     icon: (
       <svg
@@ -56,67 +76,6 @@ const navigationItems: NavigationItem[] = [
       </svg>
     ),
   },
-  {
-    id: 'results',
-    label: 'Results',
-    href: '/results',
-    icon: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
-      </svg>
-    ),
-    disabled: true, // Enabled after health check completion
-  },
-  {
-    id: 'about',
-    label: 'About',
-    href: '/about',
-    icon: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: 'help',
-    label: 'Help',
-    href: '/help',
-    icon: (
-      <svg
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
-  },
 ];
 
 export const Header: React.FC = () => {
@@ -124,6 +83,7 @@ export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Handle hydration
   useEffect(() => {
@@ -188,13 +148,13 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-3 rounded-lg text-gray-900 transition-colors hover:text-medical-500 focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white"
               aria-label="NeuroLens-X Home"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-medical-500 to-medical-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
                 <svg
                   className="h-5 w-5 text-white"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5 0 1.64-.8 3.09-2.03 4H9.03C7.8 12.09 7 10.64 7 9c0-2.76 2.24-5 5-5zm-2 7h4v2h-4v-2z" />
                 </svg>
               </div>
               <span className="text-xl font-bold">NeuroLens-X</span>
@@ -243,7 +203,7 @@ export const Header: React.FC = () => {
             <Button
               variant="primary"
               size="md"
-              onClick={() => (window.location.href = '/assessment')}
+              onClick={() => router.push('/assessment')}
               className="font-semibold transition-all duration-200 hover:scale-105"
             >
               Start Health Check
@@ -343,7 +303,7 @@ export const Header: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={() => (window.location.href = '/assessment')}
+                onClick={() => router.push('/assessment')}
                 className="w-full font-semibold transition-all duration-200 hover:scale-105"
               >
                 Start Health Check

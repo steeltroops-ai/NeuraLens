@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { Button, Card } from '@/components/ui';
-import { NRIScoreDisplay } from '@/components/results/NRIScoreDisplay';
-import { ClinicalRecommendations } from '@/components/results/ClinicalRecommendations';
+// Removed dependencies on deleted results components
 import type { CompleteAssessmentResult } from '@/lib/ml';
 
 interface ResultsStepProps {
@@ -50,14 +49,14 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-6">
-        <div className="mx-auto max-w-6xl space-y-12">
+    <div className="min-h-screen py-12 bg-gray-50">
+      <div className="container px-6 mx-auto">
+        <div className="max-w-6xl mx-auto space-y-12">
           {/* Apple-Style Header */}
-          <div className="animate-fade-in space-y-6 text-center">
-            <div className="shadow-success mx-auto flex h-24 w-24 items-center justify-center rounded-apple-xl bg-gradient-to-br from-success-500 to-success-600">
+          <div className="space-y-6 text-center animate-fade-in">
+            <div className="flex items-center justify-center w-24 h-24 mx-auto shadow-success rounded-apple-xl bg-gradient-to-br from-success-500 to-success-600">
               <svg
-                className="h-12 w-12 text-white"
+                className="w-12 h-12 text-white"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -67,10 +66,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
             <h1 className="text-5xl font-bold tracking-tight text-text-primary">
               Health Check Complete
             </h1>
-            <p className="mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary">
+            <p className="max-w-2xl mx-auto text-xl leading-relaxed text-text-secondary">
               Your comprehensive brain health evaluation results
             </p>
-            <div className="inline-block rounded-apple-lg border border-gray-200 bg-white px-6 py-3 shadow-sm">
+            <div className="inline-block px-6 py-3 bg-white border border-gray-200 shadow-sm rounded-apple-lg">
               <div className="text-sm text-text-secondary">
                 Completed on {results.metadata.timestamp.toLocaleDateString()}{' '}
                 at {results.metadata.timestamp.toLocaleTimeString()}
@@ -79,7 +78,24 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
 
           {/* NRI Score Display */}
-          <NRIScoreDisplay nriResult={results.nriResult} />
+          <Card className="p-6">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="text-6xl font-bold text-blue-600">
+                  {results.nriResult.nriScore}
+                </div>
+                <div className="text-lg text-slate-600">
+                  Neurological Risk Index
+                </div>
+              </div>
+              <div className="text-sm text-slate-500">
+                Risk Category:{' '}
+                <span className="font-medium">
+                  {results.nriResult.riskCategory}
+                </span>
+              </div>
+            </div>
+          </Card>
 
           {/* Quick Summary */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -113,11 +129,21 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
 
           {/* Clinical Recommendations */}
-          <ClinicalRecommendations
-            recommendations={results.nriResult.recommendations}
-            riskCategory={results.nriResult.riskCategory}
-            modalityResults={results.modalityResults}
-          />
+          <Card className="p-6">
+            <h3 className="mb-4 text-lg font-semibold text-slate-900">
+              Clinical Recommendations
+            </h3>
+            <div className="space-y-3">
+              {results.nriResult.recommendations.map(
+                (recommendation, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 mt-1 bg-blue-600 rounded-full"></div>
+                    <p className="text-sm text-slate-700">{recommendation}</p>
+                  </div>
+                )
+              )}
+            </div>
+          </Card>
 
           {/* Action Buttons */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -128,7 +154,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
               className="w-full"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="w-5 h-5 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -150,7 +176,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
               className="w-full"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="w-5 h-5 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -172,7 +198,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
               className="w-full"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="w-5 h-5 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -194,7 +220,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
               className="w-full"
             >
               <svg
-                className="mr-2 h-5 w-5"
+                className="w-5 h-5 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -211,10 +237,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
 
           {/* Important Disclaimer */}
-          <Card className="border-amber-500/20 bg-amber-500/5 p-6">
+          <Card className="p-6 border-amber-500/20 bg-amber-500/5">
             <div className="flex items-start space-x-3">
               <svg
-                className="mt-1 h-6 w-6 flex-shrink-0 text-amber-400"
+                className="flex-shrink-0 w-6 h-6 mt-1 text-amber-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >

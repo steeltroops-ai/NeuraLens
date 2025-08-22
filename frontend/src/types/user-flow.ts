@@ -287,20 +287,7 @@ export const ROUTES: Record<RouteId, Route> = {
     component: 'ProcessingPage',
     estimatedDuration: 45,
   },
-  results: {
-    id: 'results',
-    path: '/results',
-    title: 'Assessment Results',
-    description: 'Your neurological risk assessment results',
-    component: 'ResultsPage',
-  },
-  report: {
-    id: 'report',
-    path: '/report',
-    title: 'Clinical Report',
-    description: 'Download and share your clinical report',
-    component: 'ReportPage',
-  },
+  // Results are now shown inline in assessment flow
   dashboard: {
     id: 'dashboard',
     path: '/dashboard',
@@ -309,14 +296,7 @@ export const ROUTES: Record<RouteId, Route> = {
     component: 'DashboardPage',
     protected: true,
   },
-  about: {
-    id: 'about',
-    path: '/about',
-    title: 'About NeuroLens-X',
-    description: 'Learn about our technology and clinical validation',
-    component: 'AboutPage',
-    showInNav: true,
-  },
+  // About page removed for streamlined experience
   privacy: {
     id: 'privacy',
     path: '/privacy',

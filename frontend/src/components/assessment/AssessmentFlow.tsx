@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { AssessmentLayout } from '@/components/layout';
 import { Button, Card, Progress } from '@/components/ui';
 import { WelcomeStep } from './steps/WelcomeStep';
@@ -96,6 +97,7 @@ const ASSESSMENT_STEPS: Array<{
 ];
 
 export const AssessmentFlow: React.FC = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState<AssessmentStep>('welcome');
   const [assessmentData, setAssessmentData] = useState<AssessmentData>({
     sessionId: generateSessionId(),
@@ -140,7 +142,7 @@ export const AssessmentFlow: React.FC = () => {
         'Are you sure you want to exit the assessment? Your progress will be lost.'
       )
     ) {
-      window.location.href = '/';
+      router.push('/');
     }
   }, []);
 
@@ -295,11 +297,7 @@ export const AssessmentFlow: React.FC = () => {
               setAssessmentData({ sessionId: generateSessionId() });
               setCurrentStep('welcome');
             }}
-            onExit={() => {
-              if (typeof window !== 'undefined') {
-                window.location.href = '/';
-              }
-            }}
+            onExit={() => router.push('/')}
           />
         ) : (
           <div className="p-8 text-center">
