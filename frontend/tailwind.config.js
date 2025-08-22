@@ -1,322 +1,431 @@
 /** @type {import('tailwindcss').Config} */
+
+const { fontFamily } = require('tailwindcss/defaultTheme');
+
 module.exports = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/utils/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'media', // Use media query for dark mode detection
   theme: {
     extend: {
-      // Premium OKLCH Color System - Neural Technology Palette
+      // Apple-inspired color system
       colors: {
-        // Primary Colors - Neural Deep Blue & Electric Innovation
+        // Primary Medical Blue (Apple's signature blue)
         primary: {
-          50: "oklch(97.5% 0.013 250)",
-          100: "oklch(94.2% 0.028 250)",
-          200: "oklch(87.8% 0.056 250)",
-          300: "oklch(79.1% 0.089 250)",
-          400: "oklch(68.9% 0.123 250)",
-          500: "oklch(58.2% 0.142 250)", // Electric Blue - Innovation Core
-          600: "oklch(49.8% 0.138 250)",
-          700: "oklch(42.1% 0.128 250)",
-          800: "oklch(35.2% 0.115 250)",
-          900: "oklch(28.8% 0.098 250)", // Deep Neural Blue - Trust Foundation
-          950: "oklch(19.2% 0.065 250)",
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#007AFF', // Apple's signature medical blue
+          600: '#0056CC',
+          700: '#003D99',
+          800: '#002966',
+          900: '#001A33',
+          950: '#000D1A',
         },
-        secondary: {
-          50: "oklch(97.8% 0.015 180)",
-          100: "oklch(93.2% 0.042 180)",
-          200: "oklch(86.1% 0.078 180)",
-          300: "oklch(77.8% 0.108 180)",
-          400: "oklch(68.2% 0.128 180)",
-          500: "oklch(59.1% 0.142 180)", // Teal Science - Precision
-          600: "oklch(51.2% 0.138 180)",
-          700: "oklch(44.1% 0.128 180)",
-          800: "oklch(37.8% 0.115 180)",
-          900: "oklch(32.1% 0.098 180)",
-          950: "oklch(21.8% 0.065 180)",
+
+        // Medical Blue (alias for primary)
+        medical: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#007AFF', // Apple blue
+          600: '#0056CC',
+          700: '#003D99',
+          800: '#002966',
+          900: '#001A33',
+          950: '#000D1A',
         },
-        neutral: {
-          50: "oklch(98.2% 0.002 270)",
-          100: "oklch(96.1% 0.004 270)",
-          200: "oklch(91.8% 0.008 270)",
-          300: "oklch(85.2% 0.012 270)", // Soft Gray - Neutrality
-          400: "oklch(71.8% 0.018 270)",
-          500: "oklch(58.2% 0.024 270)",
-          600: "oklch(45.8% 0.028 270)",
-          700: "oklch(38.2% 0.032 270)",
-          800: "oklch(28.8% 0.035 270)",
-          900: "oklch(18.2% 0.038 270)",
-          950: "oklch(8.8% 0.042 270)",
-        },
-        // Premium Glassmorphism Support
-        glass: {
-          light: "oklch(100% 0 0 / 0.08)",
-          medium: "oklch(100% 0 0 / 0.12)",
-          strong: "oklch(100% 0 0 / 0.18)",
-          "border-light": "oklch(100% 0 0 / 0.15)",
-          "border-medium": "oklch(100% 0 0 / 0.25)",
-          "border-strong": "oklch(100% 0 0 / 0.35)",
-        },
-        // Neural Grid System
-        neural: {
-          "grid-primary": "oklch(28.8% 0.098 250 / 0.08)",
-          "grid-secondary": "oklch(59.1% 0.142 180 / 0.06)",
-          "node-active": "oklch(58.2% 0.142 250 / 0.8)",
-          "node-inactive": "oklch(59.1% 0.142 180 / 0.4)",
-          "connection-primary": "oklch(58.2% 0.142 250 / 0.3)",
-          "connection-secondary": "oklch(59.1% 0.142 180 / 0.2)",
-          "pulse-glow": "oklch(58.2% 0.142 250 / 0.6)",
-        },
-        // Success, Warning, Error States
+
+        // Success Green (Apple Green)
         success: {
-          50: "oklch(97.1% 0.013 142)",
-          500: "oklch(64.8% 0.150 142)",
-          600: "oklch(55.4% 0.148 142)",
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#34D399',
+          500: '#34C759', // Apple green
+          600: '#059669',
+          700: '#047857',
+          800: '#065F46',
+          900: '#064E3B',
         },
+
+        // Warning Orange (Apple Orange)
         warning: {
-          50: "oklch(97.6% 0.013 83)",
-          500: "oklch(75.8% 0.108 83)",
-          600: "oklch(65.1% 0.118 83)",
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#FCD34D',
+          400: '#FBBF24',
+          500: '#FF9500', // Apple orange
+          600: '#D97706',
+          700: '#B45309',
+          800: '#92400E',
+          900: '#78350F',
         },
+
+        // Error Red (Apple Red)
         error: {
-          50: "oklch(97.2% 0.013 25)",
-          500: "oklch(62.8% 0.257 25)",
-          600: "oklch(54.3% 0.227 25)",
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          300: '#FCA5A5',
+          400: '#F87171',
+          500: '#FF3B30', // Apple red
+          600: '#DC2626',
+          700: '#B91C1C',
+          800: '#991B1B',
+          900: '#7F1D1D',
+        },
+
+        // Neural Purple (AI theme)
+        neural: {
+          50: '#FAF5FF',
+          100: '#F3E8FF',
+          200: '#E9D5FF',
+          300: '#D8B4FE',
+          400: '#C084FC',
+          500: '#AF52DE', // Apple purple
+          600: '#9333EA',
+          700: '#7C3AED',
+          800: '#6B21A8',
+          900: '#581C87',
+        },
+
+        // Apple-style neutrals
+        gray: {
+          50: '#F2F2F7', // Apple light gray
+          100: '#E5E5EA',
+          200: '#D1D1D6',
+          300: '#C7C7CC',
+          400: '#AEAEB2',
+          500: '#8E8E93',
+          600: '#636366',
+          700: '#48484A',
+          800: '#3A3A3C',
+          900: '#2C2C2E',
+          950: '#1C1C1E', // Apple dark
+        },
+
+        // Background colors
+        background: '#F2F2F7', // Apple light background
+        card: '#FFFFFF', // Pure white cards
+
+        // Text colors
+        text: {
+          primary: '#000000', // Maximum readability
+          secondary: '#3C3C43', // Apple secondary text
+          tertiary: '#8E8E93', // Apple tertiary text
         },
       },
 
-      // Typography - Inter Primary, Roboto Fallback
+      // Apple-style typography
       fontFamily: {
-        sans: ["Inter", "Roboto", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "Consolas", "monospace"],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'SF Pro Display',
+          'SF Pro Text',
+          'Inter',
+          'system-ui',
+          'sans-serif',
+        ],
+        display: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'SF Pro Display',
+          'Inter',
+          'system-ui',
+          'sans-serif',
+        ],
+        mono: ['SF Mono', 'Monaco', 'Menlo', 'JetBrains Mono', 'monospace'],
       },
 
-      // 8px Grid System
+      fontSize: {
+        xs: ['12px', { lineHeight: '16px' }], // Captions
+        sm: ['14px', { lineHeight: '20px' }], // Secondary text
+        base: ['17px', { lineHeight: '24px' }], // Body text (Apple standard)
+        lg: ['20px', { lineHeight: '28px' }], // Subheadings
+        xl: ['24px', { lineHeight: '32px' }], // Section headers
+        '2xl': ['28px', { lineHeight: '36px' }], // Page titles
+        '3xl': ['34px', { lineHeight: '40px' }], // Hero headlines
+        '4xl': ['40px', { lineHeight: '44px' }], // Large headlines
+        '5xl': ['48px', { lineHeight: '52px' }], // Display text
+        '6xl': ['60px', { lineHeight: '64px' }], // Hero display
+      },
+
+      // 8px grid spacing system
       spacing: {
-        0.5: "2px",
-        1: "4px",
-        2: "8px",
-        3: "12px",
-        4: "16px",
-        5: "20px",
-        6: "24px",
-        8: "32px",
-        10: "40px",
-        12: "48px",
-        16: "64px",
-        20: "80px",
-        24: "96px",
-        32: "128px",
+        0.5: '2px', // Micro spacing
+        1.5: '6px', // Small spacing
+        2.5: '10px', // Medium spacing
+        3.5: '14px', // Standard spacing
+        4.5: '18px', // Large spacing
+        5.5: '22px', // XL spacing
+        6.5: '26px', // XXL spacing
+        7.5: '30px', // Section spacing
+        15: '60px', // Major spacing
+        18: '72px', // Hero spacing
+        22: '88px', // Massive spacing
       },
 
-      // Glassmorphism & Elevation
-      backdropBlur: {
-        xs: "2px",
-        sm: "4px",
-        md: "8px",
-        lg: "12px",
-        xl: "16px",
-        "2xl": "24px",
-        glass: "10px", // Standard glassmorphism
-      },
-
-      boxShadow: {
-        // Premium Glass Shadows
-        "glass-sm": "0 2px 8px 0 oklch(28.8% 0.098 250 / 0.15)",
-        "glass-md": "0 8px 32px 0 oklch(28.8% 0.098 250 / 0.2)",
-        "glass-lg": "0 16px 64px 0 oklch(28.8% 0.098 250 / 0.25)",
-        "glass-xl": "0 24px 96px 0 oklch(28.8% 0.098 250 / 0.3)",
-
-        // Neural Glow Shadows
-        "neural-sm": "0 0 8px 0 oklch(58.2% 0.142 250 / 0.3)",
-        "neural-md": "0 0 16px 0 oklch(58.2% 0.142 250 / 0.4)",
-        "neural-lg": "0 0 32px 0 oklch(58.2% 0.142 250 / 0.5)",
-        "neural-xl": "0 0 64px 0 oklch(58.2% 0.142 250 / 0.6)",
-
-        // Premium Elevation System
-        "elevation-1":
-          "0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1)",
-        "elevation-2":
-          "0 4px 6px -1px oklch(0% 0 0 / 0.1), 0 2px 4px -2px oklch(0% 0 0 / 0.1)",
-        "elevation-3":
-          "0 10px 15px -3px oklch(0% 0 0 / 0.1), 0 4px 6px -4px oklch(0% 0 0 / 0.1)",
-        "elevation-4":
-          "0 20px 25px -5px oklch(0% 0 0 / 0.1), 0 8px 10px -6px oklch(0% 0 0 / 0.1)",
-        "elevation-5": "0 25px 50px -12px oklch(0% 0 0 / 0.25)",
-
-        // Legacy support
-        glass: "0 8px 32px 0 oklch(28.8% 0.098 250 / 0.2)",
-        neural: "0 4px 16px 0 oklch(28.8% 0.098 250 / 0.2)",
-      },
-
-      // Border Radius - 8px System
-      borderRadius: {
-        none: "0",
-        sm: "4px",
-        md: "8px", // Standard card radius
-        lg: "12px",
-        xl: "16px",
-        "2xl": "24px",
-        full: "9999px",
-      },
-
-      // Animation & Transitions
+      // Apple-style animations
       animation: {
-        "fade-in": "fadeIn 0.5s ease-in-out",
-        "slide-up": "slideUp 0.3s ease-out",
-        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "neural-pulse": "neuralPulse 2s ease-in-out infinite",
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        'scale-in': 'scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        'bounce-gentle': 'bounceGentle 0.6s ease-out',
+        'pulse-slow': 'pulse 3s ease-in-out infinite',
+        shimmer: 'shimmer 1.5s infinite',
+        'button-press': 'buttonPress 0.15s ease-out',
+        'card-hover': 'cardHover 0.3s ease-out',
+        'nri-reveal': 'nriReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
+        'progress-fill': 'progressFill 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+        'spin-slow': 'spin 3s linear infinite',
       },
 
       keyframes: {
         fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
         slideUp: {
-          "0%": { transform: "translateY(10px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        neuralPulse: {
-          "0%, 100%": { opacity: "0.4" },
-          "50%": { opacity: "0.8" },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.9)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        bounceGentle: {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        buttonPress: {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(0.98)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        cardHover: {
+          '0%': { transform: 'translateY(0) scale(1)' },
+          '100%': { transform: 'translateY(-4px) scale(1.02)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        nriReveal: {
+          '0%': { opacity: '0', transform: 'scale(0.8) translateY(20px)' },
+          '50%': { opacity: '0.7', transform: 'scale(1.05) translateY(-5px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+        },
+        progressFill: {
+          '0%': { width: '0%' },
+          '100%': { width: 'var(--progress-width, 0%)' },
         },
       },
 
-      // Responsive Breakpoints
-      screens: {
-        xs: "320px",
-        sm: "640px",
-        md: "768px",
-        lg: "1024px",
-        xl: "1280px",
-        "2xl": "1536px",
+      // Apple-style easing functions
+      transitionTimingFunction: {
+        apple: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+        'out-quint': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'in-out-cubic': 'cubic-bezier(0.65, 0, 0.35, 1)',
+        spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
 
-      // Accessibility & Touch Targets
+      // Apple-style shadows
+      boxShadow: {
+        apple: '0 2px 16px rgba(0, 0, 0, 0.08)',
+        'apple-hover': '0 8px 32px rgba(0, 0, 0, 0.12)',
+        'apple-pressed': '0 1px 4px rgba(0, 0, 0, 0.16)',
+        medical: '0 4px 14px rgba(0, 122, 255, 0.25)',
+        'medical-hover': '0 6px 20px rgba(0, 122, 255, 0.35)',
+        glass: '0 8px 32px rgba(31, 38, 135, 0.37)',
+        nri: '0 10px 40px rgba(0, 122, 255, 0.3)',
+      },
+
+      // Apple-style border radius
+      borderRadius: {
+        apple: '12px', // Standard Apple radius
+        'apple-lg': '16px', // Large Apple radius
+        'apple-xl': '20px', // Extra large Apple radius
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+
+      // Backdrop blur
+      backdropBlur: {
+        xs: '2px',
+        apple: '16px', // Apple glass effect
+      },
+
+      // Z-index scale
+      zIndex: {
+        60: '60',
+        70: '70',
+        80: '80',
+        90: '90',
+        100: '100',
+      },
+
+      // Touch target sizes (Apple HIG)
       minHeight: {
-        touch: "44px", // Minimum touch target
+        touch: '44px', // Minimum touch target
+        'touch-lg': '48px', // Large touch target
       },
+
       minWidth: {
-        touch: "44px", // Minimum touch target
+        touch: '44px', // Minimum touch target
+        'touch-lg': '48px', // Large touch target
+      },
+
+      // Apple-style screens (breakpoints)
+      screens: {
+        xs: '375px', // iPhone SE
+        sm: '640px', // Small tablets
+        md: '768px', // iPad
+        lg: '1024px', // iPad Pro / Small laptops
+        xl: '1280px', // Laptops
+        '2xl': '1536px', // Large screens
+        '3xl': '1920px', // Ultra-wide
+      },
+
+      // Container with Apple-style padding
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '16px', // Apple standard
+          sm: '20px',
+          md: '24px',
+          lg: '32px',
+          xl: '40px',
+          '2xl': '48px',
+        },
       },
     },
   },
   plugins: [
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
-    // Premium Design System Plugin
-    function ({ addUtilities }) {
-      const premiumUtilities = {
-        // Premium Glassmorphism
-        ".glass-light": {
-          background: "oklch(100% 0 0 / 0.08)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          border: "1px solid oklch(100% 0 0 / 0.15)",
-          boxShadow: "0 2px 8px 0 oklch(28.8% 0.098 250 / 0.15)",
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        },
-        ".glass-medium": {
-          background: "oklch(100% 0 0 / 0.12)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid oklch(100% 0 0 / 0.25)",
-          boxShadow: "0 8px 32px 0 oklch(28.8% 0.098 250 / 0.2)",
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        },
-        ".glass-strong": {
-          background: "oklch(100% 0 0 / 0.18)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid oklch(100% 0 0 / 0.35)",
-          boxShadow: "0 16px 64px 0 oklch(28.8% 0.098 250 / 0.25)",
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        },
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
 
-        // Neural Grid System
-        ".neural-grid-primary": {
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, oklch(28.8% 0.098 250 / 0.08) 1px, transparent 0)",
-          backgroundSize: "24px 24px",
-          backgroundAttachment: "fixed",
+    // Apple-style component utilities
+    function ({ addUtilities, addComponents, theme }) {
+      // Apple-style focus utilities
+      addUtilities({
+        '.apple-focus': {
+          '&:focus-visible': {
+            outline: '3px solid #007AFF',
+            outlineOffset: '2px',
+            boxShadow: '0 0 0 6px rgba(0, 122, 255, 0.2)',
+          },
         },
-        ".neural-grid-secondary": {
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, oklch(59.1% 0.142 180 / 0.06) 1px, transparent 0)",
-          backgroundSize: "32px 32px",
-          backgroundAttachment: "fixed",
+        '.glass-morphism': {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)',
         },
-        ".neural-grid-animated": {
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, oklch(28.8% 0.098 250 / 0.08) 1px, transparent 0), radial-gradient(circle at 1px 1px, oklch(59.1% 0.142 180 / 0.06) 1px, transparent 0)",
-          backgroundSize: "24px 24px, 48px 48px",
-          backgroundAttachment: "fixed",
-          animation: "neural-grid-pulse 8s ease-in-out infinite",
+        '.text-gradient-medical': {
+          background: 'linear-gradient(135deg, #007AFF, #0056CC)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         },
+        '.text-gradient-success': {
+          background: 'linear-gradient(135deg, #34C759, #059669)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        },
+      });
 
-        // Premium Interactive Effects
-        ".interactive-premium": {
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          transformOrigin: "center",
-          willChange: "transform, box-shadow, background",
+      // Apple-style components
+      addComponents({
+        '.btn-apple': {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: '600',
+          borderRadius: '12px',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'all 0.15s ease-out',
+          textDecoration: 'none',
+          whiteSpace: 'nowrap',
+          userSelect: 'none',
+          position: 'relative',
+          minHeight: '44px',
+          minWidth: '44px',
+          fontSize: '17px',
+          '&:focus-visible': {
+            outline: '3px solid #007AFF',
+            outlineOffset: '2px',
+          },
+          '&:disabled': {
+            opacity: '0.5',
+            cursor: 'not-allowed',
+            pointerEvents: 'none',
+          },
+          '&:active': {
+            transform: 'scale(0.98)',
+          },
         },
-        ".interactive-premium:hover": {
-          transform: "translateY(-2px) scale(1.02)",
-          boxShadow: "0 16px 64px 0 oklch(28.8% 0.098 250 / 0.25)",
+        '.btn-primary': {
+          background: 'linear-gradient(135deg, #007AFF 0%, #0056CC 100%)',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(0, 122, 255, 0.3)',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(0, 122, 255, 0.4)',
+          },
         },
-        ".interactive-premium:active": {
-          transform: "translateY(0) scale(0.98)",
-          transitionDuration: "100ms",
+        '.btn-secondary': {
+          backgroundColor: '#F2F2F7',
+          color: '#000000',
+          border: '1px solid #C6C6C8',
+          '&:hover': {
+            backgroundColor: '#E5E5EA',
+            transform: 'translateY(-1px)',
+          },
         },
-
-        // Text Gradients
-        ".text-gradient-primary": {
-          background:
-            "linear-gradient(135deg, oklch(49.8% 0.138 250) 0%, oklch(58.2% 0.142 250) 50%, oklch(59.1% 0.142 180) 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          backgroundSize: "200% 200%",
-          animation: "gradient-shift 4s ease-in-out infinite",
+        '.card-apple': {
+          backgroundColor: 'white',
+          borderRadius: '20px',
+          padding: '24px',
+          boxShadow: '0 2px 16px rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+          },
         },
-        ".text-gradient-neural": {
-          background:
-            "linear-gradient(135deg, oklch(49.8% 0.138 250) 0%, oklch(59.1% 0.142 180) 25%, oklch(58.2% 0.142 250) 50%, oklch(51.2% 0.138 180) 75%, oklch(42.1% 0.128 250) 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          backgroundSize: "300% 300%",
-          animation: "neural-gradient 6s ease-in-out infinite",
+        '.nri-score': {
+          fontSize: '60px',
+          fontWeight: '900',
+          fontFamily: theme('fontFamily.display'),
+          lineHeight: '1',
+          background: 'linear-gradient(135deg, #007AFF, #0056CC)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textAlign: 'center',
         },
-
-        // Legacy Support
-        ".glass": {
-          background: "oklch(100% 0 0 / 0.12)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid oklch(100% 0 0 / 0.25)",
-          boxShadow: "0 8px 32px 0 oklch(28.8% 0.098 250 / 0.2)",
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        },
-        ".glass-dark": {
-          background: "rgba(0, 0, 0, 0.1)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          boxShadow: "0 2px 8px 0 oklch(28.8% 0.098 250 / 0.15)",
-          transition: "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        },
-        ".neural-grid": {
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, oklch(28.8% 0.098 250 / 0.08) 1px, transparent 0)",
-          backgroundSize: "24px 24px",
-          backgroundAttachment: "fixed",
-        },
-      };
-      addUtilities(premiumUtilities);
+      });
     },
   ],
 };

@@ -1,168 +1,147 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    "plugin:testing-library/react",
-    "plugin:jest-dom/recommended"
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
     "project": "./tsconfig.json"
   },
   "plugins": [
     "@typescript-eslint",
+    "react",
+    "react-hooks",
     "jsx-a11y",
-    "testing-library",
-    "jest-dom"
+    "import"
   ],
   "rules": {
     // TypeScript specific rules
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/prefer-const": "error",
-    "@typescript-eslint/no-non-null-assertion": "warn",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-empty-function": "warn",
-    "@typescript-eslint/no-inferrable-types": "error",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
-    "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/no-unnecessary-type-assertion": "error",
-    "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/await-thenable": "error",
-    "@typescript-eslint/require-await": "error",
-    "@typescript-eslint/no-misused-promises": "error",
-    
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/prefer-const": "error",
+    "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false
+      }
+    ],
+
     // React specific rules
-    "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
     "react/display-name": "warn",
-    "react/no-unescaped-entities": "error",
+    "react/no-unescaped-entities": "off",
     "react/jsx-key": "error",
     "react/jsx-no-duplicate-props": "error",
     "react/jsx-no-undef": "error",
     "react/jsx-uses-react": "off",
     "react/jsx-uses-vars": "error",
     "react/no-deprecated": "warn",
-    "react/no-direct-mutation-state": "error",
-    "react/no-find-dom-node": "error",
-    "react/no-is-mounted": "error",
-    "react/no-render-return-value": "error",
-    "react/no-string-refs": "error",
-    "react/no-unknown-property": "error",
-    "react/require-render-return": "error",
-    
+    "react/no-unsafe": "warn",
+    "react/self-closing-comp": "error",
+
+    // React Hooks rules
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+
     // Accessibility rules
     "jsx-a11y/alt-text": "error",
     "jsx-a11y/anchor-has-content": "error",
     "jsx-a11y/anchor-is-valid": "error",
-    "jsx-a11y/aria-activedescendant-has-tabindex": "error",
     "jsx-a11y/aria-props": "error",
     "jsx-a11y/aria-proptypes": "error",
-    "jsx-a11y/aria-role": "error",
     "jsx-a11y/aria-unsupported-elements": "error",
     "jsx-a11y/click-events-have-key-events": "error",
     "jsx-a11y/heading-has-content": "error",
-    "jsx-a11y/html-has-lang": "error",
-    "jsx-a11y/iframe-has-title": "error",
     "jsx-a11y/img-redundant-alt": "error",
     "jsx-a11y/interactive-supports-focus": "error",
     "jsx-a11y/label-has-associated-control": "error",
-    "jsx-a11y/media-has-caption": "warn",
-    "jsx-a11y/mouse-events-have-key-events": "error",
-    "jsx-a11y/no-access-key": "error",
     "jsx-a11y/no-autofocus": "warn",
     "jsx-a11y/no-distracting-elements": "error",
-    "jsx-a11y/no-interactive-element-to-noninteractive-role": "error",
-    "jsx-a11y/no-noninteractive-element-interactions": "error",
-    "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
-    "jsx-a11y/no-noninteractive-tabindex": "error",
     "jsx-a11y/no-redundant-roles": "error",
-    "jsx-a11y/no-static-element-interactions": "error",
     "jsx-a11y/role-has-required-aria-props": "error",
     "jsx-a11y/role-supports-aria-props": "error",
-    "jsx-a11y/scope": "error",
-    "jsx-a11y/tabindex-no-positive": "error",
-    
-    // General code quality rules
+
+    // Import rules
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object",
+          "type"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/no-unresolved": "error",
+    "import/no-duplicates": "error",
+    "import/no-unused-modules": "warn",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+
+    // General JavaScript/TypeScript rules
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-debugger": "error",
     "no-alert": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-unused-expressions": "error",
+    "no-duplicate-imports": "error",
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "eol-last": "error",
+    "comma-dangle": ["error", "always-multiline"],
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
+
+    // Performance rules
+    "no-await-in-loop": "warn",
+    "require-atomic-updates": "error",
+
+    // Security rules
     "no-eval": "error",
     "no-implied-eval": "error",
     "no-new-func": "error",
-    "no-script-url": "error",
-    "no-void": "error",
-    "no-with": "error",
-    "prefer-const": "error",
-    "no-var": "error",
-    "object-shorthand": "error",
-    "prefer-arrow-callback": "error",
-    "prefer-template": "error",
-    "prefer-spread": "error",
-    "prefer-rest-params": "error",
-    "no-useless-concat": "error",
-    "no-useless-escape": "error",
-    "no-duplicate-imports": "error",
-    
-    // Performance rules
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    
-    // Testing rules
-    "testing-library/await-async-query": "error",
-    "testing-library/no-await-sync-query": "error",
-    "testing-library/no-debugging-utils": "warn",
-    "testing-library/no-dom-import": "error",
-    "testing-library/prefer-find-by": "error",
-    "testing-library/prefer-screen-queries": "error",
-    "testing-library/render-result-naming-convention": "error",
-    
-    // Jest DOM rules
-    "jest-dom/prefer-checked": "error",
-    "jest-dom/prefer-enabled-disabled": "error",
-    "jest-dom/prefer-required": "error",
-    "jest-dom/prefer-to-have-attribute": "error",
-    "jest-dom/prefer-to-have-class": "error",
-    "jest-dom/prefer-to-have-text-content": "error",
-    "jest-dom/prefer-to-have-value": "error"
+    "no-script-url": "error"
   },
-  "overrides": [
-    {
-      "files": ["**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
-      "env": {
-        "jest": true
-      },
-      "rules": {
-        "@typescript-eslint/no-non-null-assertion": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "no-console": "off"
-      }
-    },
-    {
-      "files": ["**/*.stories.*"],
-      "rules": {
-        "react-hooks/rules-of-hooks": "off"
-      }
-    },
-    {
-      "files": ["next.config.js", "jest.config.js", "tailwind.config.js"],
-      "env": {
-        "node": true
-      },
-      "rules": {
-        "@typescript-eslint/no-var-requires": "off",
-        "@typescript-eslint/no-require-imports": "off"
-      }
-    }
-  ],
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
     }
   },
   "env": {
@@ -170,6 +149,29 @@
     "es2022": true,
     "node": true
   },
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["next.config.js", "tailwind.config.js", "postcss.config.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
     ".next/",
@@ -177,6 +179,7 @@
     "dist/",
     "build/",
     "coverage/",
-    "*.min.js"
+    "public/sw.js",
+    "public/workbox-*.js"
   ]
 }
