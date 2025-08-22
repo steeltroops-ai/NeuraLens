@@ -11,19 +11,28 @@ echo "=================================="
 # Check prerequisites
 echo "📋 Checking prerequisites..."
 
-# Check Node.js
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js not found. Please install Node.js 18+ from https://nodejs.org/"
-    exit 1
-fi
+# Check for Bun first (preferred)
+if command -v bun &> /dev/null; then
+    echo "✅ Bun $(bun --version) found (RECOMMENDED)"
+    USE_BUN=true
+else
+    echo "⚠️ Bun not found. Install from https://bun.sh for better performance"
+    USE_BUN=false
 
-NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
-if [ "$NODE_VERSION" -lt 18 ]; then
-    echo "❌ Node.js version $NODE_VERSION is too old. Please install Node.js 18+"
-    exit 1
-fi
+    # Check Node.js as fallback
+    if ! command -v node &> /dev/null; then
+        echo "❌ Node.js not found. Please install Node.js 18+ from https://nodejs.org/"
+        exit 1
+    fi
 
-echo "✅ Node.js $(node --version) found"
+    NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+    if [ "$NODE_VERSION" -lt 18 ]; then
+        echo "❌ Node.js version $NODE_VERSION is too old. Please install Node.js 18+"
+        exit 1
+    fi
+
+    echo "✅ Node.js $(node --version) found (fallback)"
+fi
 
 # Check Python
 if ! command -v python3 &> /dev/null; then
@@ -49,7 +58,15 @@ echo "========================="
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
-npm install
+cd frontend
+
+if [ "$USE_BUN" = true ]; then
+    echo "Using Bun for package management..."
+    bun install
+else
+    echo "Using npm for package management..."
+    npm install
+fi
 
 if [ $? -ne 0 ]; then
     echo "❌ Frontend dependency installation failed"
@@ -57,6 +74,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Frontend dependencies installed"
+cd ..
 
 # Setup Backend
 echo ""
@@ -247,11 +265,19 @@ cd ..
 # Build frontend
 echo ""
 echo "🏗️ Building frontend..."
-npm run build
+cd frontend
+
+if [ "$USE_BUN" = true ]; then
+    bun run build
+else
+    npm run build
+fi
 
 if [ $? -ne 0 ]; then
     echo "⚠️ Frontend build failed, but continuing..."
 fi
+
+cd ..
 
 # Final setup verification
 echo ""
@@ -288,7 +314,11 @@ echo "🎉 NeuroLens-X Setup Complete!"
 echo "=============================="
 echo ""
 echo "🚀 To start development:"
-echo "   Frontend: npm run dev"
+if [ "$USE_BUN" = true ]; then
+    echo "   Frontend: cd frontend && bun run dev"
+else
+    echo "   Frontend: cd frontend && npm run dev"
+fi
 echo "   Backend:  cd backend && source venv/bin/activate && uvicorn app.main:app --reload"
 echo ""
 echo "🌐 Access points:"

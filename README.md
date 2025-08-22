@@ -152,7 +152,8 @@ NeuroLens-X/
 
 ### **Prerequisites**
 
-- Node.js 18+
+- **Bun 1.0+** (Primary package manager - REQUIRED)
+- Node.js 18+ (fallback)
 - Python 3.9+
 - Git
 
@@ -166,10 +167,28 @@ chmod +x scripts/setup.sh
 ./scripts/setup.sh
 ```
 
-### **Manual Setup**
+### **Manual Setup (Bun - RECOMMENDED)**
 
 ```bash
-# Frontend setup
+# Frontend setup (using Bun)
+cd frontend
+bun install
+bun run dev
+
+# Backend setup (separate terminal)
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Access application
+open http://localhost:3000
+```
+
+### **Alternative Setup (npm fallback)**
+
+```bash
+# Frontend setup (npm fallback)
+cd frontend
 npm install
 npm run dev
 
@@ -245,20 +264,40 @@ open http://localhost:3000
 
 ## 🔧 **Development Commands**
 
+### **Frontend (Bun - RECOMMENDED)**
+
 ```bash
-# Frontend development
+cd frontend
+bun run dev              # Start development server
+bun run build           # Production build
+bun run lint            # Code linting
+bun run type-check      # TypeScript validation
+bun test                # Run tests
+```
+
+### **Frontend (npm fallback)**
+
+```bash
+cd frontend
 npm run dev              # Start development server
 npm run build           # Production build
 npm run lint            # Code linting
 npm run type-check      # TypeScript validation
+npm test                # Run tests
+```
 
-# Backend development
+### **Backend Development**
+
+```bash
 cd backend
 uvicorn app.main:app --reload  # Start API server
 python -m pytest              # Run tests
 python scripts/generate-demo-data.py  # Generate demo data
+```
 
-# Deployment
+### **Deployment**
+
+```bash
 ./scripts/deploy.sh     # Deploy to production
 ```
 

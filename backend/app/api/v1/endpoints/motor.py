@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import MotorAssessmentRequest, MotorAssessmentResponse
-from app.ml.models.motor_analyzer import motor_analyzer
+from app.ml.realtime.realtime_motor import realtime_motor_analyzer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -68,7 +68,7 @@ async def analyze_motor_function(
         # Process with timeout
         try:
             analysis_result = await asyncio.wait_for(
-                motor_analyzer.analyze(request, session_id),
+                realtime_motor_analyzer.analyze_realtime(request, session_id),
                 timeout=settings.MOTOR_PROCESSING_TIMEOUT
             )
             
@@ -154,7 +154,7 @@ async def health_check():
         Service health status and model information
     """
     try:
-        health_status = await motor_analyzer.health_check()
+        health_status = await realtime_motor_analyzer.health_check()
         return {
             "service": "motor_analysis",
             "status": "healthy",

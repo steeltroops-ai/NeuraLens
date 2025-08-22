@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import CognitiveAssessmentRequest, CognitiveAssessmentResponse
-from app.ml.models.cognitive_analyzer import cognitive_analyzer
+from app.ml.realtime.realtime_cognitive import realtime_cognitive_analyzer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -68,7 +68,7 @@ async def analyze_cognitive_function(
         # Process with timeout
         try:
             analysis_result = await asyncio.wait_for(
-                cognitive_analyzer.analyze(request, session_id),
+                realtime_cognitive_analyzer.analyze_realtime(request, session_id),
                 timeout=settings.COGNITIVE_PROCESSING_TIMEOUT
             )
             
@@ -172,7 +172,7 @@ async def health_check():
         Service health status and model information
     """
     try:
-        health_status = await cognitive_analyzer.health_check()
+        health_status = await realtime_cognitive_analyzer.health_check()
         return {
             "service": "cognitive_analysis",
             "status": "healthy",

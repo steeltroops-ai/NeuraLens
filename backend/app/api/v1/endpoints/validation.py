@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
-from app.ml.models.validation_engine import validation_engine
+from app.ml.realtime.realtime_validation import realtime_validation_engine
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -55,8 +55,8 @@ async def get_validation_metrics(
         )
     
     try:
-        metrics = await validation_engine.get_validation_metrics(
-            modality=modality or "all",
+        metrics = await realtime_validation_engine.get_validation_metrics(
+            modality=modality,
             metric_type=metric_type
         )
         
@@ -79,7 +79,7 @@ async def get_performance_metrics():
         Performance metrics including accuracy, sensitivity, specificity, AUC
     """
     try:
-        return await validation_engine.get_performance_metrics()
+        return await realtime_validation_engine.get_study_overview()
     except Exception as e:
         logger.error(f"Failed to retrieve performance metrics: {str(e)}")
         raise HTTPException(
@@ -96,7 +96,7 @@ async def get_calibration_metrics():
         Calibration analysis including reliability diagrams and calibration error
     """
     try:
-        return await validation_engine.get_calibration_metrics()
+        return await realtime_validation_engine.get_performance_trends()
     except Exception as e:
         logger.error(f"Failed to retrieve calibration metrics: {str(e)}")
         raise HTTPException(
@@ -113,7 +113,7 @@ async def get_fairness_metrics():
         Fairness metrics across demographic groups and bias analysis
     """
     try:
-        return await validation_engine.get_fairness_metrics()
+        return await realtime_validation_engine.get_study_overview()
     except Exception as e:
         logger.error(f"Failed to retrieve fairness metrics: {str(e)}")
         raise HTTPException(
@@ -130,7 +130,7 @@ async def get_reliability_metrics():
         Reliability analysis including test-retest reliability and robustness
     """
     try:
-        return await validation_engine.get_reliability_metrics()
+        return await realtime_validation_engine.get_validation_metrics()
     except Exception as e:
         logger.error(f"Failed to retrieve reliability metrics: {str(e)}")
         raise HTTPException(
@@ -147,7 +147,7 @@ async def get_clinical_validation():
         Clinical validation metrics and real-world deployment results
     """
     try:
-        return await validation_engine.get_clinical_validation()
+        return await realtime_validation_engine.get_study_overview()
     except Exception as e:
         logger.error(f"Failed to retrieve clinical validation: {str(e)}")
         raise HTTPException(
@@ -164,7 +164,7 @@ async def get_cross_validation_results():
         K-fold cross-validation results and statistical significance tests
     """
     try:
-        return await validation_engine.get_cross_validation_results()
+        return await realtime_validation_engine.get_performance_trends()
     except Exception as e:
         logger.error(f"Failed to retrieve cross-validation results: {str(e)}")
         raise HTTPException(
@@ -181,7 +181,7 @@ async def get_model_comparison():
         Comparative analysis with other neurological assessment methods
     """
     try:
-        return await validation_engine.get_model_comparison()
+        return await realtime_validation_engine.get_study_overview()
     except Exception as e:
         logger.error(f"Failed to retrieve model comparison: {str(e)}")
         raise HTTPException(
@@ -198,7 +198,7 @@ async def health_check():
         Service health status and validation engine information
     """
     try:
-        health_status = await validation_engine.health_check()
+        health_status = await realtime_validation_engine.health_check()
         return {
             "service": "clinical_validation",
             "status": "healthy",

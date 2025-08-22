@@ -1,16 +1,15 @@
 /** @type {import('next').NextConfig} */
-
-const withPWA = require('next-pwa')({
-  dest: 'public',
+const withPWA = require("next-pwa")({
+  dest: "public",
   register: true,
   skipWaiting: true,
-  disable: false, // Enable PWA in development for testing
+  disable: process.env.NODE_ENV === "development",
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-      handler: 'CacheFirst',
+      handler: "CacheFirst",
       options: {
-        cacheName: 'google-fonts',
+        cacheName: "google-fonts",
         expiration: {
           maxEntries: 4,
           maxAgeSeconds: 365 * 24 * 60 * 60, // 365 days
@@ -19,9 +18,9 @@ const withPWA = require('next-pwa')({
     },
     {
       urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-      handler: 'CacheFirst',
+      handler: "CacheFirst",
       options: {
-        cacheName: 'google-fonts-static',
+        cacheName: "google-fonts-static",
         expiration: {
           maxEntries: 4,
           maxAgeSeconds: 365 * 24 * 60 * 60, // 365 days
@@ -29,61 +28,132 @@ const withPWA = require('next-pwa')({
       },
     },
     {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
-      handler: 'CacheFirst',
+      urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
+      handler: "StaleWhileRevalidate",
       options: {
-        cacheName: 'images',
+        cacheName: "static-font-assets",
         expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          maxEntries: 4,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
       },
     },
     {
-      urlPattern: /\.(?:js|css|woff|woff2|ttf|eot)$/i,
-      handler: 'CacheFirst',
+      urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+      handler: "StaleWhileRevalidate",
       options: {
-        cacheName: 'static-resources',
+        cacheName: "static-image-assets",
         expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          maxEntries: 64,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
         },
       },
     },
     {
-      urlPattern: /^\/api\/.*/i,
-      handler: 'NetworkFirst',
+      urlPattern: /\/_next\/image\?url=.+$/i,
+      handler: "StaleWhileRevalidate",
       options: {
-        cacheName: 'api-cache',
+        cacheName: "next-image",
+        expiration: {
+          maxEntries: 64,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:mp3|wav|ogg)$/i,
+      handler: "CacheFirst",
+      options: {
+        rangeRequests: true,
+        cacheName: "static-audio-assets",
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:js)$/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "static-js-assets",
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:css|less)$/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "static-style-assets",
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+    {
+      urlPattern: /^https:\/\/.*\.(?:json)$/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "json-cache",
+      },
+    },
+    {
+      urlPattern: /\/api\/.*$/i,
+      handler: "NetworkFirst",
+      method: "GET",
+      options: {
+        cacheName: "apis",
+        expiration: {
+          maxEntries: 16,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+        networkTimeoutSeconds: 10, // fall back to cache if api does not response within 10 seconds
+      },
+    },
+    {
+      urlPattern: /.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "others",
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
         networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 5 * 60, // 5 minutes
-        },
-        cacheableResponse: {
-          statuses: [0, 200],
-        },
       },
     },
   ],
 });
 
 const nextConfig = {
-  // React configuration
   reactStrictMode: true,
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
 
-  // Server external packages (moved from experimental)
-  serverExternalPackages: ['sharp'],
-
-  // Experimental features
+  // Performance optimizations
   experimental: {
-    optimizeCss: false, // Disabled to fix critters module error
-    optimizePackageImports: ['lucide-react', 'recharts'],
+    optimizeCss: true,
+    optimizePackageImports: ["lucide-react", "@headlessui/react"],
+  },
+
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
 
   // Image optimization
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
@@ -95,170 +165,55 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          // Security headers
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          // Performance headers
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
         ],
       },
       {
-        source: '/api/(.*)',
+        source: "/sw.js",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=300, stale-while-revalidate=60',
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
           },
-        ],
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
           },
         ],
       },
     ];
   },
 
-  // Redirects for SEO and UX
-  async redirects() {
-    return [
-      {
-        source: '/assessment/start',
-        destination: '/assessment',
-        permanent: true,
-      },
-      {
-        source: '/test',
-        destination: '/assessment',
-        permanent: true,
-      },
-    ];
-  },
-
-  // Webpack configuration
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Bundle analyzer
-    if (process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+  // Bundle analyzer
+  ...(process.env.ANALYZE === "true" && {
+    webpack: (config) => {
+      const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
       config.plugins.push(
         new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
+          analyzerMode: "static",
           openAnalyzer: false,
-          reportFilename: isServer
-            ? '../analyze/server.html'
-            : './analyze/client.html',
         })
       );
-    }
-
-    // Optimize for production
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-          },
-          // Common chunk
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-        },
-      };
-    }
-
-    // Audio file handling
-    config.module.rules.push({
-      test: /\.(mp3|wav|ogg|m4a)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          publicPath: '/_next/static/audio/',
-          outputPath: 'static/audio/',
-        },
-      },
-    });
-
-    return config;
-  },
-
-  // Environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-
-  // TypeScript configuration
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-
-  // ESLint configuration - temporarily disabled to focus on hydration issues
-  eslint: {
-    ignoreDuringBuilds: true,
-    dirs: ['src', 'pages', 'components', 'lib', 'utils'],
-  },
-
-  // Output configuration
-  output: 'standalone',
-
-  // Compression
-  compress: true,
-
-  // Power by header
-  poweredByHeader: false,
-
-  // Trailing slash
-  trailingSlash: false,
-
-  // Generate ETags
-  generateEtags: true,
-
-  // Page extensions
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-
-  // Internationalization (future)
-  // i18n: {
-  //   locales: ['en', 'es', 'fr', 'de'],
-  //   defaultLocale: 'en',
-  // },
+      return config;
+    },
+  }),
 };
 
 module.exports = withPWA(nextConfig);

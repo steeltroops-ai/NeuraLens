@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import NRIFusionRequest, NRIFusionResponse
-from app.ml.models.nri_fusion import nri_fusion_engine
+from app.ml.realtime.realtime_nri import realtime_nri_fusion
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -81,7 +81,7 @@ async def calculate_nri(
         # Process with timeout
         try:
             fusion_result = await asyncio.wait_for(
-                nri_fusion_engine.calculate_nri(request),
+                realtime_nri_fusion.calculate_nri_realtime(request),
                 timeout=settings.NRI_PROCESSING_TIMEOUT
             )
             
@@ -203,7 +203,7 @@ async def health_check():
         Service health status and model information
     """
     try:
-        health_status = await nri_fusion_engine.health_check()
+        health_status = await realtime_nri_fusion.health_check()
         return {
             "service": "nri_fusion",
             "status": "healthy",

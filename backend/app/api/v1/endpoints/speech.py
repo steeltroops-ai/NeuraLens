@@ -11,14 +11,14 @@ import time
 import uuid
 
 from app.schemas.assessment import SpeechAnalysisRequest, SpeechAnalysisResponse
-from app.ml.models.speech_analyzer import SpeechAnalyzer
+from app.ml.realtime.realtime_speech import realtime_speech_analyzer
 from app.core.config import settings
 
 
 router = APIRouter()
 
-# Initialize speech analyzer (singleton for performance)
-speech_analyzer = SpeechAnalyzer()
+# Use global speech analyzer instance
+speech_analyzer = realtime_speech_analyzer
 
 
 @router.post("/analyze", response_model=SpeechAnalysisResponse)
@@ -63,7 +63,7 @@ async def analyze_speech(
         # Process audio with timeout
         try:
             analysis_result = await asyncio.wait_for(
-                speech_analyzer.analyze(audio_bytes, session_id),
+                speech_analyzer.analyze_realtime(audio_bytes, session_id),
                 timeout=settings.SPEECH_PROCESSING_TIMEOUT
             )
         except asyncio.TimeoutError:

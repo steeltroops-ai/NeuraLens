@@ -35,7 +35,7 @@ class SpeechAnalysisRequest(BaseAssessmentRequest):
     duration: Optional[float] = None
     sample_rate: Optional[int] = None
     language: str = "en"
-    
+
     @validator('language')
     def validate_language(cls, v):
         supported_languages = ['en', 'es', 'fr', 'de']
@@ -70,7 +70,7 @@ class RetinalAnalysisRequest(BaseAssessmentRequest):
     image_format: Optional[str] = None
     image_size: Optional[tuple] = None
     eye: str = Field(default="unknown", pattern="^(left|right|unknown)$")
-    
+
     @validator('eye')
     def validate_eye(cls, v):
         if v not in ['left', 'right', 'unknown']:
@@ -184,24 +184,3 @@ class NRIFusionResponse(BaseModel):
     timestamp: datetime
     recommendations: List[str] = []
     follow_up_actions: List[str] = []
-
-
-# Risk Assessment Schemas (for traditional questionnaire-based assessment)
-class RiskFactorData(BaseModel):
-    """Traditional risk factor data"""
-    age: int = Field(ge=18, le=120)
-    sex: str = Field(pattern="^(male|female|other)$")
-    education_years: int = Field(ge=0, le=30)
-    family_history: Dict[str, bool] = {}
-    medical_history: Dict[str, bool] = {}
-    lifestyle_factors: Dict[str, Union[str, int, float]] = {}
-
-
-class RiskAssessmentResponse(BaseAssessmentResponse):
-    """Response schema for risk assessment"""
-    risk_factors: RiskFactorData
-    risk_score: float = Field(ge=0.0, le=1.0)
-    framingham_score: Optional[float] = None
-    lifestyle_score: float = Field(ge=0.0, le=1.0)
-    genetic_risk_score: float = Field(ge=0.0, le=1.0)
-    recommendations: List[str] = []

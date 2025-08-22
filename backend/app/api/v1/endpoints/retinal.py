@@ -11,7 +11,7 @@ from typing import Optional
 
 from app.core.config import settings
 from app.schemas.assessment import RetinalAnalysisResponse, RetinalBiomarkers
-from app.ml.models.retinal_analyzer import retinal_analyzer
+from app.ml.realtime.realtime_retinal import realtime_retinal_analyzer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -76,7 +76,7 @@ async def analyze_retinal_image(
         # Process with timeout
         try:
             analysis_result = await asyncio.wait_for(
-                retinal_analyzer.analyze(image_bytes, session_id),
+                realtime_retinal_analyzer.analyze_realtime(image_bytes, session_id),
                 timeout=settings.RETINAL_PROCESSING_TIMEOUT
             )
             
@@ -108,7 +108,7 @@ async def health_check():
         Service health status and model information
     """
     try:
-        health_status = await retinal_analyzer.health_check()
+        health_status = await realtime_retinal_analyzer.health_check()
         return {
             "service": "retinal_analysis",
             "status": "healthy",

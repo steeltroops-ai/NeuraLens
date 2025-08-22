@@ -1,68 +1,72 @@
-import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
+/**
+ * NeuroLens-X Root Layout
+ * Global layout with Neuro-Minimalist styling and PWA support
+ */
 
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+
+// Optimized font loading
 const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: 'NeuroLens-X | Brain Health Screening',
-    template: '%s | NeuroLens-X',
+    default: "NeuroLens-X | Neurological Risk Assessment Platform",
+    template: "%s | NeuroLens-X",
   },
   description:
-    'AI-powered brain health screening platform for early detection of neurological conditions through voice evaluation, eye health scans, and health questionnaires.',
+    "Advanced multi-modal neurological risk assessment platform using AI-powered analysis of speech, retinal, motor, and cognitive biomarkers.",
   keywords: [
-    'brain health',
-    'neurological screening',
-    'early detection',
-    'AI healthcare',
-    'voice evaluation',
-    'eye health scan',
-    'health questionnaire',
-    'dementia screening',
-    "Parkinson's detection",
-    'cognitive health',
+    "neurological assessment",
+    "AI healthcare",
+    "medical screening",
+    "biomarker analysis",
+    "speech analysis",
+    "retinal screening",
+    "motor assessment",
+    "cognitive evaluation",
   ],
-  authors: [{ name: 'NeuroLens-X Team' }],
-  creator: 'NeuroLens-X',
-  publisher: 'NeuroLens-X',
+  authors: [{ name: "NeuroLens Team" }],
+  creator: "NeuroLens-X",
+  publisher: "NeuroLens-X",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://neurolens-x.com'),
+  metadataBase: new URL("https://neurolens-x.vercel.app"),
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://neurolens-x.com',
-    siteName: 'NeuroLens-X',
-    title: 'NeuroLens-X | Neurological Risk Assessment',
+    type: "website",
+    locale: "en_US",
+    url: "https://neurolens-x.vercel.app",
+    title: "NeuroLens-X | Neurological Risk Assessment Platform",
     description:
-      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
+      "Advanced multi-modal neurological risk assessment platform using AI-powered analysis.",
+    siteName: "NeuroLens-X",
     images: [
       {
-        url: '/og-image.png',
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: 'NeuroLens-X - Neurological Risk Assessment Platform',
+        alt: "NeuroLens-X Platform",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'NeuroLens-X | Neurological Risk Assessment',
+    card: "summary_large_image",
+    title: "NeuroLens-X | Neurological Risk Assessment Platform",
     description:
-      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
-    images: ['/twitter-image.png'],
-    creator: '@neurolens_x',
+      "Advanced multi-modal neurological risk assessment platform using AI-powered analysis.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -70,159 +74,102 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    yahoo: 'your-yahoo-verification-code',
+    google: "your-google-verification-code",
   },
-  category: 'healthcare',
-  classification: 'Medical Technology',
-  referrer: 'origin-when-cross-origin',
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#3B82F6' },
-    { media: '(prefers-color-scheme: dark)', color: '#3B82F6' },
+    { media: "(prefers-color-scheme: light)", color: "#3b82f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e3a8a" },
   ],
-  colorScheme: 'dark light',
+  colorScheme: "light",
 };
 
-interface RootLayoutProps {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={cn(inter.variable, "scroll-smooth")}>
       <head>
-        {/* PWA Meta Tags */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="NeuroLens-X" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="NeuroLens-X" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#3B82F6" />
-        <meta name="msapplication-tap-highlight" content="no" />
-
-        {/* Apple Touch Icons */}
-        <link
-          rel="apple-touch-icon"
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
-        />
-
-        {/* Favicons */}
-        <link
-          rel="icon"
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
-        />
-
-        {/* Preconnect to external domains */}
+        {/* Preload critical resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
+          crossOrigin=""
         />
 
-        {/* DNS Prefetch */}
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
 
-        {/* Preload critical resources */}
-        {/* Font preloading removed - using Google Fonts instead */}
+        {/* Apple PWA meta tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="NeuroLens-X" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
 
-        {/* Security Headers */}
-        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-        <meta
-          httpEquiv="Referrer-Policy"
-          content="strict-origin-when-cross-origin"
+        {/* Microsoft PWA meta tags */}
+        <meta name="msapplication-TileColor" content="#1e3a8a" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        {/* Favicon */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
         />
 
-        {/* Performance Hints */}
-        <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
-
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'MedicalWebPage',
-              name: 'NeuroLens-X',
-              description: 'Multi-modal neurological risk assessment platform',
-              url: 'https://neurolens-x.com',
-              medicalAudience: {
-                '@type': 'MedicalAudience',
-                audienceType: 'Patient',
-              },
-              about: {
-                '@type': 'MedicalCondition',
-                name: 'Neurological Disorders',
-              },
-              provider: {
-                '@type': 'Organization',
-                name: 'NeuroLens-X',
-                url: 'https://neurolens-x.com',
-              },
-            }),
-          }}
-        />
+        {/* Performance hints */}
+        <link rel="dns-prefetch" href="//api.neurolens-x.com" />
+        <link rel="preconnect" href="https://api.neurolens-x.com" />
       </head>
       <body
-        className="min-h-screen bg-surface-background text-text-primary antialiased"
-        suppressHydrationWarning
+        className={cn(
+          "min-h-screen bg-gradient-to-br from-neutral-50/80 via-primary-50/60 to-secondary-50/80",
+          "font-sans antialiased",
+          "neural-grid-primary",
+          // Accessibility improvements
+          "focus-within:outline-none",
+          // Performance optimizations
+          "will-change-scroll"
+        )}
       >
-        {/* Skip Links for Accessibility */}
+        {/* Premium Skip to main content link for accessibility */}
         <a
           href="#main-content"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 glass-medium text-primary-900 px-6 py-3 rounded-xl font-medium shadow-neural-md transition-all duration-300"
         >
           Skip to main content
         </a>
-        <a
-          href="#main-navigation"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
-        >
-          Skip to navigation
-        </a>
 
-        {/* Main Application */}
-        <div id="root" className="relative">
+        {/* Main application content */}
+        <div id="main-content" className="relative min-h-screen">
           {children}
         </div>
 
-        {/* Live Regions for Screen Readers */}
-        <div
-          id="live-region-announcements"
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
-        />
-        <div
-          id="live-region-alerts"
-          aria-live="assertive"
-          aria-atomic="true"
-          className="sr-only"
-        />
-
-        {/* PWA Install Prompt */}
-        <div id="pwa-install-prompt" className="pwa-install-prompt" />
-
-        {/* Service Worker Registration - Disabled in Development */}
-        {process.env.NODE_ENV === 'production' && (
+        {/* Service Worker Registration - Disabled for development */}
+        {process.env.NODE_ENV === "production" && (
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -242,54 +189,28 @@ export default function RootLayout({ children }: RootLayoutProps) {
           />
         )}
 
-        {/* Accessibility Initialization */}
+        {/* Performance monitoring */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Initialize accessibility features
-              (function() {
-                // Detect reduced motion preference
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                  document.documentElement.classList.add('reduce-motion');
+              // Core Web Vitals monitoring
+              function sendToAnalytics(metric) {
+                // Replace with your analytics endpoint
+                console.log('Performance metric:', metric);
+              }
+
+              // Monitor LCP, FID, CLS (disabled for development)
+              if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+                try {
+                  import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
+                    getCLS(sendToAnalytics);
+                    getFID(sendToAnalytics);
+                    getLCP(sendToAnalytics);
+                  }).catch(err => console.log('Web vitals not available:', err));
+                } catch (e) {
+                  console.log('Web vitals import failed:', e);
                 }
-                
-                // Detect high contrast preference
-                if (window.matchMedia('(prefers-contrast: high)').matches) {
-                  document.documentElement.classList.add('high-contrast');
-                }
-                
-                // Focus management for keyboard users
-                let hadKeyboardEvent = true;
-                const keyboardThrottleTimeout = 100;
-                
-                function handleKeyboardEvent(e) {
-                  if (e.metaKey || e.altKey || e.ctrlKey) {
-                    return;
-                  }
-                  hadKeyboardEvent = true;
-                }
-                
-                function handlePointerEvent() {
-                  hadKeyboardEvent = false;
-                  setTimeout(() => {
-                    if (!hadKeyboardEvent) {
-                      document.body.classList.remove('keyboard-user');
-                    }
-                  }, keyboardThrottleTimeout);
-                }
-                
-                document.addEventListener('keydown', handleKeyboardEvent, true);
-                document.addEventListener('mousedown', handlePointerEvent, true);
-                document.addEventListener('pointerdown', handlePointerEvent, true);
-                document.addEventListener('touchstart', handlePointerEvent, true);
-                
-                // Add keyboard user class when tab is pressed
-                document.addEventListener('keydown', function(e) {
-                  if (e.key === 'Tab') {
-                    document.body.classList.add('keyboard-user');
-                  }
-                });
-              })();
+              }
             `,
           }}
         />
