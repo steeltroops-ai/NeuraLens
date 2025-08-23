@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Clock, 
-  Zap, 
-  TrendingUp, 
+import {
+  Clock,
+  Zap,
+  TrendingUp,
   Activity,
   CheckCircle,
   AlertTriangle,
   Cpu,
-  Database
+  Database,
 } from 'lucide-react';
 
 interface PerformanceMetricsProps {
@@ -24,7 +24,56 @@ interface PerformanceMetricsProps {
   };
 }
 
-export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps) {
+export default function PerformanceMetrics({
+  metrics,
+}: PerformanceMetricsProps) {
+  // Apple Design System color mapping
+  const getAppleColor = (color: string) => {
+    switch (color) {
+      case 'blue':
+        return '#007AFF';
+      case 'green':
+        return '#34C759';
+      case 'purple':
+        return '#9B59B6';
+      case 'indigo':
+        return '#5856D6';
+      case 'yellow':
+        return '#FF9500';
+      default:
+        return '#007AFF';
+    }
+  };
+
+  const getAppleStatusColor = (status: string) => {
+    switch (status) {
+      case 'excellent':
+        return '#34C759';
+      case 'good':
+        return '#007AFF';
+      case 'warning':
+        return '#FF9500';
+      default:
+        return '#FF3B30';
+    }
+  };
+
+  const getAppleStatusIcon = (status: string) => {
+    switch (status) {
+      case 'excellent':
+      case 'good':
+        return <CheckCircle className="h-4 w-4" style={{ color: '#34C759' }} />;
+      case 'warning':
+        return (
+          <AlertTriangle className="h-4 w-4" style={{ color: '#FF9500' }} />
+        );
+      default:
+        return (
+          <AlertTriangle className="h-4 w-4" style={{ color: '#FF3B30' }} />
+        );
+    }
+  };
+
   const modelMetrics = [
     {
       name: 'Speech Analysis',
@@ -33,7 +82,7 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
       target: 100,
       status: 'excellent',
       icon: <Activity className="h-5 w-5" />,
-      color: 'blue'
+      color: 'blue',
     },
     {
       name: 'Retinal Analysis',
@@ -42,7 +91,7 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
       target: 150,
       status: 'warning',
       icon: <Database className="h-5 w-5" />,
-      color: 'green'
+      color: 'green',
     },
     {
       name: 'Motor Function',
@@ -51,7 +100,7 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
       target: 50,
       status: 'good',
       icon: <Cpu className="h-5 w-5" />,
-      color: 'purple'
+      color: 'purple',
     },
     {
       name: 'Cognitive Tests',
@@ -60,7 +109,7 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
       target: 50,
       status: 'good',
       icon: <TrendingUp className="h-5 w-5" />,
-      color: 'indigo'
+      color: 'indigo',
     },
     {
       name: 'NRI Fusion',
@@ -69,8 +118,8 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
       target: 100,
       status: 'excellent',
       icon: <Zap className="h-5 w-5" />,
-      color: 'yellow'
-    }
+      color: 'yellow',
+    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -110,126 +159,210 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
     green: 'from-green-500 to-green-600',
     purple: 'from-purple-500 to-purple-600',
     indigo: 'from-indigo-500 to-indigo-600',
-    yellow: 'from-yellow-500 to-yellow-600'
+    yellow: 'from-yellow-500 to-yellow-600',
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-slate-900">Real-Time Performance Metrics</h2>
-        <div className="flex items-center space-x-2 text-sm text-green-600">
-          <CheckCircle className="h-4 w-4" />
-          <span>All Systems Operational</span>
+    <div className="mx-auto max-w-7xl">
+      {/* Apple-Style Header */}
+      <div className="mb-12 flex items-center justify-between">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: '#1D1D1F',
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          }}
+        >
+          Real-Time Performance Metrics
+        </h2>
+        <div className="flex items-center space-x-3">
+          <CheckCircle className="h-5 w-5" style={{ color: '#34C759' }} />
+          <span className="text-base font-medium" style={{ color: '#34C759' }}>
+            All Systems Operational
+          </span>
         </div>
       </div>
 
-      {/* Overall Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <Clock className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">Avg Latency</span>
+      {/* Apple-Style Overall Stats - No Cards */}
+      <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-4">
+        <div className="text-center">
+          <div className="mb-4 flex items-center justify-center space-x-3">
+            <Clock className="h-6 w-6" style={{ color: '#007AFF' }} />
+            <span className="text-lg font-medium" style={{ color: '#1D1D1F' }}>
+              Avg Latency
+            </span>
           </div>
-          <div className="text-2xl font-bold text-blue-600">
-            {((metrics.speechLatency + metrics.motorLatency + metrics.cognitiveLatency + metrics.nriLatency) / 4).toFixed(1)}ms
+          <div className="mb-2 text-4xl font-bold" style={{ color: '#007AFF' }}>
+            {(
+              (metrics.speechLatency +
+                metrics.motorLatency +
+                metrics.nriLatency) /
+              4
+            ).toFixed(1)}
+            ms
           </div>
-          <div className="text-xs text-blue-700">Target: &lt;100ms</div>
+          <div className="text-base" style={{ color: '#86868B' }}>
+            Target: &lt;100ms
+          </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-green-900">Accuracy</span>
+        <div className="text-center">
+          <div className="mb-4 flex items-center justify-center space-x-3">
+            <TrendingUp className="h-6 w-6" style={{ color: '#34C759' }} />
+            <span className="text-lg font-medium" style={{ color: '#1D1D1F' }}>
+              Accuracy
+            </span>
           </div>
-          <div className="text-2xl font-bold text-green-600">{metrics.overallAccuracy}%</div>
-          <div className="text-xs text-green-700">Target: &gt;90%</div>
+          <div className="mb-2 text-4xl font-bold" style={{ color: '#34C759' }}>
+            {metrics.overallAccuracy}%
+          </div>
+          <div className="text-base" style={{ color: '#86868B' }}>
+            Target: &gt;90%
+          </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <Zap className="h-5 w-5 text-purple-600" />
-            <span className="text-sm font-medium text-purple-900">Models Active</span>
+        <div className="text-center">
+          <div className="mb-4 flex items-center justify-center space-x-3">
+            <Zap className="h-6 w-6" style={{ color: '#FF9500' }} />
+            <span className="text-lg font-medium" style={{ color: '#1D1D1F' }}>
+              Models Active
+            </span>
           </div>
-          <div className="text-2xl font-bold text-purple-600">5/5</div>
-          <div className="text-xs text-purple-700">All operational</div>
+          <div className="mb-2 text-4xl font-bold" style={{ color: '#FF9500' }}>
+            5/5
+          </div>
+          <div className="text-base" style={{ color: '#86868B' }}>
+            All operational
+          </div>
         </div>
 
-        <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <Activity className="h-5 w-5 text-indigo-600" />
-            <span className="text-sm font-medium text-indigo-900">Throughput</span>
+        <div className="text-center">
+          <div className="mb-4 flex items-center justify-center space-x-3">
+            <Activity className="h-6 w-6" style={{ color: '#9B59B6' }} />
+            <span className="text-lg font-medium" style={{ color: '#1D1D1F' }}>
+              Throughput
+            </span>
           </div>
-          <div className="text-2xl font-bold text-indigo-600">1000+</div>
-          <div className="text-xs text-indigo-700">Assessments/hour</div>
+          <div className="mb-2 text-4xl font-bold" style={{ color: '#9B59B6' }}>
+            1000+
+          </div>
+          <div className="text-base" style={{ color: '#86868B' }}>
+            Assessments/hour
+          </div>
         </div>
       </div>
 
-      {/* Individual Model Performance */}
-      <div className="space-y-4">
-        <h3 className="text-md font-medium text-slate-900">Individual Model Performance</h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Apple-Style Individual Model Performance */}
+      <div className="space-y-8">
+        <h3
+          className="text-2xl font-bold"
+          style={{
+            color: '#1D1D1F',
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          }}
+        >
+          Individual Model Performance
+        </h3>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {modelMetrics.map((model, index) => (
             <motion.div
               key={model.name}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-slate-50 rounded-lg p-4"
+              className="p-6"
+              style={{ backgroundColor: '#FFFFFF' }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClasses[model.color as keyof typeof colorClasses]} text-white`}>
-                    {model.icon}
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div
+                    className="rounded-lg p-3"
+                    style={{ backgroundColor: getAppleColor(model.color) }}
+                  >
+                    {React.cloneElement(model.icon as React.ReactElement, {
+                      style: { color: '#FFFFFF' },
+                      className: 'h-6 w-6',
+                    })}
                   </div>
                   <div>
-                    <h4 className="font-medium text-slate-900">{model.name}</h4>
-                    <div className="flex items-center space-x-1">
-                      {getStatusIcon(getLatencyStatus(model.latency, model.target))}
-                      <span className={`text-xs font-medium ${getStatusColor(getLatencyStatus(model.latency, model.target))}`}>
-                        {getLatencyStatus(model.latency, model.target).toUpperCase()}
+                    <h4
+                      className="text-lg font-semibold"
+                      style={{ color: '#1D1D1F' }}
+                    >
+                      {model.name}
+                    </h4>
+                    <div className="flex items-center space-x-2">
+                      {getAppleStatusIcon(
+                        getLatencyStatus(model.latency, model.target)
+                      )}
+                      <span
+                        className="text-sm font-medium"
+                        style={{
+                          color: getAppleStatusColor(
+                            getLatencyStatus(model.latency, model.target)
+                          ),
+                        }}
+                      >
+                        {getLatencyStatus(
+                          model.latency,
+                          model.target
+                        ).toUpperCase()}
                       </span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-slate-900">{model.latency}ms</div>
-                  <div className="text-xs text-slate-500">Target: {model.target}ms</div>
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: '#1D1D1F' }}
+                  >
+                    {model.latency}ms
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Target: {model.target}ms
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
                 {/* Latency Progress Bar */}
                 <div>
-                  <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <div className="mb-1 flex justify-between text-xs text-slate-600">
                     <span>Latency</span>
-                    <span>{model.latency}ms / {model.target}ms</span>
+                    <span>
+                      {model.latency}ms / {model.target}ms
+                    </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="h-2 w-full rounded-full bg-slate-200">
                     <div
                       className={`h-2 rounded-full transition-all duration-500 ${
                         model.latency <= model.target * 0.5
                           ? 'bg-green-500'
                           : model.latency <= model.target
-                          ? 'bg-blue-500'
-                          : model.latency <= model.target * 1.5
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
+                            ? 'bg-blue-500'
+                            : model.latency <= model.target * 1.5
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
                       }`}
-                      style={{ width: `${Math.min(100, (model.latency / model.target) * 100)}%` }}
+                      style={{
+                        width: `${Math.min(100, (model.latency / model.target) * 100)}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
 
                 {/* Accuracy Progress Bar */}
                 <div>
-                  <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <div className="mb-1 flex justify-between text-xs text-slate-600">
                     <span>Accuracy</span>
                     <span>{model.accuracy}%</span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="h-2 w-full rounded-full bg-slate-200">
                     <div
-                      className="h-2 bg-green-500 rounded-full transition-all duration-500"
+                      className="h-2 rounded-full bg-green-500 transition-all duration-500"
                       style={{ width: `${model.accuracy}%` }}
                     ></div>
                   </div>
@@ -240,28 +373,45 @@ export default function PerformanceMetrics({ metrics }: PerformanceMetricsProps)
         </div>
       </div>
 
-      {/* Performance Insights */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">Performance Insights</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-green-700">
-              <CheckCircle className="h-4 w-4" />
-              <span>Speech & NRI models exceed targets by 8x</span>
+      {/* Apple-Style Performance Insights */}
+      <div className="mt-12 pt-8" style={{ borderTop: '1px solid #F2F2F7' }}>
+        <h3
+          className="mb-8 text-2xl font-bold"
+          style={{
+            color: '#1D1D1F',
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          }}
+        >
+          Performance Insights
+        </h3>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-5 w-5" style={{ color: '#34C759' }} />
+              <span className="text-base" style={{ color: '#1D1D1F' }}>
+                Speech & NRI models exceed targets by 8x
+              </span>
             </div>
-            <div className="flex items-center space-x-2 text-green-700">
-              <CheckCircle className="h-4 w-4" />
-              <span>Motor & Cognitive models within targets</span>
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-5 w-5" style={{ color: '#34C759' }} />
+              <span className="text-base" style={{ color: '#1D1D1F' }}>
+                Motor & Cognitive models within targets
+              </span>
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-yellow-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span>Retinal model needs optimization</span>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="h-5 w-5" style={{ color: '#FF9500' }} />
+              <span className="text-base" style={{ color: '#1D1D1F' }}>
+                Retinal model needs optimization
+              </span>
             </div>
-            <div className="flex items-center space-x-2 text-blue-700">
-              <TrendingUp className="h-4 w-4" />
-              <span>Overall system ready for production</span>
+            <div className="flex items-center space-x-3">
+              <TrendingUp className="h-5 w-5" style={{ color: '#007AFF' }} />
+              <span className="text-base" style={{ color: '#1D1D1F' }}>
+                Overall system ready for production
+              </span>
             </div>
           </div>
         </div>
