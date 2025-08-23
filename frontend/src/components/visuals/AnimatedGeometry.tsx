@@ -283,7 +283,7 @@ export function RetinalEye({ light = 0.6 }: { light?: number }) {
   return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
 }
 
-// Motor Assessment - Hand Kinematics with DH Parameters
+// Motor Assessment - Enhanced Hand Kinematics with Anatomical Features
 export function HandKinematics() {
   const ref = useHiDpiCanvas();
   useEffect(() => {
@@ -291,6 +291,7 @@ export function HandKinematics() {
     const ctx = canvas.getContext('2d')!;
     let raf = 0;
     let t = 0;
+    const trailPoints: Array<{ x: number; y: number; time: number }> = [];
 
     // Denavit-Hartenberg forward kinematics for finger joints
     function forwardKinematics(theta1: number, theta2: number, theta3: number) {
@@ -320,6 +321,44 @@ export function HandKinematics() {
       return pts;
     }
 
+    // Draw anatomical bone structure
+    function drawBone(p1: any, p2: any, width: number) {
+      // Bone shaft with anatomical shape
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = '#E8E8E8';
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Bone highlights for 3D effect
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = width * 0.3;
+      ctx.stroke();
+    }
+
+    // Draw anatomical joint markers
+    function drawJoint(p: any, radius: number, isActive: boolean = false) {
+      // Joint capsule
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = isActive ? '#007AFF' : '#F0F0F0';
+      ctx.fill();
+      ctx.strokeStyle = '#D0D0D0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Joint center
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = isActive ? '#FFFFFF' : '#C0C0C0';
+      ctx.fill();
+    }
+
     function render() {
       const W = Math.max(480, canvas.clientWidth);
       const H = Math.max(320, canvas.clientHeight);
@@ -336,59 +375,91 @@ export function HandKinematics() {
 
       const pts = forwardKinematics(theta1, theta2, theta3);
 
-      // Draw bones
-      function drawBone(p1: any, p2: any, width: number) {
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = 'rgba(0, 122, 255, 0.6)';
-        ctx.lineWidth = width;
-        ctx.stroke();
-      }
-
       const p0 = { x: baseX, y: baseY };
       const p1 = { x: baseX + pts[1]!.x, y: baseY + pts[1]!.y };
       const p2 = { x: baseX + pts[2]!.x, y: baseY + pts[2]!.y };
       const p3 = { x: baseX + pts[3]!.x, y: baseY + pts[3]!.y };
 
+      // Draw palm base (anatomical structure)
+      ctx.beginPath();
+      ctx.ellipse(baseX - 15, baseY + 10, 25, 15, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#F5F5F5';
+      ctx.fill();
+      ctx.strokeStyle = '#D0D0D0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw enhanced anatomical bones
       drawBone(p0, p1, 18);
       drawBone(p1, p2, 14);
       drawBone(p2, p3, 10);
 
-      // Draw joints
-      function drawJoint(p: any) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 122, 255, 0.4)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-      drawJoint(p0);
-      drawJoint(p1);
-      drawJoint(p2);
+      // Draw enhanced anatomical joints with activity indicators
+      const isActive = tapPhase > 0.7;
+      drawJoint(p0, 12, isActive);
+      drawJoint(p1, 10, isActive);
+      drawJoint(p2, 8, isActive);
 
-      // Draw tendons as bezier curves
+      // Draw tendon pathways (curved anatomical connections)
       ctx.beginPath();
       ctx.moveTo(baseX - 10, baseY - 18);
-      ctx.quadraticCurveTo(p1.x, p1.y - 40, p3.x + 6, p3.y - 8);
-      ctx.strokeStyle = 'rgba(0, 122, 255, 0.3)';
-      ctx.lineWidth = 2;
+      ctx.quadraticCurveTo(p1.x - 5, p1.y - 25, p2.x, p2.y - 15);
+      ctx.quadraticCurveTo(p2.x + 3, p2.y - 8, p3.x + 6, p3.y - 8);
+      ctx.strokeStyle = 'rgba(255, 140, 0, 0.6)';
+      ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Fingertip pad
+      // Enhanced fingertip pad with anatomical detail
       ctx.beginPath();
-      ctx.arc(p3.x, p3.y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 122, 255, 0.2)';
+      ctx.arc(p3.x, p3.y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFE4E1';
+      ctx.fill();
+      ctx.strokeStyle = '#D0D0D0';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Fingerprint pattern (subtle detail)
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(p3.x, p3.y, 3 + i * 1.5, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(200, 200, 200, ${0.3 - i * 0.1})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Enhanced tremor visualization with multiple oscillation points
+      const tremor = Math.sin(t * 15) * 2;
+      const microTremor = Math.sin(t * 25) * 0.8;
+
+      // Primary tremor indicator
+      ctx.beginPath();
+      ctx.arc(p3.x + tremor, p3.y + microTremor, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 59, 48, 0.8)';
       ctx.fill();
 
-      // Tremor visualization (small oscillations)
-      const tremor = Math.sin(t * 15) * 2;
+      // Secondary tremor indicators
       ctx.beginPath();
-      ctx.arc(p3.x + tremor, p3.y, 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 59, 48, 0.6)';
+      ctx.arc(p2.x + tremor * 0.6, p2.y + microTremor * 0.4, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 59, 48, 0.5)';
       ctx.fill();
+
+      // Movement trail effect
+      trailPoints.push({ x: p3.x, y: p3.y, time: t });
+
+      // Remove old trail points
+      while (trailPoints.length > 0 && t - trailPoints[0]!.time > 2) {
+        trailPoints.shift();
+      }
+
+      // Draw movement trail
+      for (let i = 0; i < trailPoints.length - 1; i++) {
+        const point = trailPoints[i]!;
+        const alpha = (t - point.time) / 2;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 122, 255, ${0.4 * (1 - alpha)})`;
+        ctx.fill();
+      }
 
       t += 0.02;
       raf = requestAnimationFrame(render);
@@ -453,41 +524,174 @@ export function BrainNeural() {
         ctx.stroke();
       }
 
-      // Neural activity nodes
+      // Enhanced neural activity nodes with specialized brain regions
+      const brainRegions = [
+        { name: 'Frontal', color: '#FF6B6B', cognitive: true },
+        { name: 'Parietal', color: '#4ECDC4', attention: true },
+        { name: 'Temporal', color: '#45B7D1', memory: true },
+        { name: 'Occipital', color: '#96CEB4', visual: true },
+        { name: 'Motor', color: '#FFEAA7', motor: true },
+        { name: 'Sensory', color: '#DDA0DD', sensory: true },
+      ];
+
       for (let i = 0; i < 12; i++) {
         const angle = (i / 12) * Math.PI * 2;
         const radius = rx * 0.7;
         const x = cx + Math.cos(angle) * radius;
         const y = cy + Math.sin(angle) * radius * (ry / rx);
         const activity = Math.sin(t * 3 + i) * 0.5 + 0.5;
+        const region = brainRegions[i % brainRegions.length]!;
 
+        // Enhanced neural nodes with region-specific colors
         ctx.beginPath();
-        ctx.arc(x, y, 3 + activity * 4, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 122, 255, ${0.3 + activity * 0.4})`;
+        ctx.arc(x, y, 4 + activity * 6, 0, Math.PI * 2);
+        ctx.fillStyle = region.color;
+        ctx.globalAlpha = 0.4 + activity * 0.6;
         ctx.fill();
+        ctx.globalAlpha = 1;
 
-        // Neural connections
-        if (i < 11) {
-          const nextAngle = ((i + 1) / 12) * Math.PI * 2;
+        // Node outline
+        ctx.beginPath();
+        ctx.arc(x, y, 4 + activity * 6, 0, Math.PI * 2);
+        ctx.strokeStyle = region.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Synaptic firing effects (bright flashes)
+        if (activity > 0.8) {
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fill();
+
+          // Firing burst effect
+          for (let burst = 0; burst < 4; burst++) {
+            const burstAngle = (burst / 4) * Math.PI * 2;
+            const burstX = x + Math.cos(burstAngle) * 8;
+            const burstY = y + Math.sin(burstAngle) * 8;
+            ctx.beginPath();
+            ctx.arc(burstX, burstY, 1, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * activity})`;
+            ctx.fill();
+          }
+        }
+
+        // Enhanced neural pathways with branching
+        for (let j = i + 1; j < 12; j++) {
+          const nextAngle = (j / 12) * Math.PI * 2;
           const nextX = cx + Math.cos(nextAngle) * radius;
           const nextY = cy + Math.sin(nextAngle) * radius * (ry / rx);
+          const nextActivity = Math.sin(t * 3 + j) * 0.5 + 0.5;
+          const connectionStrength = (activity + nextActivity) / 2;
 
+          if (connectionStrength > 0.4) {
+            // Main pathway
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(nextX, nextY);
+            ctx.strokeStyle = `rgba(0, 122, 255, ${connectionStrength * 0.3})`;
+            ctx.lineWidth = 1 + connectionStrength * 2;
+            ctx.stroke();
+
+            // Branching pathways
+            const midX = (x + nextX) / 2;
+            const midY = (y + nextY) / 2;
+            const branchAngle = Math.atan2(nextY - y, nextX - x) + Math.PI / 4;
+            const branchX = midX + Math.cos(branchAngle) * 15;
+            const branchY = midY + Math.sin(branchAngle) * 15;
+
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(branchX, branchY);
+            ctx.strokeStyle = `rgba(0, 122, 255, ${connectionStrength * 0.2})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Enhanced corpus callosum with information transfer
+      ctx.beginPath();
+      ctx.moveTo(cx - rx * 0.18, cy);
+      ctx.quadraticCurveTo(cx, cy + 10, cx + rx * 0.18, cy);
+      ctx.strokeStyle = 'rgba(0, 122, 255, 0.3)';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      // Information transfer particles across corpus callosum
+      const transferPhase = (t * 2) % 1;
+      const transferX = cx - rx * 0.18 + rx * 0.36 * transferPhase;
+      const transferY = cy + 10 * Math.sin(Math.PI * transferPhase);
+      ctx.beginPath();
+      ctx.arc(transferX, transferY, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
+      ctx.fill();
+
+      // Memory formation clusters (hippocampus region)
+      const memoryX = cx - rx * 0.3;
+      const memoryY = cy + ry * 0.4;
+      const memoryActivity = Math.sin(t * 1.5) * 0.5 + 0.5;
+
+      for (let m = 0; m < 6; m++) {
+        const clusterAngle = (m / 6) * Math.PI * 2;
+        const clusterRadius = 12 + memoryActivity * 8;
+        const clusterX = memoryX + Math.cos(clusterAngle) * clusterRadius;
+        const clusterY = memoryY + Math.sin(clusterAngle) * clusterRadius;
+
+        ctx.beginPath();
+        ctx.arc(clusterX, clusterY, 2 + memoryActivity * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 140, 0, ${0.4 + memoryActivity * 0.4})`;
+        ctx.fill();
+
+        // Memory consolidation connections
+        if (memoryActivity > 0.6) {
           ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(nextX, nextY);
-          ctx.strokeStyle = `rgba(0, 122, 255, ${0.1 + activity * 0.2})`;
+          ctx.moveTo(memoryX, memoryY);
+          ctx.lineTo(clusterX, clusterY);
+          ctx.strokeStyle = `rgba(255, 140, 0, ${memoryActivity * 0.3})`;
           ctx.lineWidth = 1;
           ctx.stroke();
         }
       }
 
-      // Corpus callosum
-      ctx.beginPath();
-      ctx.moveTo(cx - rx * 0.18, cy);
-      ctx.quadraticCurveTo(cx, cy + 10, cx + rx * 0.18, cy);
-      ctx.strokeStyle = 'rgba(0, 122, 255, 0.2)';
-      ctx.lineWidth = 6;
-      ctx.stroke();
+      // Attention network (frontal-parietal connections)
+      const frontalX = cx;
+      const frontalY = cy - ry * 0.6;
+      const parietalX = cx;
+      const parietalY = cy + ry * 0.3;
+      const attentionFlow = Math.sin(t * 4) * 0.5 + 0.5;
+
+      // Flowing particles showing attention direction
+      for (let a = 0; a < 3; a++) {
+        const flowProgress = (attentionFlow + a * 0.33) % 1;
+        const flowX = frontalX + (parietalX - frontalX) * flowProgress;
+        const flowY = frontalY + (parietalY - frontalY) * flowProgress;
+
+        ctx.beginPath();
+        ctx.arc(flowX, flowY, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(138, 43, 226, ${0.6 + attentionFlow * 0.4})`;
+        ctx.fill();
+      }
+
+      // Cognitive load visualization through overall brightness modulation
+      const cognitiveLoad = Math.sin(t * 0.8) * 0.3 + 0.7;
+      ctx.globalAlpha = cognitiveLoad;
+
+      // Brain activity waves
+      for (let w = 0; w < 2; w++) {
+        const waveRadius = (t * 30 + w * 40) % 120;
+        const waveAlpha = 1 - waveRadius / 120;
+
+        if (waveAlpha > 0) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, waveRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(138, 43, 226, ${waveAlpha * 0.2 * cognitiveLoad})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      ctx.globalAlpha = 1;
 
       t += 0.01;
       raf = requestAnimationFrame(render);
@@ -517,28 +721,59 @@ export function NRIFusion() {
       const cx = W / 2,
         cy = H / 2;
 
-      // Central fusion node
+      // Enhanced central fusion node with processing visualization
+      const fusionActivity = Math.sin(t * 3) * 0.3 + 0.7;
       ctx.beginPath();
-      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 122, 255, 0.8)';
+      ctx.arc(cx, cy, 25 * fusionActivity, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 122, 255, 1)';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 215, 0, 1)';
+      ctx.lineWidth = 4;
       ctx.stroke();
 
-      // Data streams from 4 modalities
+      // Fusion algorithm visualization (mathematical processing)
+      const symbols = ['∑', '∫', '∆', '∇'];
+      for (let s = 0; s < symbols.length; s++) {
+        const symbolAngle = (s / symbols.length) * Math.PI * 2 + t;
+        const symbolRadius = 15;
+        const symbolX = cx + Math.cos(symbolAngle) * symbolRadius;
+        const symbolY = cy + Math.sin(symbolAngle) * symbolRadius;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.6 + Math.sin(t * 4 + s) * 0.3})`;
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(symbols[s]!, symbolX, symbolY + 5);
+      }
+
+      // Enhanced modalities with distinct visual representations
       const modalities = [
-        { name: 'Speech', angle: 0, color: 'rgba(0, 122, 255, 0.6)' },
+        {
+          name: 'Speech',
+          angle: 0,
+          color: '#4A90E2',
+          icon: '🎤',
+          symbol: '♪',
+        },
         {
           name: 'Retinal',
           angle: Math.PI / 2,
-          color: 'rgba(0, 122, 255, 0.6)',
+          color: '#50C878',
+          icon: '👁️',
+          symbol: '◉',
         },
-        { name: 'Motor', angle: Math.PI, color: 'rgba(0, 122, 255, 0.6)' },
+        {
+          name: 'Motor',
+          angle: Math.PI,
+          color: '#FF8C42',
+          icon: '✋',
+          symbol: '⚡',
+        },
         {
           name: 'Cognitive',
           angle: (3 * Math.PI) / 2,
-          color: 'rgba(0, 122, 255, 0.6)',
+          color: '#9B59B6',
+          icon: '🧠',
+          symbol: '⚙',
         },
       ];
 
@@ -546,18 +781,42 @@ export function NRIFusion() {
         const radius = 80;
         const x = cx + Math.cos(mod.angle) * radius;
         const y = cy + Math.sin(mod.angle) * radius;
+        const activity = Math.sin(t * 2 + i) * 0.5 + 0.5;
 
-        // Modality node
+        // Enhanced modality node with distinct colors
         ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.arc(x, y, 15 + activity * 5, 0, Math.PI * 2);
         ctx.fillStyle = mod.color;
         ctx.fill();
+        ctx.strokeStyle = mod.color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
 
-        // Animated data flow
+        // Modality symbol/icon representation
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(mod.symbol, x, y + 5);
+
+        // Processing stage (intermediate node)
+        const stageRadius = 50;
+        const stageX = cx + Math.cos(mod.angle) * stageRadius;
+        const stageY = cy + Math.sin(mod.angle) * stageRadius;
+
+        ctx.beginPath();
+        ctx.arc(stageX, stageY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.6 + activity * 0.4})`;
+        ctx.fill();
+        ctx.strokeStyle = mod.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Enhanced data flow with confidence indicators
         const flowPhase = (t * 2 + (i * Math.PI) / 2) % (Math.PI * 2);
         const flowProgress = (Math.sin(flowPhase) + 1) / 2;
+        const confidence = 0.7 + Math.sin(t * 1.5 + i) * 0.3;
 
-        // Data particles flowing toward center
+        // Data particles with varying opacity based on confidence
         for (let j = 0; j < 5; j++) {
           const particleProgress = (flowProgress + j * 0.2) % 1;
           const px = x + (cx - x) * particleProgress;
@@ -565,17 +824,41 @@ export function NRIFusion() {
 
           ctx.beginPath();
           ctx.arc(px, py, 2 + Math.sin(t * 4 + j) * 1, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(0, 122, 255, ${0.4 + particleProgress * 0.4})`;
+          const alpha = (0.4 + particleProgress * 0.4) * confidence;
+          ctx.fillStyle = `${mod.color.slice(0, -1)}, ${alpha})`;
           ctx.fill();
         }
 
-        // Connection lines
+        // Connection lines with varying thickness based on correlation
         ctx.beginPath();
         ctx.moveTo(x, y);
+        ctx.lineTo(stageX, stageY);
         ctx.lineTo(cx, cy);
-        ctx.strokeStyle = `rgba(0, 122, 255, ${0.2 + Math.sin(t * 2 + i) * 0.1})`;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = `${mod.color.slice(0, -1)}, ${0.3 + activity * 0.4})`;
+        ctx.lineWidth = 2 + activity * 3;
         ctx.stroke();
+
+        // Correlation analysis arcs between modalities
+        for (let k = i + 1; k < modalities.length; k++) {
+          const otherMod = modalities[k]!;
+          const otherX = cx + Math.cos(otherMod.angle) * radius;
+          const otherY = cy + Math.sin(otherMod.angle) * radius;
+          const correlation = Math.sin(t * 1.2 + i + k) * 0.5 + 0.5;
+
+          if (correlation > 0.6) {
+            // Draw correlation arc
+            const midX = (x + otherX) / 2;
+            const midY = (y + otherY) / 2;
+            const arcRadius =
+              Math.sqrt((x - otherX) ** 2 + (y - otherY) ** 2) / 3;
+
+            ctx.beginPath();
+            ctx.arc(midX, midY, arcRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 215, 0, ${correlation * 0.3})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
       });
 
       // Fusion algorithm visualization (concentric rings)
@@ -618,56 +901,125 @@ export function MultiModalNetwork() {
       const cx = W / 2,
         cy = H / 2;
 
-      // Network nodes representing different assessment types
+      // Enhanced network nodes with distinct colors and icons
       const nodes = [
-        { x: cx - 80, y: cy - 60, label: 'Speech', size: 15 },
-        { x: cx + 80, y: cy - 60, label: 'Retinal', size: 15 },
-        { x: cx - 80, y: cy + 60, label: 'Motor', size: 15 },
-        { x: cx + 80, y: cy + 60, label: 'Cognitive', size: 15 },
-        { x: cx, y: cy, label: 'NRI', size: 20 },
+        {
+          x: cx - 80,
+          y: cy - 60,
+          label: 'Speech',
+          size: 15,
+          color: '#4A90E2',
+          icon: '♪',
+          symbol: '🎤',
+        },
+        {
+          x: cx + 80,
+          y: cy - 60,
+          label: 'Retinal',
+          size: 15,
+          color: '#50C878',
+          icon: '◉',
+          symbol: '👁️',
+        },
+        {
+          x: cx - 80,
+          y: cy + 60,
+          label: 'Motor',
+          size: 15,
+          color: '#FF8C42',
+          icon: '⚡',
+          symbol: '✋',
+        },
+        {
+          x: cx + 80,
+          y: cy + 60,
+          label: 'Cognitive',
+          size: 15,
+          color: '#9B59B6',
+          icon: '⚙',
+          symbol: '🧠',
+        },
+        {
+          x: cx,
+          y: cy,
+          label: 'NRI',
+          size: 20,
+          color: '#FFD700',
+          icon: '⚡',
+          symbol: '⚡',
+        },
       ];
 
-      // Draw connections between all nodes
+      // Enhanced connections with network strength indicators
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const activity = Math.sin(t * 2 + i + j) * 0.5 + 0.5;
+          const nodeI = nodes[i]!;
+          const nodeJ = nodes[j]!;
+          const connectionStrength = 0.3 + activity * 0.7;
 
+          // Enhanced connection lines with varying thickness
           ctx.beginPath();
-          ctx.moveTo(nodes[i]!.x, nodes[i]!.y);
-          ctx.lineTo(nodes[j]!.x, nodes[j]!.y);
-          ctx.strokeStyle = `rgba(0, 122, 255, ${0.1 + activity * 0.2})`;
-          ctx.lineWidth = 1 + activity * 2;
+          ctx.moveTo(nodeI.x, nodeI.y);
+          ctx.lineTo(nodeJ.x, nodeJ.y);
+          ctx.strokeStyle = `rgba(100, 100, 100, ${0.2 + activity * 0.3})`;
+          ctx.lineWidth = 1 + connectionStrength * 3;
           ctx.stroke();
 
-          // Data packets traveling along connections
+          // Colored data packets with modality-specific colors
           const packetProgress = (t * 1.5 + i * j) % 1;
-          const px = nodes[i]!.x + (nodes[j]!.x - nodes[i]!.x) * packetProgress;
-          const py = nodes[i]!.y + (nodes[j]!.y - nodes[i]!.y) * packetProgress;
+          const px = nodeI.x + (nodeJ.x - nodeI.x) * packetProgress;
+          const py = nodeI.y + (nodeJ.y - nodeI.y) * packetProgress;
+
+          // Use source node color for data packet
+          const packetColor = i === 4 ? nodeJ.color : nodeI.color;
 
           ctx.beginPath();
-          ctx.arc(px, py, 2, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(0, 122, 255, ${0.6 + activity * 0.4})`;
+          ctx.rect(px - 2, py - 2, 4, 4);
+          ctx.fillStyle = `${packetColor}CC`;
           ctx.fill();
+          ctx.strokeStyle = packetColor;
+          ctx.lineWidth = 1;
+          ctx.stroke();
         }
       }
 
-      // Draw nodes
+      // Enhanced nodes with distinct colors and icons
       nodes.forEach((node, i) => {
         const pulse = Math.sin(t * 3 + i) * 0.3 + 0.7;
 
+        // Main node with modality-specific color
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.size * pulse, 0, Math.PI * 2);
-        ctx.fillStyle =
-          i === 4 ? 'rgba(0, 122, 255, 0.8)' : 'rgba(0, 122, 255, 0.6)';
+        ctx.fillStyle = node.color;
         ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 122, 255, 1)';
+        ctx.strokeStyle = node.color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Node icon/symbol
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `${node.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText(node.icon, node.x, node.y + node.size * 0.3);
+
+        // Enhanced activity rings with modality colors
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.size * (1 + pulse * 0.5), 0, Math.PI * 2);
+        ctx.strokeStyle = `${node.color}66`;
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Node activity rings
+        // Outer activity ring
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.size * (1 + pulse * 0.5), 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(0, 122, 255, ${0.2 * pulse})`;
+        ctx.arc(
+          node.x,
+          node.y,
+          node.size * (1.5 + pulse * 0.3),
+          0,
+          Math.PI * 2
+        );
+        ctx.strokeStyle = `${node.color}33`;
         ctx.lineWidth = 1;
         ctx.stroke();
       });

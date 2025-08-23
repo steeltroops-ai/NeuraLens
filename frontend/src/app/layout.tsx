@@ -10,8 +10,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'NeuroLens-X | Brain Health Screening',
-    template: '%s | NeuroLens-X',
+    default: 'NeuroLens | Neuro Health Screening',
+    template: '%s | NeuroLens',
   },
   description:
     'AI-powered brain health screening platform for early detection of neurological conditions through voice evaluation, eye health scans, and health questionnaires.',
@@ -27,24 +27,24 @@ export const metadata: Metadata = {
     "Parkinson's detection",
     'cognitive health',
   ],
-  authors: [{ name: 'NeuroLens-X Team' }],
-  creator: 'NeuroLens-X',
-  publisher: 'NeuroLens-X',
+  authors: [{ name: 'NeuraLens - Mayank' }],
+  creator: 'NeuroLens',
+  publisher: 'NeuraLens',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://neurolens-x.com'),
+  metadataBase: new URL('https://neuralens.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://neurolens-x.com',
-    siteName: 'NeuroLens-X',
-    title: 'NeuroLens-X | Neurological Risk Assessment',
+    url: 'https://neuralens.com',
+    siteName: 'NeuroLens',
+    title: 'NeuraLens | Neuralogical Risk Assessment',
     description:
       'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
     images: [
@@ -52,17 +52,17 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NeuroLens-X - Neurological Risk Assessment Platform',
+        alt: 'NeuraLens - Neurological Risk Assessment Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NeuroLens-X | Neurological Risk Assessment',
+    title: 'NeuraLens | Neurological Risk Assessment',
     description:
       'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
     images: ['/twitter-image.png'],
-    creator: '@neurolens_x',
+    creator: '@steeltroosp_ai',
   },
   robots: {
     index: true,

@@ -159,7 +159,7 @@ export default function HomePage() {
           </section>
 
           {/* Consolidated Overview Section */}
-          <section className="py-20" style={{ backgroundColor: '#F5F5F7' }}>
+          <section className="py-20" style={{ backgroundColor: 'bg-white' }}>
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -168,6 +168,28 @@ export default function HomePage() {
                 className="mx-auto max-w-6xl"
               >
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+                  {/* Advanced Features */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="space-y-4 text-center"
+                  >
+                    <h2
+                      className="text-2xl font-bold"
+                      style={{ color: '#1D1D1F' }}
+                    >
+                      Advanced Features
+                    </h2>
+                    <p className="text-lg leading-relaxed text-slate-600">
+                      Our platform employs state of the art ML
+                      algorithms for comprehensive neurological assessment.
+                      Real-time speech analysis, retinal
+                      imaging, precise motor function evaluation, and
+                      cognitive testing.
+                    </p>
+                  </motion.div>
+
                   {/* What is NeuraLens */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -182,10 +204,9 @@ export default function HomePage() {
                       What is NeuraLens?
                     </h2>
                     <p className="text-lg leading-relaxed text-slate-600">
-                      A pioneering platform harnessing speech, retinal, motor,
-                      and cognitive analysis to detect neurological risks early,
-                      empowering better health decisions with AI-powered
-                      precision.
+                      NeuraLens integrates advanced AI powered multi-modal
+                      analysis combining speech patterns, retinal imaging, motor
+                      function assessment, and cognitive evaluation. 
                     </p>
                   </motion.div>
 
@@ -203,31 +224,13 @@ export default function HomePage() {
                       The Impact
                     </h2>
                     <p className="text-lg leading-relaxed text-slate-600">
-                      1 in 6 adults experience neurological conditions
-                      worldwide. Early detection improves outcomes
-                      significantly. Advanced AI accuracy enables precise
-                      multi-modal assessment for better health decisions.
+                      Neurological conditions affect 1 in 6 adults globally,
+                      representing over 1 billion people worldwide. Early
+                      detection through advanced screening reduces healthcare
+                      costs by 40% and significantly improves patient outcomes.
+                      
                     </p>
-                  </motion.div>
-
-                  {/* Advanced Features */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                    className="space-y-4 text-center"
-                  >
-                    <h2
-                      className="text-2xl font-bold"
-                      style={{ color: '#1D1D1F' }}
-                    >
-                      Advanced AI Assessment Features
-                    </h2>
-                    <p className="text-lg leading-relaxed text-slate-600">
-                      Comprehensive neurological evaluation through cutting-edge
-                      multi-modal analysis
-                    </p>
-                  </motion.div>
+                  </motion.div>                  
                 </div>
               </motion.div>
             </div>
