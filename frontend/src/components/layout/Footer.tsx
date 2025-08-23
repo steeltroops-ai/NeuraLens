@@ -6,23 +6,69 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <footer className="border-t border-slate-100 bg-white/95 backdrop-blur-md">
+      <div className="container mx-auto px-4 py-12">
         {/* Main Footer Content */}
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex flex-col items-center justify-center space-y-6 text-center">
           {/* Brand Section */}
           <div className="flex items-center space-x-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
+            {/* Neural Node Logo */}
+            <div className="relative">
               <svg
-                className="h-5 w-5 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+                className="h-8 w-8"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5 0 1.64-.8 3.09-2.03 4H9.03C7.8 12.09 7 10.64 7 9c0-2.76 2.24-5 5-5zm-2 7h4v2h-4v-2z" />
+                {/* Neural nodes */}
+                <circle
+                  cx="8"
+                  cy="16"
+                  r="6"
+                  fill="url(#neuralGradientFooter)"
+                  stroke="#1e3a8a"
+                  strokeWidth="1"
+                />
+                <circle
+                  cx="24"
+                  cy="12"
+                  r="4"
+                  fill="url(#neuralGradientFooter)"
+                  stroke="#1e3a8a"
+                  strokeWidth="1"
+                />
+
+                {/* Connection line */}
+                <line
+                  x1="14"
+                  y1="16"
+                  x2="20"
+                  y2="12"
+                  stroke="#1e3a8a"
+                  strokeWidth="2"
+                  opacity="0.7"
+                />
+
+                {/* Gradient definition */}
+                <defs>
+                  <linearGradient
+                    id="neuralGradientFooter"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#0d9488" />
+                    <stop offset="100%" stopColor="#3b82f6" />
+                  </linearGradient>
+                </defs>
               </svg>
             </div>
-            <span className="text-xl font-bold text-slate-900">
-              NeuroLens-X
+            <span
+              className="text-xl font-bold text-slate-900"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Neuralens
             </span>
           </div>
 

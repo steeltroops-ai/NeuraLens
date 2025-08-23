@@ -57,9 +57,9 @@ const navigationItems: NavigationItem[] = [
     ),
   },
   {
-    id: 'assessment',
-    label: 'Start Test',
-    href: '/assessment',
+    id: 'about',
+    label: 'About',
+    href: '/about',
     icon: (
       <svg
         className="h-5 w-5"
@@ -71,7 +71,27 @@ const navigationItems: NavigationItem[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'readme',
+    label: 'README',
+    href: '/readme',
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
         />
       </svg>
     ),
@@ -128,8 +148,8 @@ export const Header: React.FC = () => {
         'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
         // Always render initial state on server, apply scroll styles after hydration
         mounted && isScrolled
-          ? 'border-b border-gray-200 bg-white/95 shadow-apple backdrop-blur-xl'
-          : 'bg-white/80 backdrop-blur-sm'
+          ? 'border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-xl'
+          : 'bg-white/90 backdrop-blur-md'
       )}
       onKeyDown={handleKeyDown}
       suppressHydrationWarning
@@ -141,23 +161,15 @@ export const Header: React.FC = () => {
         id="main-navigation"
       >
         <div className="flex h-16 items-center justify-between lg:h-20">
-          {/* Logo */}
+          {/* Brand */}
           <div className="flex-shrink-0">
             <Link
               href="/"
-              className="flex items-center space-x-3 rounded-lg text-gray-900 transition-colors hover:text-medical-500 focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white"
-              aria-label="NeuroLens-X Home"
+              className="text-xl font-semibold transition-colors duration-200 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              style={{ color: '#1D1D1F' }}
+              aria-label="NeuraLens Home"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-                <svg
-                  className="h-5 w-5 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5 0 1.64-.8 3.09-2.03 4H9.03C7.8 12.09 7 10.64 7 9c0-2.76 2.24-5 5-5zm-2 7h4v2h-4v-2z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold">NeuroLens-X</span>
+              NeuraLens
             </Link>
           </div>
 
@@ -172,13 +184,12 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={isDisabled ? '#' : item.href}
                   className={cn(
-                    'flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
-                    'focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white',
-                    isActive &&
-                      'border border-medical-500/20 bg-medical-500/10 text-medical-600',
+                    'text-sm font-medium transition-colors duration-200 hover:no-underline',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                    isActive && 'text-gray-900',
                     !isActive &&
                       !isDisabled &&
-                      'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                      'text-gray-600 hover:text-gray-900',
                     isDisabled && 'cursor-not-allowed text-gray-400 opacity-50'
                   )}
                   aria-current={isActive ? 'page' : undefined}
@@ -186,10 +197,9 @@ export const Header: React.FC = () => {
                   tabIndex={isDisabled ? -1 : 0}
                   {...(isDisabled && { onClick: (e) => e.preventDefault() })}
                 >
-                  {item.icon}
                   <span>{item.label}</span>
                   {item.badge && (
-                    <span className="ml-2 rounded-full bg-primary-500 px-2 py-1 text-xs text-white">
+                    <span className="ml-2 rounded-full bg-blue-500 px-2 py-1 text-xs text-white">
                       {item.badge}
                     </span>
                   )}
@@ -198,16 +208,35 @@ export const Header: React.FC = () => {
             })}
           </div>
 
-          {/* CTA Button */}
+          {/* CTA and Sign In Buttons */}
           <div className="hidden lg:flex lg:items-center lg:space-x-4">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => router.push('/assessment')}
-              className="font-semibold transition-all duration-200 hover:scale-105"
+            <button
+              onClick={() => router.push('/login')}
+              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ color: '#8E8E93' }}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                // Trigger sidebar assessment instead of navigation
+                const event = new CustomEvent('openAssessmentSidebar');
+                window.dispatchEvent(event);
+              }}
+              className="hover:scale-98 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                backgroundColor: '#007AFF',
+                backdropFilter: 'blur(20px)',
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.currentTarget.style.backgroundColor = '#0056CC';
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.currentTarget.style.backgroundColor = '#007AFF';
+              }}
             >
               Start Health Check
-            </Button>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}

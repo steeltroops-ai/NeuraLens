@@ -139,6 +139,8 @@ export function CognitiveAssessmentStep({
     setIsTestActive(false);
 
     // Simulate test results (in real implementation, this would come from the actual test)
+    if (!currentTest) return;
+
     const mockResult = {
       testId: currentTest.id,
       score: Math.random() * 0.4 + 0.6, // Random score between 0.6-1.0
@@ -270,27 +272,29 @@ export function CognitiveAssessmentStep({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  {currentTest.icon}
-                  {currentTest.name}
+                  {currentTest?.icon}
+                  {currentTest?.name}
                 </CardTitle>
-                <p className="text-gray-600">{currentTest.description}</p>
+                <p className="text-gray-600">{currentTest?.description}</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    Duration: {Math.floor(currentTest.duration / 60)}:
-                    {(currentTest.duration % 60).toString().padStart(2, '0')}
+                    Duration: {Math.floor((currentTest?.duration || 0) / 60)}:
+                    {((currentTest?.duration || 0) % 60)
+                      .toString()
+                      .padStart(2, '0')}
                   </div>
                   <Badge variant="secondary" className="capitalize">
-                    {currentTest.type}
+                    {currentTest?.type}
                   </Badge>
                 </div>
 
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Instructions:</h4>
                   <ul className="space-y-2">
-                    {currentTest.instructions.map((instruction, index) => (
+                    {currentTest?.instructions?.map((instruction, index) => (
                       <li
                         key={index}
                         className="flex items-start gap-2 text-sm text-gray-600"
@@ -313,7 +317,7 @@ export function CognitiveAssessmentStep({
                     Start Test
                   </Button>
                   {currentTestIndex > 0 && (
-                    <Button variant="outline" onClick={onBack}>
+                    <Button variant="secondary" onClick={onBack}>
                       Back
                     </Button>
                   )}
@@ -333,15 +337,15 @@ export function CognitiveAssessmentStep({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-3">
-                    {currentTest.icon}
-                    {currentTest.name} - In Progress
+                    {currentTest?.icon}
+                    {currentTest?.name} - In Progress
                   </CardTitle>
                   <div className="flex items-center gap-4">
                     <div className="font-mono text-2xl font-bold text-blue-600">
                       {formatTime(timeRemaining)}
                     </div>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={resetCurrentTest}
                       className="flex items-center gap-1"
@@ -353,8 +357,8 @@ export function CognitiveAssessmentStep({
                 </div>
                 <Progress
                   value={
-                    ((currentTest.duration - timeRemaining) /
-                      currentTest.duration) *
+                    (((currentTest?.duration || 0) - timeRemaining) /
+                      (currentTest?.duration || 1)) *
                     100
                   }
                   className="h-2"
@@ -364,10 +368,10 @@ export function CognitiveAssessmentStep({
                 <div className="flex min-h-[300px] items-center justify-center rounded-lg bg-gray-50">
                   <div className="space-y-4 text-center">
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                      {currentTest.icon}
+                      {currentTest?.icon}
                     </div>
                     <p className="text-gray-600">
-                      {currentTest.name} is now running...
+                      {currentTest?.name} is now running...
                     </p>
                     <p className="text-sm text-gray-500">
                       Follow the on-screen instructions and complete the tasks
@@ -375,7 +379,7 @@ export function CognitiveAssessmentStep({
                     </p>
                     <Button
                       onClick={handleTestComplete}
-                      variant="outline"
+                      variant="secondary"
                       className="mt-4"
                     >
                       Complete Test Early

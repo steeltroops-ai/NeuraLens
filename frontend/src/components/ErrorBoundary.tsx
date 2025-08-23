@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex min-h-screen items-center justify-center bg-surface-background p-4">
+        <div className="bg-surface-background flex min-h-screen items-center justify-center p-4">
           <Card className="w-full max-w-lg p-8 text-center">
             <div className="mb-4 text-6xl">⚠️</div>
             <h1 className="mb-4 text-2xl font-bold text-text-primary">
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <summary className="mb-2 cursor-pointer text-sm font-medium text-text-primary">
                   Error Details (Development)
                 </summary>
-                <div className="overflow-auto rounded-lg bg-surface-secondary p-4 font-mono text-xs text-text-secondary">
+                <div className="bg-surface-secondary overflow-auto rounded-lg p-4 font-mono text-xs text-text-secondary">
                   <div className="mb-2">
                     <strong>Error:</strong> {this.state.error.message}
                   </div>
@@ -131,3 +131,47 @@ export const ErrorFallback: React.FC<{
     </Card>
   </div>
 );
+
+// Loading Skeleton Component for Anatomical Visuals
+export const AnatomicalLoadingSkeleton: React.FC<{ className?: string }> = ({
+  className = '',
+}) => (
+  <div
+    className={`h-48 w-full animate-pulse rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 ${className}`}
+  >
+    <div className="flex h-full items-center justify-center">
+      <div className="text-sm font-medium text-slate-400">
+        Loading visualization...
+      </div>
+    </div>
+  </div>
+);
+
+// Network Status Component
+export const NetworkStatus: React.FC = () => {
+  const [isOnline, setIsOnline] = React.useState(true);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  if (isOnline) return null;
+
+  return (
+    <div className="fixed left-0 right-0 top-0 z-50 bg-red-600 px-4 py-2 text-center text-sm font-medium text-white">
+      You are currently offline. Some features may not be available.
+    </div>
+  );
+};
+
+// Default export
+export default ErrorBoundary;

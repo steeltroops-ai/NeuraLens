@@ -9,10 +9,7 @@ export type RouteId =
   | 'assessment-retinal'
   | 'assessment-risk'
   | 'assessment-processing'
-  | 'results'
-  | 'report'
   | 'dashboard'
-  | 'about'
   | 'privacy'
   | 'help';
 
@@ -443,24 +440,11 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     icon: 'brain',
   },
   {
-    id: 'results',
-    label: 'Results',
-    route: 'results',
-    icon: 'chart',
-    disabled: true, // Enabled after assessment completion
-  },
-  {
     id: 'dashboard',
     label: 'Dashboard',
     route: 'dashboard',
     icon: 'dashboard',
     disabled: true, // Enabled for registered users
-  },
-  {
-    id: 'about',
-    label: 'About',
-    route: 'about',
-    icon: 'info',
   },
   {
     id: 'help',
