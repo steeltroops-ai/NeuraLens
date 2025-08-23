@@ -197,6 +197,7 @@ export default function PerformanceMetrics({
             {(
               (metrics.speechLatency +
                 metrics.motorLatency +
+                metrics.cognitiveLatency +
                 metrics.nriLatency) /
               4
             ).toFixed(1)}
