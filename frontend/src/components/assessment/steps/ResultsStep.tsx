@@ -28,7 +28,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
       try {
         await navigator.share({
           title: 'NeuroLens-X Health Check Results',
-          text: `My brain health check shows a health score of ${results.nriResult.nriScore} (${results.nriResult.riskCategory} risk)`,
+          text: `My brain health check shows a health score of ${results.nriResult.nri_score} (${results.nriResult.risk_category} risk)`,
           url: window.location.href,
         });
       } catch (error) {
@@ -36,7 +36,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
       }
     } else {
       // Fallback: copy to clipboard
-      const shareText = `My NeuroLens-X health check: Health Score ${results.nriResult.nriScore} (${results.nriResult.riskCategory} risk)`;
+      const shareText = `My NeuroLens-X health check: Health Score ${results.nriResult.nri_score} (${results.nriResult.risk_category} risk)`;
       try {
         await navigator.clipboard.writeText(shareText);
         alert('Results copied to clipboard!');
@@ -75,11 +75,14 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
           <Card className='p-6'>
             <div className='text-center'>
               <div className='mb-4'>
-                <div className='text-6xl font-bold text-blue-600'>{results.nriResult.nriScore}</div>
+                <div className='text-6xl font-bold text-blue-600'>
+                  {results.nriResult.nri_score}
+                </div>
                 <div className='text-lg text-slate-600'>Neurological Risk Index</div>
               </div>
               <div className='text-sm text-slate-500'>
-                Risk Category: <span className='font-medium'>{results.nriResult.riskCategory}</span>
+                Risk Category:{' '}
+                <span className='font-medium'>{results.nriResult.risk_category}</span>
               </div>
             </div>
           </Card>
@@ -88,7 +91,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
           <div className='grid grid-cols-1 gap-6 md:grid-cols-4'>
             <Card className='p-6 text-center'>
               <div className='mb-2 text-3xl font-bold text-primary-400'>
-                {results.nriResult.nriScore}
+                {results.nriResult.nri_score}
               </div>
               <div className='text-sm text-text-secondary'>NRI Score</div>
             </Card>
@@ -102,7 +105,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
 
             <Card className='p-6 text-center'>
               <div className='mb-2 text-3xl font-bold text-text-primary'>
-                {results.nriResult.dataCompleteness}%
+                {results.nriResult.confidence ? Math.round(results.nriResult.confidence * 100) : 85}
+                %
               </div>
               <div className='text-sm text-text-secondary'>Data Complete</div>
             </Card>

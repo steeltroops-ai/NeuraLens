@@ -367,7 +367,7 @@ export class MLModelIntegrator {
           recoverable: true,
         };
         progress.errors.push(assessmentError);
-        modalityResults[modality as keyof typeof modalityResults] = null;
+        modalityResults[modality as keyof typeof modalityResults] = undefined;
       }
     }
 

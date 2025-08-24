@@ -172,6 +172,12 @@ async function processMotorAssessment(
     biomarkers,
     assessment_type: request.assessment_type,
     movement_quality: movementQuality,
+    recommendations: [
+      'Continue regular physical therapy',
+      'Practice balance exercises daily',
+      'Monitor movement patterns',
+      'Consult with healthcare provider',
+    ],
     timestamp: new Date().toISOString(),
   };
 }
@@ -227,7 +233,13 @@ function calculateMovementFrequency(
   // Count peaks to estimate frequency
   let peakCount = 0;
   for (let i = 1; i < magnitudes.length - 1; i++) {
-    if (magnitudes[i] > magnitudes[i - 1] && magnitudes[i] > magnitudes[i + 1]) {
+    if (
+      magnitudes[i] &&
+      magnitudes[i - 1] &&
+      magnitudes[i + 1] &&
+      (magnitudes[i] ?? 0) > (magnitudes[i - 1] ?? 0) &&
+      (magnitudes[i] ?? 0) > (magnitudes[i + 1] ?? 0)
+    ) {
       peakCount++;
     }
   }
@@ -277,8 +289,8 @@ function calculateCoordinationIndex(sensorData: MotorAssessmentRequest['sensor_d
   let correlation = 0;
 
   for (let i = 0; i < minLength - 1; i++) {
-    const accelChange = accelMagnitudes[i + 1] - accelMagnitudes[i];
-    const gyroChange = gyroMagnitudes[i + 1] - gyroMagnitudes[i];
+    const accelChange = (accelMagnitudes[i + 1] ?? 0) - (accelMagnitudes[i] ?? 0);
+    const gyroChange = (gyroMagnitudes[i + 1] ?? 0) - (gyroMagnitudes[i] ?? 0);
     correlation += Math.abs(accelChange * gyroChange);
   }
 
@@ -310,10 +322,13 @@ function calculateTremorSeverity(
 
   for (let i = 0; i < windowSize - 1; i++) {
     const frequency = (i * samplingRate) / windowSize;
-    const power = Math.abs(magnitudes[i + 1] - magnitudes[i]);
+    const power = Math.abs((magnitudes[i + 1] ?? 0) - (magnitudes[i] ?? 0));
 
     totalPower += power;
-    if (frequency >= tremorFrequencyRange[0] && frequency <= tremorFrequencyRange[1]) {
+    if (
+      frequency >= (tremorFrequencyRange[0] ?? 0) &&
+      frequency <= (tremorFrequencyRange[1] ?? 100)
+    ) {
       tremorPower += power;
     }
   }
@@ -350,7 +365,9 @@ function calculateFatigueIndex(
   const initialPower = segments[0];
   const finalPower = segments[segments.length - 1];
 
-  return initialPower > 0 ? Math.max(0, (initialPower - finalPower) / initialPower) : 0;
+  return (initialPower ?? 0) > 0
+    ? Math.max(0, ((initialPower ?? 0) - (finalPower ?? 0)) / (initialPower ?? 1))
+    : 0;
 }
 
 /**
@@ -553,6 +570,12 @@ export function generateDemoMotorResult(
     },
     assessment_type: assessmentType,
     movement_quality: baseRisk < 30 ? 'good' : baseRisk < 50 ? 'fair' : 'concerning',
+    recommendations: [
+      'Continue regular physical therapy',
+      'Practice balance exercises daily',
+      'Monitor movement patterns',
+      'Consult with healthcare provider',
+    ],
     timestamp: new Date().toISOString(),
   };
 }

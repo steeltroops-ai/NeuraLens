@@ -178,7 +178,10 @@ async function processNRIFusion(request: NRIFusionRequest): Promise<NRIFusionRes
   const modalityContributions = extractModalityContributions(request.modality_results);
 
   // Calculate unified NRI score based on fusion method
-  const nriScore = calculateNRIScore(modalityContributions, request.fusion_method);
+  const nriScore = calculateNRIScore(
+    modalityContributions,
+    request.fusion_method ?? 'weighted_average',
+  );
 
   // Determine risk category
   const riskCategory = determineRiskCategory(nriScore);
@@ -186,7 +189,7 @@ async function processNRIFusion(request: NRIFusionRequest): Promise<NRIFusionRes
   // Calculate confidence and uncertainty
   const { confidence, uncertainty } = calculateConfidenceAndUncertainty(
     modalityContributions,
-    request.uncertainty_quantification,
+    request.uncertainty_quantification ?? false,
   );
 
   // Calculate consistency score
@@ -532,7 +535,7 @@ export function generateDemoNRIResult(modalityCount: number = 4): NRIFusionRespo
 
   for (let i = 0; i < Math.min(modalityCount, 4); i++) {
     contributions.push({
-      modality: modalities[i],
+      modality: modalities[i] ?? 'unknown',
       weight: 1.0 / modalityCount,
       confidence: 0.8 + Math.random() * 0.15,
       risk_score: nriScore + (Math.random() - 0.5) * 20,

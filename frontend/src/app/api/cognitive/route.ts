@@ -572,6 +572,12 @@ export function generateDemoCognitiveResult(
       processing_speed: Math.round(60 + Math.random() * 30),
       cognitive_flexibility: Math.round(65 + Math.random() * 25),
     },
+    recommendations: [
+      'Continue regular cognitive exercises',
+      'Maintain healthy sleep patterns',
+      'Consider memory training programs',
+      'Regular physical exercise recommended',
+    ],
     timestamp: new Date().toISOString(),
   };
 }

@@ -40,11 +40,11 @@ export default function MLIntegrationTestRunner({ className = '' }: MLIntegratio
       ];
 
       for (let i = 0; i < testSteps.length - 1; i++) {
-        setCurrentTest(testSteps[i]);
+        setCurrentTest(testSteps[i] ?? 'Unknown test');
         await new Promise(resolve => setTimeout(resolve, 300));
       }
 
-      setCurrentTest(testSteps[testSteps.length - 1]);
+      setCurrentTest(testSteps[testSteps.length - 1] ?? 'Test completed');
       const testResults = await runComprehensiveMLIntegrationTest();
       setResults(testResults);
       setCurrentTest('ML integration tests completed!');

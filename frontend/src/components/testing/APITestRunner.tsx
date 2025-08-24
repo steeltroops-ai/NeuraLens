@@ -37,11 +37,11 @@ export default function APITestRunner({ className = '' }: APITestRunnerProps) {
       ];
 
       for (let i = 0; i < testSteps.length - 1; i++) {
-        setCurrentTest(testSteps[i]);
+        setCurrentTest(testSteps[i] ?? 'Unknown test');
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      setCurrentTest(testSteps[testSteps.length - 1]);
+      setCurrentTest(testSteps[testSteps.length - 1] ?? 'Test completed');
       const testResults = await runComprehensiveIntegrationTest();
       setResults(testResults);
       setCurrentTest('Tests completed!');

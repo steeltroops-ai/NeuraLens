@@ -6,7 +6,7 @@
 import { BaseValidator, ValidationResult, FileMetadata, QualityAssessment } from './base-validator';
 
 // Re-export for backward compatibility
-export { ValidationResult, FileMetadata };
+export type { ValidationResult, FileMetadata };
 
 // Audio file validation
 export async function validateAudioFile(file: File): Promise<ValidationResult> {
