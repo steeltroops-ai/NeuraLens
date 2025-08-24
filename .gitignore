@@ -297,6 +297,9 @@ tramp
 docs/build/
 docs/dist/
 
+# Generated reports (local-only)
+docs/reports/
+
 # Benchmark results
 benchmark/
 
