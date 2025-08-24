@@ -21,10 +21,10 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
-import type { 
-  CognitiveAssessmentRequest, 
+import type {
+  CognitiveAssessmentRequest,
   CognitiveAssessmentResponse,
-  CognitiveBiomarkers 
+  CognitiveBiomarkers,
 } from '../../../lib/api/types';
 
 /**
@@ -37,14 +37,16 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { session_id, test_results, test_battery, difficulty_level } = body as CognitiveAssessmentRequest;
+    const { session_id, test_results, test_battery, difficulty_level } =
+      body as CognitiveAssessmentRequest;
 
     // Validate required fields
     if (!session_id || !test_results || !test_battery || !difficulty_level) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Missing required fields: session_id, test_results, test_battery, or difficulty_level',
+          error:
+            'Missing required fields: session_id, test_results, test_battery, or difficulty_level',
         },
         { status: 400 },
       );
@@ -151,19 +153,23 @@ export async function GET(request: NextRequest) {
  * Process cognitive assessment data and add server-side enhancements
  */
 async function processCognitiveAssessment(
-  request: CognitiveAssessmentRequest
+  request: CognitiveAssessmentRequest,
 ): Promise<CognitiveAssessmentResponse> {
   const startTime = Date.now();
-  
+
   // Analyze test results to extract cognitive biomarkers
-  const biomarkers = analyzeCognitivePerformance(request.test_results, request.test_battery, request.difficulty_level);
-  
+  const biomarkers = analyzeCognitivePerformance(
+    request.test_results,
+    request.test_battery,
+    request.difficulty_level,
+  );
+
   // Calculate overall cognitive score
   const overallScore = calculateOverallCognitiveScore(biomarkers, request.difficulty_level);
-  
+
   // Generate domain-specific scores
   const domainScores = calculateDomainScores(biomarkers, request.test_battery);
-  
+
   const processingTime = Date.now() - startTime;
 
   return {
@@ -175,6 +181,7 @@ async function processCognitiveAssessment(
     overall_score: Math.round(overallScore),
     test_battery: request.test_battery,
     domain_scores: domainScores,
+    recommendations: [], // Add empty recommendations array
     timestamp: new Date().toISOString(),
   };
 }
@@ -185,23 +192,32 @@ async function processCognitiveAssessment(
 function analyzeCognitivePerformance(
   testResults: CognitiveAssessmentRequest['test_results'],
   testBattery: string[],
-  difficultyLevel: string
+  difficultyLevel: string,
 ): CognitiveBiomarkers {
   // Extract memory performance
   const memoryScore = calculateMemoryScore(testResults.memory || {}, difficultyLevel);
-  
+
   // Extract attention performance
-  const attentionScore = calculateAttentionScore(testResults.attention || {}, testResults.response_times || []);
-  
+  const attentionScore = calculateAttentionScore(
+    testResults.attention || {},
+    testResults.response_times || [],
+  );
+
   // Extract executive function performance
-  const executiveScore = calculateExecutiveScore(testResults.executive || {}, testResults.task_switching);
-  
+  const executiveScore = calculateExecutiveScore(
+    testResults.executive || {},
+    testResults.task_switching,
+  );
+
   // Calculate language performance
   const languageScore = calculateLanguageScore(testResults, testBattery);
-  
+
   // Calculate processing speed
-  const processingSpeed = calculateProcessingSpeed(testResults.response_times || [], testResults.accuracy || []);
-  
+  const processingSpeed = calculateProcessingSpeed(
+    testResults.response_times || [],
+    testResults.accuracy || [],
+  );
+
   // Calculate cognitive flexibility
   const cognitiveFlexibility = calculateCognitiveFlexibility(testResults.task_switching);
 
@@ -220,36 +236,42 @@ function analyzeCognitivePerformance(
  */
 function calculateMemoryScore(memoryData: Record<string, number>, difficultyLevel: string): number {
   if (Object.keys(memoryData).length === 0) return 0.5; // Default neutral score
-  
+
   const scores = Object.values(memoryData);
   const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  
+
   // Adjust for difficulty level
   const difficultyMultiplier = getDifficultyMultiplier(difficultyLevel);
-  
+
   return Math.min(1.0, averageScore * difficultyMultiplier);
 }
 
 /**
  * Calculate attention domain score
  */
-function calculateAttentionScore(attentionData: Record<string, number>, responseTimes: number[]): number {
+function calculateAttentionScore(
+  attentionData: Record<string, number>,
+  responseTimes: number[],
+): number {
   if (Object.keys(attentionData).length === 0) return 0.5;
-  
+
   const scores = Object.values(attentionData);
   const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  
+
   // Factor in response time consistency
   let consistencyBonus = 1.0;
   if (responseTimes.length > 5) {
-    const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-    const variance = responseTimes.reduce((sum, time) => sum + Math.pow(time - avgResponseTime, 2), 0) / responseTimes.length;
+    const avgResponseTime =
+      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+    const variance =
+      responseTimes.reduce((sum, time) => sum + Math.pow(time - avgResponseTime, 2), 0) /
+      responseTimes.length;
     const coefficient = Math.sqrt(variance) / avgResponseTime;
-    
+
     // Lower coefficient of variation = better attention consistency
     consistencyBonus = Math.max(0.7, 1.0 - coefficient);
   }
-  
+
   return Math.min(1.0, averageScore * consistencyBonus);
 }
 
@@ -258,40 +280,44 @@ function calculateAttentionScore(attentionData: Record<string, number>, response
  */
 function calculateExecutiveScore(
   executiveData: Record<string, number>,
-  taskSwitching?: CognitiveAssessmentRequest['test_results']['task_switching']
+  taskSwitching?: CognitiveAssessmentRequest['test_results']['task_switching'],
 ): number {
   if (Object.keys(executiveData).length === 0) return 0.5;
-  
+
   const scores = Object.values(executiveData);
   let averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  
+
   // Factor in task switching performance
   if (taskSwitching) {
     const switchCost = calculateSwitchCost(taskSwitching);
     const switchBonus = Math.max(0.8, 1.0 - switchCost);
     averageScore *= switchBonus;
   }
-  
+
   return Math.min(1.0, averageScore);
 }
 
 /**
  * Calculate language domain score
  */
-function calculateLanguageScore(testResults: CognitiveAssessmentRequest['test_results'], testBattery: string[]): number {
+function calculateLanguageScore(
+  testResults: CognitiveAssessmentRequest['test_results'],
+  testBattery: string[],
+): number {
   // Check if language tests were included
-  const hasLanguageTests = testBattery.some(test => 
-    test.toLowerCase().includes('language') || 
-    test.toLowerCase().includes('verbal') ||
-    test.toLowerCase().includes('fluency')
+  const hasLanguageTests = testBattery.some(
+    test =>
+      test.toLowerCase().includes('language') ||
+      test.toLowerCase().includes('verbal') ||
+      test.toLowerCase().includes('fluency'),
   );
-  
+
   if (!hasLanguageTests) return 0.7; // Default score if no language tests
-  
+
   // Use accuracy as proxy for language performance
   const accuracy = testResults.accuracy || [];
   if (accuracy.length === 0) return 0.5;
-  
+
   const averageAccuracy = accuracy.reduce((sum, acc) => sum + acc, 0) / accuracy.length;
   return Math.min(1.0, averageAccuracy);
 }
@@ -301,46 +327,49 @@ function calculateLanguageScore(testResults: CognitiveAssessmentRequest['test_re
  */
 function calculateProcessingSpeed(responseTimes: number[], accuracy: number[]): number {
   if (responseTimes.length === 0) return 0.5;
-  
+
   const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-  const avgAccuracy = accuracy.length > 0 ? accuracy.reduce((sum, acc) => sum + acc, 0) / accuracy.length : 0.8;
-  
+  const avgAccuracy =
+    accuracy.length > 0 ? accuracy.reduce((sum, acc) => sum + acc, 0) / accuracy.length : 0.8;
+
   // Normalize response time (assuming 500-3000ms range)
   const normalizedSpeed = Math.max(0, Math.min(1, (3000 - avgResponseTime) / 2500));
-  
+
   // Combine speed and accuracy
-  return (normalizedSpeed * 0.6) + (avgAccuracy * 0.4);
+  return normalizedSpeed * 0.6 + avgAccuracy * 0.4;
 }
 
 /**
  * Calculate cognitive flexibility score
  */
 function calculateCognitiveFlexibility(
-  taskSwitching?: CognitiveAssessmentRequest['test_results']['task_switching']
+  taskSwitching?: CognitiveAssessmentRequest['test_results']['task_switching'],
 ): number {
   if (!taskSwitching) return 0.5;
-  
+
   const switchCost = calculateSwitchCost(taskSwitching);
   const flexibilityScore = Math.max(0, 1.0 - switchCost);
-  
+
   // Factor in switch accuracy
   const accuracyBonus = taskSwitching.switch_accuracy || 0.8;
-  
+
   return Math.min(1.0, flexibilityScore * accuracyBonus);
 }
 
 /**
  * Calculate task switching cost
  */
-function calculateSwitchCost(taskSwitching: NonNullable<CognitiveAssessmentRequest['test_results']['task_switching']>): number {
+function calculateSwitchCost(
+  taskSwitching: NonNullable<CognitiveAssessmentRequest['test_results']['task_switching']>,
+): number {
   const repeatTrials = taskSwitching.repeat_trials || [];
   const switchTrials = taskSwitching.switch_trials || [];
-  
+
   if (repeatTrials.length === 0 || switchTrials.length === 0) return 0.2; // Default low cost
-  
+
   const avgRepeatTime = repeatTrials.reduce((sum, time) => sum + time, 0) / repeatTrials.length;
   const avgSwitchTime = switchTrials.reduce((sum, time) => sum + time, 0) / switchTrials.length;
-  
+
   // Switch cost as proportion of repeat trial time
   return Math.min(1.0, Math.max(0, (avgSwitchTime - avgRepeatTime) / avgRepeatTime));
 }
@@ -348,36 +377,42 @@ function calculateSwitchCost(taskSwitching: NonNullable<CognitiveAssessmentReque
 /**
  * Calculate overall cognitive score
  */
-function calculateOverallCognitiveScore(biomarkers: CognitiveBiomarkers, difficultyLevel: string): number {
+function calculateOverallCognitiveScore(
+  biomarkers: CognitiveBiomarkers,
+  difficultyLevel: string,
+): number {
   const weights = {
     memory: 0.25,
-    attention: 0.20,
-    executive: 0.20,
+    attention: 0.2,
+    executive: 0.2,
     language: 0.15,
-    processing_speed: 0.10,
-    cognitive_flexibility: 0.10,
+    processing_speed: 0.1,
+    cognitive_flexibility: 0.1,
   };
-  
-  const weightedScore = 
+
+  const weightedScore =
     biomarkers.memory_score * weights.memory +
     biomarkers.attention_score * weights.attention +
     biomarkers.executive_score * weights.executive +
     biomarkers.language_score * weights.language +
     biomarkers.processing_speed * weights.processing_speed +
     biomarkers.cognitive_flexibility * weights.cognitive_flexibility;
-  
+
   // Apply difficulty adjustment
   const difficultyMultiplier = getDifficultyMultiplier(difficultyLevel);
-  
+
   return Math.min(100, weightedScore * 100 * difficultyMultiplier);
 }
 
 /**
  * Calculate domain-specific scores
  */
-function calculateDomainScores(biomarkers: CognitiveBiomarkers, testBattery: string[]): Record<string, number> {
+function calculateDomainScores(
+  biomarkers: CognitiveBiomarkers,
+  testBattery: string[],
+): Record<string, number> {
   const domainScores: Record<string, number> = {};
-  
+
   // Map biomarkers to domain scores (0-100 scale)
   domainScores.memory = Math.round(biomarkers.memory_score * 100);
   domainScores.attention = Math.round(biomarkers.attention_score * 100);
@@ -385,16 +420,18 @@ function calculateDomainScores(biomarkers: CognitiveBiomarkers, testBattery: str
   domainScores.language = Math.round(biomarkers.language_score * 100);
   domainScores.processing_speed = Math.round(biomarkers.processing_speed * 100);
   domainScores.cognitive_flexibility = Math.round(biomarkers.cognitive_flexibility * 100);
-  
+
   // Add composite scores for test battery
   testBattery.forEach(test => {
     if (!domainScores[test]) {
       // Calculate composite score for this test
       const relevantScores = Object.values(domainScores);
-      domainScores[test] = Math.round(relevantScores.reduce((sum, score) => sum + score, 0) / relevantScores.length);
+      domainScores[test] = Math.round(
+        relevantScores.reduce((sum, score) => sum + score, 0) / relevantScores.length,
+      );
     }
   });
-  
+
   return domainScores;
 }
 
@@ -403,11 +440,11 @@ function calculateDomainScores(biomarkers: CognitiveBiomarkers, testBattery: str
  */
 function getDifficultyMultiplier(difficultyLevel: string): number {
   const multipliers = {
-    easy: 0.8,     // Easier tests get lower multiplier
+    easy: 0.8, // Easier tests get lower multiplier
     standard: 1.0, // Standard difficulty
-    hard: 1.2,     // Harder tests get bonus multiplier
+    hard: 1.2, // Harder tests get bonus multiplier
   };
-  
+
   return multipliers[difficultyLevel as keyof typeof multipliers] || 1.0;
 }
 
@@ -416,31 +453,33 @@ function getDifficultyMultiplier(difficultyLevel: string): number {
  */
 function calculateConfidence(
   testResults: CognitiveAssessmentRequest['test_results'],
-  testBattery: string[]
+  testBattery: string[],
 ): number {
   let confidence = 0.9; // Base confidence
-  
+
   // Reduce confidence for incomplete test data
   const dataCompleteness = calculateDataCompleteness(testResults, testBattery);
   confidence *= dataCompleteness;
-  
+
   // Reduce confidence for inconsistent response times
   const responseTimes = testResults.response_times || [];
   if (responseTimes.length > 5) {
     const avgTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-    const variance = responseTimes.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) / responseTimes.length;
+    const variance =
+      responseTimes.reduce((sum, time) => sum + Math.pow(time - avgTime, 2), 0) /
+      responseTimes.length;
     const coefficient = Math.sqrt(variance) / avgTime;
-    
+
     if (coefficient > 0.5) confidence *= 0.9; // High variability reduces confidence
   }
-  
+
   // Reduce confidence for extreme accuracy values
   const accuracy = testResults.accuracy || [];
   if (accuracy.length > 0) {
     const avgAccuracy = accuracy.reduce((sum, acc) => sum + acc, 0) / accuracy.length;
     if (avgAccuracy < 0.3 || avgAccuracy > 0.98) confidence *= 0.8; // Extreme values are suspicious
   }
-  
+
   return Math.round(Math.max(0.1, Math.min(1.0, confidence)) * 100) / 100;
 }
 
@@ -449,27 +488,27 @@ function calculateConfidence(
  */
 function calculateDataCompleteness(
   testResults: CognitiveAssessmentRequest['test_results'],
-  testBattery: string[]
+  testBattery: string[],
 ): number {
   let completeness = 0;
   let totalExpected = 0;
-  
+
   // Check for expected data fields
   const expectedFields = ['response_times', 'accuracy', 'memory', 'attention', 'executive'];
-  
+
   expectedFields.forEach(field => {
     totalExpected++;
     if (testResults[field as keyof typeof testResults]) {
       completeness++;
     }
   });
-  
+
   // Bonus for task switching data
   if (testResults.task_switching) {
     completeness += 0.5;
     totalExpected += 0.5;
   }
-  
+
   return Math.min(1.0, completeness / totalExpected);
 }
 
@@ -480,7 +519,7 @@ function calculateNRIContribution(result: CognitiveAssessmentResponse): number {
   // Cognitive assessment contributes 25% to overall NRI
   const cognitiveWeight = 0.25;
   const weightedScore = result.risk_score * cognitiveWeight * result.confidence;
-  
+
   return Math.round(Math.max(0, Math.min(25, weightedScore)));
 }
 
@@ -504,10 +543,12 @@ async function getCachedResult(key: string): Promise<any | null> {
 /**
  * Generate demo cognitive assessment result for testing
  */
-export function generateDemoCognitiveResult(testBattery: string[] = ['memory', 'attention', 'executive']): CognitiveAssessmentResponse {
+export function generateDemoCognitiveResult(
+  testBattery: string[] = ['memory', 'attention', 'executive'],
+): CognitiveAssessmentResponse {
   const overallScore = 60 + Math.random() * 30; // 60-90 range
   const riskScore = Math.round(100 - overallScore);
-  
+
   return {
     session_id: `demo_${Date.now()}`,
     risk_score: riskScore,

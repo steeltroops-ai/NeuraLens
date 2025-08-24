@@ -1,23 +1,30 @@
 # FastAPI Core - Essential for hackathon demo
-fastapi>=0.100.0
-uvicorn>=0.20.0
-pydantic>=2.0.0
+fastapi>=0.116.1
+uvicorn>=0.35.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+
+# Database & Storage
+sqlalchemy>=2.0.43
+alembic>=1.14.0
+psycopg2-binary>=2.9.0  # PostgreSQL adapter
+supabase>=2.12.0  # Supabase Python client
 
 # ML & Data Processing - Core packages only
-numpy>=1.20.0
-pillow>=8.0.0
+numpy>=2.3.2
+pillow>=11.0.0
 
 # Real-time ML Models
-transformers>=4.30.0
-onnx>=1.14.0
-onnxruntime>=1.15.0
-scikit-learn>=1.3.0
-xgboost>=1.7.0
+transformers>=4.55.4
+onnx>=1.18.0
+onnxruntime>=1.21.0
+scikit-learn>=1.6.0
+xgboost>=2.1.0
 
 # Audio Processing
-librosa>=0.10.0
-soundfile>=0.12.0
+librosa>=0.10.5
+soundfile>=0.12.1
 
-# Optional packages for advanced features
-# torch>=2.0.0  # For model conversion
-# tensorflow>=2.13.0  # Alternative ML framework
+# Optional packages for advanced features (commented out to reduce dependencies)
+# torch>=2.0.0  # For model conversion - uncomment if needed
+# tensorflow>=2.13.0  # Alternative ML framework - uncomment if needed

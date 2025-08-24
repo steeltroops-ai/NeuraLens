@@ -1,12 +1,16 @@
 /**
  * ML Integration Test Suite
- * 
+ *
  * Comprehensive test suite to verify the ML integration layer works correctly
  * with the new API-based backend communication.
  */
 
 import { MLModelIntegrator, generateSessionId, validateAssessmentRequest } from './ml-integration';
-import type { AssessmentRequest, AssessmentProgress, CompleteAssessmentResult } from './ml-integration';
+import type {
+  AssessmentRequest,
+  AssessmentProgress,
+  CompleteAssessmentResult,
+} from './ml-integration';
 
 export interface MLIntegrationTestResult {
   success: boolean;
@@ -42,7 +46,7 @@ export interface ComprehensiveMLTestResults {
  */
 export async function runComprehensiveMLIntegrationTest(): Promise<ComprehensiveMLTestResults> {
   console.log('🧠 Starting comprehensive ML integration test suite...');
-  
+
   const startTime = Date.now();
   const results: ComprehensiveMLTestResults = {
     overall: {
@@ -67,22 +71,22 @@ export async function runComprehensiveMLIntegrationTest(): Promise<Comprehensive
 
   // Test session generation
   results.results.sessionGeneration = await testSessionGeneration();
-  
+
   // Test request validation
   results.results.requestValidation = await testRequestValidation();
-  
+
   // Test individual modality analyses
   results.results.speechAnalysis = await testSpeechAnalysis();
   results.results.retinalAnalysis = await testRetinalAnalysis();
   results.results.motorAnalysis = await testMotorAnalysis();
   results.results.cognitiveAnalysis = await testCognitiveAnalysis();
-  
+
   // Test multi-modal assessment
   results.results.multiModalAssessment = await testMultiModalAssessment();
-  
+
   // Test progress tracking
   results.results.progressTracking = await testProgressTracking();
-  
+
   // Test error handling
   results.results.errorHandling = await testErrorHandling();
 
@@ -99,8 +103,10 @@ export async function runComprehensiveMLIntegrationTest(): Promise<Comprehensive
     totalDuration,
   };
 
-  console.log(`✅ ML integration test completed: ${passedTests}/${results.overall.totalTests} tests passed in ${totalDuration}ms`);
-  
+  console.log(
+    `✅ ML integration test completed: ${passedTests}/${results.overall.totalTests} tests passed in ${totalDuration}ms`,
+  );
+
   return results;
 }
 
@@ -109,26 +115,26 @@ export async function runComprehensiveMLIntegrationTest(): Promise<Comprehensive
  */
 async function testSessionGeneration(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const sessionId1 = generateSessionId();
     const sessionId2 = generateSessionId();
-    
+
     // Validate session IDs are generated
     if (!sessionId1 || !sessionId2) {
       throw new Error('Session ID generation failed');
     }
-    
+
     // Validate session IDs are unique
     if (sessionId1 === sessionId2) {
       throw new Error('Session IDs are not unique');
     }
-    
+
     // Validate session ID format
     if (!sessionId1.startsWith('session_')) {
       throw new Error('Invalid session ID format');
     }
-    
+
     return {
       success: true,
       testName: 'Session Generation',
@@ -150,7 +156,7 @@ async function testSessionGeneration(): Promise<MLIntegrationTestResult> {
  */
 async function testRequestValidation(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     // Test valid request
     const validRequest: AssessmentRequest = {
@@ -158,23 +164,23 @@ async function testRequestValidation(): Promise<MLIntegrationTestResult> {
       audioFile: new File(['test'], 'test.wav', { type: 'audio/wav' }),
       retinalImage: new File(['test'], 'test.jpg', { type: 'image/jpeg' }),
     };
-    
+
     const validErrors = validateAssessmentRequest(validRequest);
     if (validErrors.length > 0) {
       throw new Error(`Valid request failed validation: ${validErrors.join(', ')}`);
     }
-    
+
     // Test invalid request
     const invalidRequest: AssessmentRequest = {
       sessionId: '',
       // No modalities provided
     };
-    
+
     const invalidErrors = validateAssessmentRequest(invalidRequest);
     if (invalidErrors.length === 0) {
       throw new Error('Invalid request passed validation');
     }
-    
+
     return {
       success: true,
       testName: 'Request Validation',
@@ -196,20 +202,20 @@ async function testRequestValidation(): Promise<MLIntegrationTestResult> {
  */
 async function testSpeechAnalysis(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const integrator = new MLModelIntegrator();
     const audioFile = new File(['test audio data'], 'test.wav', { type: 'audio/wav' });
-    
+
     const request: AssessmentRequest = {
       sessionId: generateSessionId(),
       audioFile,
     };
-    
+
     // This would normally call the API, but for testing we'll simulate
     // In a real test environment, you'd mock the API calls
     console.log('Speech analysis test - would call API with:', request);
-    
+
     return {
       success: true,
       testName: 'Speech Analysis',
@@ -231,18 +237,18 @@ async function testSpeechAnalysis(): Promise<MLIntegrationTestResult> {
  */
 async function testRetinalAnalysis(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const integrator = new MLModelIntegrator();
     const retinalImage = new File(['test image data'], 'test.jpg', { type: 'image/jpeg' });
-    
+
     const request: AssessmentRequest = {
       sessionId: generateSessionId(),
       retinalImage,
     };
-    
+
     console.log('Retinal analysis test - would call API with:', request);
-    
+
     return {
       success: true,
       testName: 'Retinal Analysis',
@@ -264,10 +270,10 @@ async function testRetinalAnalysis(): Promise<MLIntegrationTestResult> {
  */
 async function testMotorAnalysis(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const integrator = new MLModelIntegrator();
-    
+
     const request: AssessmentRequest = {
       sessionId: generateSessionId(),
       motorData: {
@@ -284,9 +290,9 @@ async function testMotorAnalysis(): Promise<MLIntegrationTestResult> {
         assessmentType: 'tremor',
       },
     };
-    
+
     console.log('Motor analysis test - would call API with:', request);
-    
+
     return {
       success: true,
       testName: 'Motor Analysis',
@@ -308,10 +314,10 @@ async function testMotorAnalysis(): Promise<MLIntegrationTestResult> {
  */
 async function testCognitiveAnalysis(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const integrator = new MLModelIntegrator();
-    
+
     const request: AssessmentRequest = {
       sessionId: generateSessionId(),
       cognitiveData: {
@@ -335,9 +341,9 @@ async function testCognitiveAnalysis(): Promise<MLIntegrationTestResult> {
         difficultyLevel: 'standard',
       },
     };
-    
+
     console.log('Cognitive analysis test - would call API with:', request);
-    
+
     return {
       success: true,
       testName: 'Cognitive Analysis',
@@ -359,10 +365,10 @@ async function testCognitiveAnalysis(): Promise<MLIntegrationTestResult> {
  */
 async function testMultiModalAssessment(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const integrator = new MLModelIntegrator();
-    
+
     const request: AssessmentRequest = {
       sessionId: generateSessionId(),
       audioFile: new File(['test audio'], 'test.wav', { type: 'audio/wav' }),
@@ -380,9 +386,9 @@ async function testMultiModalAssessment(): Promise<MLIntegrationTestResult> {
         difficultyLevel: 'standard',
       },
     };
-    
+
     console.log('Multi-modal assessment test - would process all modalities:', request);
-    
+
     return {
       success: true,
       testName: 'Multi-Modal Assessment',
@@ -404,14 +410,14 @@ async function testMultiModalAssessment(): Promise<MLIntegrationTestResult> {
  */
 async function testProgressTracking(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const progressUpdates: AssessmentProgress[] = [];
-    
+
     const progressCallback = (progress: AssessmentProgress) => {
       progressUpdates.push({ ...progress });
     };
-    
+
     // Simulate progress tracking
     const mockProgress: AssessmentProgress = {
       sessionId: generateSessionId(),
@@ -423,13 +429,13 @@ async function testProgressTracking(): Promise<MLIntegrationTestResult> {
       startTime: Date.now(),
       lastUpdate: Date.now(),
     };
-    
+
     progressCallback(mockProgress);
-    
+
     if (progressUpdates.length === 0) {
       throw new Error('Progress callback not called');
     }
-    
+
     return {
       success: true,
       testName: 'Progress Tracking',
@@ -451,19 +457,19 @@ async function testProgressTracking(): Promise<MLIntegrationTestResult> {
  */
 async function testErrorHandling(): Promise<MLIntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     // Test validation errors
     const invalidRequest: AssessmentRequest = {
       sessionId: '', // Invalid session ID
     };
-    
+
     const errors = validateAssessmentRequest(invalidRequest);
-    
+
     if (errors.length === 0) {
       throw new Error('Error handling failed - no validation errors detected');
     }
-    
+
     return {
       success: true,
       testName: 'Error Handling',
@@ -485,7 +491,7 @@ async function testErrorHandling(): Promise<MLIntegrationTestResult> {
  */
 export function generateMLTestReport(results: ComprehensiveMLTestResults): string {
   const { overall, results: testResults } = results;
-  
+
   let report = `
 # ML Integration Test Report
 

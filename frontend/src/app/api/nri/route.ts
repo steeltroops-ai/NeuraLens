@@ -22,14 +22,14 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
-import type { 
-  NRIFusionRequest, 
+import type {
+  NRIFusionRequest,
   NRIFusionResponse,
   ModalityContribution,
   SpeechAnalysisResponse,
   RetinalAnalysisResponse,
   MotorAssessmentResponse,
-  CognitiveAssessmentResponse
+  CognitiveAssessmentResponse,
 } from '../../../lib/api/types';
 
 /**
@@ -42,11 +42,11 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { 
-      session_id, 
-      modality_results, 
+    const {
+      session_id,
+      modality_results,
       fusion_method = 'bayesian',
-      uncertainty_quantification = true 
+      uncertainty_quantification = true,
     } = body as NRIFusionRequest;
 
     // Validate required fields
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Validate that at least two modalities are present
     const availableModalities = Object.keys(modality_results).filter(
-      key => modality_results[key as keyof typeof modality_results] !== undefined
+      key => modality_results[key as keyof typeof modality_results] !== undefined,
     );
 
     if (availableModalities.length < 2) {
@@ -173,31 +173,31 @@ export async function GET(request: NextRequest) {
  */
 async function processNRIFusion(request: NRIFusionRequest): Promise<NRIFusionResponse> {
   const startTime = Date.now();
-  
+
   // Extract modality contributions
   const modalityContributions = extractModalityContributions(request.modality_results);
-  
+
   // Calculate unified NRI score based on fusion method
   const nriScore = calculateNRIScore(modalityContributions, request.fusion_method);
-  
+
   // Determine risk category
   const riskCategory = determineRiskCategory(nriScore);
-  
+
   // Calculate confidence and uncertainty
   const { confidence, uncertainty } = calculateConfidenceAndUncertainty(
     modalityContributions,
-    request.uncertainty_quantification
+    request.uncertainty_quantification,
   );
-  
+
   // Calculate consistency score
   const consistencyScore = calculateConsistencyScore(modalityContributions);
-  
+
   // Generate clinical recommendations
   const recommendations = generateRecommendations(nriScore, riskCategory, modalityContributions);
-  
+
   // Generate follow-up actions
   const followUpActions = generateFollowUpActions(nriScore, riskCategory, modalityContributions);
-  
+
   const processingTime = Date.now() - startTime;
 
   return {
@@ -219,10 +219,10 @@ async function processNRIFusion(request: NRIFusionRequest): Promise<NRIFusionRes
  * Extract modality contributions from assessment results
  */
 function extractModalityContributions(
-  modalityResults: NRIFusionRequest['modality_results']
+  modalityResults: NRIFusionRequest['modality_results'],
 ): ModalityContribution[] {
   const contributions: ModalityContribution[] = [];
-  
+
   // Speech modality
   if (modalityResults.speech) {
     contributions.push({
@@ -232,17 +232,17 @@ function extractModalityContributions(
       risk_score: modalityResults.speech.risk_score,
     });
   }
-  
+
   // Retinal modality
   if (modalityResults.retinal) {
     contributions.push({
       modality: 'retinal',
-      weight: 0.30, // 30% weight for retinal analysis
+      weight: 0.3, // 30% weight for retinal analysis
       confidence: modalityResults.retinal.confidence,
       risk_score: modalityResults.retinal.risk_score,
     });
   }
-  
+
   // Motor modality
   if (modalityResults.motor) {
     contributions.push({
@@ -252,23 +252,23 @@ function extractModalityContributions(
       risk_score: modalityResults.motor.risk_score,
     });
   }
-  
+
   // Cognitive modality
   if (modalityResults.cognitive) {
     contributions.push({
       modality: 'cognitive',
-      weight: 0.20, // 20% weight for cognitive assessment
+      weight: 0.2, // 20% weight for cognitive assessment
       confidence: modalityResults.cognitive.confidence,
       risk_score: modalityResults.cognitive.risk_score,
     });
   }
-  
+
   // Normalize weights to sum to 1.0
   const totalWeight = contributions.reduce((sum, contrib) => sum + contrib.weight, 0);
   contributions.forEach(contrib => {
     contrib.weight = contrib.weight / totalWeight;
   });
-  
+
   return contributions;
 }
 
@@ -294,23 +294,23 @@ function calculateNRIScore(contributions: ModalityContribution[], fusionMethod: 
 function calculateBayesianFusion(contributions: ModalityContribution[]): number {
   // Prior probability (base rate of neurological conditions)
   const priorRisk = 0.15; // 15% base rate
-  
+
   let posteriorRisk = priorRisk;
-  
+
   contributions.forEach(contrib => {
     // Convert risk score to probability
     const likelihood = contrib.risk_score / 100;
-    
+
     // Weight by confidence
     const weightedLikelihood = likelihood * contrib.confidence;
-    
+
     // Bayesian update
     const numerator = weightedLikelihood * posteriorRisk;
     const denominator = numerator + (1 - weightedLikelihood) * (1 - posteriorRisk);
-    
+
     posteriorRisk = denominator > 0 ? numerator / denominator : posteriorRisk;
   });
-  
+
   // Convert back to 0-100 scale
   return Math.min(100, posteriorRisk * 100);
 }
@@ -321,14 +321,14 @@ function calculateBayesianFusion(contributions: ModalityContribution[]): number 
 function calculateWeightedAverage(contributions: ModalityContribution[]): number {
   let weightedSum = 0;
   let totalWeight = 0;
-  
+
   contributions.forEach(contrib => {
     // Weight by both modality weight and confidence
     const effectiveWeight = contrib.weight * contrib.confidence;
     weightedSum += contrib.risk_score * effectiveWeight;
     totalWeight += effectiveWeight;
   });
-  
+
   return totalWeight > 0 ? weightedSum / totalWeight : 0;
 }
 
@@ -338,7 +338,7 @@ function calculateWeightedAverage(contributions: ModalityContribution[]): number
 function calculateEnsembleFusion(contributions: ModalityContribution[]): number {
   const bayesianScore = calculateBayesianFusion(contributions);
   const weightedScore = calculateWeightedAverage(contributions);
-  
+
   // Combine with equal weights
   return (bayesianScore + weightedScore) / 2;
 }
@@ -357,29 +357,35 @@ function determineRiskCategory(nriScore: number): 'low' | 'moderate' | 'high' {
  */
 function calculateConfidenceAndUncertainty(
   contributions: ModalityContribution[],
-  uncertaintyQuantification: boolean
+  uncertaintyQuantification: boolean,
 ): { confidence: number; uncertainty: number } {
   // Base confidence from modality confidences
-  const avgConfidence = contributions.reduce((sum, contrib) => sum + contrib.confidence, 0) / contributions.length;
-  
+  const avgConfidence =
+    contributions.reduce((sum, contrib) => sum + contrib.confidence, 0) / contributions.length;
+
   let uncertainty = 0;
-  
+
   if (uncertaintyQuantification) {
     // Calculate uncertainty from confidence variance
-    const confidenceVariance = contributions.reduce((sum, contrib) => 
-      sum + Math.pow(contrib.confidence - avgConfidence, 2), 0
-    ) / contributions.length;
-    
+    const confidenceVariance =
+      contributions.reduce(
+        (sum, contrib) => sum + Math.pow(contrib.confidence - avgConfidence, 2),
+        0,
+      ) / contributions.length;
+
     // Calculate uncertainty from risk score variance
-    const avgRiskScore = contributions.reduce((sum, contrib) => sum + contrib.risk_score, 0) / contributions.length;
-    const riskVariance = contributions.reduce((sum, contrib) => 
-      sum + Math.pow(contrib.risk_score - avgRiskScore, 2), 0
-    ) / contributions.length;
-    
+    const avgRiskScore =
+      contributions.reduce((sum, contrib) => sum + contrib.risk_score, 0) / contributions.length;
+    const riskVariance =
+      contributions.reduce(
+        (sum, contrib) => sum + Math.pow(contrib.risk_score - avgRiskScore, 2),
+        0,
+      ) / contributions.length;
+
     // Combine uncertainties
-    uncertainty = Math.sqrt(confidenceVariance + (riskVariance / 10000)); // Normalize risk variance
+    uncertainty = Math.sqrt(confidenceVariance + riskVariance / 10000); // Normalize risk variance
   }
-  
+
   return {
     confidence: Math.max(0.1, Math.min(1.0, avgConfidence)),
     uncertainty: Math.max(0, Math.min(1.0, uncertainty)),
@@ -391,15 +397,17 @@ function calculateConfidenceAndUncertainty(
  */
 function calculateConsistencyScore(contributions: ModalityContribution[]): number {
   if (contributions.length < 2) return 1.0;
-  
+
   const riskScores = contributions.map(contrib => contrib.risk_score);
   const avgRiskScore = riskScores.reduce((sum, score) => sum + score, 0) / riskScores.length;
-  
+
   // Calculate coefficient of variation
-  const variance = riskScores.reduce((sum, score) => sum + Math.pow(score - avgRiskScore, 2), 0) / riskScores.length;
+  const variance =
+    riskScores.reduce((sum, score) => sum + Math.pow(score - avgRiskScore, 2), 0) /
+    riskScores.length;
   const stdDev = Math.sqrt(variance);
   const coefficientOfVariation = avgRiskScore > 0 ? stdDev / avgRiskScore : 0;
-  
+
   // Convert to consistency score (lower variation = higher consistency)
   return Math.max(0, 1.0 - Math.min(1.0, coefficientOfVariation));
 }
@@ -410,10 +418,10 @@ function calculateConsistencyScore(contributions: ModalityContribution[]): numbe
 function generateRecommendations(
   nriScore: number,
   riskCategory: string,
-  contributions: ModalityContribution[]
+  contributions: ModalityContribution[],
 ): string[] {
   const recommendations: string[] = [];
-  
+
   // General recommendations based on risk category
   switch (riskCategory) {
     case 'low':
@@ -434,7 +442,7 @@ function generateRecommendations(
       recommendations.push('Implement immediate risk reduction strategies');
       break;
   }
-  
+
   // Modality-specific recommendations
   contributions.forEach(contrib => {
     if (contrib.risk_score > 60) {
@@ -454,7 +462,7 @@ function generateRecommendations(
       }
     }
   });
-  
+
   return [...new Set(recommendations)]; // Remove duplicates
 }
 
@@ -464,10 +472,10 @@ function generateRecommendations(
 function generateFollowUpActions(
   nriScore: number,
   riskCategory: string,
-  contributions: ModalityContribution[]
+  contributions: ModalityContribution[],
 ): string[] {
   const actions: string[] = [];
-  
+
   // Time-based follow-up actions
   switch (riskCategory) {
     case 'low':
@@ -485,13 +493,13 @@ function generateFollowUpActions(
       actions.push('Implement monitoring protocols');
       break;
   }
-  
+
   // Data quality actions
   const lowConfidenceModalities = contributions.filter(contrib => contrib.confidence < 0.7);
   if (lowConfidenceModalities.length > 0) {
     actions.push('Consider retesting modalities with low confidence scores');
   }
-  
+
   return actions;
 }
 
@@ -518,10 +526,10 @@ async function getCachedResult(key: string): Promise<any | null> {
 export function generateDemoNRIResult(modalityCount: number = 4): NRIFusionResponse {
   const nriScore = 25 + Math.random() * 50; // 25-75 range
   const riskCategory = nriScore < 30 ? 'low' : nriScore < 70 ? 'moderate' : 'high';
-  
+
   const contributions: ModalityContribution[] = [];
   const modalities = ['speech', 'retinal', 'motor', 'cognitive'];
-  
+
   for (let i = 0; i < Math.min(modalityCount, 4); i++) {
     contributions.push({
       modality: modalities[i],
@@ -530,7 +538,7 @@ export function generateDemoNRIResult(modalityCount: number = 4): NRIFusionRespo
       risk_score: nriScore + (Math.random() - 0.5) * 20,
     });
   }
-  
+
   return {
     session_id: `demo_${Date.now()}`,
     nri_score: Math.round(nriScore * 100) / 100,

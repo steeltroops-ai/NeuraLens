@@ -117,7 +117,6 @@ NeuraLens/
 ├── .github/workflows/                # CI/CD automation
 └── README.md                         # This documentation
 ```
-
 ## 🚀 **Technology Stack**
 
 ### **Frontend Architecture**
@@ -165,7 +164,6 @@ NeuraLens/
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ### **Development Setup**
-
 ```bash
 # Clone the repository
 git clone https://github.com/steeltroops-ai/NeuraLens.git
@@ -179,9 +177,7 @@ bun run dev
 # Access the application
 open http://localhost:3000
 ```
-
 ### **Alternative Setup (npm fallback)**
-
 ```bash
 # Frontend setup (npm fallback if Bun unavailable)
 cd frontend
@@ -191,9 +187,7 @@ npm run dev
 # Access the application
 open http://localhost:3000
 ```
-
 ### **Production Deployment**
-
 ```bash
 # Build for production
 cd frontend
@@ -205,7 +199,6 @@ vercel deploy
 # Or deploy to other platforms
 bun run export  # Static export for any hosting provider
 ```
-
 ## 🎯 **Key Features & Capabilities**
 
 ### **Multi-Modal Assessment Suite**
@@ -271,7 +264,6 @@ bun run export  # Static export for any hosting provider
 ## 🔧 **Development Commands**
 
 ### **Frontend Development (Bun - RECOMMENDED)**
-
 ```bash
 cd frontend
 bun install             # Install dependencies (3x faster than npm)
@@ -282,9 +274,7 @@ bun run lint:fix        # Auto-fix linting issues
 bun run type-check      # TypeScript validation
 bun test                # Run test suite
 ```
-
 ### **Frontend Development (npm fallback)**
-
 ```bash
 cd frontend
 npm install             # Install dependencies
@@ -294,9 +284,7 @@ npm run lint            # Code linting
 npm run type-check      # TypeScript validation
 npm test                # Run tests
 ```
-
 ### **Code Quality & Performance**
-
 ```bash
 # Performance analysis
 bun run analyze         # Bundle size analysis
@@ -306,13 +294,9 @@ bun run lighthouse      # Performance audit
 bun run format          # Prettier code formatting
 bun run check-all       # Run all quality checks
 ```
-
-
-
 ## 🤝 **Contributing**
 
 ### **Development Contributions**
-
 ```bash
 # Fork the repository
 git clone https://github.com/steeltroops-ai/NeuraLens.git
@@ -331,7 +315,3 @@ git push origin feature/your-feature-name
 ## 📞 **Contact**
 
 - **General Inquiries**: steeltroops.ai@gmail.com
-
----
-
-**NeuraLens**: Revolutionizing neurological health screening through AI-powered multi-modal assessment. Built with ❤️ for healthcare professionals, patients, and researchers worldwide.

@@ -9,13 +9,16 @@ from typing import Optional
 import asyncio
 import time
 import uuid
+import logging
 
 from app.schemas.assessment import SpeechAnalysisRequest, SpeechAnalysisResponse
 from app.ml.realtime.realtime_speech import realtime_speech_analyzer
 from app.core.config import settings
+from app.services.supabase_storage import storage_service
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Use global speech analyzer instance
 speech_analyzer = realtime_speech_analyzer
@@ -56,10 +59,28 @@ async def analyze_speech(
     try:
         # Read audio file
         audio_bytes = await audio_file.read()
-        
+
+        # Upload to Supabase Storage if configured
+        file_info = None
+        if settings.is_using_supabase:
+            try:
+                file_info = await storage_service.upload_audio_file(
+                    file_data=audio_bytes,
+                    filename=audio_file.filename,
+                    session_id=session_id,
+                    metadata={
+                        "content_type": audio_file.content_type,
+                        "analysis_type": "speech",
+                        "file_size": audio_file.size
+                    }
+                )
+                logger.info(f"Audio file uploaded to storage: {file_info['storage_path']}")
+            except Exception as storage_error:
+                logger.warning(f"Storage upload failed, proceeding with analysis: {storage_error}")
+
         # Start processing timer
         start_time = time.time()
-        
+
         # Process audio with timeout
         try:
             analysis_result = await asyncio.wait_for(
@@ -71,14 +92,14 @@ async def analyze_speech(
                 status_code=408,
                 detail="Speech processing timeout. Please try with a shorter audio file."
             )
-        
+
         # Calculate processing time
         processing_time = time.time() - start_time
-        
+
         # Add metadata
         analysis_result.session_id = session_id
         analysis_result.processing_time = processing_time
-        analysis_result.file_info = {
+        analysis_result.file_info = file_info or {
             "filename": audio_file.filename,
             "size": audio_file.size,
             "content_type": audio_file.content_type

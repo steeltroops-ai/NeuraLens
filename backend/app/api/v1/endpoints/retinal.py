@@ -12,6 +12,7 @@ from typing import Optional
 from app.core.config import settings
 from app.schemas.assessment import RetinalAnalysisResponse, RetinalBiomarkers
 from app.ml.realtime.realtime_retinal import realtime_retinal_analyzer
+from app.services.supabase_storage import storage_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -63,23 +64,43 @@ async def analyze_retinal_image(
     try:
         # Read image bytes
         image_bytes = await image_file.read()
-        
+
         if len(image_bytes) == 0:
             raise HTTPException(
                 status_code=400,
                 detail="Empty file uploaded."
             )
-        
+
         # Generate session ID from filename and timestamp
         session_id = f"retinal_{image_file.filename}_{asyncio.get_event_loop().time():.0f}"
-        
+
+        # Upload file to Supabase Storage
+        try:
+            file_info = await storage_service.upload_image_file(
+                file_data=image_bytes,
+                filename=image_file.filename,
+                session_id=session_id,
+                metadata={
+                    "content_type": image_file.content_type,
+                    "analysis_type": "retinal"
+                }
+            )
+            logger.info(f"Image uploaded to storage: {file_info['storage_path']}")
+        except Exception as storage_error:
+            logger.warning(f"Storage upload failed, proceeding with analysis: {storage_error}")
+            file_info = None
+
         # Process with timeout
         try:
             analysis_result = await asyncio.wait_for(
                 realtime_retinal_analyzer.analyze_realtime(image_bytes, session_id),
                 timeout=settings.RETINAL_PROCESSING_TIMEOUT
             )
-            
+
+            # Add file info to analysis result if upload was successful
+            if file_info and hasattr(analysis_result, 'file_info'):
+                analysis_result.file_info = file_info
+
             logger.info(f"Retinal analysis completed for session {session_id}")
             return analysis_result
             

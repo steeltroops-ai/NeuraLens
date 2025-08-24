@@ -3,7 +3,7 @@ Configuration settings for NeuroLens-X Backend
 Hackathon-optimized with environment-based configuration
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, Field
 from typing import List, Optional
 import os
 
@@ -33,9 +33,40 @@ class Settings(BaseSettings):
         "https://neurolens-x-steeltroops-ai.vercel.app"
     ]
     
-    # Database (SQLite for hackathon speed)
-    DATABASE_URL: str = "sqlite:///./neurolens_x.db"
+    # Database Configuration (PostgreSQL via Supabase)
+    DATABASE_URL: str = Field(
+        default="sqlite:///./neurolens_x.db",  # Fallback for development
+        env="DATABASE_URL"
+    )
     DATABASE_ECHO: bool = False  # Set to True for SQL debugging
+
+    # Supabase Configuration
+    SUPABASE_URL: str = Field(default="", env="SUPABASE_URL")
+    SUPABASE_ANON_KEY: str = Field(default="", env="SUPABASE_ANON_KEY")
+    SUPABASE_SERVICE_ROLE_KEY: str = Field(default="", env="SUPABASE_SERVICE_ROLE_KEY")
+
+    # Supabase Database Details
+    SUPABASE_DB_HOST: str = Field(default="", env="SUPABASE_DB_HOST")
+    SUPABASE_DB_USER: str = Field(default="postgres", env="SUPABASE_DB_USER")
+    SUPABASE_DB_PASSWORD: str = Field(default="", env="SUPABASE_DB_PASSWORD")
+    SUPABASE_DB_NAME: str = Field(default="postgres", env="SUPABASE_DB_NAME")
+    SUPABASE_DB_PORT: int = Field(default=5432, env="SUPABASE_DB_PORT")
+
+    # Use Supabase if configured, otherwise fallback to SQLite
+    @property
+    def effective_database_url(self) -> str:
+        """Get the effective database URL based on configuration"""
+        if self.SUPABASE_DB_HOST and self.SUPABASE_DB_PASSWORD:
+            return (
+                f"postgresql://{self.SUPABASE_DB_USER}:{self.SUPABASE_DB_PASSWORD}"
+                f"@{self.SUPABASE_DB_HOST}:{self.SUPABASE_DB_PORT}/{self.SUPABASE_DB_NAME}"
+            )
+        return self.DATABASE_URL
+
+    @property
+    def is_using_supabase(self) -> bool:
+        """Check if we're using Supabase PostgreSQL"""
+        return bool(self.SUPABASE_DB_HOST and self.SUPABASE_DB_PASSWORD)
     
     # ML Model Configuration
     MODEL_PATH: str = "./models"

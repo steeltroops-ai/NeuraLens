@@ -1,15 +1,12 @@
 /**
  * File Validation Utilities
- * Comprehensive validation for audio files and retinal images
+ * Comprehensive validation for audio files and retinal images using base validator
  */
 
-// Validation result interface
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-  metadata?: any;
-}
+import { BaseValidator, ValidationResult, FileMetadata, QualityAssessment } from './base-validator';
+
+// Re-export for backward compatibility
+export { ValidationResult, FileMetadata };
 
 // Audio file validation
 export async function validateAudioFile(file: File): Promise<ValidationResult> {

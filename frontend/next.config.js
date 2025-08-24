@@ -6,7 +6,7 @@ const nextConfig = {
 
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts'],
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
     optimizeCss: true,
     scrollRestoration: true,
   },

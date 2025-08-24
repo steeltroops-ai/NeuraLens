@@ -1,29 +1,53 @@
 """
 Database configuration for NeuroLens-X
-SQLite for hackathon speed, easily upgradeable to PostgreSQL
+PostgreSQL via Supabase with SQLite fallback for development
 """
 
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool, QueuePool
 import asyncio
 from typing import AsyncGenerator
+import logging
 
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
 
-# Create SQLite engine with optimizations
-engine = create_engine(
-    settings.DATABASE_URL,
-    echo=settings.DATABASE_ECHO,
-    poolclass=StaticPool,
-    connect_args={
-        "check_same_thread": False,  # Allow multiple threads
-        "timeout": 20,  # Connection timeout
-    },
-    pool_pre_ping=True,  # Verify connections before use
-)
+# Determine database type and create appropriate engine
+database_url = settings.effective_database_url
+is_postgresql = database_url.startswith("postgresql://")
+
+if is_postgresql:
+    # PostgreSQL configuration for Supabase
+    engine = create_engine(
+        database_url,
+        echo=settings.DATABASE_ECHO,
+        poolclass=QueuePool,
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+        pool_recycle=3600,  # Recycle connections every hour
+        connect_args={
+            "sslmode": "require",  # Require SSL for Supabase
+            "connect_timeout": 10,
+        }
+    )
+    logger.info("✅ Using PostgreSQL database (Supabase)")
+else:
+    # SQLite configuration for development
+    engine = create_engine(
+        database_url,
+        echo=settings.DATABASE_ECHO,
+        poolclass=StaticPool,
+        connect_args={
+            "check_same_thread": False,  # Allow multiple threads
+            "timeout": 20,  # Connection timeout
+        },
+        pool_pre_ping=True,  # Verify connections before use
+    )
+    logger.info("⚠️ Using SQLite database (development mode)")
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

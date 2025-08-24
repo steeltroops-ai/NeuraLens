@@ -1,12 +1,12 @@
 /**
  * Frontend API Integration Test Suite
- * 
+ *
  * Comprehensive test suite to verify all frontend API routes work correctly
  * and integrate properly with the backend services.
- * 
+ *
  * Tests all four assessment modalities:
  * - Speech Analysis
- * - Retinal Assessment  
+ * - Retinal Assessment
  * - Motor Assessment
  * - Cognitive Testing
  * - NRI Fusion
@@ -54,7 +54,7 @@ export interface ComprehensiveTestResults {
  */
 export async function runComprehensiveIntegrationTest(): Promise<ComprehensiveTestResults> {
   console.log('🚀 Starting comprehensive frontend API integration test...');
-  
+
   const startTime = Date.now();
   const results: ComprehensiveTestResults = {
     overall: {
@@ -76,25 +76,25 @@ export async function runComprehensiveIntegrationTest(): Promise<ComprehensiveTe
 
   // Test health endpoint
   results.results.health = await testHealthEndpoint();
-  
+
   // Test speech analysis endpoint
   results.results.speech = await testSpeechEndpoint();
-  
+
   // Test retinal analysis endpoint
   results.results.retinal = await testRetinalEndpoint();
-  
+
   // Test motor assessment endpoint
   results.results.motor = await testMotorEndpoint();
-  
+
   // Test cognitive assessment endpoint
   results.results.cognitive = await testCognitiveEndpoint();
-  
+
   // Test NRI fusion endpoint (requires other modality results)
   results.results.nri = await testNRIEndpoint(
     results.results.speech.data,
     results.results.retinal.data,
     results.results.motor.data,
-    results.results.cognitive.data
+    results.results.cognitive.data,
   );
 
   // Calculate overall results
@@ -110,8 +110,10 @@ export async function runComprehensiveIntegrationTest(): Promise<ComprehensiveTe
     totalTime,
   };
 
-  console.log(`✅ Integration test completed: ${passedTests}/${results.overall.totalTests} tests passed in ${totalTime}ms`);
-  
+  console.log(
+    `✅ Integration test completed: ${passedTests}/${results.overall.totalTests} tests passed in ${totalTime}ms`,
+  );
+
   return results;
 }
 
@@ -120,7 +122,7 @@ export async function runComprehensiveIntegrationTest(): Promise<ComprehensiveTe
  */
 async function testHealthEndpoint(): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const response = await fetch('/api/health', {
       method: 'GET',
@@ -130,7 +132,7 @@ async function testHealthEndpoint(): Promise<IntegrationTestResult> {
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -141,7 +143,7 @@ async function testHealthEndpoint(): Promise<IntegrationTestResult> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.status || !data.timestamp) {
       return {
@@ -174,7 +176,7 @@ async function testHealthEndpoint(): Promise<IntegrationTestResult> {
  */
 async function testSpeechEndpoint(): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const testData = {
       result: {
@@ -214,7 +216,7 @@ async function testSpeechEndpoint(): Promise<IntegrationTestResult> {
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -225,7 +227,7 @@ async function testSpeechEndpoint(): Promise<IntegrationTestResult> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.success || !data.result) {
       return {
@@ -258,7 +260,7 @@ async function testSpeechEndpoint(): Promise<IntegrationTestResult> {
  */
 async function testRetinalEndpoint(): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const testData = {
       result: {
@@ -302,7 +304,7 @@ async function testRetinalEndpoint(): Promise<IntegrationTestResult> {
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -313,7 +315,7 @@ async function testRetinalEndpoint(): Promise<IntegrationTestResult> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.success || !data.result) {
       return {
@@ -346,7 +348,7 @@ async function testRetinalEndpoint(): Promise<IntegrationTestResult> {
  */
 async function testMotorEndpoint(): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const testData: MotorAssessmentRequest = {
       session_id: `test_${Date.now()}`,
@@ -378,7 +380,7 @@ async function testMotorEndpoint(): Promise<IntegrationTestResult> {
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -389,7 +391,7 @@ async function testMotorEndpoint(): Promise<IntegrationTestResult> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.success || !data.result) {
       return {
@@ -422,7 +424,7 @@ async function testMotorEndpoint(): Promise<IntegrationTestResult> {
  */
 async function testCognitiveEndpoint(): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const testData: CognitiveAssessmentRequest = {
       session_id: `test_${Date.now()}`,
@@ -463,7 +465,7 @@ async function testCognitiveEndpoint(): Promise<IntegrationTestResult> {
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -474,7 +476,7 @@ async function testCognitiveEndpoint(): Promise<IntegrationTestResult> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.success || !data.result) {
       return {
@@ -509,10 +511,10 @@ async function testNRIEndpoint(
   speechResult?: any,
   retinalResult?: any,
   motorResult?: any,
-  cognitiveResult?: any
+  cognitiveResult?: any,
 ): Promise<IntegrationTestResult> {
   const startTime = Date.now();
-  
+
   try {
     const testData: NRIFusionRequest = {
       session_id: `test_${Date.now()}`,
@@ -535,7 +537,7 @@ async function testNRIEndpoint(
     });
 
     const responseTime = Date.now() - startTime;
-    
+
     if (!response.ok) {
       return {
         success: false,
@@ -546,7 +548,7 @@ async function testNRIEndpoint(
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
     if (!data.success || !data.result) {
       return {
@@ -579,7 +581,7 @@ async function testNRIEndpoint(
  */
 export function generateTestReport(results: ComprehensiveTestResults): string {
   const { overall, results: testResults } = results;
-  
+
   let report = `
 # Frontend API Integration Test Report
 

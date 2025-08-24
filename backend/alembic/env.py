@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our models and database configuration
 from app.core.database import Base
+from app.core.config import settings
 from app.models import assessment, user, validation
 
 # this is the Alembic Config object, which provides
@@ -46,6 +47,10 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
+    # Override with environment variable if available
+    if settings.effective_database_url:
+        url = settings.effective_database_url
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -64,8 +69,13 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Override database URL if environment variable is set
+    configuration = config.get_section(config.config_ini_section, {})
+    if settings.effective_database_url:
+        configuration["sqlalchemy.url"] = settings.effective_database_url
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
