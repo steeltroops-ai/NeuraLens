@@ -9,11 +9,11 @@ import numpy as np
 from datetime import datetime
 
 # Import all analyzers directly
-from app.ml.models.speech_analyzer import SpeechAnalyzer
-from app.ml.models.retinal_analyzer import retinal_analyzer
-from app.ml.models.motor_analyzer import motor_analyzer
-from app.ml.models.cognitive_analyzer import cognitive_analyzer
-from app.ml.models.nri_fusion import nri_fusion_engine
+from app.ml.realtime.realtime_speech import realtime_speech_analyzer
+from app.ml.realtime.realtime_retinal import realtime_retinal_analyzer
+from app.ml.realtime.realtime_motor import realtime_motor_analyzer
+from app.ml.realtime.realtime_cognitive import realtime_cognitive_analyzer
+from app.ml.realtime.realtime_nri import realtime_nri_analyzer
 from app.ml.models.validation_engine import validation_engine
 
 # Import schemas
@@ -32,10 +32,8 @@ async def test_all_analyzers():
     # Test 1: Speech Analyzer
     print("\n1️⃣ Testing Speech Analyzer...")
     try:
-        speech_analyzer = SpeechAnalyzer()
-        
         # Create mock audio data
-        sample_rate = 22050
+        sample_rate = 16000  # Whisper-tiny optimal sample rate
         duration = 5.0
         num_samples = int(duration * sample_rate)
         t = np.linspace(0, duration, num_samples)
@@ -45,8 +43,8 @@ async def test_all_analyzers():
             0.05 * np.random.normal(0, 1, num_samples)
         )
         audio_bytes = (audio_data * 32767).astype(np.int16).tobytes()
-        
-        result = await speech_analyzer.analyze(audio_bytes, "test_speech_001")
+
+        result = await realtime_speech_analyzer.analyze_realtime(audio_bytes, "test_speech_001")
         results['speech'] = {
             'status': 'success',
             'risk_score': result.risk_score,

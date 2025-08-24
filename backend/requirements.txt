@@ -1,30 +1,72 @@
-# FastAPI Core - Essential for hackathon demo
-fastapi>=0.116.1
-uvicorn>=0.35.0
-pydantic>=2.10.0
-pydantic-settings>=2.7.0
+# NeuraLens Backend Dependencies - Production Ready
+# Pinned versions for security and reproducibility
 
-# Database & Storage
-sqlalchemy>=2.0.43
-alembic>=1.14.0
-psycopg2-binary>=2.9.0  # PostgreSQL adapter
-supabase>=2.12.0  # Supabase Python client
+# ===== CORE FRAMEWORK =====
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pydantic==2.10.0
+pydantic-settings==2.7.0
 
-# ML & Data Processing - Core packages only
-numpy>=2.3.2
-pillow>=11.0.0
+# ===== DATABASE & STORAGE =====
+sqlalchemy==2.0.43
+alembic==1.14.0
+psycopg2-binary==2.9.9
+supabase==2.12.0
 
-# Real-time ML Models
-transformers>=4.55.4
-onnx>=1.18.0
-onnxruntime>=1.21.0
-scikit-learn>=1.6.0
-xgboost>=2.1.0
+# ===== AUTHENTICATION & SECURITY =====
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+cryptography==42.0.8
 
-# Audio Processing
-librosa>=0.10.5
-soundfile>=0.12.1
+# ===== HTTP & API =====
+httpx==0.27.2
+requests==2.32.3
+aiofiles==24.1.0
+python-dotenv==1.0.1
 
-# Optional packages for advanced features (commented out to reduce dependencies)
-# torch>=2.0.0  # For model conversion - uncomment if needed
-# tensorflow>=2.13.0  # Alternative ML framework - uncomment if needed
+# ===== MACHINE LEARNING CORE =====
+torch==2.5.1
+torchaudio==2.5.1
+transformers==4.55.4
+numpy==2.3.2
+scipy==1.11.4
+
+# ===== AUDIO PROCESSING =====
+librosa==0.10.5
+soundfile==0.12.1
+resampy==0.4.2
+webrtcvad==2.0.10  # Optional: requires Visual C++ Build Tools on Windows
+
+# ===== COMPUTER VISION =====
+pillow==11.0.0
+opencv-python==4.10.0.84
+scikit-image==0.24.0
+
+# ===== DATA SCIENCE =====
+pandas==2.2.3
+scikit-learn==1.6.0
+xgboost==2.1.0
+onnx==1.18.0
+onnxruntime==1.21.0
+
+# ===== ASYNC & UTILITIES =====
+asyncio==3.4.3
+python-dateutil==2.9.0
+pytz==2024.2
+click==8.1.7
+
+# ===== MONITORING & LOGGING =====
+structlog==24.4.0
+python-json-logger==2.0.7
+
+# ===== DEVELOPMENT & TESTING =====
+pytest==8.3.3
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+black==24.10.0
+isort==5.13.2
+flake8==7.1.1
+
+# ===== DEPLOYMENT =====
+gunicorn==23.0.0
