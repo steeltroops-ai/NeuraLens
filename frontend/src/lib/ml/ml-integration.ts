@@ -1,17 +1,14 @@
 // NeuroLens-X ML Model Integration
 // Unified interface for all ML models with performance optimization
 
-import { speechAnalyzer, type SpeechAnalysisResult } from './speech-analysis';
-import {
-  retinalAnalyzer,
-  type RetinalAnalysisResult,
-} from './retinal-analysis';
+import { nriFusionCalculator, type NRIFusionResult } from './nri-fusion';
+import { retinalAnalyzer, type RetinalAnalysisResult } from './retinal-analysis';
 import {
   riskAssessmentCalculator,
   type RiskAssessmentResult,
   type RiskAssessmentData,
 } from './risk-assessment';
-import { nriFusionCalculator, type NRIFusionResult } from './nri-fusion';
+import { speechAnalyzer, type SpeechAnalysisResult } from './speech-analysis';
 
 export interface AssessmentRequest {
   sessionId: string;
@@ -59,7 +56,7 @@ export class MLModelIntegrator {
    */
   async processAssessment(
     request: AssessmentRequest,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ): Promise<CompleteAssessmentResult> {
     const startTime = performance.now();
 
@@ -78,17 +75,13 @@ export class MLModelIntegrator {
       this.updateProgress(progress, onProgress);
 
       // Process modalities in parallel for performance
-      const modalityPromises = this.createModalityPromises(
-        request,
-        progress,
-        onProgress
-      );
+      const modalityPromises = this.createModalityPromises(request, progress, onProgress);
 
       // Wait for all modalities to complete
       const modalityResults = await this.executeModalityAnalysis(
         modalityPromises,
         progress,
-        onProgress
+        onProgress,
       );
 
       // Update progress for fusion step
@@ -101,7 +94,7 @@ export class MLModelIntegrator {
         modalityResults.speech,
         modalityResults.retinal,
         modalityResults.risk,
-        modalityResults.motor
+        modalityResults.motor,
       );
 
       // Finalize results
@@ -155,44 +148,28 @@ export class MLModelIntegrator {
   private createModalityPromises(
     request: AssessmentRequest,
     progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ) {
     const promises: Record<string, Promise<any>> = {};
 
     // Speech analysis
     if (request.audioFile) {
-      promises.speech = this.processSpeechAnalysis(
-        request.audioFile,
-        progress,
-        onProgress
-      );
+      promises.speech = this.processSpeechAnalysis(request.audioFile, progress, onProgress);
     }
 
     // Retinal analysis
     if (request.retinalImage) {
-      promises.retinal = this.processRetinalAnalysis(
-        request.retinalImage,
-        progress,
-        onProgress
-      );
+      promises.retinal = this.processRetinalAnalysis(request.retinalImage, progress, onProgress);
     }
 
     // Risk assessment
     if (request.riskData) {
-      promises.risk = this.processRiskAssessment(
-        request.riskData,
-        progress,
-        onProgress
-      );
+      promises.risk = this.processRiskAssessment(request.riskData, progress, onProgress);
     }
 
     // Motor analysis (future implementation)
     if (request.motorData) {
-      promises.motor = this.processMotorAnalysis(
-        request.motorData,
-        progress,
-        onProgress
-      );
+      promises.motor = this.processMotorAnalysis(request.motorData, progress, onProgress);
     }
 
     return promises;
@@ -204,7 +181,7 @@ export class MLModelIntegrator {
   private async executeModalityAnalysis(
     promises: Record<string, Promise<any>>,
     progress: AssessmentProgress,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ) {
     const modalityResults: any = {};
     const modalityNames = Object.keys(promises);
@@ -224,9 +201,7 @@ export class MLModelIntegrator {
         progress.completedModalities.push(modalityName);
       } catch (error) {
         console.error(`${modalityName} analysis failed:`, error);
-        progress.errors.push(
-          `${modalityName} analysis failed: ${(error as Error).message}`
-        );
+        progress.errors.push(`${modalityName} analysis failed: ${(error as Error).message}`);
         modalityResults[modalityName] = null;
       }
     }
@@ -240,7 +215,7 @@ export class MLModelIntegrator {
   private async processSpeechAnalysis(
     audioFile: File,
     progress: AssessmentProgress,
-    _onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback,
   ): Promise<SpeechAnalysisResult | null> {
     try {
       // Convert file to ArrayBuffer
@@ -267,7 +242,7 @@ export class MLModelIntegrator {
   private async processRetinalAnalysis(
     retinalImage: File,
     progress: AssessmentProgress,
-    _onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback,
   ): Promise<RetinalAnalysisResult | null> {
     try {
       // Validate image file
@@ -280,9 +255,7 @@ export class MLModelIntegrator {
 
       // Validate result quality
       if (result.imageQuality < 0.4) {
-        progress.errors.push(
-          'Retinal image quality too low for reliable analysis'
-        );
+        progress.errors.push('Retinal image quality too low for reliable analysis');
       }
 
       return result;
@@ -298,7 +271,7 @@ export class MLModelIntegrator {
   private async processRiskAssessment(
     riskData: RiskAssessmentData,
     _progress: AssessmentProgress,
-    _onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback,
   ): Promise<RiskAssessmentResult | null> {
     try {
       // Validate required fields
@@ -320,7 +293,7 @@ export class MLModelIntegrator {
   private async processMotorAnalysis(
     _motorData: any,
     _progress: AssessmentProgress,
-    _onProgress?: ProgressCallback
+    _onProgress?: ProgressCallback,
   ): Promise<any | null> {
     // Placeholder for future motor analysis implementation
     return null;
@@ -367,29 +340,20 @@ export class MLModelIntegrator {
       qualities.push(modalityResults.motor.quality);
     }
 
-    return qualities.length > 0
-      ? qualities.reduce((sum, q) => sum + q, 0) / qualities.length
-      : 0.5;
+    return qualities.length > 0 ? qualities.reduce((sum, q) => sum + q, 0) / qualities.length : 0.5;
   }
 
   /**
    * Update progress and notify callback
    */
-  private updateProgress(
-    progress: AssessmentProgress,
-    onProgress?: ProgressCallback
-  ): void {
+  private updateProgress(progress: AssessmentProgress, onProgress?: ProgressCallback): void {
     // Update estimated time remaining
     if (progress.progress > 0) {
       const elapsedTime =
         Date.now() -
-        (this.activeAssessments.get(progress.sessionId)
-          ?.estimatedTimeRemaining || Date.now());
+        (this.activeAssessments.get(progress.sessionId)?.estimatedTimeRemaining || Date.now());
       const estimatedTotal = elapsedTime / (progress.progress / 100);
-      progress.estimatedTimeRemaining = Math.max(
-        0,
-        (estimatedTotal - elapsedTime) / 1000
-      );
+      progress.estimatedTimeRemaining = Math.max(0, (estimatedTotal - elapsedTime) / 1000);
     }
 
     // Notify callback
@@ -450,11 +414,7 @@ export class MLModelIntegrator {
    * Get memory usage (if available)
    */
   private getMemoryUsage(): number | undefined {
-    if (
-      typeof window !== 'undefined' &&
-      'performance' in window &&
-      'memory' in performance
-    ) {
+    if (typeof window !== 'undefined' && 'performance' in window && 'memory' in performance) {
       return (performance as any).memory.usedJSHeapSize;
     }
     return undefined;
@@ -503,12 +463,16 @@ export const mlModelIntegrator = new MLModelIntegrator();
 
 // Export utility functions
 export const generateSessionId = (): string => {
+  // Use a more deterministic approach for SSR compatibility
+  if (typeof window === 'undefined') {
+    // Server-side: use a simple counter-based approach
+    return `session_ssr_${Math.floor(Math.random() * 1000000)}`;
+  }
+  // Client-side: use timestamp and random for uniqueness
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const validateAssessmentRequest = (
-  request: AssessmentRequest
-): string[] => {
+export const validateAssessmentRequest = (request: AssessmentRequest): string[] => {
   const errors: string[] = [];
 
   if (!request.sessionId) {

@@ -30,11 +30,7 @@ export type NeutralColor =
 
 export type SemanticColor = 'success' | 'warning' | 'error' | 'info';
 
-export type RiskColor =
-  | 'risk-low'
-  | 'risk-moderate'
-  | 'risk-high'
-  | 'risk-critical';
+export type RiskColor = 'risk-low' | 'risk-moderate' | 'risk-high' | 'risk-critical';
 
 export type SurfaceColor =
   | 'surface-background'
@@ -44,11 +40,7 @@ export type SurfaceColor =
   | 'surface-overlay'
   | 'surface-glass';
 
-export type TextColor =
-  | 'text-primary'
-  | 'text-secondary'
-  | 'text-muted'
-  | 'text-inverse';
+export type TextColor = 'text-primary' | 'text-secondary' | 'text-muted' | 'text-inverse';
 
 export type ColorToken =
   | PrimaryColor
@@ -149,11 +141,7 @@ export type ComponentPadding =
   | 'component-padding-lg'
   | 'component-padding-xl';
 
-export type LayoutGap =
-  | 'layout-gap-sm'
-  | 'layout-gap-md'
-  | 'layout-gap-lg'
-  | 'layout-gap-xl';
+export type LayoutGap = 'layout-gap-sm' | 'layout-gap-md' | 'layout-gap-lg' | 'layout-gap-xl';
 
 /* ===== ANIMATION TYPES ===== */
 

@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { Eye, Upload, Activity, Clock, TrendingUp } from 'lucide-react';
+import React from 'react';
 
 interface RetinalAssessmentProps {
   onProcessingChange: (isProcessing: boolean) => void;
@@ -9,75 +9,73 @@ interface RetinalAssessmentProps {
 
 export default function RetinalAssessment({ onProcessingChange }: RetinalAssessmentProps) {
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
-            <Eye className="h-6 w-6 text-white" />
+      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
+        <div className='mb-4 flex items-center space-x-3'>
+          <div className='rounded-lg bg-gradient-to-r from-green-500 to-green-600 p-3'>
+            <Eye className='h-6 w-6 text-white' />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Retinal Analysis</h1>
-            <p className="text-slate-600">Fundus image analysis for vascular health assessment</p>
+            <h1 className='text-2xl font-bold text-slate-900'>Retinal Analysis</h1>
+            <p className='text-slate-600'>Fundus image analysis for vascular health assessment</p>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center space-x-2 text-slate-600">
-            <Clock className="h-4 w-4" />
+
+        <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-3'>
+          <div className='flex items-center space-x-2 text-slate-600'>
+            <Clock className='h-4 w-4' />
             <span>Processing Time: ~145ms</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-600">
-            <Activity className="h-4 w-4" />
+          <div className='flex items-center space-x-2 text-slate-600'>
+            <Activity className='h-4 w-4' />
             <span>Accuracy: 89%</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-600">
-            <TrendingUp className="h-4 w-4" />
+          <div className='flex items-center space-x-2 text-slate-600'>
+            <TrendingUp className='h-4 w-4' />
             <span>Vascular Analysis</span>
           </div>
         </div>
       </div>
 
       {/* Upload Interface */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Fundus Image Upload</h2>
-        
-        <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
-          <Upload className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">Upload Retinal Image</h3>
-          <p className="text-slate-600 mb-4">
+      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
+        <h2 className='mb-4 text-lg font-semibold text-slate-900'>Fundus Image Upload</h2>
+
+        <div className='rounded-lg border-2 border-dashed border-slate-300 p-8 text-center'>
+          <Upload className='mx-auto mb-4 h-12 w-12 text-slate-400' />
+          <h3 className='mb-2 text-lg font-medium text-slate-900'>Upload Retinal Image</h3>
+          <p className='mb-4 text-slate-600'>
             Upload a fundus photograph for automated retinal analysis
           </p>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+          <button className='rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700'>
             Choose Image File
           </button>
-          <p className="text-xs text-slate-500 mt-2">
-            Supports JPG, PNG files up to 10MB
-          </p>
+          <p className='mt-2 text-xs text-slate-500'>Supports JPG, PNG files up to 10MB</p>
         </div>
       </div>
 
       {/* Coming Soon */}
-      <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200 p-6">
-        <div className="text-center">
-          <Eye className="h-16 w-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-green-900 mb-2">Retinal Analysis Coming Soon</h2>
-          <p className="text-green-700 mb-4">
-            Advanced fundus image analysis with vessel tortuosity detection, 
-            A/V ratio calculation, and glaucoma screening capabilities.
+      <div className='rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-6'>
+        <div className='text-center'>
+          <Eye className='mx-auto mb-4 h-16 w-16 text-green-600' />
+          <h2 className='mb-2 text-xl font-bold text-green-900'>Retinal Analysis Coming Soon</h2>
+          <p className='mb-4 text-green-700'>
+            Advanced fundus image analysis with vessel tortuosity detection, A/V ratio calculation,
+            and glaucoma screening capabilities.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="bg-white/50 rounded-lg p-3">
-              <h3 className="font-medium text-green-900 mb-1">Detects</h3>
-              <ul className="text-green-700 space-y-1">
+          <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-2'>
+            <div className='rounded-lg bg-white/50 p-3'>
+              <h3 className='mb-1 font-medium text-green-900'>Detects</h3>
+              <ul className='space-y-1 text-green-700'>
                 <li>• Diabetic Retinopathy</li>
                 <li>• Glaucoma Risk</li>
                 <li>• Hypertensive Changes</li>
               </ul>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <h3 className="font-medium text-green-900 mb-1">Features</h3>
-              <ul className="text-green-700 space-y-1">
+            <div className='rounded-lg bg-white/50 p-3'>
+              <h3 className='mb-1 font-medium text-green-900'>Features</h3>
+              <ul className='space-y-1 text-green-700'>
                 <li>• Vessel Analysis</li>
                 <li>• Cup-Disc Ratio</li>
                 <li>• Hemorrhage Detection</li>

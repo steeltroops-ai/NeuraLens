@@ -159,9 +159,14 @@ class RealtimeMotorAnalyzer:
             
             # Amplitude variation
             features['amplitude_variation'] = np.std(magnitude) / (np.mean(magnitude) + 1e-6)
-            
+
             # Regularity (inverse of coefficient of variation)
             features['regularity'] = 1.0 / (1.0 + features['amplitude_variation'])
+
+            # Individual axis variances for asymmetry calculation
+            features['accel_x_variance'] = np.var(accel['x'])
+            features['accel_y_variance'] = np.var(accel['y'])
+            features['accel_z_variance'] = np.var(accel['z'])
             
             # Tremor detection (power in tremor frequency bands)
             tremor_band = (freqs >= 4) & (freqs <= 12)
@@ -194,11 +199,25 @@ class RealtimeMotorAnalyzer:
         regularity = features.get('regularity', 0.8)
         tremor_ratio = features.get('tremor_ratio', 0.2)
         
-        # Calculate biomarkers
+        # Calculate biomarkers using real features
         coordination_index = regularity
         tremor_severity = min(1.0, tremor_ratio * 5.0)  # Scale tremor ratio
         fatigue_index = min(1.0, amplitude_variation)    # Higher variation = more fatigue
-        asymmetry_score = np.random.uniform(0.1, 0.3)   # Mock asymmetry
+
+        # Real asymmetry calculation from accelerometer data
+        if 'accel' in features:
+            # Calculate asymmetry from variance differences between axes
+            x_var = features.get('accel_x_variance', 0.1)
+            y_var = features.get('accel_y_variance', 0.1)
+            z_var = features.get('accel_z_variance', 0.1)
+
+            # Asymmetry as coefficient of variation of axis variances
+            axis_vars = [x_var, y_var, z_var]
+            mean_var = np.mean(axis_vars)
+            asymmetry_score = np.std(axis_vars) / (mean_var + 1e-6)
+            asymmetry_score = min(1.0, asymmetry_score)
+        else:
+            asymmetry_score = 0.2  # Default moderate asymmetry
         
         return MotorBiomarkers(
             movement_frequency=movement_frequency,

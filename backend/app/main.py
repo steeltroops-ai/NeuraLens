@@ -14,6 +14,12 @@ from contextlib import asynccontextmanager
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.response import (
+    api_exception_handler,
+    health_check_response,
+    api_status_response,
+    ResponseBuilder
+)
 
 
 @asynccontextmanager
@@ -55,14 +61,36 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Health check endpoint
 @app.get("/health")
+@app.get("/api/v1/health")
 async def health_check():
     """Health check endpoint for monitoring"""
-    return {
-        "status": "healthy",
-        "service": "neurolens-x-api",
-        "version": "1.0.0",
-        "environment": settings.ENVIRONMENT
+    from app.services.database_service import DatabaseManager
+
+    # Check database health
+    db_health = DatabaseManager.health_check()
+
+    components = {
+        "database": db_health["status"],
+        "ml_models": "healthy",  # TODO: Add actual ML model health checks
+        "api": "healthy"
     }
+
+    overall_status = "healthy" if all(
+        status == "healthy" for status in components.values()
+    ) else "unhealthy"
+
+    return health_check_response(
+        status=overall_status,
+        service="NeuraLens-X API",
+        environment=settings.ENVIRONMENT,
+        components=components
+    )
+
+# API status endpoint
+@app.get("/api/v1/status")
+async def api_status():
+    """API status endpoint"""
+    return api_status_response()
 
 
 # Root endpoint
@@ -77,6 +105,9 @@ async def root():
         "health": "/health"
     }
 
+
+# Add exception handlers
+app.add_exception_handler(HTTPException, api_exception_handler)
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")

@@ -2,28 +2,57 @@
 
 import React, { useEffect, useRef } from 'react';
 
-// Utility hook for high-DPI canvas
+// Enhanced utility hook for high-DPI canvas with proper cleanup
 function useHiDpiCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     const resize = () => {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const cw = Math.max(240, canvas.clientWidth);
-      const ch = Math.max(160, canvas.clientHeight);
-      canvas.width = Math.floor(cw * dpr);
-      canvas.height = Math.floor(ch * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      try {
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const cw = Math.max(240, canvas.clientWidth);
+        const ch = Math.max(160, canvas.clientHeight);
+        canvas.width = Math.floor(cw * dpr);
+        canvas.height = Math.floor(ch * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      } catch (error) {
+        console.warn('Canvas resize error:', error);
+      }
     };
 
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-    return () => ro.disconnect();
+
+    // Store cleanup function
+    cleanupRef.current = () => {
+      ro.disconnect();
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      } catch (error) {
+        console.warn('Canvas cleanup error:', error);
+      }
+    };
+
+    return cleanupRef.current;
   }, []);
+
+  // Additional cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
+    };
+  }, []);
+
   return ref;
 }
 
@@ -69,11 +98,7 @@ function makePerlin() {
     const u = fade(xf);
     const v = fade(yf);
     const x1 = lerp(grad(bottomLeft, xf, yf), grad(bottomRight, xf - 1, yf), u);
-    const x2 = lerp(
-      grad(topLeft, xf, yf - 1),
-      grad(topRight, xf - 1, yf - 1),
-      u
-    );
+    const x2 = lerp(grad(topLeft, xf, yf - 1), grad(topRight, xf - 1, yf - 1), u);
     return (lerp(x1, x2, v) + 1) / 2; // normalize 0..1
   };
 }
@@ -83,10 +108,17 @@ const perlin = makePerlin();
 // Speech Analysis - Animated Waveform Patterns
 export function SpeechWaveform() {
   const ref = useHiDpiCanvas();
+  const rafRef = useRef<number>(0);
+  const isActiveRef = useRef(true);
+
   useEffect(() => {
-    const canvas = ref.current!;
-    const ctx = canvas.getContext('2d')!;
-    let raf = 0;
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    isActiveRef.current = true;
     let t = 0;
 
     // formant parameters (F1,F2,F3 typical ranges)
@@ -97,74 +129,83 @@ export function SpeechWaveform() {
     ];
 
     function render() {
-      const W = Math.max(480, canvas.clientWidth);
-      const H = Math.max(220, canvas.clientHeight);
-      ctx.clearRect(0, 0, W, H);
+      if (!isActiveRef.current || !canvas || !ctx) return;
 
-      // vocal tract simplified: series of overlapping ellipses
-      const cx = W / 2;
-      const topY = H * 0.28;
-      for (let i = 0; i < 5; i++) {
-        const w = W * 0.7 * (1 - i * 0.09);
-        const h = H * 0.16 * (1 - i * 0.06);
-        ctx.beginPath();
-        ctx.ellipse(cx - i * 8, topY + i * 6, w * 0.5, h, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 122, 255, 0.03)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 122, 255, 0.1)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+      try {
+        const W = Math.max(480, canvas.clientWidth);
+        const H = Math.max(220, canvas.clientHeight);
+        ctx.clearRect(0, 0, W, H);
 
-      // generate a time-domain waveform by summing three band-limited sinusoids
-      const samples = 420;
-      ctx.beginPath();
-      for (let i = 0; i < samples; i++) {
-        const u = i / (samples - 1);
-        const x = W * 0.08 + u * (W * 0.84);
-        // drive frequency modulated by slow vowels
-        const baseFreq = 110 + 40 * Math.sin(t * 0.6 + u * 3.2);
-        let yval = 0;
-        // excite and filter through formant resonators
-        for (let k = 0; k < formants.length; k++) {
-          const F = formants[k]!.f * (1 + 0.1 * Math.sin(t * 0.4 + k));
-          const amp = 1.0 / (1 + Math.abs(k - 1));
-          yval +=
-            amp *
-            Math.sin((baseFreq + F) * (u * 0.02 + t * 0.001)) *
-            (1 / (1 + Math.pow((F - 800 * (k + 1)) / 400, 2)));
+        // vocal tract simplified: series of overlapping ellipses
+        const cx = W / 2;
+        const topY = H * 0.28;
+        for (let i = 0; i < 5; i++) {
+          const w = W * 0.7 * (1 - i * 0.09);
+          const h = H * 0.16 * (1 - i * 0.06);
+          ctx.beginPath();
+          ctx.ellipse(cx - i * 8, topY + i * 6, w * 0.5, h, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 122, 255, 0.03)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(0, 122, 255, 0.1)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
         }
-        const y = H * 0.66 + yval * 18;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = 'rgba(0, 122, 255, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
 
-      // draw spectrogram-like formant bands
-      for (let k = 0; k < formants.length; k++) {
-        const F = formants[k]!.f;
-        const bx = W * 0.15 + (k / (formants.length - 1)) * (W * 0.7);
-        const energy = 0.08 + 0.06 * Math.abs(Math.sin(t * 0.5 + k));
-        ctx.fillStyle = `rgba(0, 122, 255, ${0.2 + energy})`;
-        ctx.fillRect(
-          bx - 10,
-          H * 0.82 - energy * H * 0.25,
-          20,
-          energy * H * 0.25
-        );
-      }
+        // generate a time-domain waveform by summing three band-limited sinusoids
+        const samples = 420;
+        ctx.beginPath();
+        for (let i = 0; i < samples; i++) {
+          const u = i / (samples - 1);
+          const x = W * 0.08 + u * (W * 0.84);
+          // drive frequency modulated by slow vowels
+          const baseFreq = 110 + 40 * Math.sin(t * 0.6 + u * 3.2);
+          let yval = 0;
+          // excite and filter through formant resonators
+          for (let k = 0; k < formants.length; k++) {
+            const F = formants[k]!.f * (1 + 0.1 * Math.sin(t * 0.4 + k));
+            const amp = 1.0 / (1 + Math.abs(k - 1));
+            yval +=
+              amp *
+              Math.sin((baseFreq + F) * (u * 0.02 + t * 0.001)) *
+              (1 / (1 + Math.pow((F - 800 * (k + 1)) / 400, 2)));
+          }
+          const y = H * 0.66 + yval * 18;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(0, 122, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-      t += 0.02;
-      raf = requestAnimationFrame(render);
+        // draw spectrogram-like formant bands
+        for (let k = 0; k < formants.length; k++) {
+          const F = formants[k]!.f;
+          const bx = W * 0.15 + (k / (formants.length - 1)) * (W * 0.7);
+          const energy = 0.08 + 0.06 * Math.abs(Math.sin(t * 0.5 + k));
+          ctx.fillStyle = `rgba(0, 122, 255, ${0.2 + energy})`;
+          ctx.fillRect(bx - 10, H * 0.82 - energy * H * 0.25, 20, energy * H * 0.25);
+        }
+
+        t += 0.02;
+        if (isActiveRef.current) {
+          rafRef.current = requestAnimationFrame(render);
+        }
+      } catch (error) {
+        console.warn('SpeechWaveform render error:', error);
+      }
     }
 
-    raf = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(raf);
+    rafRef.current = requestAnimationFrame(render);
+
+    return () => {
+      isActiveRef.current = false;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, [ref]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }
 
 // Retinal Analysis - Animated Eye with Vessel Networks
@@ -218,11 +259,7 @@ export function RetinalEye({ light = 0.6 }: { light?: number }) {
       const irisR = eyeR * 0.48;
       const pupilMin = eyeR * 0.12;
       const pupilMax = eyeR * 0.28;
-      const pupilR = clamp(
-        pupilMax * (1 - light) + pupilMin * light,
-        pupilMin,
-        pupilMax
-      );
+      const pupilR = clamp(pupilMax * (1 - light) + pupilMin * light, pupilMin, pupilMax);
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -235,7 +272,7 @@ export function RetinalEye({ light = 0.6 }: { light?: number }) {
           const a = (s / segments) * Math.PI * 2;
           const noiseVal = perlin(
             Math.cos(a) * 0.7 + r * 0.06 + t * 0.02,
-            Math.sin(a) * 0.7 + r * 0.06
+            Math.sin(a) * 0.7 + r * 0.06,
           );
           const spoke = 1 - Math.pow(Math.abs(Math.sin(a * 3 + t * 0.3)), 0.9);
           const rOffset = (noiseVal - 0.5) * 8 * (1 - r / rings) * spoke;
@@ -280,7 +317,7 @@ export function RetinalEye({ light = 0.6 }: { light?: number }) {
     return () => cancelAnimationFrame(raf);
   }, [ref, light]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }
 
 // Motor Assessment - Enhanced Hand Kinematics with Anatomical Features
@@ -469,7 +506,7 @@ export function HandKinematics() {
     return () => cancelAnimationFrame(raf);
   }, [ref]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }
 
 // Cognitive Evaluation - Brain with Neural Activity
@@ -701,7 +738,7 @@ export function BrainNeural() {
     return () => cancelAnimationFrame(raf);
   }, [ref]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }
 
 // NRI Fusion Engine - Data Integration Visualization
@@ -849,8 +886,7 @@ export function NRIFusion() {
             // Draw correlation arc
             const midX = (x + otherX) / 2;
             const midY = (y + otherY) / 2;
-            const arcRadius =
-              Math.sqrt((x - otherX) ** 2 + (y - otherY) ** 2) / 3;
+            const arcRadius = Math.sqrt((x - otherX) ** 2 + (y - otherY) ** 2) / 3;
 
             ctx.beginPath();
             ctx.arc(midX, midY, arcRadius, 0, Math.PI * 2);
@@ -881,7 +917,7 @@ export function NRIFusion() {
     return () => cancelAnimationFrame(raf);
   }, [ref]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }
 
 // Multi-Modal Assessment - Integrated Network Visualization
@@ -1012,13 +1048,7 @@ export function MultiModalNetwork() {
 
         // Outer activity ring
         ctx.beginPath();
-        ctx.arc(
-          node.x,
-          node.y,
-          node.size * (1.5 + pulse * 0.3),
-          0,
-          Math.PI * 2
-        );
+        ctx.arc(node.x, node.y, node.size * (1.5 + pulse * 0.3), 0, Math.PI * 2);
         ctx.strokeStyle = `${node.color}33`;
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -1046,5 +1076,5 @@ export function MultiModalNetwork() {
     return () => cancelAnimationFrame(raf);
   }, [ref]);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" />;
+  return <canvas ref={ref} className='absolute inset-0 h-full w-full' />;
 }

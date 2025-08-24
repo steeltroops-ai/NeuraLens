@@ -8,7 +8,7 @@
 export const announceToScreenReader = (
   message: string,
   priority: 'polite' | 'assertive' = 'polite',
-  delay: number = 100
+  delay: number = 100,
 ): void => {
   // Check if we're in a browser environment
   if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -50,9 +50,7 @@ export class FocusManager {
     }
 
     const targetElement =
-      typeof element === 'string'
-        ? (document.querySelector(element) as HTMLElement)
-        : element;
+      typeof element === 'string' ? (document.querySelector(element) as HTMLElement) : element;
 
     if (targetElement) {
       // Store current focus in history
@@ -99,7 +97,7 @@ export class FocusManager {
     }
 
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ) as NodeListOf<HTMLElement>;
 
     const firstElement = focusableElements[0];
@@ -157,7 +155,7 @@ export class FocusManager {
 
     // Remove existing skip links
     const existingSkipLinks = document.querySelectorAll('.skip-link');
-    existingSkipLinks.forEach((link) => link.remove());
+    existingSkipLinks.forEach(link => link.remove());
 
     // Create new skip links
     this.skipLinks.forEach(({ target, label }) => {
@@ -165,7 +163,7 @@ export class FocusManager {
       skipLink.href = `#${target}`;
       skipLink.textContent = label;
       skipLink.className = 'skip-link';
-      skipLink.addEventListener('click', (e) => {
+      skipLink.addEventListener('click', e => {
         e.preventDefault();
         const targetElement = document.getElementById(target);
         if (targetElement) {
@@ -187,11 +185,7 @@ export class KeyboardNavigation {
   /**
    * Registers a keyboard shortcut
    */
-  registerShortcut(
-    key: string,
-    callback: () => void,
-    description?: string
-  ): void {
+  registerShortcut(key: string, callback: () => void, description?: string): void {
     this.shortcuts.set(key.toLowerCase(), callback);
 
     // Add to help documentation if description provided
@@ -245,7 +239,7 @@ export class KeyboardNavigation {
         const mainContent = document.getElementById('main-content');
         if (mainContent) focusManager.setFocus(mainContent);
       },
-      'Skip to main content'
+      'Skip to main content',
     );
 
     this.registerShortcut(
@@ -254,7 +248,7 @@ export class KeyboardNavigation {
         const navigation = document.getElementById('main-navigation');
         if (navigation) focusManager.setFocus(navigation);
       },
-      'Skip to navigation'
+      'Skip to navigation',
     );
 
     this.registerShortcut(
@@ -265,7 +259,7 @@ export class KeyboardNavigation {
           window.dispatchEvent(new PopStateEvent('popstate'));
         }
       },
-      'Go to home page'
+      'Go to home page',
     );
 
     this.registerShortcut(
@@ -276,7 +270,7 @@ export class KeyboardNavigation {
           window.dispatchEvent(new PopStateEvent('popstate'));
         }
       },
-      'Start assessment'
+      'Start assessment',
     );
   }
 
@@ -314,8 +308,7 @@ export class VoiceNavigation {
 
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
@@ -323,9 +316,7 @@ export class VoiceNavigation {
       this.recognition.lang = 'en-US';
 
       this.recognition.onresult = (event: any) => {
-        const command = event.results[event.results.length - 1][0].transcript
-          .toLowerCase()
-          .trim();
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
         this.executeCommand(command);
       };
 
@@ -431,16 +422,11 @@ export class AccessibilityPreferences {
   private loadPreferences(): void {
     try {
       // Check if we're in a browser environment
-      if (
-        typeof window === 'undefined' ||
-        typeof localStorage === 'undefined'
-      ) {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
         return;
       }
 
-      const stored = localStorage.getItem(
-        'neurolens-accessibility-preferences'
-      );
+      const stored = localStorage.getItem('neurolens-accessibility-preferences');
       if (stored) {
         this.preferences = JSON.parse(stored);
       }
@@ -455,17 +441,11 @@ export class AccessibilityPreferences {
   private savePreferences(): void {
     try {
       // Check if we're in a browser environment
-      if (
-        typeof window === 'undefined' ||
-        typeof localStorage === 'undefined'
-      ) {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
         return;
       }
 
-      localStorage.setItem(
-        'neurolens-accessibility-preferences',
-        JSON.stringify(this.preferences)
-      );
+      localStorage.setItem('neurolens-accessibility-preferences', JSON.stringify(this.preferences));
     } catch (error) {
       console.warn('Failed to save accessibility preferences:', error);
     }
@@ -521,10 +501,7 @@ export class LiveRegionManager {
   /**
    * Creates a live region
    */
-  createRegion(
-    id: string,
-    politeness: 'polite' | 'assertive' = 'polite'
-  ): void {
+  createRegion(id: string, politeness: 'polite' | 'assertive' = 'polite'): void {
     // Check if we're in a browser environment
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       return;
@@ -619,8 +596,7 @@ export const voiceNavigation = (() => {
 
 export const accessibilityPreferences = (() => {
   if (typeof window === 'undefined') return {} as AccessibilityPreferences;
-  if (!_accessibilityPreferences)
-    _accessibilityPreferences = new AccessibilityPreferences();
+  if (!_accessibilityPreferences) _accessibilityPreferences = new AccessibilityPreferences();
   return _accessibilityPreferences;
 })();
 
@@ -658,10 +634,7 @@ export const initializeAccessibility = (): void => {
   }
 
   // Announce initialization
-  announceToScreenReader(
-    'NeuroLens-X accessibility features initialized',
-    'polite'
-  );
+  announceToScreenReader('NeuroLens-X accessibility features initialized', 'polite');
 };
 
 /**

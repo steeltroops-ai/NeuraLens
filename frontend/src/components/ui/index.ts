@@ -2,13 +2,7 @@
 // Clinical-grade components with accessibility and design system compliance
 
 // Button Components
-export {
-  Button,
-  IconButton,
-  ButtonGroup,
-  LoadingButton,
-  CopyButton,
-} from './Button';
+export { Button, IconButton, ButtonGroup, LoadingButton, CopyButton } from './Button';
 
 // Card Components
 export {
@@ -26,12 +20,7 @@ export {
 export { Input, Textarea, SearchInput } from './Input';
 
 // Progress Components
-export {
-  Progress,
-  CircularProgress,
-  StepProgress,
-  NRIProgress,
-} from './Progress';
+export { Progress, CircularProgress, StepProgress, NRIProgress } from './Progress';
 
 // Loading Components
 export { Loading, Skeleton, LoadingOverlay } from './Loading';

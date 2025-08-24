@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { Button, Input } from '@/components/ui';
+
 import type { RiskAssessmentData } from '@/lib/ml';
 
 interface RiskAssessmentStepProps {
@@ -85,7 +87,7 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
         apathy: false,
         irritability: false,
       },
-    }
+    },
   );
 
   const [currentSection, setCurrentSection] = useState(0);
@@ -103,16 +105,14 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
   };
 
   const renderDemographics = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className='space-y-6'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div>
-          <label className="mb-2 block text-sm font-medium text-text-primary">
-            Age
-          </label>
+          <label className='mb-2 block text-sm font-medium text-text-primary'>Age</label>
           <Input
-            type="number"
+            type='number'
             value={formData.demographics?.age?.toString() || ''}
-            onChange={(e) =>
+            onChange={e =>
               setFormData({
                 ...formData,
                 demographics: {
@@ -121,17 +121,15 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
                 },
               })
             }
-            placeholder="Enter your age"
+            placeholder='Enter your age'
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-text-primary">
-            Sex
-          </label>
+          <label className='mb-2 block text-sm font-medium text-text-primary'>Sex</label>
           <select
             value={formData.demographics?.sex || 'male'}
-            onChange={(e) =>
+            onChange={e =>
               setFormData({
                 ...formData,
                 demographics: {
@@ -140,22 +138,20 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
                 },
               })
             }
-            className="w-full rounded-lg border border-neutral-700 bg-surface-secondary px-4 py-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className='bg-surface-secondary w-full rounded-lg border border-neutral-700 px-4 py-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500'
           >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value='male'>Male</option>
+            <option value='female'>Female</option>
+            <option value='other'>Other</option>
           </select>
         </div>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-text-primary">
-          Ethnicity
-        </label>
+        <label className='mb-2 block text-sm font-medium text-text-primary'>Ethnicity</label>
         <Input
           value={formData.demographics?.ethnicity || ''}
-          onChange={(e) =>
+          onChange={e =>
             setFormData({
               ...formData,
               demographics: {
@@ -164,18 +160,18 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
               },
             })
           }
-          placeholder="Enter your ethnicity"
+          placeholder='Enter your ethnicity'
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-text-primary">
+        <label className='mb-2 block text-sm font-medium text-text-primary'>
           Years of Education
         </label>
         <Input
-          type="number"
+          type='number'
           value={formData.demographics?.education?.toString() || ''}
-          onChange={(e) =>
+          onChange={e =>
             setFormData({
               ...formData,
               demographics: {
@@ -184,18 +180,16 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
               },
             })
           }
-          placeholder="Years of formal education"
+          placeholder='Years of formal education'
         />
       </div>
     </div>
   );
 
   const renderMedicalHistory = () => (
-    <div className="space-y-6">
-      <h4 className="text-lg font-semibold text-text-primary">
-        Medical Conditions
-      </h4>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className='space-y-6'>
+      <h4 className='text-lg font-semibold text-text-primary'>Medical Conditions</h4>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {[
           { key: 'hypertension', label: 'High Blood Pressure' },
           { key: 'diabetes', label: 'Diabetes' },
@@ -204,18 +198,15 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
           { key: 'headInjury', label: 'Head Injury' },
           { key: 'depression', label: 'Depression' },
         ].map(({ key, label }) => (
-          <label
-            key={key}
-            className="flex cursor-pointer items-center space-x-3"
-          >
+          <label key={key} className='flex cursor-pointer items-center space-x-3'>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={
                 (formData.medicalHistory?.[
                   key as keyof typeof formData.medicalHistory
                 ] as boolean) || false
               }
-              onChange={(e) =>
+              onChange={e =>
                 setFormData({
                   ...formData,
                   medicalHistory: {
@@ -224,9 +215,9 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
                   },
                 })
               }
-              className="h-4 w-4 rounded border-neutral-600 bg-surface-secondary text-primary-500 focus:ring-primary-500"
+              className='bg-surface-secondary h-4 w-4 rounded border-neutral-600 text-primary-500 focus:ring-primary-500'
             />
-            <span className="text-text-secondary">{label}</span>
+            <span className='text-text-secondary'>{label}</span>
           </label>
         ))}
       </div>
@@ -234,29 +225,25 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
   );
 
   const renderFamilyHistory = () => (
-    <div className="space-y-6">
-      <h4 className="text-lg font-semibold text-text-primary">
+    <div className='space-y-6'>
+      <h4 className='text-lg font-semibold text-text-primary'>
         Family History of Neurological Conditions
       </h4>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {[
           { key: 'alzheimers', label: "Alzheimer's Disease" },
           { key: 'parkinsons', label: "Parkinson's Disease" },
           { key: 'dementia', label: 'Dementia' },
           { key: 'stroke', label: 'Stroke' },
         ].map(({ key, label }) => (
-          <label
-            key={key}
-            className="flex cursor-pointer items-center space-x-3"
-          >
+          <label key={key} className='flex cursor-pointer items-center space-x-3'>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={
-                (formData.familyHistory?.[
-                  key as keyof typeof formData.familyHistory
-                ] as boolean) || false
+                (formData.familyHistory?.[key as keyof typeof formData.familyHistory] as boolean) ||
+                false
               }
-              onChange={(e) =>
+              onChange={e =>
                 setFormData({
                   ...formData,
                   familyHistory: {
@@ -265,9 +252,9 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
                   },
                 })
               }
-              className="h-4 w-4 rounded border-neutral-600 bg-surface-secondary text-primary-500 focus:ring-primary-500"
+              className='bg-surface-secondary h-4 w-4 rounded border-neutral-600 text-primary-500 focus:ring-primary-500'
             />
-            <span className="text-text-secondary">{label}</span>
+            <span className='text-text-secondary'>{label}</span>
           </label>
         ))}
       </div>
@@ -275,17 +262,17 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
   );
 
   const renderLifestyle = () => (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <div>
-        <label className="mb-2 block text-sm font-medium text-text-primary">
+        <label className='mb-2 block text-sm font-medium text-text-primary'>
           Exercise Frequency (days per week)
         </label>
         <Input
-          type="number"
-          min="0"
-          max="7"
+          type='number'
+          min='0'
+          max='7'
           value={formData.lifestyle?.exerciseFrequency?.toString() || ''}
-          onChange={(e) =>
+          onChange={e =>
             setFormData({
               ...formData,
               lifestyle: {
@@ -298,15 +285,15 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-text-primary">
+        <label className='mb-2 block text-sm font-medium text-text-primary'>
           Diet Quality (1-10 scale)
         </label>
         <Input
-          type="number"
-          min="1"
-          max="10"
+          type='number'
+          min='1'
+          max='10'
           value={formData.lifestyle?.dietQuality?.toString() || ''}
-          onChange={(e) =>
+          onChange={e =>
             setFormData({
               ...formData,
               lifestyle: {
@@ -319,12 +306,10 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-text-primary">
-          Smoking Status
-        </label>
+        <label className='mb-2 block text-sm font-medium text-text-primary'>Smoking Status</label>
         <select
           value={formData.lifestyle?.smoking || 'never'}
-          onChange={(e) =>
+          onChange={e =>
             setFormData({
               ...formData,
               lifestyle: {
@@ -333,40 +318,33 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
               },
             })
           }
-          className="w-full rounded-lg border border-neutral-700 bg-surface-secondary px-4 py-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className='bg-surface-secondary w-full rounded-lg border border-neutral-700 px-4 py-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500'
         >
-          <option value="never">Never</option>
-          <option value="former">Former</option>
-          <option value="current">Current</option>
+          <option value='never'>Never</option>
+          <option value='former'>Former</option>
+          <option value='current'>Current</option>
         </select>
       </div>
     </div>
   );
 
   const renderCognitive = () => (
-    <div className="space-y-6">
-      <h4 className="text-lg font-semibold text-text-primary">
-        Cognitive Concerns
-      </h4>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className='space-y-6'>
+      <h4 className='text-lg font-semibold text-text-primary'>Cognitive Concerns</h4>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {[
           { key: 'memoryComplaints', label: 'Memory Problems' },
           { key: 'concentrationIssues', label: 'Concentration Issues' },
           { key: 'languageProblems', label: 'Language Difficulties' },
           { key: 'moodChanges', label: 'Mood Changes' },
         ].map(({ key, label }) => (
-          <label
-            key={key}
-            className="flex cursor-pointer items-center space-x-3"
-          >
+          <label key={key} className='flex cursor-pointer items-center space-x-3'>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={
-                (formData.cognitive?.[
-                  key as keyof typeof formData.cognitive
-                ] as boolean) || false
+                (formData.cognitive?.[key as keyof typeof formData.cognitive] as boolean) || false
               }
-              onChange={(e) =>
+              onChange={e =>
                 setFormData({
                   ...formData,
                   cognitive: {
@@ -375,9 +353,9 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
                   },
                 })
               }
-              className="h-4 w-4 rounded border-neutral-600 bg-surface-secondary text-primary-500 focus:ring-primary-500"
+              className='bg-surface-secondary h-4 w-4 rounded border-neutral-600 text-primary-500 focus:ring-primary-500'
             />
-            <span className="text-text-secondary">{label}</span>
+            <span className='text-text-secondary'>{label}</span>
           </label>
         ))}
       </div>
@@ -402,51 +380,51 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-6">
-        <div className="mx-auto max-w-4xl space-y-12">
+    <div className='min-h-screen bg-gray-50 py-12'>
+      <div className='container mx-auto px-6'>
+        <div className='mx-auto max-w-4xl space-y-12'>
           {/* Apple-Style Header */}
-          <div className="animate-fade-in space-y-6 text-center">
-            <div className="rounded-apple-xl from-warning-500 to-warning-600 mx-auto flex h-20 w-20 items-center justify-center bg-gradient-to-br shadow-warning">
+          <div className='animate-fade-in space-y-6 text-center'>
+            <div className='shadow-warning mx-auto flex h-20 w-20 items-center justify-center rounded-apple-xl bg-gradient-to-br from-warning-500 to-warning-600'>
               <svg
-                className="h-10 w-10 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                className='h-10 w-10 text-white'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
                   strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
                 />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-text-primary">
+            <h1 className='text-4xl font-bold tracking-tight text-text-primary'>
               Health Questionnaire
             </h1>
-            <p className="mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary">
+            <p className='mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary'>
               Answer simple questions about your health and lifestyle
             </p>
           </div>
 
           {/* Apple-Style Progress */}
-          <div className="flex justify-center animate-scale-in">
-            <div className="flex items-center space-x-3">
+          <div className='flex animate-scale-in justify-center'>
+            <div className='flex items-center space-x-3'>
               {sections.map((section, index) => (
-                <div key={index} className="flex items-center">
+                <div key={index} className='flex items-center'>
                   <div
                     className={`h-4 w-4 rounded-full transition-all duration-300 ${
                       index === currentSection
-                        ? 'bg-warning-500 scale-125 shadow-lg'
+                        ? 'scale-125 bg-warning-500 shadow-lg'
                         : index < currentSection
-                          ? 'bg-success-500 scale-110'
+                          ? 'scale-110 bg-success-500'
                           : 'bg-gray-300'
                     }`}
                   />
                   {index < sections.length - 1 && (
                     <div
-                      className={`w-8 h-0.5 mx-2 transition-colors duration-300 ${
+                      className={`mx-2 h-0.5 w-8 transition-colors duration-300 ${
                         index < currentSection ? 'bg-success-500' : 'bg-gray-300'
                       }`}
                     />
@@ -457,30 +435,26 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
           </div>
 
           {/* Apple-Style Form */}
-          <div className="card-apple p-10 animate-slide-up">
-            <h2 className="mb-8 text-3xl font-semibold text-text-primary text-center">
+          <div className='card-apple animate-slide-up p-10'>
+            <h2 className='mb-8 text-center text-3xl font-semibold text-text-primary'>
               {sections[currentSection]?.title || 'Assessment'}
             </h2>
             {renderCurrentSection()}
           </div>
 
           {/* Apple-Style Navigation */}
-          <div className="flex justify-between items-center animate-fade-in">
+          <div className='flex animate-fade-in items-center justify-between'>
             <Button
-              variant="secondary"
-              size="lg"
-              onClick={
-                currentSection === 0
-                  ? onBack
-                  : () => setCurrentSection(currentSection - 1)
-              }
-              className="px-8"
+              variant='secondary'
+              size='lg'
+              onClick={currentSection === 0 ? onBack : () => setCurrentSection(currentSection - 1)}
+              className='px-8'
             >
               {currentSection === 0 ? 'Back' : 'Previous'}
             </Button>
 
-            <div className="text-center">
-              <span className="text-sm text-text-secondary">
+            <div className='text-center'>
+              <span className='text-sm text-text-secondary'>
                 {currentSection + 1} of {sections.length}
               </span>
             </div>
@@ -489,23 +463,43 @@ export const RiskAssessmentStep: React.FC<RiskAssessmentStepProps> = ({
               {currentSection < sections.length - 1 ? (
                 <Button
                   onClick={() => setCurrentSection(currentSection + 1)}
-                  size="lg"
-                  className="px-8 shadow-warning hover:shadow-warning-hover"
+                  size='lg'
+                  className='shadow-warning hover:shadow-warning-hover px-8'
                 >
                   Next Section
-                  <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  <svg
+                    className='ml-2 h-5 w-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M13 7l5 5m0 0l-5 5m5-5H6'
+                    />
                   </svg>
                 </Button>
               ) : (
                 <Button
                   onClick={handleComplete}
-                  size="lg"
-                  className="px-8 shadow-warning hover:shadow-warning-hover"
+                  size='lg'
+                  className='shadow-warning hover:shadow-warning-hover px-8'
                 >
                   Complete Assessment
-                  <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className='ml-2 h-5 w-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 13l4 4L19 7'
+                    />
                   </svg>
                 </Button>
               )}

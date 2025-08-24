@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Header } from './Header';
-import { Footer } from './Footer';
+import React, { useEffect, useRef } from 'react';
+
 import { cn } from '@/utils/cn';
-import { initializeAccessibility } from '@/utils/accessibility';
+
+import { Footer } from './Footer';
+import { Header } from './Header';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,19 +24,21 @@ export const Layout: React.FC<LayoutProps> = ({
   fullHeight = false,
   containerized = true,
 }) => {
-  // Initialize accessibility features
+  // Initialize accessibility features only once globally
+  const accessibilityInitialized = useRef(false);
+
   useEffect(() => {
-    initializeAccessibility();
+    if (!accessibilityInitialized.current) {
+      // Lazy load accessibility initialization to avoid blocking render
+      import('@/utils/accessibility').then(({ initializeAccessibility }) => {
+        initializeAccessibility();
+        accessibilityInitialized.current = true;
+      });
+    }
   }, []);
 
   return (
-    <div
-      className={cn(
-        'flex min-h-screen flex-col',
-        fullHeight && 'h-screen',
-        className
-      )}
-    >
+    <div className={cn('flex min-h-screen flex-col', fullHeight && 'h-screen', className)}>
       {/* Header */}
       {showHeader && <Header />}
 
@@ -44,10 +47,10 @@ export const Layout: React.FC<LayoutProps> = ({
         className={cn(
           'flex-1',
           showHeader && 'pt-16 lg:pt-20',
-          containerized && 'container mx-auto px-4'
+          containerized && 'container mx-auto px-4',
         )}
-        id="main-content"
-        role="main"
+        id='main-content'
+        role='main'
       >
         {children}
       </main>
@@ -60,10 +63,10 @@ export const Layout: React.FC<LayoutProps> = ({
 
       {/* Accessibility Announcements */}
       <div
-        id="accessibility-announcements"
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
+        id='accessibility-announcements'
+        aria-live='polite'
+        aria-atomic='true'
+        className='sr-only'
       />
     </div>
   );
@@ -99,10 +102,7 @@ const PWAInstallPrompt: React.FC = () => {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt
-      );
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
@@ -130,10 +130,7 @@ const PWAInstallPrompt: React.FC = () => {
   const handleDismiss = () => {
     setShowPrompt(false);
     // Don't show again for this session
-    if (
-      typeof window !== 'undefined' &&
-      typeof sessionStorage !== 'undefined'
-    ) {
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
       sessionStorage.setItem('pwa-prompt-dismissed', 'true');
     }
   };
@@ -152,37 +149,31 @@ const PWAInstallPrompt: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
-      <div className="rounded-xl border border-neutral-700 bg-surface-primary p-4 shadow-xl">
-        <div className="flex items-start space-x-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600">
-            <svg
-              className="h-6 w-6 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+    <div className='fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md'>
+      <div className='bg-surface-primary rounded-xl border border-neutral-700 p-4 shadow-xl'>
+        <div className='flex items-start space-x-3'>
+          <div className='flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600'>
+            <svg className='h-6 w-6 text-white' fill='currentColor' viewBox='0 0 24 24'>
+              <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' />
             </svg>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-text-primary">
-              Install NeuroLens-X
-            </h3>
-            <p className="mt-1 text-xs text-text-secondary">
+          <div className='min-w-0 flex-1'>
+            <h3 className='text-sm font-semibold text-text-primary'>Install NeuroLens-X</h3>
+            <p className='mt-1 text-xs text-text-secondary'>
               Install our app for faster access and offline capability.
             </p>
 
-            <div className="mt-3 flex space-x-2">
+            <div className='mt-3 flex space-x-2'>
               <button
                 onClick={handleInstallClick}
-                className="rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-primary"
+                className='focus:ring-offset-surface-primary rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
               >
                 Install
               </button>
               <button
                 onClick={handleDismiss}
-                className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-surface-primary"
+                className='focus:ring-offset-surface-primary rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2'
               >
                 Not now
               </button>
@@ -191,20 +182,15 @@ const PWAInstallPrompt: React.FC = () => {
 
           <button
             onClick={handleDismiss}
-            className="rounded-lg p-1 text-text-muted transition-colors hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-surface-primary"
-            aria-label="Dismiss install prompt"
+            className='text-text-muted focus:ring-offset-surface-primary rounded-lg p-1 transition-colors hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2'
+            aria-label='Dismiss install prompt'
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeLinecap='round'
+                strokeLinejoin='round'
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d='M6 18L18 6M6 6l12 12'
               />
             </svg>
           </button>
@@ -239,44 +225,35 @@ export const AssessmentLayout: React.FC<AssessmentLayoutProps> = ({
   const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
 
   return (
-    <div className="min-h-screen bg-surface-background">
+    <div className='bg-surface-background min-h-screen'>
       {/* Assessment Header */}
-      <header className="border-b border-neutral-800 bg-surface-primary">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      <header className='bg-surface-primary border-b border-neutral-800'>
+        <div className='container mx-auto px-4 py-4'>
+          <div className='flex items-center justify-between'>
             {/* Back Button */}
-            <div className="flex items-center space-x-4">
+            <div className='flex items-center space-x-4'>
               {onBack && (
                 <button
                   onClick={onBack}
-                  className="rounded-lg p-2 text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-primary"
-                  aria-label="Go back"
+                  className='focus:ring-offset-surface-primary rounded-lg p-2 text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
+                  aria-label='Go back'
                 >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
                       strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
+                      d='M15 19l-7-7 7-7'
                     />
                   </svg>
                 </button>
               )}
 
               <div>
-                <h1 className="text-lg font-semibold text-text-primary">
+                <h1 className='text-lg font-semibold text-text-primary'>
                   {stepTitle || `Step ${currentStep} of ${totalSteps}`}
                 </h1>
-                {showProgress && (
-                  <p className="text-sm text-text-secondary">
-                    Assessment Progress
-                  </p>
-                )}
+                {showProgress && <p className='text-sm text-text-secondary'>Assessment Progress</p>}
               </div>
             </div>
 
@@ -284,20 +261,15 @@ export const AssessmentLayout: React.FC<AssessmentLayoutProps> = ({
             {onExit && (
               <button
                 onClick={onExit}
-                className="rounded-lg p-2 text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-primary"
-                aria-label="Exit assessment"
+                className='focus:ring-offset-surface-primary rounded-lg p-2 text-text-secondary transition-colors hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
+                aria-label='Exit assessment'
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                     strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
+                    d='M6 18L18 6M6 6l12 12'
                   />
                 </svg>
               </button>
@@ -306,14 +278,14 @@ export const AssessmentLayout: React.FC<AssessmentLayoutProps> = ({
 
           {/* Progress Bar */}
           {showProgress && (
-            <div className="mt-4">
-              <div className="h-2 w-full rounded-full bg-neutral-800">
+            <div className='mt-4'>
+              <div className='h-2 w-full rounded-full bg-neutral-800'>
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out"
+                  className='h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out'
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
-              <div className="mt-2 flex justify-between text-xs text-text-muted">
+              <div className='text-text-muted mt-2 flex justify-between text-xs'>
                 <span>Step {currentStep}</span>
                 <span>{Math.round(progressPercentage)}% Complete</span>
               </div>
@@ -323,7 +295,7 @@ export const AssessmentLayout: React.FC<AssessmentLayoutProps> = ({
       </header>
 
       {/* Assessment Content */}
-      <main className="flex-1 py-8" role="main">
+      <main className='flex-1 py-8' role='main'>
         {children}
       </main>
     </div>

@@ -94,15 +94,57 @@ class RealtimeCognitiveAnalyzer:
             raise Exception(f"Real-time analysis failed: {str(e)}")
     
     async def _fast_result_preprocessing(self, test_results: Dict[str, Any], difficulty_level: str) -> Dict[str, Dict[str, float]]:
-        """Ultra-fast test result preprocessing"""
-        
+        """Real test result preprocessing with response time analysis"""
+
         # Difficulty adjustment factors
         difficulty_factors = {"easy": 0.9, "standard": 1.0, "hard": 1.1}
         adjustment = difficulty_factors.get(difficulty_level, 1.0)
-        
+
         processed = {}
-        
+
+        # Process response times if available
+        if 'response_times' in test_results:
+            rt_data = test_results['response_times']
+            if isinstance(rt_data, list) and len(rt_data) > 0:
+                rt_array = np.array(rt_data)
+                processed['response_times'] = {
+                    'mean_time': np.mean(rt_array),
+                    'median_time': np.median(rt_array),
+                    'std_time': np.std(rt_array),
+                    'consistency': 1.0 / (1.0 + np.std(rt_array) / np.mean(rt_array))
+                }
+
+        # Process accuracy data
+        if 'accuracy' in test_results:
+            acc_data = test_results['accuracy']
+            if isinstance(acc_data, list):
+                acc_array = np.array(acc_data)
+                processed['accuracy'] = {
+                    'overall': np.mean(acc_array),
+                    'consistency': 1.0 - np.std(acc_array),
+                    'improvement': self._calculate_learning_trend(acc_array)
+                }
+
+        # Process task-switching data
+        if 'task_switching' in test_results:
+            switch_data = test_results['task_switching']
+            if isinstance(switch_data, dict):
+                # Calculate switch cost (difference between switch and repeat trials)
+                repeat_rt = switch_data.get('repeat_trials', [])
+                switch_rt = switch_data.get('switch_trials', [])
+
+                if repeat_rt and switch_rt:
+                    switch_cost = np.mean(switch_rt) - np.mean(repeat_rt)
+                    processed['task_switching'] = {
+                        'switch_cost': max(0.0, switch_cost / 1000.0),  # Normalize to seconds
+                        'switch_accuracy': switch_data.get('switch_accuracy', 0.8)
+                    }
+
+        # Process other test types
         for test_type, results in test_results.items():
+            if test_type in ['response_times', 'accuracy', 'task_switching']:
+                continue  # Already processed above
+
             if isinstance(results, dict):
                 # Process structured results
                 processed[test_type] = {}
@@ -117,12 +159,27 @@ class RealtimeCognitiveAnalyzer:
             else:
                 # Default processing
                 processed[test_type] = {'overall': 0.7}  # Default moderate performance
-        
+
         return processed
+
+    def _calculate_learning_trend(self, scores: np.ndarray) -> float:
+        """Calculate learning trend from accuracy scores"""
+
+        try:
+            if len(scores) < 3:
+                return 0.0
+
+            # Simple linear trend
+            x = np.arange(len(scores))
+            slope = np.polyfit(x, scores, 1)[0]
+            return np.clip(slope * len(scores), -1.0, 1.0)
+
+        except Exception:
+            return 0.0
     
     async def _fast_biomarker_calculation(self, processed_results: Dict[str, Dict[str, float]], test_battery: List[str]) -> CognitiveBiomarkers:
-        """Lightning-fast biomarker calculation using lookup tables"""
-        
+        """Real biomarker calculation with response time and accuracy analysis"""
+
         # Initialize with defaults
         memory_score = 0.8
         attention_score = 0.8
@@ -130,6 +187,22 @@ class RealtimeCognitiveAnalyzer:
         language_score = 0.8
         processing_speed = 0.8
         cognitive_flexibility = 0.8
+
+        # Calculate processing speed from response times if available
+        if 'response_times' in processed_results:
+            response_data = processed_results['response_times']
+            if isinstance(response_data, dict) and 'mean_time' in response_data:
+                mean_rt = response_data['mean_time']
+                # Convert response time to processing speed score (faster = higher score)
+                # Normal response time ~1-3 seconds, map to 0.5-1.0 score
+                processing_speed = max(0.3, min(1.0, 2.0 - (mean_rt / 3.0)))
+
+        # Calculate cognitive flexibility from task switching performance
+        if 'task_switching' in processed_results:
+            switch_data = processed_results['task_switching']
+            if isinstance(switch_data, dict):
+                switch_cost = switch_data.get('switch_cost', 0.2)  # Time penalty for switching
+                cognitive_flexibility = max(0.3, 1.0 - switch_cost)
         
         # Fast domain score calculation
         if "memory" in processed_results:

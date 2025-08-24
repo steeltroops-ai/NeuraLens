@@ -1,5 +1,6 @@
-import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 const inter = Inter({
@@ -103,60 +104,58 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang='en'
+      className={inter.variable}
+      data-scroll-behavior='smooth'
+      suppressHydrationWarning
+    >
       <head>
         {/* PWA Meta Tags */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="NeuroLens-X" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="NeuroLens-X" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#3B82F6" />
-        <meta name="msapplication-tap-highlight" content="no" />
+        <link rel='manifest' href='/manifest.json' />
+        <meta name='application-name' content='NeuroLens-X' />
+        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-status-bar-style' content='default' />
+        <meta name='apple-mobile-web-app-title' content='NeuroLens-X' />
+        <meta name='mobile-web-app-capable' content='yes' />
+        <meta name='msapplication-config' content='/browserconfig.xml' />
+        <meta name='msapplication-TileColor' content='#3B82F6' />
+        <meta name='msapplication-tap-highlight' content='no' />
 
         {/* Apple Touch Icons */}
         <link
-          rel="apple-touch-icon"
+          rel='apple-touch-icon'
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
         />
 
         {/* Favicons */}
         <link
-          rel="icon"
+          rel='icon'
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
         />
 
         {/* Preconnect to external domains */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
 
         {/* DNS Prefetch */}
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+        <link rel='dns-prefetch' href='https://fonts.gstatic.com' />
 
         {/* Preload critical resources */}
         {/* Font preloading removed - using Google Fonts instead */}
 
         {/* Security Headers */}
-        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-        <meta
-          httpEquiv="Referrer-Policy"
-          content="strict-origin-when-cross-origin"
-        />
+        <meta httpEquiv='X-Content-Type-Options' content='nosniff' />
+        <meta httpEquiv='X-XSS-Protection' content='1; mode=block' />
+        <meta httpEquiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
 
         {/* Performance Hints */}
-        <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
+        <meta httpEquiv='Accept-CH' content='DPR, Viewport-Width, Width' />
 
         {/* Structured Data */}
         <script
-          type="application/ld+json"
+          type='application/ld+json'
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
@@ -182,44 +181,39 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body
-        className="min-h-screen bg-surface-background text-text-primary antialiased"
+        className='bg-surface-background min-h-screen text-text-primary antialiased'
         suppressHydrationWarning
       >
         {/* Skip Links for Accessibility */}
         <a
-          href="#main-content"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+          href='#main-content'
+          className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
         >
           Skip to main content
         </a>
         <a
-          href="#main-navigation"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+          href='#main-navigation'
+          className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
         >
           Skip to navigation
         </a>
 
         {/* Main Application */}
-        <div id="root" className="relative">
+        <div id='root' className='relative'>
           {children}
         </div>
 
         {/* Live Regions for Screen Readers */}
         <div
-          id="live-region-announcements"
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
+          id='live-region-announcements'
+          aria-live='polite'
+          aria-atomic='true'
+          className='sr-only'
         />
-        <div
-          id="live-region-alerts"
-          aria-live="assertive"
-          aria-atomic="true"
-          className="sr-only"
-        />
+        <div id='live-region-alerts' aria-live='assertive' aria-atomic='true' className='sr-only' />
 
         {/* PWA Install Prompt */}
-        <div id="pwa-install-prompt" className="pwa-install-prompt" />
+        <div id='pwa-install-prompt' className='pwa-install-prompt' />
 
         {/* Service Worker Registration - Disabled in Development */}
         {process.env.NODE_ENV === 'production' && (

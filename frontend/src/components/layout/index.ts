@@ -6,6 +6,5 @@ export { Footer } from './Footer';
 export { Layout, AssessmentLayout } from './Layout';
 
 // Re-export types for convenience
-export type {
-  // Add layout-specific types here when needed
-} from '@/types/design-system';
+export type {} from // Add layout-specific types here when needed
+'@/types/design-system';

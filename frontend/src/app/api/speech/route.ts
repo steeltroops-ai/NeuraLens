@@ -19,11 +19,9 @@
  * - Performance monitoring and logging
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import {
-  SpeechResult,
-  SpeechAnalysisResponse,
-} from '../../../types/speech-analysis';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import type { SpeechResult, SpeechAnalysisResponse } from '../../../types/speech-analysis';
 
 /**
  * POST /api/speech
@@ -38,18 +36,13 @@ export async function POST(request: NextRequest) {
     const { result, sessionId, timestamp } = body;
 
     // Validate required fields
-    if (
-      !result ||
-      !result.fluencyScore ||
-      !result.confidence ||
-      !result.biomarkers
-    ) {
+    if (!result || !result.fluencyScore || !result.confidence || !result.biomarkers) {
       return NextResponse.json(
         {
           success: false,
           error: 'Invalid speech analysis result format',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -92,7 +85,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'Internal server error during speech analysis',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -107,10 +100,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = searchParams.get('cacheKey');
 
     if (!cacheKey) {
-      return NextResponse.json(
-        { success: false, error: 'Cache key required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Cache key required' }, { status: 400 });
     }
 
     // Retrieve cached result
@@ -119,7 +109,7 @@ export async function GET(request: NextRequest) {
     if (!cachedResult) {
       return NextResponse.json(
         { success: false, error: 'Result not found or expired' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -132,7 +122,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve cached result' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -140,9 +130,7 @@ export async function GET(request: NextRequest) {
 /**
  * Process speech analysis result and add server-side enhancements
  */
-async function processSpeechAnalysis(
-  result: SpeechResult
-): Promise<SpeechResult> {
+async function processSpeechAnalysis(result: SpeechResult): Promise<SpeechResult> {
   // Add server-side processing and validation
   const processedResult: SpeechResult = {
     ...result,
@@ -153,8 +141,7 @@ async function processSpeechAnalysis(
     // Add server processing timestamp
     metadata: {
       ...result.metadata,
-      processingTime:
-        Date.now() - (result.metadata?.timestamp?.getTime() || Date.now()),
+      processingTime: Date.now() - (result.metadata?.timestamp?.getTime() || Date.now()),
       timestamp: new Date(),
       modelVersion: result.metadata?.modelVersion || 'whisper-tiny-v1.0',
       sampleRate: result.metadata?.sampleRate || 16000,
@@ -166,22 +153,10 @@ async function processSpeechAnalysis(
     processedResult.biomarkers = {
       ...processedResult.biomarkers,
       // Ensure reasonable ranges for biomarkers
-      speechRate: Math.max(
-        50,
-        Math.min(300, processedResult.biomarkers.speechRate)
-      ),
-      pauseFrequency: Math.max(
-        0,
-        Math.min(60, processedResult.biomarkers.pauseFrequency)
-      ),
-      pauseDuration: Math.max(
-        0,
-        Math.min(5000, processedResult.biomarkers.pauseDuration)
-      ),
-      pitchVariation: Math.max(
-        0,
-        Math.min(1, processedResult.biomarkers.pitchVariation)
-      ),
+      speechRate: Math.max(50, Math.min(300, processedResult.biomarkers.speechRate)),
+      pauseFrequency: Math.max(0, Math.min(60, processedResult.biomarkers.pauseFrequency)),
+      pauseDuration: Math.max(0, Math.min(5000, processedResult.biomarkers.pauseDuration)),
+      pitchVariation: Math.max(0, Math.min(1, processedResult.biomarkers.pitchVariation)),
     };
   }
 
@@ -217,9 +192,7 @@ function calculateNRIContribution(result: SpeechResult): number {
 
     // Very slow or very fast speech increases risk
     const normalSpeechRate = 175; // WPM
-    const speechRateDeviation = Math.abs(
-      biomarkers.speechRate - normalSpeechRate
-    );
+    const speechRateDeviation = Math.abs(biomarkers.speechRate - normalSpeechRate);
     if (speechRateDeviation > 50) {
       riskScore += (speechRateDeviation - 50) * 0.5;
     }
@@ -236,7 +209,7 @@ function calculateNRIContribution(result: SpeechResult): number {
  * Cache speech analysis result
  * In production, this would use Redis or similar caching system
  */
-async function cacheResult(key: string, result: any): Promise<void> {
+async function cacheResult(key: string, _result: any): Promise<void> {
   // Placeholder implementation - would use Redis in production
   // For now, we'll just log the caching operation
   console.log(`[API] Caching result with key: ${key}`);
@@ -264,14 +237,14 @@ async function getCachedResult(key: string): Promise<any | null> {
 /**
  * Validate speech analysis request format
  */
-function validateSpeechRequest(body: any): boolean {
+function _validateSpeechRequest(_body: any): boolean {
   return (
-    body &&
-    body.result &&
-    typeof body.result.fluencyScore === 'number' &&
-    typeof body.result.confidence === 'number' &&
-    body.result.biomarkers &&
-    body.result.metadata
+    _body &&
+    _body.result &&
+    typeof _body.result.fluencyScore === 'number' &&
+    typeof _body.result.confidence === 'number' &&
+    _body.result.biomarkers &&
+    _body.result.metadata
   );
 }
 

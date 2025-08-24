@@ -1,17 +1,17 @@
 /**
  * Audio Recorder for Neuralens Speech Analysis
- * 
+ *
  * This utility class handles WebRTC audio recording for speech analysis.
  * It provides real-time audio capture with visual feedback and automatic
  * processing integration with the Speech Processor.
- * 
+ *
  * Key Features:
  * - WebRTC MediaRecorder API integration
  * - Real-time audio level monitoring for visual feedback
  * - Automatic 30-second recording duration
  * - Audio quality validation and error handling
  * - Integration with Neuro-Minimalist UI design system
- * 
+ *
  * Technical Implementation:
  * - Uses getUserMedia for microphone access
  * - Implements AudioContext for real-time analysis
@@ -19,7 +19,9 @@
  * - Handles browser compatibility and permissions
  */
 
-import { RecordingState, AudioConfig, SpeechAnalysisError } from '../../types/speech-analysis';
+import { SpeechAnalysisError } from '../../types/speech-analysis';
+
+import type { RecordingState, AudioConfig } from '../../types/speech-analysis';
 
 export class AudioRecorder {
   private mediaRecorder: MediaRecorder | null = null;
@@ -30,7 +32,7 @@ export class AudioRecorder {
   private recordedChunks: Blob[] = [];
   private recordingTimer: NodeJS.Timeout | null = null;
   private animationFrame: number | null = null;
-  
+
   private config: AudioConfig;
   private onStateChange: (state: RecordingState) => void;
   private debug: boolean;
@@ -38,16 +40,16 @@ export class AudioRecorder {
   constructor(
     config: Partial<AudioConfig> = {},
     onStateChange: (state: RecordingState) => void,
-    debug = false
+    debug = false,
   ) {
     this.config = {
       sampleRate: 16000,
       duration: 30,
       minAudioLevel: 0.01,
       noiseReduction: true,
-      ...config
+      ...config,
     };
-    
+
     this.onStateChange = onStateChange;
     this.debug = debug;
 
@@ -70,7 +72,7 @@ export class AudioRecorder {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new SpeechAnalysisError(
           'WebRTC not supported in this browser',
-          'WEBRTC_NOT_SUPPORTED'
+          'WEBRTC_NOT_SUPPORTED',
         );
       }
 
@@ -81,15 +83,15 @@ export class AudioRecorder {
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: this.config.noiseReduction,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       };
 
       this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
+
       // Create audio context for real-time analysis
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: this.config.sampleRate
+        sampleRate: this.config.sampleRate,
       });
 
       // Set up audio analysis nodes
@@ -102,7 +104,7 @@ export class AudioRecorder {
 
       // Initialize MediaRecorder
       this.mediaRecorder = new MediaRecorder(this.stream, {
-        mimeType: this.getSupportedMimeType()
+        mimeType: this.getSupportedMimeType(),
       });
 
       this.setupMediaRecorderEvents();
@@ -116,15 +118,14 @@ export class AudioRecorder {
         status: 'idle',
         progress: 0,
         audioLevel: 0,
-        recordedDuration: 0
+        recordedDuration: 0,
       });
-
     } catch (error) {
       console.error('[AudioRecorder] Initialization failed:', error);
-      
+
       let errorMessage = 'Failed to initialize audio recorder';
       let errorCode = 'INITIALIZATION_ERROR';
-      
+
       if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError') {
           errorMessage = 'Microphone access denied. Please allow microphone permissions.';
@@ -140,7 +141,7 @@ export class AudioRecorder {
         progress: 0,
         audioLevel: 0,
         recordedDuration: 0,
-        error: errorMessage
+        error: errorMessage,
       });
 
       throw new SpeechAnalysisError(errorMessage, errorCode, error);
@@ -154,17 +155,11 @@ export class AudioRecorder {
   async startRecording(): Promise<void> {
     try {
       if (!this.mediaRecorder || !this.audioContext || !this.analyser) {
-        throw new SpeechAnalysisError(
-          'Audio recorder not initialized',
-          'NOT_INITIALIZED'
-        );
+        throw new SpeechAnalysisError('Audio recorder not initialized', 'NOT_INITIALIZED');
       }
 
       if (this.mediaRecorder.state !== 'inactive') {
-        throw new SpeechAnalysisError(
-          'Recording already in progress',
-          'ALREADY_RECORDING'
-        );
+        throw new SpeechAnalysisError('Recording already in progress', 'ALREADY_RECORDING');
       }
 
       if (this.debug) {
@@ -182,7 +177,7 @@ export class AudioRecorder {
         status: 'recording',
         progress: 0,
         audioLevel: 0,
-        recordedDuration: 0
+        recordedDuration: 0,
       });
 
       // Start audio level monitoring
@@ -192,16 +187,15 @@ export class AudioRecorder {
       this.recordingTimer = setTimeout(() => {
         this.stopRecording();
       }, this.config.duration * 1000);
-
     } catch (error) {
       console.error('[AudioRecorder] Failed to start recording:', error);
-      
+
       this.updateState({
         status: 'error',
         progress: 0,
         audioLevel: 0,
         recordedDuration: 0,
-        error: `Failed to start recording: ${error}`
+        error: `Failed to start recording: ${error}`,
       });
 
       throw error;
@@ -237,18 +231,17 @@ export class AudioRecorder {
         status: 'processing',
         progress: 1,
         audioLevel: 0,
-        recordedDuration: this.config.duration
+        recordedDuration: this.config.duration,
       });
-
     } catch (error) {
       console.error('[AudioRecorder] Failed to stop recording:', error);
-      
+
       this.updateState({
         status: 'error',
         progress: 0,
         audioLevel: 0,
         recordedDuration: 0,
-        error: `Failed to stop recording: ${error}`
+        error: `Failed to stop recording: ${error}`,
       });
     }
   }
@@ -260,22 +253,16 @@ export class AudioRecorder {
   async getAudioBuffer(): Promise<AudioBuffer> {
     try {
       if (this.recordedChunks.length === 0) {
-        throw new SpeechAnalysisError(
-          'No audio data recorded',
-          'NO_AUDIO_DATA'
-        );
+        throw new SpeechAnalysisError('No audio data recorded', 'NO_AUDIO_DATA');
       }
 
       if (!this.audioContext) {
-        throw new SpeechAnalysisError(
-          'Audio context not available',
-          'NO_AUDIO_CONTEXT'
-        );
+        throw new SpeechAnalysisError('Audio context not available', 'NO_AUDIO_CONTEXT');
       }
 
       // Create blob from recorded chunks
-      const audioBlob = new Blob(this.recordedChunks, { 
-        type: this.getSupportedMimeType() 
+      const audioBlob = new Blob(this.recordedChunks, {
+        type: this.getSupportedMimeType(),
       });
 
       // Convert blob to array buffer
@@ -288,18 +275,17 @@ export class AudioRecorder {
         console.log('[AudioRecorder] Audio buffer created:', {
           duration: audioBuffer.duration,
           sampleRate: audioBuffer.sampleRate,
-          channels: audioBuffer.numberOfChannels
+          channels: audioBuffer.numberOfChannels,
         });
       }
 
       return audioBuffer;
-
     } catch (error) {
       console.error('[AudioRecorder] Failed to create audio buffer:', error);
       throw new SpeechAnalysisError(
         `Failed to process recorded audio: ${error}`,
         'AUDIO_PROCESSING_ERROR',
-        error
+        error,
       );
     }
   }
@@ -318,7 +304,7 @@ export class AudioRecorder {
       if (!this.analyser) return;
 
       this.analyser.getByteFrequencyData(dataArray);
-      
+
       // Calculate RMS audio level
       const sum = dataArray.reduce((acc, value) => acc + value * value, 0);
       const rms = Math.sqrt(sum / bufferLength);
@@ -333,7 +319,7 @@ export class AudioRecorder {
         status: 'recording',
         progress,
         audioLevel,
-        recordedDuration: elapsed
+        recordedDuration: elapsed,
       });
 
       // Continue monitoring if still recording
@@ -361,7 +347,7 @@ export class AudioRecorder {
   private setupMediaRecorderEvents(): void {
     if (!this.mediaRecorder) return;
 
-    this.mediaRecorder.ondataavailable = (event) => {
+    this.mediaRecorder.ondataavailable = event => {
       if (event.data.size > 0) {
         this.recordedChunks.push(event.data);
       }
@@ -373,15 +359,15 @@ export class AudioRecorder {
       }
     };
 
-    this.mediaRecorder.onerror = (event) => {
+    this.mediaRecorder.onerror = event => {
       console.error('[AudioRecorder] MediaRecorder error:', event);
-      
+
       this.updateState({
         status: 'error',
         progress: 0,
         audioLevel: 0,
         recordedDuration: 0,
-        error: 'Recording failed due to media recorder error'
+        error: 'Recording failed due to media recorder error',
       });
     };
   }
@@ -390,12 +376,7 @@ export class AudioRecorder {
    * Get supported MIME type for MediaRecorder
    */
   private getSupportedMimeType(): string {
-    const types = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/mp4',
-      'audio/wav'
-    ];
+    const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/wav'];
 
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
@@ -458,7 +439,6 @@ export class AudioRecorder {
       if (this.debug) {
         console.log('[AudioRecorder] Resources disposed');
       }
-
     } catch (error) {
       console.error('[AudioRecorder] Error during disposal:', error);
     }

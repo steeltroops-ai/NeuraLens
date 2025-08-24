@@ -1,9 +1,9 @@
 // NeuroLens-X NRI Fusion Algorithm
 // Unified Neuro-Risk Index calculation with uncertainty quantification
 
-import type { SpeechAnalysisResult } from './speech-analysis';
 import type { RetinalAnalysisResult } from './retinal-analysis';
 import type { RiskAssessmentResult } from './risk-assessment';
+import type { SpeechAnalysisResult } from './speech-analysis';
 
 export interface ModalityResult {
   modality: 'speech' | 'retinal' | 'risk' | 'motor';
@@ -62,7 +62,7 @@ export class NRIFusionCalculator {
     speechResult?: SpeechAnalysisResult,
     retinalResult?: RetinalAnalysisResult,
     riskResult?: RiskAssessmentResult,
-    motorResult?: any // Motor assessment not implemented yet
+    motorResult?: any, // Motor assessment not implemented yet
   ): Promise<NRIFusionResult> {
     const startTime = performance.now();
 
@@ -72,23 +72,17 @@ export class NRIFusionCalculator {
         speechResult,
         retinalResult,
         riskResult,
-        motorResult
+        motorResult,
       );
 
       // Calculate adaptive weights based on data quality and availability
       const adaptiveWeights = this.calculateAdaptiveWeights(modalityResults);
 
       // Perform weighted fusion
-      const fusedScore = this.performWeightedFusion(
-        modalityResults,
-        adaptiveWeights
-      );
+      const fusedScore = this.performWeightedFusion(modalityResults, adaptiveWeights);
 
       // Apply uncertainty quantification
-      const uncertaintyAnalysis = this.quantifyUncertainty(
-        modalityResults,
-        adaptiveWeights
-      );
+      const uncertaintyAnalysis = this.quantifyUncertainty(modalityResults, adaptiveWeights);
 
       // Determine risk category
       const riskCategory = this.determineRiskCategory(fusedScore);
@@ -97,14 +91,11 @@ export class NRIFusionCalculator {
       const recommendations = this.generateClinicalRecommendations(
         fusedScore,
         modalityResults,
-        riskCategory
+        riskCategory,
       );
 
       // Generate clinical notes
-      const clinicalNotes = this.generateClinicalNotes(
-        modalityResults,
-        fusedScore
-      );
+      const clinicalNotes = this.generateClinicalNotes(modalityResults, fusedScore);
 
       // Calculate data completeness
       const dataCompleteness = this.calculateDataCompleteness(modalityResults);
@@ -135,7 +126,7 @@ export class NRIFusionCalculator {
     speechResult?: SpeechAnalysisResult,
     retinalResult?: RetinalAnalysisResult,
     riskResult?: RiskAssessmentResult,
-    _motorResult?: any
+    _motorResult?: any,
   ): ModalityResult[] {
     const results: ModalityResult[] = [];
 
@@ -193,9 +184,7 @@ export class NRIFusionCalculator {
         confidence: riskResult.confidence,
         quality: 0.9, // Risk assessment typically high quality
         processingTime: riskResult.processingTime,
-        findings: riskResult.modifiableFactors.concat(
-          riskResult.nonModifiableFactors
-        ),
+        findings: riskResult.modifiableFactors.concat(riskResult.nonModifiableFactors),
         available: true,
       });
     } else {
@@ -227,24 +216,17 @@ export class NRIFusionCalculator {
   /**
    * Calculate adaptive weights based on data quality and availability
    */
-  private calculateAdaptiveWeights(
-    modalityResults: ModalityResult[]
-  ): FusionWeights {
+  private calculateAdaptiveWeights(modalityResults: ModalityResult[]): FusionWeights {
     const weights: FusionWeights = { speech: 0, retinal: 0, risk: 0, motor: 0 };
     let totalWeight = 0;
 
-    modalityResults.forEach((result) => {
-      if (
-        result.available &&
-        result.quality >= this.qualityThresholds.minimum
-      ) {
+    modalityResults.forEach(result => {
+      if (result.available && result.quality >= this.qualityThresholds.minimum) {
         // Base weight from configuration
         let weight = this.baseWeights[result.modality];
 
         // Adjust weight based on data quality
-        const qualityMultiplier = this.calculateQualityMultiplier(
-          result.quality
-        );
+        const qualityMultiplier = this.calculateQualityMultiplier(result.quality);
         weight *= qualityMultiplier;
 
         // Adjust weight based on confidence
@@ -258,7 +240,7 @@ export class NRIFusionCalculator {
 
     // Normalize weights to sum to 1
     if (totalWeight > 0) {
-      Object.keys(weights).forEach((key) => {
+      Object.keys(weights).forEach(key => {
         weights[key as keyof FusionWeights] /= totalWeight;
       });
     }
@@ -288,14 +270,11 @@ export class NRIFusionCalculator {
   /**
    * Perform weighted fusion of modality scores
    */
-  private performWeightedFusion(
-    modalityResults: ModalityResult[],
-    weights: FusionWeights
-  ): number {
+  private performWeightedFusion(modalityResults: ModalityResult[], weights: FusionWeights): number {
     let fusedScore = 0;
     let totalWeight = 0;
 
-    modalityResults.forEach((result) => {
+    modalityResults.forEach(result => {
       const weight = weights[result.modality];
       if (weight > 0 && result.available) {
         fusedScore += result.score * weight;
@@ -309,8 +288,7 @@ export class NRIFusionCalculator {
     }
 
     // Apply ensemble correction for missing modalities
-    const completeness =
-      totalWeight / Object.values(this.baseWeights).reduce((a, b) => a + b, 0);
+    const completeness = totalWeight / Object.values(this.baseWeights).reduce((a, b) => a + b, 0);
     const ensembleCorrection = this.calculateEnsembleCorrection(completeness);
 
     return Math.min(Math.max(fusedScore * ensembleCorrection, 0), 100);
@@ -338,15 +316,13 @@ export class NRIFusionCalculator {
    */
   private quantifyUncertainty(
     modalityResults: ModalityResult[],
-    _weights: FusionWeights
+    _weights: FusionWeights,
   ): { confidence: number; factors: string[] } {
     const uncertaintyFactors: string[] = [];
     let overallConfidence = 100;
 
     // Check data availability
-    const availableModalities = modalityResults.filter(
-      (r) => r.available
-    ).length;
+    const availableModalities = modalityResults.filter(r => r.available).length;
     if (availableModalities < 3) {
       uncertaintyFactors.push('Limited modality data available');
       overallConfidence -= (4 - availableModalities) * 15;
@@ -354,7 +330,7 @@ export class NRIFusionCalculator {
 
     // Check data quality
     const lowQualityModalities = modalityResults.filter(
-      (r) => r.available && r.quality < this.qualityThresholds.good
+      r => r.available && r.quality < this.qualityThresholds.good,
     );
     if (lowQualityModalities.length > 0) {
       uncertaintyFactors.push('Some modalities have reduced data quality');
@@ -362,9 +338,9 @@ export class NRIFusionCalculator {
     }
 
     // Check confidence consistency
-    const availableResults = modalityResults.filter((r) => r.available);
+    const availableResults = modalityResults.filter(r => r.available);
     if (availableResults.length > 1) {
-      const confidences = availableResults.map((r) => r.confidence);
+      const confidences = availableResults.map(r => r.confidence);
       const confidenceVariance = this.calculateVariance(confidences);
       if (confidenceVariance > 400) {
         // High variance in confidence
@@ -375,13 +351,11 @@ export class NRIFusionCalculator {
 
     // Check score consistency
     if (availableResults.length > 1) {
-      const scores = availableResults.map((r) => r.score);
+      const scores = availableResults.map(r => r.score);
       const scoreVariance = this.calculateVariance(scores);
       if (scoreVariance > 900) {
         // High variance in scores
-        uncertaintyFactors.push(
-          'Conflicting risk assessments between modalities'
-        );
+        uncertaintyFactors.push('Conflicting risk assessments between modalities');
         overallConfidence -= 15;
       }
     }
@@ -402,16 +376,14 @@ export class NRIFusionCalculator {
     if (values.length < 2) return 0;
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
+    const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
     return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / values.length;
   }
 
   /**
    * Determine risk category based on NRI score
    */
-  private determineRiskCategory(
-    nriScore: number
-  ): 'low' | 'moderate' | 'high' | 'critical' {
+  private determineRiskCategory(nriScore: number): 'low' | 'moderate' | 'high' | 'critical' {
     if (nriScore <= 25) return 'low';
     if (nriScore <= 50) return 'moderate';
     if (nriScore <= 75) return 'high';
@@ -424,7 +396,7 @@ export class NRIFusionCalculator {
   private generateClinicalRecommendations(
     _nriScore: number,
     modalityResults: ModalityResult[],
-    riskCategory: 'low' | 'moderate' | 'high' | 'critical'
+    riskCategory: 'low' | 'moderate' | 'high' | 'critical',
   ): string[] {
     const recommendations: string[] = [];
 
@@ -433,9 +405,7 @@ export class NRIFusionCalculator {
       case 'critical':
         recommendations.push('Immediate neurological evaluation recommended');
         recommendations.push('Consider comprehensive cognitive assessment');
-        recommendations.push(
-          'Discuss findings with healthcare provider urgently'
-        );
+        recommendations.push('Discuss findings with healthcare provider urgently');
         break;
       case 'high':
         recommendations.push('Neurological consultation within 3 months');
@@ -454,24 +424,22 @@ export class NRIFusionCalculator {
     }
 
     // Modality-specific recommendations
-    const speechResult = modalityResults.find((r) => r.modality === 'speech');
+    const speechResult = modalityResults.find(r => r.modality === 'speech');
     if (speechResult?.available && speechResult.score > 50) {
       recommendations.push('Speech therapy evaluation may be beneficial');
     }
 
-    const retinalResult = modalityResults.find((r) => r.modality === 'retinal');
+    const retinalResult = modalityResults.find(r => r.modality === 'retinal');
     if (retinalResult?.available && retinalResult.score > 50) {
       recommendations.push('Ophthalmological follow-up recommended');
     }
 
     // Data quality recommendations
     const lowQualityModalities = modalityResults.filter(
-      (r) => r.available && r.quality < this.qualityThresholds.good
+      r => r.available && r.quality < this.qualityThresholds.good,
     );
     if (lowQualityModalities.length > 0) {
-      recommendations.push(
-        'Consider repeat assessment with higher quality data'
-      );
+      recommendations.push('Consider repeat assessment with higher quality data');
     }
 
     return recommendations;
@@ -480,28 +448,22 @@ export class NRIFusionCalculator {
   /**
    * Generate clinical notes for healthcare providers
    */
-  private generateClinicalNotes(
-    modalityResults: ModalityResult[],
-    nriScore: number
-  ): string[] {
+  private generateClinicalNotes(modalityResults: ModalityResult[], nriScore: number): string[] {
     const notes: string[] = [];
 
     // Overall assessment note
     notes.push(`Unified NRI Score: ${Math.round(nriScore)}/100`);
 
     // Modality-specific notes
-    modalityResults.forEach((result) => {
+    modalityResults.forEach(result => {
       if (result.available) {
-        const modalityName =
-          result.modality.charAt(0).toUpperCase() + result.modality.slice(1);
+        const modalityName = result.modality.charAt(0).toUpperCase() + result.modality.slice(1);
         notes.push(
-          `${modalityName} Analysis: ${result.score}/100 (Quality: ${Math.round(result.quality * 100)}%)`
+          `${modalityName} Analysis: ${result.score}/100 (Quality: ${Math.round(result.quality * 100)}%)`,
         );
 
         if (result.findings.length > 0) {
-          notes.push(
-            `${modalityName} Findings: ${result.findings.slice(0, 3).join(', ')}`
-          );
+          notes.push(`${modalityName} Findings: ${result.findings.slice(0, 3).join(', ')}`);
         }
       }
     });
@@ -509,7 +471,7 @@ export class NRIFusionCalculator {
     // Processing performance note
     const totalProcessingTime = modalityResults.reduce(
       (sum, result) => sum + result.processingTime,
-      0
+      0,
     );
     notes.push(`Total Processing Time: ${Math.round(totalProcessingTime)}ms`);
 
@@ -520,9 +482,7 @@ export class NRIFusionCalculator {
    * Calculate data completeness percentage
    */
   private calculateDataCompleteness(modalityResults: ModalityResult[]): number {
-    const availableModalities = modalityResults.filter(
-      (r) => r.available
-    ).length;
+    const availableModalities = modalityResults.filter(r => r.available).length;
     const totalModalities = modalityResults.length;
     return Math.round((availableModalities / totalModalities) * 100);
   }
@@ -532,8 +492,7 @@ export class NRIFusionCalculator {
    */
   getModalityImportance(): Record<string, string> {
     return {
-      speech:
-        'Voice biomarkers provide early detection of neurological changes',
+      speech: 'Voice biomarkers provide early detection of neurological changes',
       retinal: 'Retinal vascular patterns reflect brain health status',
       risk: 'Comprehensive risk factors inform overall probability',
       motor: 'Physical manifestations indicate disease progression',
@@ -546,8 +505,7 @@ export class NRIFusionCalculator {
   getRiskCategoryDescriptions(): Record<string, string> {
     return {
       low: 'Low neurological risk - routine monitoring recommended',
-      moderate:
-        'Moderate risk - enhanced monitoring and lifestyle interventions',
+      moderate: 'Moderate risk - enhanced monitoring and lifestyle interventions',
       high: 'High risk - medical evaluation and intervention recommended',
       critical: 'Critical risk - immediate medical attention required',
     };

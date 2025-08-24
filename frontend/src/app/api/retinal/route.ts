@@ -19,11 +19,9 @@
  * - Performance monitoring and caching architecture
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import {
-  RetinalResult,
-  RetinalAnalysisResponse,
-} from '../../../types/retinal-analysis';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import type { RetinalResult, RetinalAnalysisResponse } from '../../../types/retinal-analysis';
 
 /**
  * POST /api/retinal
@@ -50,14 +48,12 @@ export async function POST(request: NextRequest) {
           success: false,
           error: 'Invalid retinal analysis result format',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Process retinal analysis result
-    const processedResult = await processRetinalAnalysis(
-      result as RetinalResult
-    );
+    const processedResult = await processRetinalAnalysis(result as RetinalResult);
 
     // Calculate NRI contribution from retinal metrics
     const nriContribution = calculateNRIContribution(result as RetinalResult);
@@ -97,7 +93,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'Internal server error during retinal analysis',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -112,10 +108,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = searchParams.get('cacheKey');
 
     if (!cacheKey) {
-      return NextResponse.json(
-        { success: false, error: 'Cache key required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Cache key required' }, { status: 400 });
     }
 
     // Retrieve cached result
@@ -124,7 +117,7 @@ export async function GET(request: NextRequest) {
     if (!cachedResult) {
       return NextResponse.json(
         { success: false, error: 'Result not found or expired' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -137,7 +130,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve cached result' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -145,9 +138,7 @@ export async function GET(request: NextRequest) {
 /**
  * Process retinal analysis result and add server-side enhancements
  */
-async function processRetinalAnalysis(
-  result: RetinalResult
-): Promise<RetinalResult> {
+async function processRetinalAnalysis(result: RetinalResult): Promise<RetinalResult> {
   // Add server-side processing and validation
   const processedResult: RetinalResult = {
     ...result,
@@ -160,8 +151,7 @@ async function processRetinalAnalysis(
     // Add server processing timestamp
     metadata: {
       ...result.metadata,
-      processingTime:
-        Date.now() - (result.metadata?.timestamp?.getTime() || Date.now()),
+      processingTime: Date.now() - (result.metadata?.timestamp?.getTime() || Date.now()),
       timestamp: new Date(),
       modelVersion: result.metadata?.modelVersion || 'efficientnet-b0-v1.0',
       gpuAccelerated: result.metadata?.gpuAccelerated || false,
@@ -173,35 +163,17 @@ async function processRetinalAnalysis(
     processedResult.riskFeatures = {
       ...processedResult.riskFeatures,
       // Ensure reasonable ranges for risk features
-      vesselDensity: Math.max(
-        0,
-        Math.min(1, processedResult.riskFeatures.vesselDensity)
-      ),
-      tortuosityIndex: Math.max(
-        0,
-        Math.min(1, processedResult.riskFeatures.tortuosityIndex)
-      ),
+      vesselDensity: Math.max(0, Math.min(1, processedResult.riskFeatures.vesselDensity)),
+      tortuosityIndex: Math.max(0, Math.min(1, processedResult.riskFeatures.tortuosityIndex)),
       arteriovenousRatio: Math.max(
         0.3,
-        Math.min(1.2, processedResult.riskFeatures.arteriovenousRatio)
+        Math.min(1.2, processedResult.riskFeatures.arteriovenousRatio),
       ),
-      imageQuality: Math.max(
-        0,
-        Math.min(1, processedResult.riskFeatures.imageQuality)
-      ),
+      imageQuality: Math.max(0, Math.min(1, processedResult.riskFeatures.imageQuality)),
       // Validate counts
-      hemorrhageCount: Math.max(
-        0,
-        Math.floor(processedResult.riskFeatures.hemorrhageCount)
-      ),
-      microaneurysmCount: Math.max(
-        0,
-        Math.floor(processedResult.riskFeatures.microaneurysmCount)
-      ),
-      softExudateCount: Math.max(
-        0,
-        Math.floor(processedResult.riskFeatures.softExudateCount)
-      ),
+      hemorrhageCount: Math.max(0, Math.floor(processedResult.riskFeatures.hemorrhageCount)),
+      microaneurysmCount: Math.max(0, Math.floor(processedResult.riskFeatures.microaneurysmCount)),
+      softExudateCount: Math.max(0, Math.floor(processedResult.riskFeatures.softExudateCount)),
     };
   }
 
@@ -234,9 +206,7 @@ function calculateNRIContribution(result: RetinalResult): number {
 
     // Vessel density (normal range: 0.15-0.25)
     const normalVesselDensity = 0.2;
-    const vesselDensityDeviation = Math.abs(
-      riskFeatures.vesselDensity - normalVesselDensity
-    );
+    const vesselDensityDeviation = Math.abs(riskFeatures.vesselDensity - normalVesselDensity);
     featureRisk += vesselDensityDeviation * 50;
 
     // Tortuosity index (higher = more risk)
@@ -244,14 +214,11 @@ function calculateNRIContribution(result: RetinalResult): number {
 
     // Arteriovenous ratio (normal ~0.67)
     const normalAVRatio = 0.67;
-    const avRatioDeviation = Math.abs(
-      riskFeatures.arteriovenousRatio - normalAVRatio
-    );
+    const avRatioDeviation = Math.abs(riskFeatures.arteriovenousRatio - normalAVRatio);
     featureRisk += avRatioDeviation * 40;
 
     // Hemorrhages and microaneurysms
-    featureRisk +=
-      (riskFeatures.hemorrhageCount + riskFeatures.microaneurysmCount) * 5;
+    featureRisk += (riskFeatures.hemorrhageCount + riskFeatures.microaneurysmCount) * 5;
 
     // Hard and soft exudates
     featureRisk += riskFeatures.hardExudateArea * 20;
@@ -272,7 +239,7 @@ function calculateNRIContribution(result: RetinalResult): number {
  * Cache retinal analysis result
  * In production, this would use Redis or similar caching system
  */
-async function cacheResult(key: string, result: any): Promise<void> {
+async function cacheResult(key: string, _result: any): Promise<void> {
   // Placeholder implementation - would use Redis in production
   // For now, we'll just log the caching operation
   console.log(`[API] Caching retinal result with key: ${key}`);
@@ -300,15 +267,15 @@ async function getCachedResult(key: string): Promise<any | null> {
 /**
  * Validate retinal analysis request format
  */
-function validateRetinalRequest(body: any): boolean {
+function _validateRetinalRequest(_body: any): boolean {
   return (
-    body &&
-    body.result &&
-    typeof body.result.vascularScore === 'number' &&
-    typeof body.result.cupDiscRatio === 'number' &&
-    typeof body.result.confidence === 'number' &&
-    body.result.riskFeatures &&
-    body.result.metadata
+    _body &&
+    _body.result &&
+    typeof _body.result.vascularScore === 'number' &&
+    typeof _body.result.cupDiscRatio === 'number' &&
+    typeof _body.result.confidence === 'number' &&
+    _body.result.riskFeatures &&
+    _body.result.metadata
   );
 }
 
@@ -336,10 +303,7 @@ export function generateDemoRetinalResult(): RetinalResult {
       hardExudateArea: Math.random() * 0.08,
       softExudateCount: Math.floor(Math.random() * 3),
       imageQuality: 0.75 + Math.random() * 0.25,
-      spatialFeatures: Array.from(
-        { length: 1280 },
-        () => Math.random() * 2 - 1
-      ),
+      spatialFeatures: Array.from({ length: 1280 }, () => Math.random() * 2 - 1),
     },
     metadata: {
       processingTime: 120 + Math.random() * 60,

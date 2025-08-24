@@ -1,17 +1,10 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import React, { useState, useCallback } from 'react';
+
 import { AssessmentLayout } from '@/components/layout';
 import { Button, Card, Progress } from '@/components/ui';
-import { WelcomeStep } from './steps/WelcomeStep';
-import { SpeechAssessmentStep } from './steps/SpeechAssessmentStep';
-import { RetinalAssessmentStep } from './steps/RetinalAssessmentStep';
-import { CognitiveAssessmentStep } from './steps/CognitiveAssessmentStep';
-import { RiskAssessmentStep } from './steps/RiskAssessmentStep';
-import { MotorAssessmentStep } from './steps/MotorAssessmentStep';
-import { ProcessingStep } from './steps/ProcessingStep';
-import { ResultsStep } from './steps/ResultsStep';
 import {
   mlModelIntegrator,
   generateSessionId,
@@ -19,6 +12,15 @@ import {
   type CompleteAssessmentResult,
   type RiskAssessmentData,
 } from '@/lib/ml';
+
+import { CognitiveAssessmentStep } from './steps/CognitiveAssessmentStep';
+import { MotorAssessmentStep } from './steps/MotorAssessmentStep';
+import { ProcessingStep } from './steps/ProcessingStep';
+import { ResultsStep } from './steps/ResultsStep';
+import { RetinalAssessmentStep } from './steps/RetinalAssessmentStep';
+import { RiskAssessmentStep } from './steps/RiskAssessmentStep';
+import { SpeechAssessmentStep } from './steps/SpeechAssessmentStep';
+import { WelcomeStep } from './steps/WelcomeStep';
 
 export type AssessmentStep =
   | 'welcome'
@@ -106,9 +108,7 @@ export const AssessmentFlow: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Get current step info
-  const currentStepIndex = ASSESSMENT_STEPS.findIndex(
-    (step) => step.id === currentStep
-  );
+  const currentStepIndex = ASSESSMENT_STEPS.findIndex(step => step.id === currentStep);
   const currentStepInfo = ASSESSMENT_STEPS[currentStepIndex];
   const totalSteps = ASSESSMENT_STEPS.length - 1; // Exclude results step from count
 
@@ -138,21 +138,16 @@ export const AssessmentFlow: React.FC = () => {
   const handleExit = useCallback(() => {
     if (
       typeof window !== 'undefined' &&
-      confirm(
-        'Are you sure you want to exit the assessment? Your progress will be lost.'
-      )
+      confirm('Are you sure you want to exit the assessment? Your progress will be lost.')
     ) {
       router.push('/');
     }
   }, []);
 
   // Data update handlers
-  const updateAssessmentData = useCallback(
-    (updates: Partial<AssessmentData>) => {
-      setAssessmentData((prev) => ({ ...prev, ...updates }));
-    },
-    []
-  );
+  const updateAssessmentData = useCallback((updates: Partial<AssessmentData>) => {
+    setAssessmentData(prev => ({ ...prev, ...updates }));
+  }, []);
 
   // Process assessment
   const processAssessment = useCallback(async () => {
@@ -189,7 +184,7 @@ export const AssessmentFlow: React.FC = () => {
       updateAssessmentData({ audioFile });
       handleNext();
     },
-    [updateAssessmentData, handleNext]
+    [updateAssessmentData, handleNext],
   );
 
   const handleRetinalComplete = useCallback(
@@ -197,7 +192,7 @@ export const AssessmentFlow: React.FC = () => {
       updateAssessmentData({ retinalImage });
       handleNext();
     },
-    [updateAssessmentData, handleNext]
+    [updateAssessmentData, handleNext],
   );
 
   const handleCognitiveComplete = useCallback(
@@ -205,7 +200,7 @@ export const AssessmentFlow: React.FC = () => {
       updateAssessmentData({ cognitiveData });
       handleNext();
     },
-    [updateAssessmentData, handleNext]
+    [updateAssessmentData, handleNext],
   );
 
   const handleRiskComplete = useCallback(
@@ -213,7 +208,7 @@ export const AssessmentFlow: React.FC = () => {
       updateAssessmentData({ riskData });
       handleNext();
     },
-    [updateAssessmentData, handleNext]
+    [updateAssessmentData, handleNext],
   );
 
   const handleMotorComplete = useCallback(
@@ -225,7 +220,7 @@ export const AssessmentFlow: React.FC = () => {
         processAssessment();
       }, 1000);
     },
-    [updateAssessmentData, processAssessment]
+    [updateAssessmentData, processAssessment],
   );
 
   // Render current step
@@ -253,12 +248,7 @@ export const AssessmentFlow: React.FC = () => {
         );
 
       case 'cognitive':
-        return (
-          <CognitiveAssessmentStep
-            onComplete={handleCognitiveComplete}
-            onBack={handleBack}
-          />
-        );
+        return <CognitiveAssessmentStep onComplete={handleCognitiveComplete} onBack={handleBack} />;
 
       case 'risk':
         return (
@@ -272,12 +262,7 @@ export const AssessmentFlow: React.FC = () => {
         );
 
       case 'motor':
-        return (
-          <MotorAssessmentStep
-            onComplete={handleMotorComplete}
-            onBack={handleBack}
-          />
-        );
+        return <MotorAssessmentStep onComplete={handleMotorComplete} onBack={handleBack} />;
 
       case 'processing':
         return (
@@ -300,16 +285,12 @@ export const AssessmentFlow: React.FC = () => {
             onExit={() => router.push('/')}
           />
         ) : (
-          <div className="p-8 text-center">
-            <h2 className="mb-4 text-2xl font-bold text-text-primary">
-              No Results Available
-            </h2>
-            <p className="mb-8 text-text-secondary">
+          <div className='p-8 text-center'>
+            <h2 className='mb-4 text-2xl font-bold text-text-primary'>No Results Available</h2>
+            <p className='mb-8 text-text-secondary'>
               Please complete the assessment to view results.
             </p>
-            <Button onClick={() => setCurrentStep('welcome')}>
-              Start Over
-            </Button>
+            <Button onClick={() => setCurrentStep('welcome')}>Start Over</Button>
           </div>
         );
 
@@ -320,22 +301,16 @@ export const AssessmentFlow: React.FC = () => {
 
   // Calculate progress percentage
   const progressPercentage =
-    currentStep === 'results'
-      ? 100
-      : (currentStepIndex / (totalSteps - 1)) * 100;
+    currentStep === 'results' ? 100 : (currentStepIndex / (totalSteps - 1)) * 100;
 
   const layoutProps: any = {
     currentStep: currentStepIndex + 1,
-    totalSteps: totalSteps,
+    totalSteps,
     stepTitle: currentStepInfo?.title || 'Assessment',
     showProgress: currentStep !== 'results',
   };
 
-  if (
-    currentStep !== 'welcome' &&
-    currentStep !== 'processing' &&
-    currentStep !== 'results'
-  ) {
+  if (currentStep !== 'welcome' && currentStep !== 'processing' && currentStep !== 'results') {
     layoutProps.onBack = handleBack;
   }
 
@@ -344,54 +319,47 @@ export const AssessmentFlow: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       {/* Apple-Style Progress Header */}
       {currentStep !== 'results' && (
-        <div className="sticky top-0 z-40 border-b border-gray-200 bg-white bg-white/95 backdrop-blur-sm">
-          <div className="container mx-auto px-6 py-4">
-            <div className="mx-auto max-w-4xl">
+        <div className='sticky top-0 z-40 border-b border-gray-200 bg-white bg-white/95 backdrop-blur-sm'>
+          <div className='container mx-auto px-6 py-4'>
+            <div className='mx-auto max-w-4xl'>
               {/* Header with Back Button */}
-              <div className="mb-6 flex items-center justify-between">
+              <div className='mb-6 flex items-center justify-between'>
                 {currentStep !== 'welcome' && currentStep !== 'processing' && (
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant='ghost'
+                    size='sm'
                     onClick={handleBack}
-                    className="flex items-center gap-2 text-medical-500 hover:text-medical-600"
+                    className='flex items-center gap-2 text-medical-500 hover:text-medical-600'
                   >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
                         strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
+                        d='M15 19l-7-7 7-7'
                       />
                     </svg>
                     Back
                   </Button>
                 )}
 
-                <div className="flex-1 text-center">
-                  <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+                <div className='flex-1 text-center'>
+                  <h1 className='text-2xl font-semibold tracking-tight text-text-primary'>
                     {currentStepInfo?.title}
                   </h1>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    {currentStepInfo?.description}
-                  </p>
+                  <p className='mt-1 text-sm text-text-secondary'>{currentStepInfo?.description}</p>
                 </div>
 
                 {(currentStep as AssessmentStep) !== 'processing' &&
                   (currentStep as AssessmentStep) !== 'results' && (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant='ghost'
+                      size='sm'
                       onClick={handleExit}
-                      className="text-text-secondary hover:text-text-primary"
+                      className='text-text-secondary hover:text-text-primary'
                     >
                       Exit
                     </Button>
@@ -399,9 +367,9 @@ export const AssessmentFlow: React.FC = () => {
               </div>
 
               {/* Apple-Style Progress Dots */}
-              <div className="mb-4 flex items-center justify-center space-x-3">
+              <div className='mb-4 flex items-center justify-center space-x-3'>
                 {ASSESSMENT_STEPS.slice(0, -2).map((step, index) => (
-                  <div key={step.id} className="flex items-center">
+                  <div key={step.id} className='flex items-center'>
                     <div
                       className={`h-3 w-3 rounded-full transition-all duration-300 ${
                         index < currentStepIndex
@@ -414,9 +382,7 @@ export const AssessmentFlow: React.FC = () => {
                     {index < ASSESSMENT_STEPS.length - 3 && (
                       <div
                         className={`mx-2 h-0.5 w-8 transition-colors duration-300 ${
-                          index < currentStepIndex
-                            ? 'bg-success-500'
-                            : 'bg-gray-300'
+                          index < currentStepIndex ? 'bg-success-500' : 'bg-gray-300'
                         }`}
                       />
                     )}
@@ -425,8 +391,8 @@ export const AssessmentFlow: React.FC = () => {
               </div>
 
               {/* Step Counter */}
-              <div className="text-center">
-                <span className="text-sm font-medium text-text-secondary">
+              <div className='text-center'>
+                <span className='text-sm font-medium text-text-secondary'>
                   Step {currentStepIndex + 1} of {totalSteps - 2}
                 </span>
               </div>
@@ -436,58 +402,45 @@ export const AssessmentFlow: React.FC = () => {
       )}
 
       {/* Apple-Style Step Content */}
-      <div className="flex-1 py-8">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-4xl">{renderCurrentStep()}</div>
+      <div className='flex-1 py-8'>
+        <div className='container mx-auto px-6'>
+          <div className='mx-auto max-w-4xl'>{renderCurrentStep()}</div>
         </div>
       </div>
 
       {/* Apple-Style Error Toast */}
       {error && (
-        <div className="fixed bottom-6 left-6 right-6 z-50 animate-slide-up">
-          <div className="mx-auto max-w-md">
-            <div className="rounded-apple-lg border border-error-200 bg-white p-4 shadow-apple">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-apple bg-error-50">
-                    <svg
-                      className="h-4 w-4 text-error-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+        <div className='fixed bottom-6 left-6 right-6 z-50 animate-slide-up'>
+          <div className='mx-auto max-w-md'>
+            <div className='rounded-apple-lg border border-error-200 bg-white p-4 shadow-apple'>
+              <div className='flex items-start space-x-3'>
+                <div className='flex-shrink-0'>
+                  <div className='flex h-8 w-8 items-center justify-center rounded-apple bg-error-50'>
+                    <svg className='h-4 w-4 text-error-500' fill='currentColor' viewBox='0 0 20 20'>
                       <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
+                        fillRule='evenodd'
+                        d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+                        clipRule='evenodd'
                       />
                     </svg>
                   </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-text-primary">
-                    Assessment Error
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                    {error}
-                  </p>
+                <div className='min-w-0 flex-1'>
+                  <h3 className='text-sm font-semibold text-text-primary'>Assessment Error</h3>
+                  <p className='mt-1 text-sm leading-relaxed text-text-secondary'>{error}</p>
                 </div>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={() => setError(null)}
-                  className="flex-shrink-0 p-1 text-text-secondary hover:text-text-primary"
+                  className='flex-shrink-0 p-1 text-text-secondary hover:text-text-primary'
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
+                      d='M6 18L18 6M6 6l12 12'
                     />
                   </svg>
                 </Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { cn } from '@/utils/cn';
 
 interface LoadingProps {
@@ -24,25 +25,23 @@ export const Loading: React.FC<LoadingProps> = ({
   fullScreen = false,
 }) => {
   const spinner = (
-    <div className="flex flex-col items-center space-y-4">
+    <div className='flex flex-col items-center space-y-4'>
       <div
         className={cn(
-          'animate-spin border-2 border-primary-500 border-t-transparent rounded-full',
+          'animate-spin rounded-full border-2 border-primary-500 border-t-transparent',
           sizeClasses[size],
-          className
+          className,
         )}
-        role="status"
-        aria-label="Loading"
+        role='status'
+        aria-label='Loading'
       />
-      {text && (
-        <p className="text-text-secondary text-sm font-medium">{text}</p>
-      )}
+      {text && <p className='text-sm font-medium text-text-secondary'>{text}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-surface-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className='bg-surface-background/80 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
         {spinner}
       </div>
     );
@@ -72,14 +71,14 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       className={cn(
         'animate-pulse bg-neutral-800',
         rounded ? 'rounded-full' : 'rounded',
-        className
+        className,
       )}
       style={{
         width: typeof width === 'number' ? `${width}px` : width,
         height: typeof height === 'number' ? `${height}px` : height,
       }}
-      role="status"
-      aria-label="Loading content"
+      role='status'
+      aria-label='Loading content'
     />
   );
 };
@@ -104,7 +103,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     <div className={cn('relative', className)}>
       {children}
       {isLoading && (
-        <div className="absolute inset-0 bg-surface-background/80 backdrop-blur-sm flex items-center justify-center z-10">
+        <div className='bg-surface-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm'>
           <Loading text={text} />
         </div>
       )}

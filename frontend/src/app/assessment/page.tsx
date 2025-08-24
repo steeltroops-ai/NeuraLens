@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
 import { AssessmentFlow } from '@/components/assessment/AssessmentFlow';
 import { Layout } from '@/components/layout';
+
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Neurological Assessment',

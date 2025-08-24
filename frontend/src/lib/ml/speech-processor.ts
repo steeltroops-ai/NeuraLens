@@ -20,14 +20,18 @@
  */
 
 import { InferenceSession, Tensor } from 'onnxruntime-web';
+
 import {
-  SpeechResult,
-  SpeechBiomarkers,
-  SpeechProcessorConfig,
   AudioConfig,
   ProcessingMetadata,
   SpeechAnalysisError,
   SPEECH_ANALYSIS_CONSTANTS,
+} from '../../types/speech-analysis';
+
+import type {
+  SpeechResult,
+  SpeechBiomarkers,
+  SpeechProcessorConfig,
 } from '../../types/speech-analysis';
 
 export class SpeechProcessor {
@@ -63,10 +67,7 @@ export class SpeechProcessor {
   async initialize(): Promise<void> {
     try {
       if (this.config.debug) {
-        console.log(
-          '[SpeechProcessor] Loading ONNX model from:',
-          this.config.modelPath
-        );
+        console.log('[SpeechProcessor] Loading ONNX model from:', this.config.modelPath);
       }
 
       // Configure ONNX Runtime for WebAssembly execution
@@ -80,29 +81,19 @@ export class SpeechProcessor {
 
       // Load the ONNX model - this is the converted whisper-tiny model
       // The model expects MFCC features as input and outputs fluency predictions
-      this.session = await InferenceSession.create(
-        this.config.modelPath,
-        sessionOptions
-      );
+      this.session = await InferenceSession.create(this.config.modelPath, sessionOptions);
 
       this.isInitialized = true;
 
       if (this.config.debug) {
         console.log('[SpeechProcessor] Model loaded successfully');
         console.log('[SpeechProcessor] Input names:', this.session.inputNames);
-        console.log(
-          '[SpeechProcessor] Output names:',
-          this.session.outputNames
-        );
+        console.log('[SpeechProcessor] Output names:', this.session.outputNames);
       }
     } catch (error) {
       const errorMessage = `Failed to initialize speech processor: ${error}`;
       console.error('[SpeechProcessor]', errorMessage);
-      throw new SpeechAnalysisError(
-        errorMessage,
-        'INITIALIZATION_ERROR',
-        error
-      );
+      throw new SpeechAnalysisError(errorMessage, 'INITIALIZATION_ERROR', error);
     }
   }
 
@@ -125,7 +116,7 @@ export class SpeechProcessor {
       if (!this.isInitialized || !this.session) {
         throw new SpeechAnalysisError(
           'Speech processor not initialized. Call initialize() first.',
-          'NOT_INITIALIZED'
+          'NOT_INITIALIZED',
         );
       }
 
@@ -175,7 +166,7 @@ export class SpeechProcessor {
       // Validate processing time meets performance requirements
       if (processingTime > SPEECH_ANALYSIS_CONSTANTS.MAX_LATENCY) {
         console.warn(
-          `[SpeechProcessor] Processing time ${processingTime}ms exceeds target ${SPEECH_ANALYSIS_CONSTANTS.MAX_LATENCY}ms`
+          `[SpeechProcessor] Processing time ${processingTime}ms exceeds target ${SPEECH_ANALYSIS_CONSTANTS.MAX_LATENCY}ms`,
         );
       }
 
@@ -184,11 +175,10 @@ export class SpeechProcessor {
       const processingTime = performance.now() - startTime;
       console.error('[SpeechProcessor] Processing failed:', error);
 
-      throw new SpeechAnalysisError(
-        `Speech processing failed: ${error}`,
-        'PROCESSING_ERROR',
-        { processingTime, originalError: error }
-      );
+      throw new SpeechAnalysisError(`Speech processing failed: ${error}`, 'PROCESSING_ERROR', {
+        processingTime,
+        originalError: error,
+      });
     }
   }
 
@@ -203,21 +193,20 @@ export class SpeechProcessor {
     if (audioBuffer.duration < audioConfig.duration * 0.8) {
       throw new SpeechAnalysisError(
         `Audio too short: ${audioBuffer.duration}s, minimum ${audioConfig.duration * 0.8}s required`,
-        'INVALID_AUDIO_DURATION'
+        'INVALID_AUDIO_DURATION',
       );
     }
 
     // Check audio level to ensure valid recording
     const channelData = audioBuffer.getChannelData(0);
     const rms = Math.sqrt(
-      channelData.reduce((sum, sample) => sum + sample * sample, 0) /
-        channelData.length
+      channelData.reduce((sum, sample) => sum + sample * sample, 0) / channelData.length,
     );
 
     if (rms < audioConfig.minAudioLevel) {
       throw new SpeechAnalysisError(
         `Audio level too low: ${rms}, minimum ${audioConfig.minAudioLevel} required`,
-        'INVALID_AUDIO_LEVEL'
+        'INVALID_AUDIO_LEVEL',
       );
     }
   }
@@ -230,20 +219,14 @@ export class SpeechProcessor {
    * 3. Compute MFCC coefficients (13 features)
    * 4. Apply normalization for model input
    */
-  private async extractFeatures(
-    audioBuffer: AudioBuffer
-  ): Promise<Float32Array> {
+  private async extractFeatures(audioBuffer: AudioBuffer): Promise<Float32Array> {
     try {
       // Get audio data from first channel
       const audioData = audioBuffer.getChannelData(0);
 
       // Resample to target sample rate if needed
       const targetSampleRate = this.config.audioConfig.sampleRate;
-      const resampledData = this.resampleAudio(
-        audioData,
-        audioBuffer.sampleRate,
-        targetSampleRate
-      );
+      const resampledData = this.resampleAudio(audioData, audioBuffer.sampleRate, targetSampleRate);
 
       // Apply noise reduction if enabled
       const processedData = this.config.audioConfig.noiseReduction
@@ -261,10 +244,7 @@ export class SpeechProcessor {
           originalLength: audioData.length,
           resampledLength: resampledData.length,
           mfccLength: mfccFeatures.length,
-          featureRange: [
-            Math.min(...normalizedFeatures),
-            Math.max(...normalizedFeatures),
-          ],
+          featureRange: [Math.min(...normalizedFeatures), Math.max(...normalizedFeatures)],
         });
       }
 
@@ -273,7 +253,7 @@ export class SpeechProcessor {
       throw new SpeechAnalysisError(
         `Feature extraction failed: ${error}`,
         'FEATURE_EXTRACTION_ERROR',
-        error
+        error,
       );
     }
   }
@@ -301,28 +281,17 @@ export class SpeechProcessor {
       const outputs = await this.session.run(feeds);
 
       if (this.config.debug) {
-        console.log(
-          '[SpeechProcessor] Inference outputs:',
-          Object.keys(outputs)
-        );
+        console.log('[SpeechProcessor] Inference outputs:', Object.keys(outputs));
       }
 
       return outputs;
     } catch (error) {
-      throw new SpeechAnalysisError(
-        `Model inference failed: ${error}`,
-        'INFERENCE_ERROR',
-        error
-      );
+      throw new SpeechAnalysisError(`Model inference failed: ${error}`, 'INFERENCE_ERROR', error);
     }
   }
 
   // Placeholder methods for audio processing - to be implemented
-  private resampleAudio(
-    data: Float32Array,
-    fromRate: number,
-    toRate: number
-  ): Float32Array {
+  private resampleAudio(data: Float32Array, fromRate: number, toRate: number): Float32Array {
     // TODO: Implement proper audio resampling
     // For now, return original data (assuming correct sample rate)
     return data;
@@ -337,9 +306,7 @@ export class SpeechProcessor {
   private computeMFCC(data: Float32Array, sampleRate: number): Float32Array {
     // TODO: Implement MFCC computation
     // For now, return dummy features
-    return new Float32Array(SPEECH_ANALYSIS_CONSTANTS.MODEL_INPUT_SIZE).fill(
-      0.5
-    );
+    return new Float32Array(SPEECH_ANALYSIS_CONSTANTS.MODEL_INPUT_SIZE).fill(0.5);
   }
 
   private normalizeFeatures(features: Float32Array): Float32Array {
@@ -348,10 +315,7 @@ export class SpeechProcessor {
     return features;
   }
 
-  private extractBiomarkers(
-    audioBuffer: AudioBuffer,
-    outputs: any
-  ): SpeechBiomarkers {
+  private extractBiomarkers(audioBuffer: AudioBuffer, outputs: any): SpeechBiomarkers {
     // TODO: Implement biomarker extraction from model outputs
     // This is a placeholder implementation
     return {
@@ -369,10 +333,7 @@ export class SpeechProcessor {
     };
   }
 
-  private calculateFluencyScore(
-    outputs: any,
-    biomarkers: SpeechBiomarkers
-  ): number {
+  private calculateFluencyScore(outputs: any, biomarkers: SpeechBiomarkers): number {
     // TODO: Implement fluency score calculation
     // For now, return a placeholder score
     return Math.max(0, Math.min(1, 0.85 + (Math.random() - 0.5) * 0.2));

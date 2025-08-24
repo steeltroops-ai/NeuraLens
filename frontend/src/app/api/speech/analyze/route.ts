@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
-    
+
     if (!audioFile) {
-      return NextResponse.json(
-        { error: 'No audio file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
     }
 
     // Convert file to buffer
@@ -43,8 +40,8 @@ export async function POST(request: NextRequest) {
         recommendations: [
           'Speech analysis completed successfully',
           'Consider follow-up assessment if risk score is elevated',
-          'Monitor speech patterns for changes over time'
-        ]
+          'Monitor speech patterns for changes over time',
+        ],
       };
 
       return NextResponse.json(mockResult);
@@ -52,10 +49,9 @@ export async function POST(request: NextRequest) {
 
     const result = await backendResponse.json();
     return NextResponse.json(result);
-
   } catch (error) {
     console.error('Speech analysis error:', error);
-    
+
     // Return mock data on error for demo purposes
     const mockResult = {
       session_id: `speech_${Date.now()}`,
@@ -73,8 +69,8 @@ export async function POST(request: NextRequest) {
       recommendations: [
         'Low speech risk detected - continue routine monitoring',
         'Speech patterns appear normal for age group',
-        'No immediate clinical intervention required'
-      ]
+        'No immediate clinical intervention required',
+      ],
     };
 
     return NextResponse.json(mockResult);

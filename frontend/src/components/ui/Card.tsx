@@ -1,8 +1,10 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import type { CardProps } from '@/types/design-system';
+
 import { cn } from '@/utils/cn';
+
+import type { CardProps } from '@/types/design-system';
 
 /**
  * Clinical-grade Card component with multiple variants and accessibility support
@@ -19,7 +21,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       testId,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Apple-style base card classes
     const baseClasses = [
@@ -49,12 +51,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         'border-white/10',
         'shadow-glass',
       ],
-      clinical: [
-        'bg-surface-primary',
-        'border-2',
-        'border-primary-500',
-        'shadow-clinical',
-      ],
+      clinical: ['bg-surface-primary', 'border-2', 'border-primary-500', 'shadow-clinical'],
       results: [
         'bg-gradient-to-br',
         'from-surface-primary',
@@ -96,7 +93,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       ...variantClasses[variant],
       ...hoverClasses,
       ...interactiveClasses,
-      className
+      className,
     );
 
     // Handle keyboard interaction
@@ -121,7 +118,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 
 Card.displayName = 'Card';
@@ -135,15 +132,11 @@ interface CardHeaderProps {
   actions?: React.ReactNode;
 }
 
-export const CardHeader: React.FC<CardHeaderProps> = ({
-  children,
-  className,
-  actions,
-}) => {
+export const CardHeader: React.FC<CardHeaderProps> = ({ children, className, actions }) => {
   return (
     <div className={cn('mb-4 flex items-center justify-between', className)}>
-      <div className="flex-1">{children}</div>
-      {actions && <div className="ml-4 flex items-center gap-2">{actions}</div>}
+      <div className='flex-1'>{children}</div>
+      {actions && <div className='ml-4 flex items-center gap-2'>{actions}</div>}
     </div>
   );
 };
@@ -157,11 +150,7 @@ interface CardTitleProps {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-export const CardTitle: React.FC<CardTitleProps> = ({
-  children,
-  className,
-  level = 3,
-}) => {
+export const CardTitle: React.FC<CardTitleProps> = ({ children, className, level = 3 }) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
 
   const levelClasses = {
@@ -175,13 +164,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
 
   return (
     <Tag
-      className={cn(
-        'text-text-primary',
-        'leading-tight',
-        'mb-2',
-        levelClasses[level],
-        className
-      )}
+      className={cn('text-text-primary', 'leading-tight', 'mb-2', levelClasses[level], className)}
     >
       {children}
     </Tag>
@@ -196,20 +179,9 @@ interface CardDescriptionProps {
   className?: string;
 }
 
-export const CardDescription: React.FC<CardDescriptionProps> = ({
-  children,
-  className,
-}) => {
+export const CardDescription: React.FC<CardDescriptionProps> = ({ children, className }) => {
   return (
-    <p
-      className={cn(
-        'text-text-secondary',
-        'text-sm',
-        'leading-relaxed',
-        'mb-0',
-        className
-      )}
-    >
+    <p className={cn('text-text-secondary', 'text-sm', 'leading-relaxed', 'mb-0', className)}>
       {children}
     </p>
   );
@@ -223,10 +195,7 @@ interface CardContentProps {
   className?: string;
 }
 
-export const CardContent: React.FC<CardContentProps> = ({
-  children,
-  className,
-}) => {
+export const CardContent: React.FC<CardContentProps> = ({ children, className }) => {
   return <div className={cn('space-y-4', className)}>{children}</div>;
 };
 
@@ -239,11 +208,7 @@ interface CardFooterProps {
   justify?: 'start' | 'center' | 'end' | 'between';
 }
 
-export const CardFooter: React.FC<CardFooterProps> = ({
-  children,
-  className,
-  justify = 'end',
-}) => {
+export const CardFooter: React.FC<CardFooterProps> = ({ children, className, justify = 'end' }) => {
   const justifyClasses = {
     start: 'justify-start',
     center: 'justify-center',
@@ -262,7 +227,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
         'border-t',
         'border-neutral-800',
         justifyClasses[justify],
-        className
+        className,
       )}
     >
       {children}
@@ -308,36 +273,30 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
 
   return (
     <Card
-      variant="default"
+      variant='default'
       hover={status === 'pending' || status === 'current'}
       {...(onStart && { onClick: onStart })}
-      className={cn(
-        'transition-all duration-300',
-        statusClasses[status],
-        className
-      )}
+      className={cn('transition-all duration-300', statusClasses[status], className)}
       {...props}
     >
       <CardHeader>
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-500/10">
+        <div className='flex items-center gap-4'>
+          <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-500/10'>
             {icon}
           </div>
-          <div className="flex-1">
+          <div className='flex-1'>
             <CardTitle level={4}>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
-          <div className="flex-shrink-0 text-2xl">{statusIcons[status]}</div>
+          <div className='flex-shrink-0 text-2xl'>{statusIcons[status]}</div>
         </div>
       </CardHeader>
 
       {estimatedTime && (
-        <CardFooter justify="between">
-          <span className="text-sm text-text-muted">
-            Estimated time: {estimatedTime}
-          </span>
+        <CardFooter justify='between'>
+          <span className='text-text-muted text-sm'>Estimated time: {estimatedTime}</span>
           {(status === 'pending' || status === 'current') && (
-            <span className="text-sm text-primary-400">Click to start →</span>
+            <span className='text-sm text-primary-400'>Click to start →</span>
           )}
         </CardFooter>
       )}
@@ -381,36 +340,30 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
 
   return (
     <Card
-      variant="results"
+      variant='results'
       className={cn('border-l-4', categoryColors[category], className)}
       {...props}
     >
       <CardHeader>
         <CardTitle level={4}>{title}</CardTitle>
-        <div className="text-right">
-          <div className="text-3xl font-bold text-text-primary">
-            {score}/100
-          </div>
+        <div className='text-right'>
+          <div className='text-3xl font-bold text-text-primary'>{score}/100</div>
           <div className={cn('text-sm font-medium', categoryColors[category])}>
             {categoryLabels[category]}
           </div>
-          {confidence && (
-            <div className="text-xs text-text-muted">
-              ±{confidence}% confidence
-            </div>
-          )}
+          {confidence && <div className='text-text-muted text-xs'>±{confidence}% confidence</div>}
         </div>
       </CardHeader>
 
       <CardContent>
-        <div className="mb-4 h-2 w-full rounded-full bg-neutral-800">
+        <div className='mb-4 h-2 w-full rounded-full bg-neutral-800'>
           <div
             className={cn(
               'h-2 rounded-full transition-all duration-1000',
               category === 'low' && 'bg-success',
               category === 'moderate' && 'bg-warning',
               category === 'high' && 'bg-orange-500',
-              category === 'critical' && 'bg-error'
+              category === 'critical' && 'bg-error',
             )}
             style={{ width: `${score}%` }}
           />
@@ -418,16 +371,11 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({
 
         {findings.length > 0 && (
           <div>
-            <h5 className="mb-2 text-sm font-medium text-text-primary">
-              Key Findings:
-            </h5>
-            <ul className="space-y-1">
+            <h5 className='mb-2 text-sm font-medium text-text-primary'>Key Findings:</h5>
+            <ul className='space-y-1'>
               {findings.map((finding, index) => (
-                <li
-                  key={index}
-                  className="flex items-start gap-2 text-sm text-text-secondary"
-                >
-                  <span className="mt-1 text-primary-400">•</span>
+                <li key={index} className='flex items-start gap-2 text-sm text-text-secondary'>
+                  <span className='mt-1 text-primary-400'>•</span>
                   <span>{finding}</span>
                 </li>
               ))}

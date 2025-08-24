@@ -23,7 +23,6 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic,
@@ -36,25 +35,20 @@ import {
   Brain,
   Zap,
 } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
 
+import { SPEECH_ANALYSIS_CONSTANTS } from '../../types/speech-analysis';
 import { SpeechAnalysisCard } from '../assessment/SpeechAnalysisCard';
-import {
-  SpeechResult,
-  SpeechAnalysisError,
-  SPEECH_ANALYSIS_CONSTANTS,
-} from '../../types/speech-analysis';
+
+import type { SpeechResult, SpeechAnalysisError } from '../../types/speech-analysis';
 
 interface SpeechAssessmentProps {
   onProcessingChange: (isProcessing: boolean) => void;
 }
 
-export default function SpeechAssessment({
-  onProcessingChange,
-}: SpeechAssessmentProps) {
+export default function SpeechAssessment({ onProcessingChange }: SpeechAssessmentProps) {
   // Component state for ML-powered speech analysis
-  const [analysisResult, setAnalysisResult] = useState<SpeechResult | null>(
-    null
-  );
+  const [analysisResult, setAnalysisResult] = useState<SpeechResult | null>(null);
   const [error, setError] = useState<SpeechAnalysisError | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -77,11 +71,10 @@ export default function SpeechAssessment({
       setIsProcessing(false);
 
       // Update performance metrics
-      setPerformanceMetrics((prev) => ({
+      setPerformanceMetrics(prev => ({
         totalAnalyses: prev.totalAnalyses + 1,
         averageLatency:
-          (prev.averageLatency * prev.totalAnalyses +
-            result.metadata.processingTime) /
+          (prev.averageLatency * prev.totalAnalyses + result.metadata.processingTime) /
           (prev.totalAnalyses + 1),
         averageAccuracy:
           (prev.averageAccuracy * prev.totalAnalyses + result.confidence) /
@@ -92,7 +85,7 @@ export default function SpeechAssessment({
       // Notify parent component that processing is complete
       onProcessingChange(false);
     },
-    [onProcessingChange]
+    [onProcessingChange],
   );
 
   /**
@@ -109,7 +102,7 @@ export default function SpeechAssessment({
       // Notify parent component that processing failed
       onProcessingChange(false);
     },
-    [onProcessingChange]
+    [onProcessingChange],
   );
 
   /**
@@ -118,15 +111,14 @@ export default function SpeechAssessment({
    */
   const handleStateChange = useCallback(
     (state: any) => {
-      const isCurrentlyProcessing =
-        state.status === 'recording' || state.status === 'processing';
+      const isCurrentlyProcessing = state.status === 'recording' || state.status === 'processing';
 
       if (isCurrentlyProcessing !== isProcessing) {
         setIsProcessing(isCurrentlyProcessing);
         onProcessingChange(isCurrentlyProcessing);
       }
     },
-    [isProcessing, onProcessingChange]
+    [isProcessing, onProcessingChange],
   );
 
   /**
@@ -148,16 +140,14 @@ export default function SpeechAssessment({
    * Get risk level classification based on NRI score
    */
   const getRiskLevel = (nriScore: number) => {
-    if (nriScore < 25)
-      return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50' };
+    if (nriScore < 25) return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50' };
     if (nriScore < 50)
       return {
         level: 'Moderate',
         color: 'text-yellow-600',
         bg: 'bg-yellow-50',
       };
-    if (nriScore < 75)
-      return { level: 'High', color: 'text-orange-600', bg: 'bg-orange-50' };
+    if (nriScore < 75) return { level: 'High', color: 'text-orange-600', bg: 'bg-orange-50' };
     return { level: 'Critical', color: 'text-red-600', bg: 'bg-red-50' };
   };
 
@@ -165,41 +155,37 @@ export default function SpeechAssessment({
    * Render performance metrics display
    */
   const renderPerformanceMetrics = () => (
-    <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4 sm:text-sm lg:grid-cols-4">
-      <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
-        <Clock className="h-4 w-4 flex-shrink-0" />
+    <div className='grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4 sm:text-sm lg:grid-cols-4'>
+      <div className='flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3'>
+        <Clock className='h-4 w-4 flex-shrink-0' />
         <span>Target: &lt;{SPEECH_ANALYSIS_CONSTANTS.MAX_LATENCY}ms</span>
       </div>
-      <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
-        <Activity className="h-4 w-4 flex-shrink-0" />
-        <span>
-          Target: {SPEECH_ANALYSIS_CONSTANTS.MIN_ACCURACY * 100}%+ Accuracy
-        </span>
+      <div className='flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3'>
+        <Activity className='h-4 w-4 flex-shrink-0' />
+        <span>Target: {SPEECH_ANALYSIS_CONSTANTS.MIN_ACCURACY * 100}%+ Accuracy</span>
       </div>
-      <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
-        <TrendingUp className="h-4 w-4 flex-shrink-0" />
+      <div className='flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3'>
+        <TrendingUp className='h-4 w-4 flex-shrink-0' />
         <span>Analyses: {performanceMetrics.totalAnalyses}</span>
       </div>
-      <div className="flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3">
-        <Brain className="h-4 w-4 flex-shrink-0" />
+      <div className='flex items-center space-x-2 rounded-lg bg-slate-50 p-2 text-slate-600 sm:p-3'>
+        <Brain className='h-4 w-4 flex-shrink-0' />
         <span>Model: Whisper-tiny</span>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Header */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="mb-4 flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0">
-          <div className="w-fit rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 p-3">
-            <Mic className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+      <div className='rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6'>
+        <div className='mb-4 flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-x-3 sm:space-y-0'>
+          <div className='w-fit rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 p-3'>
+            <Mic className='h-5 w-5 text-white sm:h-6 sm:w-6' />
           </div>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
-              Speech Analysis
-            </h1>
-            <p className="text-sm text-slate-600 sm:text-base">
+          <div className='flex-1'>
+            <h1 className='text-xl font-bold text-slate-900 sm:text-2xl'>Speech Analysis</h1>
+            <p className='text-sm text-slate-600 sm:text-base'>
               ML-powered neurological assessment through voice pattern analysis
             </p>
           </div>
@@ -212,7 +198,7 @@ export default function SpeechAssessment({
       <SpeechAnalysisCard
         onResult={handleAnalysisResult}
         onError={handleAnalysisError}
-        className="w-full"
+        className='w-full'
       />
 
       {/* Analysis Results Display */}
@@ -222,85 +208,65 @@ export default function SpeechAssessment({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+            className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'
           >
-            <div className="mb-4 flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <h2 className="text-lg font-semibold text-slate-900">
-                Analysis Results
-              </h2>
+            <div className='mb-4 flex items-center space-x-2'>
+              <CheckCircle className='h-5 w-5 text-green-600' />
+              <h2 className='text-lg font-semibold text-slate-900'>Analysis Results</h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               {/* Primary Metrics */}
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <div>
-                  <h3 className="mb-2 text-sm font-medium text-slate-700">
-                    Fluency Assessment
-                  </h3>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl font-bold text-blue-600">
+                  <h3 className='mb-2 text-sm font-medium text-slate-700'>Fluency Assessment</h3>
+                  <div className='flex items-center space-x-3'>
+                    <div className='text-2xl font-bold text-blue-600'>
                       {(analysisResult.fluencyScore * 100).toFixed(1)}%
                     </div>
-                    <div className="text-sm text-slate-600">
-                      Confidence: {(analysisResult.confidence * 100).toFixed(1)}
-                      %
+                    <div className='text-sm text-slate-600'>
+                      Confidence: {(analysisResult.confidence * 100).toFixed(1)}%
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="mb-2 text-sm font-medium text-slate-700">
-                    NRI Contribution
-                  </h3>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl font-bold text-purple-600">
+                  <h3 className='mb-2 text-sm font-medium text-slate-700'>NRI Contribution</h3>
+                  <div className='flex items-center space-x-3'>
+                    <div className='text-2xl font-bold text-purple-600'>
                       {calculateNRIContribution(analysisResult)}
                     </div>
                     <div
                       className={`rounded-full px-2 py-1 text-xs font-medium ${getRiskLevel(calculateNRIContribution(analysisResult)).bg} ${getRiskLevel(calculateNRIContribution(analysisResult)).color}`}
                     >
-                      {
-                        getRiskLevel(calculateNRIContribution(analysisResult))
-                          .level
-                      }{' '}
-                      Risk
+                      {getRiskLevel(calculateNRIContribution(analysisResult)).level} Risk
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Biomarkers */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-slate-700">
-                  Speech Biomarkers
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Speech Rate:</span>
-                    <span className="font-medium">
-                      {analysisResult.biomarkers.speechRate} WPM
-                    </span>
+              <div className='space-y-3'>
+                <h3 className='text-sm font-medium text-slate-700'>Speech Biomarkers</h3>
+                <div className='space-y-2 text-sm'>
+                  <div className='flex justify-between'>
+                    <span className='text-slate-600'>Speech Rate:</span>
+                    <span className='font-medium'>{analysisResult.biomarkers.speechRate} WPM</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Pause Frequency:</span>
-                    <span className="font-medium">
+                  <div className='flex justify-between'>
+                    <span className='text-slate-600'>Pause Frequency:</span>
+                    <span className='font-medium'>
                       {analysisResult.biomarkers.pauseFrequency}/min
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Avg Pause Duration:</span>
-                    <span className="font-medium">
-                      {analysisResult.biomarkers.pauseDuration}ms
-                    </span>
+                  <div className='flex justify-between'>
+                    <span className='text-slate-600'>Avg Pause Duration:</span>
+                    <span className='font-medium'>{analysisResult.biomarkers.pauseDuration}ms</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Pitch Variation:</span>
-                    <span className="font-medium">
-                      {(analysisResult.biomarkers.pitchVariation * 100).toFixed(
-                        1
-                      )}
-                      %
+                  <div className='flex justify-between'>
+                    <span className='text-slate-600'>Pitch Variation:</span>
+                    <span className='font-medium'>
+                      {(analysisResult.biomarkers.pitchVariation * 100).toFixed(1)}%
                     </span>
                   </div>
                 </div>
@@ -308,12 +274,9 @@ export default function SpeechAssessment({
             </div>
 
             {/* Performance Metrics */}
-            <div className="mt-6 border-t pt-4">
-              <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>
-                  Processing Time:{' '}
-                  {analysisResult.metadata.processingTime.toFixed(1)}ms
-                </span>
+            <div className='mt-6 border-t pt-4'>
+              <div className='flex items-center justify-between text-sm text-slate-600'>
+                <span>Processing Time: {analysisResult.metadata.processingTime.toFixed(1)}ms</span>
                 <span>Model: {analysisResult.metadata.modelVersion}</span>
                 <span>Sample Rate: {analysisResult.metadata.sampleRate}Hz</span>
               </div>
@@ -329,18 +292,14 @@ export default function SpeechAssessment({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="rounded-xl border border-red-200 bg-red-50 p-6"
+            className='rounded-xl border border-red-200 bg-red-50 p-6'
           >
-            <div className="flex items-center space-x-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              <h3 className="font-semibold">Analysis Error</h3>
+            <div className='flex items-center space-x-2 text-red-600'>
+              <AlertCircle className='h-5 w-5' />
+              <h3 className='font-semibold'>Analysis Error</h3>
             </div>
-            <p className="mt-2 text-sm text-red-600">{error.message}</p>
-            {error.code && (
-              <p className="mt-1 text-xs text-red-500">
-                Error Code: {error.code}
-              </p>
-            )}
+            <p className='mt-2 text-sm text-red-600'>{error.message}</p>
+            {error.code && <p className='mt-1 text-xs text-red-500'>Error Code: {error.code}</p>}
           </motion.div>
         )}
       </AnimatePresence>

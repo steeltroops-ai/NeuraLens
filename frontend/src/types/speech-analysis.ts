@@ -1,9 +1,9 @@
 /**
  * Speech Analysis Types for Neuralens
- * 
+ *
  * This file defines TypeScript interfaces for the Speech Analysis ML model
  * implementation, focusing on neurological disorder detection through voice patterns.
- * 
+ *
  * Key Features:
  * - Fluency detection for Parkinson's speech patterns
  * - Vocal tremor analysis for neurological indicators
@@ -14,25 +14,25 @@
 
 // Core speech analysis result structure
 export interface SpeechResult {
-  /** 
+  /**
    * Normalized fluency score (0-1, where 1 is perfect fluency)
    * Calculated from pause patterns, hesitations, and speech rhythm
    */
   fluencyScore: number;
-  
-  /** 
+
+  /**
    * Model confidence level (0-1) indicating prediction certainty
    * Higher values indicate more reliable results
    */
   confidence: number;
-  
-  /** 
+
+  /**
    * Detailed biomarkers extracted from speech analysis
    * Used for clinical interpretation and explainability
    */
   biomarkers: SpeechBiomarkers;
-  
-  /** 
+
+  /**
    * Processing metadata for performance monitoring
    */
   metadata: ProcessingMetadata;
@@ -42,19 +42,19 @@ export interface SpeechResult {
 export interface SpeechBiomarkers {
   /** Average pause duration in milliseconds */
   pauseDuration: number;
-  
+
   /** Number of pauses per minute */
   pauseFrequency: number;
-  
+
   /** Vocal tremor frequency in Hz (0 if no tremor detected) */
   tremorFrequency: number;
-  
+
   /** Speech rate in words per minute */
   speechRate: number;
-  
+
   /** Pitch variation coefficient (higher = more unstable) */
   pitchVariation: number;
-  
+
   /** Voice quality metrics */
   voiceQuality: {
     /** Jitter (pitch perturbation) percentage */
@@ -64,7 +64,7 @@ export interface SpeechBiomarkers {
     /** Harmonics-to-noise ratio in dB */
     hnr: number;
   };
-  
+
   /** MFCC feature vector (13 coefficients) */
   mfccFeatures: number[];
 }
@@ -73,16 +73,16 @@ export interface SpeechBiomarkers {
 export interface ProcessingMetadata {
   /** Processing time in milliseconds */
   processingTime: number;
-  
+
   /** Audio sample duration in seconds */
   audioDuration: number;
-  
+
   /** Sample rate of processed audio */
   sampleRate: number;
-  
+
   /** Model version used for inference */
   modelVersion: string;
-  
+
   /** Timestamp of analysis */
   timestamp: Date;
 }
@@ -91,13 +91,13 @@ export interface ProcessingMetadata {
 export interface AudioConfig {
   /** Target sample rate for processing (default: 16000 Hz) */
   sampleRate: number;
-  
+
   /** Audio duration in seconds (default: 30s) */
   duration: number;
-  
+
   /** Minimum audio level threshold for valid recording */
   minAudioLevel: number;
-  
+
   /** Enable noise reduction preprocessing */
   noiseReduction: boolean;
 }
@@ -106,13 +106,13 @@ export interface AudioConfig {
 export interface SpeechProcessorConfig {
   /** Path to ONNX model file */
   modelPath: string;
-  
+
   /** Audio processing configuration */
   audioConfig: AudioConfig;
-  
+
   /** Enable debug logging */
   debug: boolean;
-  
+
   /** Maximum processing timeout in milliseconds */
   timeout: number;
 }
@@ -121,16 +121,16 @@ export interface SpeechProcessorConfig {
 export interface RecordingState {
   /** Current recording status */
   status: 'idle' | 'recording' | 'processing' | 'complete' | 'error';
-  
+
   /** Recording progress (0-1) */
   progress: number;
-  
+
   /** Current audio level for visual feedback */
   audioLevel: number;
-  
+
   /** Error message if status is 'error' */
   error?: string;
-  
+
   /** Recorded audio duration in seconds */
   recordedDuration: number;
 }
@@ -139,13 +139,13 @@ export interface RecordingState {
 export interface SpeechAnalysisRequest {
   /** Base64 encoded audio data */
   audioData: string;
-  
+
   /** Audio format (wav, mp3, etc.) */
   format: string;
-  
+
   /** Processing configuration */
   config: Partial<SpeechProcessorConfig>;
-  
+
   /** User session ID for caching */
   sessionId?: string;
 }
@@ -153,13 +153,13 @@ export interface SpeechAnalysisRequest {
 export interface SpeechAnalysisResponse {
   /** Analysis results */
   result: SpeechResult;
-  
+
   /** Processing success status */
   success: boolean;
-  
+
   /** Error message if processing failed */
   error?: string;
-  
+
   /** Cache key for result storage */
   cacheKey?: string;
 }
@@ -168,19 +168,19 @@ export interface SpeechAnalysisResponse {
 export interface ValidationMetrics {
   /** Model accuracy on test dataset */
   accuracy: number;
-  
+
   /** Precision score */
   precision: number;
-  
+
   /** Recall score */
   recall: number;
-  
+
   /** F1 score */
   f1Score: number;
-  
+
   /** Average processing latency in ms */
   averageLatency: number;
-  
+
   /** Bias metrics across demographics */
   biasMetrics: {
     ageGroups: Record<string, number>;
@@ -192,20 +192,20 @@ export interface ValidationMetrics {
 export interface DemoAudioSample {
   /** Sample identifier */
   id: string;
-  
+
   /** Audio file path */
   filePath: string;
-  
+
   /** Expected NRI score (0-100) */
   expectedNRI: number;
-  
+
   /** Ground truth labels for validation */
   groundTruth: {
     fluencyScore: number;
     hasNeurologicalIndicators: boolean;
     condition?: 'healthy' | 'parkinsons' | 'alzheimers' | 'other';
   };
-  
+
   /** Sample metadata */
   metadata: {
     duration: number;
@@ -220,7 +220,7 @@ export class SpeechAnalysisError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = 'SpeechAnalysisError';
@@ -233,16 +233,16 @@ export const SPEECH_ANALYSIS_CONSTANTS = {
   MODEL_INPUT_SIZE: 13, // MFCC coefficients
   TARGET_SAMPLE_RATE: 16000, // Hz
   DEFAULT_DURATION: 30, // seconds
-  
+
   // Performance targets
   MAX_LATENCY: 100, // milliseconds
-  MIN_ACCURACY: 0.90, // 90%
-  MIN_CONFIDENCE: 0.70, // 70%
-  
+  MIN_ACCURACY: 0.9, // 90%
+  MIN_CONFIDENCE: 0.7, // 70%
+
   // Audio quality thresholds
   MIN_AUDIO_LEVEL: 0.01,
   MAX_NOISE_LEVEL: 0.05,
-  
+
   // Biomarker normal ranges
   NORMAL_SPEECH_RATE: { min: 150, max: 200 }, // words per minute
   NORMAL_PAUSE_DURATION: { min: 200, max: 800 }, // milliseconds

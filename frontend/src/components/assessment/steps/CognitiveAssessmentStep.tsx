@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain,
@@ -12,15 +11,9 @@ import {
   Pause,
   RotateCcw,
 } from 'lucide-react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Progress,
-  Badge,
-} from '@/components/ui';
+import React, { useState, useEffect } from 'react';
+
+import { Button, Card, CardContent, CardHeader, CardTitle, Progress, Badge } from '@/components/ui';
 
 interface CognitiveTest {
   id: string;
@@ -43,7 +36,7 @@ const cognitiveTests: CognitiveTest[] = [
     name: 'Memory Recall',
     description: 'Test your ability to remember and recall information',
     duration: 120,
-    icon: <Brain className="h-6 w-6" />,
+    icon: <Brain className='h-6 w-6' />,
     type: 'memory',
     instructions: [
       'You will see a sequence of words for 30 seconds',
@@ -57,7 +50,7 @@ const cognitiveTests: CognitiveTest[] = [
     name: 'Sustained Attention',
     description: 'Measure your ability to maintain focus over time',
     duration: 180,
-    icon: <Target className="h-6 w-6" />,
+    icon: <Target className='h-6 w-6' />,
     type: 'attention',
     instructions: [
       'Watch for specific target stimuli on the screen',
@@ -71,7 +64,7 @@ const cognitiveTests: CognitiveTest[] = [
     name: 'Executive Function',
     description: 'Assess planning, problem-solving, and cognitive flexibility',
     duration: 240,
-    icon: <CheckCircle className="h-6 w-6" />,
+    icon: <CheckCircle className='h-6 w-6' />,
     type: 'executive',
     instructions: [
       'Complete a series of problem-solving tasks',
@@ -85,7 +78,7 @@ const cognitiveTests: CognitiveTest[] = [
     name: 'Language Processing',
     description: 'Evaluate language comprehension and verbal fluency',
     duration: 150,
-    icon: <AlertCircle className="h-6 w-6" />,
+    icon: <AlertCircle className='h-6 w-6' />,
     type: 'language',
     instructions: [
       'Complete word association tasks',
@@ -96,10 +89,7 @@ const cognitiveTests: CognitiveTest[] = [
   },
 ];
 
-export function CognitiveAssessmentStep({
-  onComplete,
-  onBack,
-}: CognitiveAssessmentStepProps) {
+export function CognitiveAssessmentStep({ onComplete, onBack }: CognitiveAssessmentStepProps) {
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [isTestActive, setIsTestActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -108,15 +98,13 @@ export function CognitiveAssessmentStep({
   const [isCompleted, setIsCompleted] = useState(false);
 
   const currentTest = cognitiveTests[currentTestIndex];
-  const progress =
-    ((currentTestIndex + (isTestActive ? 0.5 : 0)) / cognitiveTests.length) *
-    100;
+  const progress = ((currentTestIndex + (isTestActive ? 0.5 : 0)) / cognitiveTests.length) * 100;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTestActive && timeRemaining > 0) {
       interval = setInterval(() => {
-        setTimeRemaining((prev) => {
+        setTimeRemaining(prev => {
           if (prev <= 1) {
             handleTestComplete();
             return 0;
@@ -149,7 +137,7 @@ export function CognitiveAssessmentStep({
       completedAt: new Date().toISOString(),
     };
 
-    setTestResults((prev) => ({
+    setTestResults(prev => ({
       ...prev,
       [currentTest.id]: mockResult,
     }));
@@ -157,7 +145,7 @@ export function CognitiveAssessmentStep({
     // Move to next test or complete assessment
     if (currentTestIndex < cognitiveTests.length - 1) {
       setTimeout(() => {
-        setCurrentTestIndex((prev) => prev + 1);
+        setCurrentTestIndex(prev => prev + 1);
         setShowInstructions(true);
       }, 2000);
     } else {
@@ -170,10 +158,8 @@ export function CognitiveAssessmentStep({
 
   const handleAssessmentComplete = () => {
     const overallScore =
-      Object.values(testResults).reduce(
-        (acc: number, result: any) => acc + result.score,
-        0
-      ) / Object.keys(testResults).length;
+      Object.values(testResults).reduce((acc: number, result: any) => acc + result.score, 0) /
+      Object.keys(testResults).length;
 
     const assessmentData = {
       type: 'cognitive',
@@ -189,7 +175,7 @@ export function CognitiveAssessmentStep({
         processing_speed:
           Object.values(testResults).reduce(
             (acc: number, result: any) => acc + 1000 / result.reactionTime,
-            0
+            0,
           ) / Object.keys(testResults).length,
         cognitive_flexibility: testResults.executive?.score || 0,
       },
@@ -215,91 +201,77 @@ export function CognitiveAssessmentStep({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-2xl space-y-6 text-center"
+        className='mx-auto max-w-2xl space-y-6 text-center'
       >
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-          <CheckCircle className="h-10 w-10 text-green-600" />
+        <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100'>
+          <CheckCircle className='h-10 w-10 text-green-600' />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Cognitive Assessment Complete!
-        </h2>
-        <p className="text-gray-600">
-          All cognitive tests have been completed successfully. Your results are
-          being processed.
+        <h2 className='text-2xl font-bold text-gray-900'>Cognitive Assessment Complete!</h2>
+        <p className='text-gray-600'>
+          All cognitive tests have been completed successfully. Your results are being processed.
         </p>
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          {Object.entries(testResults).map(
-            ([testId, result]: [string, any]) => (
-              <Card key={testId} className="p-4">
-                <div className="text-sm font-medium capitalize text-gray-600">
-                  {testId}
-                </div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {Math.round(result.score * 100)}%
-                </div>
-              </Card>
-            )
-          )}
+        <div className='mt-6 grid grid-cols-2 gap-4'>
+          {Object.entries(testResults).map(([testId, result]: [string, any]) => (
+            <Card key={testId} className='p-4'>
+              <div className='text-sm font-medium capitalize text-gray-600'>{testId}</div>
+              <div className='text-2xl font-bold text-blue-600'>
+                {Math.round(result.score * 100)}%
+              </div>
+            </Card>
+          ))}
         </div>
       </motion.div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className='mx-auto max-w-4xl space-y-6'>
       {/* Progress Header */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Cognitive Assessment
-          </h1>
-          <Badge variant="outline" className="text-sm">
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h1 className='text-2xl font-bold text-gray-900'>Cognitive Assessment</h1>
+          <Badge variant='outline' className='text-sm'>
             Test {currentTestIndex + 1} of {cognitiveTests.length}
           </Badge>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className='h-2' />
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode='wait'>
         {showInstructions ? (
           <motion.div
-            key="instructions"
+            key='instructions'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className='space-y-6'
           >
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-3">
+                <CardTitle className='flex items-center gap-3'>
                   {currentTest?.icon}
                   {currentTest?.name}
                 </CardTitle>
-                <p className="text-gray-600">{currentTest?.description}</p>
+                <p className='text-gray-600'>{currentTest?.description}</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+              <CardContent className='space-y-4'>
+                <div className='flex items-center gap-4 text-sm text-gray-600'>
+                  <div className='flex items-center gap-1'>
+                    <Clock className='h-4 w-4' />
                     Duration: {Math.floor((currentTest?.duration || 0) / 60)}:
-                    {((currentTest?.duration || 0) % 60)
-                      .toString()
-                      .padStart(2, '0')}
+                    {((currentTest?.duration || 0) % 60).toString().padStart(2, '0')}
                   </div>
-                  <Badge variant="secondary" className="capitalize">
+                  <Badge variant='secondary' className='capitalize'>
                     {currentTest?.type}
                   </Badge>
                 </div>
 
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-900">Instructions:</h4>
-                  <ul className="space-y-2">
+                <div className='space-y-3'>
+                  <h4 className='font-medium text-gray-900'>Instructions:</h4>
+                  <ul className='space-y-2'>
                     {currentTest?.instructions?.map((instruction, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-2 text-sm text-gray-600"
-                      >
-                        <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">
+                      <li key={index} className='flex items-start gap-2 text-sm text-gray-600'>
+                        <span className='mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600'>
                           {index + 1}
                         </span>
                         {instruction}
@@ -308,16 +280,13 @@ export function CognitiveAssessmentStep({
                   </ul>
                 </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    onClick={startTest}
-                    className="flex items-center gap-2"
-                  >
-                    <Play className="h-4 w-4" />
+                <div className='flex gap-3 pt-4'>
+                  <Button onClick={startTest} className='flex items-center gap-2'>
+                    <Play className='h-4 w-4' />
                     Start Test
                   </Button>
                   {currentTestIndex > 0 && (
-                    <Button variant="secondary" onClick={onBack}>
+                    <Button variant='secondary' onClick={onBack}>
                       Back
                     </Button>
                   )}
@@ -327,30 +296,30 @@ export function CognitiveAssessmentStep({
           </motion.div>
         ) : (
           <motion.div
-            key="test-active"
+            key='test-active'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className='space-y-6'
           >
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-3">
+                <div className='flex items-center justify-between'>
+                  <CardTitle className='flex items-center gap-3'>
                     {currentTest?.icon}
                     {currentTest?.name} - In Progress
                   </CardTitle>
-                  <div className="flex items-center gap-4">
-                    <div className="font-mono text-2xl font-bold text-blue-600">
+                  <div className='flex items-center gap-4'>
+                    <div className='font-mono text-2xl font-bold text-blue-600'>
                       {formatTime(timeRemaining)}
                     </div>
                     <Button
-                      variant="secondary"
-                      size="sm"
+                      variant='secondary'
+                      size='sm'
                       onClick={resetCurrentTest}
-                      className="flex items-center gap-1"
+                      className='flex items-center gap-1'
                     >
-                      <RotateCcw className="h-4 w-4" />
+                      <RotateCcw className='h-4 w-4' />
                       Reset
                     </Button>
                   </div>
@@ -361,27 +330,21 @@ export function CognitiveAssessmentStep({
                       (currentTest?.duration || 1)) *
                     100
                   }
-                  className="h-2"
+                  className='h-2'
                 />
               </CardHeader>
               <CardContent>
-                <div className="flex min-h-[300px] items-center justify-center rounded-lg bg-gray-50">
-                  <div className="space-y-4 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                <div className='flex min-h-[300px] items-center justify-center rounded-lg bg-gray-50'>
+                  <div className='space-y-4 text-center'>
+                    <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100'>
                       {currentTest?.icon}
                     </div>
-                    <p className="text-gray-600">
-                      {currentTest?.name} is now running...
+                    <p className='text-gray-600'>{currentTest?.name} is now running...</p>
+                    <p className='text-sm text-gray-500'>
+                      Follow the on-screen instructions and complete the tasks as accurately as
+                      possible.
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Follow the on-screen instructions and complete the tasks
-                      as accurately as possible.
-                    </p>
-                    <Button
-                      onClick={handleTestComplete}
-                      variant="secondary"
-                      className="mt-4"
-                    >
+                    <Button onClick={handleTestComplete} variant='secondary' className='mt-4'>
                       Complete Test Early
                     </Button>
                   </div>

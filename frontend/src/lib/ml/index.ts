@@ -3,8 +3,16 @@
 
 // Core ML Models
 export { speechAnalyzer, type SpeechAnalysisResult, type SpeechFeatures } from './speech-analysis';
-export { retinalAnalyzer, type RetinalAnalysisResult, type RetinalFeatures } from './retinal-analysis';
-export { riskAssessmentCalculator, type RiskAssessmentResult, type RiskAssessmentData } from './risk-assessment';
+export {
+  retinalAnalyzer,
+  type RetinalAnalysisResult,
+  type RetinalFeatures,
+} from './retinal-analysis';
+export {
+  riskAssessmentCalculator,
+  type RiskAssessmentResult,
+  type RiskAssessmentData,
+} from './risk-assessment';
 export { nriFusionCalculator, type NRIFusionResult, type ModalityResult } from './nri-fusion';
 
 // ML Integration
@@ -27,9 +35,7 @@ export type {
   CognitiveAssessment,
 } from './risk-assessment';
 
-export type {
-  FusionWeights,
-} from './nri-fusion';
+export type { FusionWeights } from './nri-fusion';
 
 // Utility functions
 export const ML_VERSION = '1.0.0';
@@ -53,7 +59,7 @@ export const getMLCapabilities = () => ({
   nriFusion: {
     supported: true,
     features: ['multi-modal fusion', 'uncertainty quantification', 'confidence intervals'],
-    accuracy: 0.90,
+    accuracy: 0.9,
   },
 });
 
