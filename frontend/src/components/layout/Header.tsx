@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
 import { Button, cn } from '@/components/ui';
+import { useSafeNavigation } from '@/components/SafeNavigation';
 
 interface NavigationItem {
   id: string;
@@ -85,6 +86,7 @@ export const Header: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { preload } = useSafeNavigation();
 
   // Handle hydration
   useEffect(() => {
@@ -174,6 +176,8 @@ export const Header: React.FC = () => {
                   aria-current={isActive ? 'page' : undefined}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : 0}
+                  onMouseEnter={() => !isDisabled && preload(item.href)}
+                  onFocus={() => !isDisabled && preload(item.href)}
                   {...(isDisabled && { onClick: e => e.preventDefault() })}
                 >
                   <span>{item.label}</span>
@@ -282,6 +286,8 @@ export const Header: React.FC = () => {
                   aria-current={isActive ? 'page' : undefined}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : 0}
+                  onMouseEnter={() => !isDisabled && preload(item.href)}
+                  onFocus={() => !isDisabled && preload(item.href)}
                   {...(isDisabled && { onClick: e => e.preventDefault() })}
                 >
                   {item.icon}

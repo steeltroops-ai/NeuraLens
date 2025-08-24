@@ -11,6 +11,9 @@ const nextConfig = {
     scrollRestoration: true,
   },
 
+  // Server external packages for better performance
+  serverExternalPackages: ['@supabase/supabase-js'],
+
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
@@ -99,7 +102,7 @@ const nextConfig = {
     ];
   },
 
-  // Headers for performance
+  // Headers for performance and caching
   async headers() {
     return [
       {
@@ -116,6 +119,34 @@ const nextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+      // Cache static assets aggressively
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache API responses with shorter TTL
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
           },
         ],
       },
