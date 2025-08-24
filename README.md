@@ -106,35 +106,12 @@ graph TB
 
 ```
 NeuraLens/
-├── frontend/                          # Next.js 15 Application
+├── frontend/                         # Next.js 15 Application
 │   ├── src/
-│   │   ├── app/                      # Next.js App Router
-│   │   │   ├── dashboard/            # Multi-modal assessment interface
-│   │   │   ├── about/                # Platform information
-│   │   │   └── api/                  # API route handlers
-│   │   ├── components/               # Reusable UI components
-│   │   │   ├── dashboard/            # Assessment components
-│   │   │   ├── ui/                   # Base UI components
-│   │   │   └── layout/               # Layout components
-│   │   ├── lib/                      # Utility libraries
-│   │   │   ├── ml/                   # Client-side ML processing
-│   │   │   ├── audio/                # Audio processing utilities
-│   │   │   └── utils/                # Helper functions
-│   │   └── types/                    # TypeScript type definitions
-│   ├── public/                       # Static assets
-│   ├── docs/                         # Apple Design System documentation
-│   └── package.json                  # Bun package configuration
 │
-├── hackathon/                         # Competition documentation
-│   ├── project-overview.md           # Problem statement & value proposition
-│   ├── technical-features.md         # System architecture & implementation
-│   ├── ai-ml-strategy.md            # AI capabilities & model specifications
-│   ├── user-testing.md              # UX strategy & validation protocols
-│   ├── system-integration.md        # API architecture & security
-│   └── feature-solutions.md         # Clinical validation & ROI analysis
+├── docs/                             # Documentation suite
 │
-├── .augment/                         # Augment Code optimization rules
-│   └── rules/                        # Development standards & guidelines
+├── backend/                          # FastAPI Backend
 │
 ├── scripts/                          # Deployment & utility scripts
 ├── .github/workflows/                # CI/CD automation
@@ -330,46 +307,15 @@ bun run format          # Prettier code formatting
 bun run check-all       # Run all quality checks
 ```
 
-## 🏆 **Clinical Validation & Evidence**
 
-### **Peer-Reviewed Research Foundation**
 
-- **Speech Analysis Literature**:
-
-  - Tsanas et al. (2012): "Accurate telemonitoring of Parkinson's disease progression"
-  - Rusz et al. (2013): "Imprecise vowel articulation as a potential early marker"
-
-- **Retinal Imaging Research**:
-
-  - Koronyo et al. (2017): "Retinal amyloid pathology in Alzheimer's disease" - Nature Medicine
-  - Cheung et al. (2012): "Retinal vascular tortuosity and cognitive function" - The Lancet
-
-- **Motor Assessment Studies**:
-  - Espay et al. (2016): "Technology in Parkinson's disease: Challenges and opportunities"
-  - Maetzler et al. (2013): "Quantitative wearable sensors for objective assessment"
-
-### **Clinical Trial Evidence**
-
-- **EARLY-DETECT Study**: 2,500 participants, 24-month follow-up, 18.3 months earlier detection
-- **MULTI-MODAL Study**: 1,800 participants across 12 sites, 92.4% overall accuracy
-- **Validation Cohorts**: 5,000+ total participants across all assessment modalities
-
-## 🤝 **Contributing & Partnership**
-
-### **Healthcare Partnerships**
-
-We welcome collaboration with:
-
-- Healthcare systems and medical institutions
-- Clinical researchers and academic partners
-- Pharmaceutical companies for drug development
-- Technology partners for platform integration
+## 🤝 **Contributing**
 
 ### **Development Contributions**
 
 ```bash
 # Fork the repository
-git clone https://github.com/your-username/NeuraLens.git
+git clone https://github.com/steeltroops-ai/NeuraLens.git
 cd NeuraLens
 
 # Create feature branch
@@ -382,16 +328,9 @@ git commit -m "Add your feature description"
 git push origin feature/your-feature-name
 ```
 
-## 📞 **Contact & Support**
+## 📞 **Contact**
 
-- **General Inquiries**: contact@neuralens.ai
-- **Partnership Opportunities**: partnerships@neuralens.ai
-- **Technical Support**: support@neuralens.ai
-- **Research Collaboration**: research@neuralens.ai
-
-## 📝 **License**
-
-MIT License - Advancing neurological healthcare through open innovation
+- **General Inquiries**: steeltroops.ai@gmail.com
 
 ---
 
