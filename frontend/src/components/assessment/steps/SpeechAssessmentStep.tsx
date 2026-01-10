@@ -80,7 +80,7 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
       };
 
       // Fallback for Safari
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      if (!MediaRecorder.isTypeSupported(options.mimeType || '')) {
         options.mimeType = 'audio/mp4';
       }
 

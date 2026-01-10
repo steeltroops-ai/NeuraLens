@@ -178,12 +178,6 @@ module.exports = {
         22: '88px', // Massive spacing
       },
 
-      // Custom scale values for subtle interactions
-      scale: {
-        98: '0.98',
-        102: '1.02',
-      },
-
       // Apple-style animations
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

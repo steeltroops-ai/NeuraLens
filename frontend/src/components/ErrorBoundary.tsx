@@ -3,7 +3,6 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 
 import { Card, Button } from '@/components/ui';
-import { reportErrorToBoundary } from '@/lib/monitoring/errorMonitoring';
 
 interface Props {
   children: ReactNode;
@@ -14,92 +13,22 @@ interface State {
   hasError: boolean;
   error?: Error;
   errorInfo?: ErrorInfo;
-  isHydrationError: boolean;
-  isNavigationError: boolean;
-  retryCount: number;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      isHydrationError: false,
-      isNavigationError: false,
-      retryCount: 0,
-    };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
-    // Detect hydration errors
-    const isHydrationError =
-      error.message.includes('Hydration') ||
-      error.message.includes('hydration') ||
-      error.message.includes('server HTML') ||
-      error.message.includes('client-side');
-
-    // Detect navigation errors
-    const isNavigationError =
-      error.message.includes('navigation') ||
-      error.message.includes('router') ||
-      error.message.includes('route');
-
-    return {
-      hasError: true,
-      error,
-      isHydrationError,
-      isNavigationError,
-    };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-
-    // Report error to monitoring system
-    reportErrorToBoundary(error, errorInfo);
-
-    // Enhanced error logging for debugging
-    if (this.state.isHydrationError) {
-      console.error('🔥 Hydration Error Detected:', {
-        error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-      });
-    }
-
-    if (this.state.isNavigationError) {
-      console.error('🧭 Navigation Error Detected:', {
-        error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-      });
-    }
-
     this.setState({ error, errorInfo });
   }
-
-  handleRetry = () => {
-    this.setState(prevState => ({
-      hasError: false,
-      error: undefined,
-      errorInfo: undefined,
-      isHydrationError: false,
-      isNavigationError: false,
-      retryCount: prevState.retryCount + 1,
-    }));
-  };
-
-  handleReload = () => {
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
-  };
-
-  handleGoHome = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
-  };
 
   override render() {
     if (this.state.hasError) {
@@ -107,30 +36,15 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      // Specific error messages based on error type
-      let errorTitle = 'Something went wrong';
-      let errorMessage =
-        'We apologize for the inconvenience. An unexpected error occurred while loading this page.';
-      let errorIcon = '⚠️';
-
-      if (this.state.isHydrationError) {
-        errorTitle = 'Page Loading Issue';
-        errorMessage =
-          'There was a mismatch between server and client rendering. This usually resolves with a page refresh.';
-        errorIcon = '🔄';
-      } else if (this.state.isNavigationError) {
-        errorTitle = 'Navigation Error';
-        errorMessage =
-          'There was an issue navigating to this page. Please try refreshing or going back to the home page.';
-        errorIcon = '🧭';
-      }
-
       return (
         <div className='bg-surface-background flex min-h-screen items-center justify-center p-4'>
           <Card className='w-full max-w-lg p-8 text-center'>
-            <div className='mb-4 text-6xl'>{errorIcon}</div>
-            <h1 className='mb-4 text-2xl font-bold text-text-primary'>{errorTitle}</h1>
-            <p className='mb-6 text-text-secondary'>{errorMessage}</p>
+            <div className='mb-4 text-6xl'>⚠️</div>
+            <h1 className='mb-4 text-2xl font-bold text-text-primary'>Something went wrong</h1>
+            <p className='mb-6 text-text-secondary'>
+              We apologize for the inconvenience. An unexpected error occurred while loading this
+              page.
+            </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className='mb-6 text-left'>
@@ -158,34 +72,28 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
 
             <div className='space-y-3'>
-              {this.state.isHydrationError ? (
-                <>
-                  <Button onClick={this.handleReload} className='w-full'>
-                    Refresh Page
-                  </Button>
-                  <Button variant='secondary' onClick={this.handleRetry} className='w-full'>
-                    Try Again
-                  </Button>
-                </>
-              ) : this.state.isNavigationError ? (
-                <>
-                  <Button onClick={this.handleGoHome} className='w-full'>
-                    Go Home
-                  </Button>
-                  <Button variant='secondary' onClick={this.handleReload} className='w-full'>
-                    Refresh Page
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={this.handleRetry} className='w-full'>
-                    Try Again
-                  </Button>
-                  <Button variant='secondary' onClick={this.handleGoHome} className='w-full'>
-                    Go Home
-                  </Button>
-                </>
-              )}
+              <Button
+                onClick={() => {
+                  this.setState({
+                    hasError: false,
+                  });
+                }}
+                className='w-full'
+              >
+                Try Again
+              </Button>
+
+              <Button
+                variant='secondary'
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/';
+                  }
+                }}
+                className='w-full'
+              >
+                Go Home
+              </Button>
             </div>
           </Card>
         </div>

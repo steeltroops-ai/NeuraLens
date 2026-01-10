@@ -22,7 +22,11 @@ html {
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
     rgb(var(--background-start-rgb));
   min-height: 100vh;
   font-feature-settings:
@@ -61,26 +65,15 @@ body {
   color: var(--text-primary);
 }
 
-/* Focus Ring Reset - Only remove default outline when focus-visible is supported */
-*:focus:not(:focus-visible) {
+/* Focus Ring Reset */
+*:focus {
   outline: none;
 }
 
-/* Enhanced Focus-Visible Styles */
-*:focus-visible {
-  outline: 3px solid #007aff;
+/* Custom Focus Styles */
+.focus-visible {
+  outline: 2px solid var(--primary-500);
   outline-offset: 2px;
-  box-shadow: 0 0 0 6px rgba(0, 122, 255, 0.2);
-  border-radius: 4px;
-}
-
-/* Navigation-specific focus styles */
-nav a:focus-visible,
-nav button:focus-visible {
-  outline: 2px solid #007aff;
-  outline-offset: 1px;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
-  background-color: rgba(0, 122, 255, 0.05);
 }
 
 /* Print Styles */
@@ -205,7 +198,11 @@ nav button:focus-visible {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.1) 0%,
+    transparent 70%
+  );
   animation: nri-glow 3s ease-in-out infinite alternate;
 }
 
@@ -232,7 +229,12 @@ nav button:focus-visible {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
   transform: translateX(-100%);
   animation: progress-shimmer 2s infinite;
 }

@@ -1,63 +1,83 @@
 """
-Assessment service providing CRUD operations for assessments and results
+Simplified assessment service for core CRUD operations
 """
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 import uuid
-import logging
 
 from app.models.assessment import Assessment, AssessmentResult, NRIResult
-from app.services.database_service import DatabaseService
-from app.schemas.assessment import (
-    SpeechAnalysisResponse, RetinalAnalysisResponse, 
-    MotorAssessmentResponse, CognitiveAssessmentResponse,
-    NRIFusionResponse
-)
-
-logger = logging.getLogger(__name__)
 
 
 class AssessmentService:
-    """Service for managing assessments and results"""
-    
-    def __init__(self):
-        self.assessment_db = DatabaseService(Assessment)
-        self.result_db = DatabaseService(AssessmentResult)
-        self.nri_db = DatabaseService(NRIResult)
+    """Simplified service for managing assessments and results"""
     
     def create_assessment(
         self, 
         db: Session, 
         user_id: Optional[str] = None,
-        modalities: List[str] = None,
-        assessment_type: str = "full"
+        modalities: List[str] = None
     ) -> Assessment:
         """Create a new assessment session"""
-        try:
-            assessment_data = {
-                "session_id": str(uuid.uuid4()),
-                "user_id": user_id,
-                "modalities": modalities or ["speech", "retinal", "motor", "cognitive"],
-                "assessment_type": assessment_type,
-                "status": "in_progress",
-                "created_at": datetime.utcnow()
-            }
-            
-            assessment = self.assessment_db.create(db, obj_in=assessment_data)
-            logger.info(f"Created assessment session: {assessment.session_id}")
-            return assessment
-            
-        except SQLAlchemyError as e:
-            logger.error(f"Error creating assessment: {str(e)}")
-            raise
+        assessment = Assessment(
+            session_id=str(uuid.uuid4()),
+            user_id=user_id,
+            modalities=modalities or ["speech", "retinal", "motor", "cognitive"],
+            status="in_progress"
+        )
+        db.add(assessment)
+        db.commit()
+        db.refresh(assessment)
+        return assessment
     
     def get_assessment(self, db: Session, session_id: str) -> Optional[Assessment]:
         """Get assessment by session ID"""
-        try:
-            return db.query(Assessment).filter(
+        return db.query(Assessment).filter(Assessment.session_id == session_id).first()
+    
+    def save_result(
+        self, 
+        db: Session, 
+        assessment_id: int,
+        modality: str,
+        risk_score: float,
+        confidence: float,
+        biomarkers: Dict[str, Any]
+    ) -> AssessmentResult:
+        """Save assessment result"""
+        result = AssessmentResult(
+            assessment_id=assessment_id,
+            modality=modality,
+            risk_score=risk_score,
+            confidence=confidence,
+            biomarkers=biomarkers
+        )
+        db.add(result)
+        db.commit()
+        db.refresh(result)
+        return result
+    
+    def save_nri_result(
+        self,
+        db: Session,
+        assessment_id: int,
+        nri_score: float,
+        risk_category: str,
+        confidence: float,
+        modality_contributions: Dict[str, float]
+    ) -> NRIResult:
+        """Save NRI fusion result"""
+        nri_result = NRIResult(
+            assessment_id=assessment_id,
+            nri_score=nri_score,
+            risk_category=risk_category,
+            confidence=confidence,
+            modality_contributions=modality_contributions
+        )
+        db.add(nri_result)
+        db.commit()
+        db.refresh(nri_result)
+        return nri_result
                 Assessment.session_id == session_id
             ).first()
         except SQLAlchemyError as e:

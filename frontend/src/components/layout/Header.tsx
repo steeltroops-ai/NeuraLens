@@ -129,14 +129,13 @@ export const Header: React.FC = () => {
     <header
       className={cn(
         'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
-        // Enhanced glassmorphism with better blur and transparency
+        // Always render initial state on server, apply scroll styles after hydration
         mounted && isScrolled
-          ? 'border-b border-white/20 bg-white/80 shadow-lg backdrop-blur-2xl'
-          : 'bg-white/70 backdrop-blur-xl',
-        // Add subtle border for glassmorphism effect
-        'border-b border-white/10',
+          ? 'border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-xl'
+          : 'bg-white/90 backdrop-blur-md',
       )}
       onKeyDown={handleKeyDown}
+      suppressHydrationWarning
     >
       <nav
         className='container mx-auto px-4'
@@ -168,12 +167,9 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={isDisabled ? '#' : item.href}
                   className={cn(
-                    'text-sm font-medium transition-all duration-300 hover:no-underline',
-                    'rounded-lg px-3 py-2',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                    'hover:scale-105 hover:bg-white/30 hover:shadow-sm hover:backdrop-blur-sm',
-                    'active:scale-95 active:transition-transform active:duration-75',
-                    isActive && 'scale-105 bg-white/40 text-gray-900 shadow-sm',
+                    'text-sm font-medium transition-colors duration-200 hover:no-underline',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                    isActive && 'text-gray-900',
                     !isActive && !isDisabled && 'text-gray-600 hover:text-gray-900',
                     isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
                   )}
@@ -269,7 +265,7 @@ export const Header: React.FC = () => {
           )}
           aria-hidden={!isMobileMenuOpen}
         >
-          <div className='mx-2 mt-2 space-y-2 rounded-lg border-t border-white/20 bg-white/10 pb-2 pt-4 backdrop-blur-md'>
+          <div className='space-y-2 border-t border-gray-200 pb-2 pt-4'>
             {navigationItems.map(item => {
               const isActive = pathname === item.href;
               const isDisabled = item.disabled;
@@ -279,12 +275,12 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={isDisabled ? '#' : item.href}
                   className={cn(
-                    'flex items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-all duration-300',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                    'hover:scale-102 hover:bg-white/40 hover:shadow-sm hover:backdrop-blur-sm',
-                    'active:scale-98 active:transition-transform active:duration-75',
-                    isActive && 'scale-102 bg-white/50 text-blue-600 shadow-sm backdrop-blur-sm',
-                    !isActive && !isDisabled && 'text-gray-600 hover:text-gray-900',
+                    'flex items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-all duration-200',
+                    'focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white',
+                    isActive && 'border border-medical-500/20 bg-medical-500/10 text-medical-600',
+                    !isActive &&
+                      !isDisabled &&
+                      'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                     isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
                   )}
                   aria-current={isActive ? 'page' : undefined}

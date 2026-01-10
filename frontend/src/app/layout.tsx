@@ -1,12 +1,7 @@
 import { Inter } from 'next/font/google';
-import Link from 'next/link';
 
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-
-// Import error monitoring for global error handling
-import '@/lib/monitoring/errorMonitoring';
-import { GlobalLoadingState } from '@/components/GlobalLoadingState';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -109,7 +104,12 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang='en' className={inter.variable} data-scroll-behavior='smooth'>
+    <html
+      lang='en'
+      className={inter.variable}
+      data-scroll-behavior='smooth'
+      suppressHydrationWarning
+    >
       <head>
         {/* PWA Meta Tags */}
         <link rel='manifest' href='/manifest.json' />
@@ -180,28 +180,28 @@ export default function RootLayout({ children }: RootLayoutProps) {
           }}
         />
       </head>
-      <body className='bg-surface-background min-h-screen text-text-primary antialiased'>
+      <body
+        className='bg-surface-background min-h-screen text-text-primary antialiased'
+        suppressHydrationWarning
+      >
         {/* Skip Links for Accessibility */}
-        <Link
+        <a
           href='#main-content'
           className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
         >
           Skip to main content
-        </Link>
-        <Link
+        </a>
+        <a
           href='#main-navigation'
           className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
         >
           Skip to navigation
-        </Link>
+        </a>
 
         {/* Main Application */}
         <div id='root' className='relative'>
           {children}
         </div>
-
-        {/* Global Loading State */}
-        <GlobalLoadingState />
 
         {/* Live Regions for Screen Readers */}
         <div

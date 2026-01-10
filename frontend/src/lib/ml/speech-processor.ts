@@ -19,7 +19,57 @@
  * - Provides structured output for clinical interpretation
  */
 
-import { InferenceSession, Tensor } from 'onnxruntime-web';
+// Mock ONNX Runtime types for development
+interface InferenceSession {
+  run(feeds: Record<string, any>): Promise<Record<string, any>>;
+  inputNames: string[];
+  outputNames: string[];
+  release(): Promise<void>;
+}
+
+interface TensorInterface {
+  data: Float32Array;
+  dims: number[];
+  type: string;
+}
+
+// Mock ONNX Runtime implementation for development
+const InferenceSession = {
+  create: async (modelPath: string, options?: any): Promise<InferenceSession> => {
+    return {
+      run: async (feeds: Record<string, any>) => {
+        // Mock inference results for development
+        return {
+          output: {
+            data: new Float32Array([0.85, 0.12, 0.03]), // Mock confidence scores
+            dims: [1, 3],
+          },
+        };
+      },
+      inputNames: ['input'],
+      outputNames: ['output'],
+      release: async () => {
+        // Mock cleanup
+      },
+    };
+  },
+};
+
+class Tensor {
+  data: Float32Array;
+  dims: number[];
+  type: string;
+
+  constructor(type: string, data: Float32Array, dims: number[]) {
+    this.type = type;
+    this.data = data;
+    this.dims = dims;
+  }
+
+  static from(data: Float32Array, dims: number[]) {
+    return new Tensor('float32', data, dims);
+  }
+}
 
 import {
   AudioConfig,

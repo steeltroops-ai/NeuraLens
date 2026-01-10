@@ -1,78 +1,103 @@
-import { Activity, Shield, Clock, Zap } from 'lucide-react';
-import { Suspense } from 'react';
 import { Metadata } from 'next';
-
-import {
-  ErrorBoundary,
-  NetworkStatus,
-  AnatomicalLoadingSkeleton,
-} from '@/components/ErrorBoundary';
+import { Suspense } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Layout } from '@/components/layout';
 import { HomePageClient } from '@/components/pages/HomePageClient';
 
-// Static metadata for SSG
+// Static metadata for optimal SEO
 export const metadata: Metadata = {
-  title: 'NeuraLens - Early Detection, Better Outcomes',
+  title: 'NeuraLens - Advanced Neurological Assessment Platform',
   description:
-    'Transforming neurological health with AI-powered insights for millions. Advanced multi-modal assessment platform for early detection of neurological conditions.',
+    'Revolutionary AI-powered neurological assessment platform. Early detection through multi-modal analysis of speech, retinal imaging, motor function, and cognitive patterns.',
   keywords: [
     'neurological assessment',
-    'AI health',
+    'AI healthcare',
     'early detection',
-    'brain health',
+    'speech analysis',
+    'retinal imaging',
+    'motor function',
+    'cognitive assessment',
+    'Parkinson\'s detection',
+    'neurodegenerative diseases',
     'medical AI',
   ],
+  authors: [{ name: 'NeuraLens Team' }],
+  creator: 'NeuraLens',
+  publisher: 'NeuraLens',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://neuralens.ai'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'NeuraLens - Early Detection, Better Outcomes',
-    description: 'Transforming neurological health with AI-powered insights for millions.',
+    title: 'NeuraLens - Advanced Neurological Assessment Platform',
+    description:
+      'Revolutionary AI-powered neurological assessment platform for early detection and better outcomes.',
+    url: 'https://neuralens.ai',
+    siteName: 'NeuraLens',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'NeuraLens - Advanced Neurological Assessment Platform',
+      },
+    ],
+    locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NeuraLens - Advanced Neurological Assessment Platform',
+    description:
+      'Revolutionary AI-powered neurological assessment platform for early detection and better outcomes.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code',
   },
 };
 
-// Server component for static content
-export default function HomePage() {
+// Loading component for Suspense
+function HomePageLoading() {
   return (
-    <ErrorBoundary>
-      <NetworkStatus />
-      <Layout showHeader={true} showFooter={false} containerized={false}>
-        <div className='min-h-screen bg-white'>
-          {/* Static Hero Section - Server Rendered */}
-          <section className='relative overflow-hidden bg-white'>
-            {/* Subtle Neural Grid Background */}
-            <div className='absolute inset-0 opacity-[0.02]'>
-              <div
-                className='w-full h-full'
-                style={{
-                  backgroundImage:
-                    'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)',
-                  backgroundSize: '20px 20px',
-                }}
-              />
-            </div>
-
-            <div className='relative px-4 py-20 mx-auto max-w-7xl sm:px-6 lg:px-8 lg:py-32'>
-              <div className='text-center'>
-                <div className='mb-16 space-y-8'>
-                  <h1 className='text-5xl font-bold leading-tight text-slate-900 sm:text-6xl lg:text-7xl'>
-                    <span style={{ color: '#1D1D1F' }}>Neuralens</span>
-                  </h1>
-                  <p className='text-2xl font-medium text-slate-700 sm:text-3xl'>
-                    Early Detection, Better Outcomes.
-                  </p>
-                  <p className='max-w-4xl mx-auto text-lg leading-relaxed text-slate-600 sm:text-xl'>
-                    Transforming neurological health with AI-powered insights for millions.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Client-side Interactive Components */}
-          <Suspense fallback={<AnatomicalLoadingSkeleton />}>
-            <HomePageClient />
-          </Suspense>
-        </div>
-      </Layout>
-    </ErrorBoundary>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-slate-600 font-medium">Loading NeuraLens...</p>
+      </div>
+    </div>
   );
 }
+
+// Main page component - Server-side rendered
+export default function HomePage() {
+  return (
+    <Layout>
+      <ErrorBoundary>
+        <Suspense fallback={<HomePageLoading />}>
+          <HomePageClient />
+        </Suspense>
+      </ErrorBoundary>
+    </Layout>
+  );
+}
+
+// Enable static generation for optimal performance
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidate every hour

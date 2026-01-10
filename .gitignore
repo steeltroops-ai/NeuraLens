@@ -297,8 +297,25 @@ tramp
 docs/build/
 docs/dist/
 
+# Internal documentation (private/hackathon files)
+docs/hackathon/
+docs/reports/
+docs/internal/
+docs/private/
+docs/notes/
+docs/drafts/
+docs/JUDGE_EVALUATION_GUIDE.md
+docs/**/*.pdf
+docs/**/*.docx
+docs/**/*.pptx
+
 # Generated reports (local-only)
 docs/reports/
+reports/
+test-reports/
+coverage-reports/
+performance-reports/
+audit-reports/
 
 # Benchmark results
 benchmark/
@@ -320,16 +337,27 @@ benchmark/
 
 # Jest cache
 .jest/
+.jest-cache/
+
+# Test results and reports
+test-results/
+test-reports/
+junit.xml
+coverage.xml
+test-output/
+e2e-results/
 
 # Cypress
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+cypress/fixtures/downloads/
 
 # Playwright
 test-results/
 playwright-report/
 playwright/.cache/
+playwright-results/
 
 # MSW
 public/mockServiceWorker.js
@@ -434,3 +462,99 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Development and hackathon files
+*.draft
+*.scratch
+*.notes
+*.todo
+NOTES.md
+TODO.md
+SCRATCH.md
+DRAFT.md
+hackathon/
+demo/
+presentation/
+slides/
+pitch/
+
+# Backend private files
+backend/test_*.py
+backend/demo_data/
+backend/generate_demo_data.py
+backend/neurolens_x.db
+backend/__pycache__/
+backend/venv/
+backend/alembic/__pycache__/
+backend/app/__pycache__/
+backend/models/__pycache__/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/data/samples/
+backend/data/validation/
+
+# Frontend private files
+frontend/build-errors.log
+frontend/dist/
+frontend/tests/fixtures/
+frontend/scripts/private/
+frontend/scripts/internal/
+
+# Project root private files
+PROJECT_OVERVIEW.md
+WORKFLOW_DOCUMENTATION.md
+JUDGE_*.md
+EVALUATION_*.md
+HACKATHON_*.md
+
+# Backend private files
+backend/test_*.py
+backend/demo_data/
+backend/generate_demo_data.py
+backend/neurolens_x.db
+backend/__pycache__/
+backend/venv/
+backend/alembic/__pycache__/
+backend/app/__pycache__/
+backend/models/__pycache__/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/data/samples/
+backend/data/validation/
+
+# Personal development files
+.personal/
+personal/
+my-notes/
+dev-notes/
+experiments/
+sandbox/
+
+# Temporary markdown files
+temp.md
+tmp.md
+draft*.md
+notes*.md
+scratch*.md
+
+# Development artifacts
+.dev/
+dev/
+development/
+staging/
+prototype/
+
+# Backup and temporary files
+*.backup
+*.bak
+*.old
+*.orig
+*.rej
+*.swp
+*.tmp
+*.temp
+*~
+.#*
+#*#

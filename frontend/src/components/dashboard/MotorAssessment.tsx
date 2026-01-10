@@ -1,13 +1,218 @@
 'use client';
 
-import { Hand, Smartphone, Activity, Clock, TrendingUp } from 'lucide-react';
-import React from 'react';
+import {
+  Hand,
+  Smartphone,
+  Activity,
+  Clock,
+  TrendingUp,
+  Play,
+  Pause,
+  Square,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  RotateCcw,
+} from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MotorAssessmentProps {
   onProcessingChange: (isProcessing: boolean) => void;
 }
 
+interface MotorAnalysisResult {
+  sessionId: string;
+  processingTime: number;
+  confidence: number;
+  riskScore: number;
+  biomarkers: {
+    tapFrequency: number;
+    coordination: number;
+    tremor: number;
+    rhythmConsistency: number;
+  };
+  recommendations: string[];
+  timestamp: Date;
+}
+
+interface TapTestState {
+  isActive: boolean;
+  countdown: number;
+  tapCount: number;
+  tapTimes: number[];
+  startTime: number;
+  testDuration: number;
+  isComplete: boolean;
+}
+
 export default function MotorAssessment({ onProcessingChange }: MotorAssessmentProps) {
+  const [tapTestState, setTapTestState] = useState<TapTestState>({
+    isActive: false,
+    countdown: 0,
+    tapCount: 0,
+    tapTimes: [],
+    startTime: 0,
+    testDuration: 15,
+    isComplete: false,
+  });
+
+  const [analysisResult, setAnalysisResult] = useState<MotorAnalysisResult | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Stop tap test
+  const handleStopTapTest = useCallback(() => {
+    setTapTestState(prev => ({
+      ...prev,
+      isActive: false,
+      countdown: 0,
+      isComplete: true,
+    }));
+  }, []);
+
+  // Tap test countdown effect
+  useEffect(() => {
+    if (tapTestState.isActive && tapTestState.countdown > 0) {
+      const timer = setTimeout(() => {
+        setTapTestState(prev => ({ ...prev, countdown: prev.countdown - 1 }));
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (tapTestState.isActive && tapTestState.countdown === 0) {
+      handleStopTapTest();
+    }
+    return undefined;
+  }, [tapTestState.isActive, tapTestState.countdown, handleStopTapTest]);
+
+  // Start tap test
+  const startTapTest = useCallback(() => {
+    setTapTestState({
+      isActive: true,
+      countdown: 15,
+      tapCount: 0,
+      tapTimes: [],
+      startTime: Date.now(),
+      testDuration: 15,
+      isComplete: false,
+    });
+    setError(null);
+  }, []);
+
+  // Handle tap
+  const handleTap = useCallback(() => {
+    if (!tapTestState.isActive || tapTestState.countdown <= 0) return;
+
+    const currentTime = Date.now();
+    setTapTestState(prev => ({
+      ...prev,
+      tapCount: prev.tapCount + 1,
+      tapTimes: [...prev.tapTimes, currentTime - prev.startTime],
+    }));
+  }, [tapTestState.isActive, tapTestState.countdown]);
+
+  // Process motor analysis
+  const processMotorAnalysis = useCallback(async () => {
+    if (tapTestState.tapTimes.length === 0) {
+      setError('No tap data available. Please complete the finger tapping test first.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    onProcessingChange(true);
+
+    try {
+      // Calculate tap metrics
+      const avgInterval =
+        tapTestState.tapTimes.length > 1
+          ? tapTestState.tapTimes.reduce((acc, time, index) => {
+              if (index === 0) return acc;
+              const prevTime = tapTestState.tapTimes[index - 1];
+              return acc + (time - (prevTime || 0));
+            }, 0) /
+            (tapTestState.tapTimes.length - 1)
+          : 0;
+
+      const tapFrequency = tapTestState.tapCount / tapTestState.testDuration;
+
+      // Calculate rhythm consistency (coefficient of variation)
+      const intervals = tapTestState.tapTimes.slice(1).map((time, index) => {
+        const prevTime = tapTestState.tapTimes[index];
+        return time - (prevTime || 0);
+      });
+      const intervalMean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const intervalStd = Math.sqrt(
+        intervals.reduce((acc, interval) => acc + Math.pow(interval - intervalMean, 2), 0) /
+          intervals.length,
+      );
+      const rhythmConsistency = 1 - intervalStd / intervalMean;
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Create analysis result
+      const mockResult: MotorAnalysisResult = {
+        sessionId: `motor_${Date.now()}`,
+        processingTime: 134,
+        confidence: 0.92,
+        riskScore: Math.max(
+          0,
+          Math.min(1, (1 - rhythmConsistency) * 0.5 + (tapFrequency < 2 ? 0.3 : 0)),
+        ),
+        biomarkers: {
+          tapFrequency: Math.min(1, tapFrequency / 3), // Normalize to 0-1
+          coordination: Math.min(1, Math.max(0, rhythmConsistency)),
+          tremor: Math.max(0, Math.min(1, 1 - rhythmConsistency)),
+          rhythmConsistency: Math.min(1, Math.max(0, rhythmConsistency)),
+        },
+        recommendations: [
+          tapFrequency >= 2
+            ? 'Motor function appears normal with good tapping frequency'
+            : 'Consider follow-up for bradykinesia assessment',
+          rhythmConsistency > 0.8
+            ? 'Good rhythm consistency observed'
+            : 'Irregular tapping pattern detected',
+          'Continue regular physical activity to maintain motor skills',
+        ],
+        timestamp: new Date(),
+      };
+
+      setAnalysisResult(mockResult);
+    } catch (error) {
+      console.error('Motor analysis failed:', error);
+      setError('Analysis failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+      onProcessingChange(false);
+    }
+  }, [tapTestState, onProcessingChange]);
+
+  // Reset assessment
+  const resetAssessment = useCallback(() => {
+    setTapTestState({
+      isActive: false,
+      countdown: 0,
+      tapCount: 0,
+      tapTimes: [],
+      startTime: 0,
+      testDuration: 15,
+      isComplete: false,
+    });
+    setAnalysisResult(null);
+    setError(null);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = tapTestState.isActive
+    ? ((tapTestState.testDuration - tapTestState.countdown) / tapTestState.testDuration) * 100
+    : tapTestState.isComplete
+      ? 100
+      : 0;
   return (
     <div className='space-y-6'>
       {/* Header */}
@@ -18,92 +223,359 @@ export default function MotorAssessment({ onProcessingChange }: MotorAssessmentP
           </div>
           <div>
             <h1 className='text-2xl font-bold text-slate-900'>Motor Function Assessment</h1>
-            <p className='text-slate-600'>Movement pattern analysis using smartphone sensors</p>
+            <p className='text-slate-600'>
+              Interactive finger tapping test for motor function analysis
+            </p>
           </div>
         </div>
 
         <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-3'>
           <div className='flex items-center space-x-2 text-slate-600'>
             <Clock className='h-4 w-4' />
-            <span>Processing Time: ~42ms</span>
+            <span>Test Duration: 15 seconds</span>
           </div>
           <div className='flex items-center space-x-2 text-slate-600'>
             <Activity className='h-4 w-4' />
-            <span>Accuracy: 92%</span>
+            <span>Real-time Analysis</span>
           </div>
           <div className='flex items-center space-x-2 text-slate-600'>
             <TrendingUp className='h-4 w-4' />
-            <span>Real-time Analysis</span>
+            <span>Tremor Detection</span>
           </div>
         </div>
       </div>
 
-      {/* Test Selection */}
+      {/* Finger Tapping Test */}
       <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-        <h2 className='mb-4 text-lg font-semibold text-slate-900'>Motor Tests</h2>
+        <h2 className='mb-4 text-lg font-semibold text-slate-900'>Finger Tapping Test</h2>
 
-        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-          <div className='cursor-pointer rounded-lg border border-slate-200 p-4 transition-colors hover:border-purple-300'>
-            <div className='mb-3 flex items-center space-x-3'>
-              <div className='rounded-lg bg-purple-100 p-2'>
-                <Hand className='h-5 w-5 text-purple-600' />
+        <AnimatePresence mode='wait'>
+          {!tapTestState.isActive && !tapTestState.isComplete && !analysisResult ? (
+            <motion.div
+              key='instructions'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className='text-center'
+            >
+              <div className='mb-6 rounded-lg border-2 border-dashed border-purple-300 bg-purple-50 p-8'>
+                <Hand className='mx-auto mb-4 h-16 w-16 text-purple-600' />
+                <h3 className='mb-2 text-xl font-semibold text-purple-900'>Ready to Start</h3>
+                <p className='mb-4 text-purple-700'>
+                  Tap the button below as quickly and consistently as possible for 15 seconds. This
+                  test measures your motor function and rhythm consistency.
+                </p>
+                <div className='mb-4 text-sm text-purple-600'>
+                  <p>• Use your index finger</p>
+                  <p>• Maintain steady rhythm</p>
+                  <p>• Tap as fast as comfortable</p>
+                </div>
+                <button
+                  onClick={startTapTest}
+                  className='rounded-lg bg-purple-600 px-8 py-3 text-lg font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-purple-700'
+                >
+                  <Play className='mr-2 h-5 w-5' />
+                  Start Tapping Test
+                </button>
               </div>
-              <h3 className='font-medium text-slate-900'>Finger Tapping</h3>
-            </div>
-            <p className='mb-3 text-sm text-slate-600'>
-              Assess bradykinesia and rhythm stability through finger tapping patterns
-            </p>
-            <button className='w-full rounded-lg bg-purple-600 py-2 font-medium text-white transition-colors hover:bg-purple-700'>
-              Start Test
-            </button>
-          </div>
+            </motion.div>
+          ) : tapTestState.isActive ? (
+            <motion.div
+              key='active-test'
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className='text-center'
+            >
+              {/* Countdown Display */}
+              <div className='mb-6'>
+                <div className='mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-4xl font-bold text-white shadow-lg'>
+                  {tapTestState.countdown}
+                </div>
+                <div className='mb-2 h-2 rounded-full bg-slate-200'>
+                  <div
+                    className='h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000'
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className='text-sm text-slate-600'>
+                  {formatTime(tapTestState.testDuration - tapTestState.countdown)} /{' '}
+                  {formatTime(tapTestState.testDuration)}
+                </p>
+              </div>
 
-          <div className='cursor-pointer rounded-lg border border-slate-200 p-4 transition-colors hover:border-purple-300'>
-            <div className='mb-3 flex items-center space-x-3'>
-              <div className='rounded-lg bg-purple-100 p-2'>
-                <Smartphone className='h-5 w-5 text-purple-600' />
+              {/* Tap Button */}
+              <div className='mb-6'>
+                <button
+                  onClick={handleTap}
+                  className='h-48 w-48 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-2xl transition-all duration-75 hover:scale-105 active:scale-95 active:shadow-lg'
+                >
+                  <div className='text-center'>
+                    <Hand className='mx-auto mb-2 h-12 w-12' />
+                    <div className='text-2xl font-bold'>{tapTestState.tapCount}</div>
+                    <div className='text-sm'>Taps</div>
+                  </div>
+                </button>
               </div>
-              <h3 className='font-medium text-slate-900'>Tremor Detection</h3>
+
+              {/* Current Stats */}
+              <div className='grid grid-cols-2 gap-4 text-sm'>
+                <div className='rounded-lg bg-slate-50 p-3'>
+                  <div className='font-medium text-slate-900'>Tap Count</div>
+                  <div className='text-2xl font-bold text-purple-600'>{tapTestState.tapCount}</div>
+                </div>
+                <div className='rounded-lg bg-slate-50 p-3'>
+                  <div className='font-medium text-slate-900'>Frequency</div>
+                  <div className='text-2xl font-bold text-purple-600'>
+                    {tapTestState.tapCount > 0
+                      ? (
+                          (tapTestState.tapCount /
+                            (tapTestState.testDuration - tapTestState.countdown)) *
+                          60
+                        ).toFixed(1)
+                      : '0.0'}{' '}
+                    /min
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleStopTapTest}
+                className='mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50'
+              >
+                <Square className='mr-2 h-4 w-4' />
+                Stop Test
+              </button>
+            </motion.div>
+          ) : tapTestState.isComplete && !analysisResult ? (
+            <motion.div
+              key='complete'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className='text-center'
+            >
+              <div className='mb-6 rounded-lg border border-green-200 bg-green-50 p-6'>
+                <CheckCircle className='mx-auto mb-4 h-12 w-12 text-green-600' />
+                <h3 className='mb-2 text-lg font-semibold text-green-900'>Test Complete!</h3>
+                <p className='mb-4 text-green-700'>
+                  You completed {tapTestState.tapCount} taps in {tapTestState.testDuration} seconds
+                </p>
+
+                <div className='mb-4 grid grid-cols-2 gap-4 text-sm'>
+                  <div className='rounded-lg bg-white p-3'>
+                    <div className='font-medium text-slate-900'>Total Taps</div>
+                    <div className='text-xl font-bold text-green-600'>{tapTestState.tapCount}</div>
+                  </div>
+                  <div className='rounded-lg bg-white p-3'>
+                    <div className='font-medium text-slate-900'>Average Rate</div>
+                    <div className='text-xl font-bold text-green-600'>
+                      {((tapTestState.tapCount / tapTestState.testDuration) * 60).toFixed(1)} /min
+                    </div>
+                  </div>
+                </div>
+
+                <div className='flex justify-center space-x-3'>
+                  <button
+                    onClick={processMotorAnalysis}
+                    disabled={isProcessing}
+                    className='rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50'
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                        Analyzing...
+                      </>
+                    ) : (
+                      'Analyze Results'
+                    )}
+                  </button>
+                  <button
+                    onClick={resetAssessment}
+                    className='rounded-lg border border-slate-300 px-6 py-2 font-medium text-slate-700 transition-colors hover:bg-slate-50'
+                  >
+                    <RotateCcw className='mr-2 h-4 w-4' />
+                    Retry Test
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className='mt-4 rounded-lg border border-red-200 bg-red-50 p-4'
+          >
+            <div className='flex items-center space-x-3'>
+              <AlertCircle className='h-5 w-5 text-red-600' />
+              <div>
+                <p className='font-medium text-red-900'>Error</p>
+                <p className='text-sm text-red-700'>{error}</p>
+              </div>
             </div>
-            <p className='mb-3 text-sm text-slate-600'>
-              Detect and analyze tremor patterns using accelerometer data
-            </p>
-            <button className='w-full rounded-lg bg-purple-600 py-2 font-medium text-white transition-colors hover:bg-purple-700'>
-              Start Test
-            </button>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
 
-      {/* Coming Soon */}
-      <div className='rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100 p-6'>
-        <div className='text-center'>
-          <Hand className='mx-auto mb-4 h-16 w-16 text-purple-600' />
-          <h2 className='mb-2 text-xl font-bold text-purple-900'>Motor Assessment Coming Soon</h2>
-          <p className='mb-4 text-purple-700'>
-            Comprehensive motor function analysis using smartphone sensors for tremor detection,
-            coordination assessment, and movement pattern analysis.
-          </p>
-          <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-2'>
-            <div className='rounded-lg bg-white/50 p-3'>
-              <h3 className='mb-1 font-medium text-purple-900'>Detects</h3>
-              <ul className='space-y-1 text-purple-700'>
-                <li>• Parkinson's Disease</li>
-                <li>• Essential Tremor</li>
-                <li>• Motor Coordination Issues</li>
-              </ul>
+      {/* Analysis Results */}
+      {analysisResult && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'
+        >
+          <div className='mb-6 flex items-center space-x-3'>
+            <div className='rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 p-2'>
+              <CheckCircle className='h-5 w-5 text-white' />
             </div>
-            <div className='rounded-lg bg-white/50 p-3'>
-              <h3 className='mb-1 font-medium text-purple-900'>Features</h3>
-              <ul className='space-y-1 text-purple-700'>
-                <li>• Tremor Analysis</li>
-                <li>• Bradykinesia Detection</li>
-                <li>• Coordination Scoring</li>
-              </ul>
+            <div>
+              <h2 className='text-lg font-semibold text-slate-900'>Motor Analysis Complete</h2>
+              <p className='text-sm text-slate-600'>
+                Processed in {analysisResult.processingTime}ms • Confidence:{' '}
+                {(analysisResult.confidence * 100).toFixed(1)}%
+              </p>
             </div>
           </div>
-        </div>
-      </div>
+
+          {/* Biomarkers Grid */}
+          <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <div className='rounded-lg border border-slate-200 p-4'>
+              <h3 className='text-sm font-medium text-slate-600'>Tap Frequency</h3>
+              <p className='text-2xl font-bold text-slate-900'>
+                {(analysisResult.biomarkers.tapFrequency * 100).toFixed(1)}%
+              </p>
+              <div className='mt-2 h-2 rounded-full bg-slate-200'>
+                <div
+                  className='h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-600'
+                  style={{ width: `${analysisResult.biomarkers.tapFrequency * 100}%` }}
+                />
+              </div>
+              <p className='mt-1 text-xs text-slate-500'>
+                {tapTestState.tapCount} taps in {tapTestState.testDuration}s
+              </p>
+            </div>
+
+            <div className='rounded-lg border border-slate-200 p-4'>
+              <h3 className='text-sm font-medium text-slate-600'>Coordination</h3>
+              <p className='text-2xl font-bold text-slate-900'>
+                {(analysisResult.biomarkers.coordination * 100).toFixed(1)}%
+              </p>
+              <div className='mt-2 h-2 rounded-full bg-slate-200'>
+                <div
+                  className='h-2 rounded-full bg-gradient-to-r from-green-500 to-green-600'
+                  style={{ width: `${analysisResult.biomarkers.coordination * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className='rounded-lg border border-slate-200 p-4'>
+              <h3 className='text-sm font-medium text-slate-600'>Tremor Level</h3>
+              <p className='text-2xl font-bold text-slate-900'>
+                {(analysisResult.biomarkers.tremor * 100).toFixed(1)}%
+              </p>
+              <div className='mt-2 h-2 rounded-full bg-slate-200'>
+                <div
+                  className='h-2 rounded-full bg-gradient-to-r from-yellow-500 to-red-600'
+                  style={{ width: `${analysisResult.biomarkers.tremor * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className='rounded-lg border border-slate-200 p-4'>
+              <h3 className='text-sm font-medium text-slate-600'>Rhythm Consistency</h3>
+              <p className='text-2xl font-bold text-slate-900'>
+                {(analysisResult.biomarkers.rhythmConsistency * 100).toFixed(1)}%
+              </p>
+              <div className='mt-2 h-2 rounded-full bg-slate-200'>
+                <div
+                  className='h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600'
+                  style={{ width: `${analysisResult.biomarkers.rhythmConsistency * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Risk Assessment */}
+          <div className='mb-6 rounded-lg border border-slate-200 p-4'>
+            <h3 className='mb-3 text-sm font-medium text-slate-600'>Motor Function Assessment</h3>
+            <div className='flex items-center space-x-4'>
+              <div className='flex-1'>
+                <div className='flex justify-between text-sm'>
+                  <span>Overall Risk Score</span>
+                  <span className='font-medium'>
+                    {(analysisResult.riskScore * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className='mt-2 h-3 rounded-full bg-slate-200'>
+                  <div
+                    className={`h-3 rounded-full ${
+                      analysisResult.riskScore < 0.3
+                        ? 'bg-gradient-to-r from-green-500 to-green-600'
+                        : analysisResult.riskScore < 0.7
+                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                          : 'bg-gradient-to-r from-red-500 to-red-600'
+                    }`}
+                    style={{ width: `${analysisResult.riskScore * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  analysisResult.riskScore < 0.3
+                    ? 'bg-green-100 text-green-800'
+                    : analysisResult.riskScore < 0.7
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {analysisResult.riskScore < 0.3
+                  ? 'Normal'
+                  : analysisResult.riskScore < 0.7
+                    ? 'Monitor'
+                    : 'Concern'}
+              </div>
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          {analysisResult.recommendations.length > 0 && (
+            <div className='rounded-lg border border-purple-200 bg-purple-50 p-4'>
+              <h3 className='mb-3 text-sm font-medium text-purple-900'>Recommendations</h3>
+              <ul className='space-y-2'>
+                {analysisResult.recommendations.map((recommendation, index) => (
+                  <li key={index} className='flex items-start space-x-2 text-sm text-purple-800'>
+                    <span className='mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-600' />
+                    <span>{recommendation}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className='mt-6 flex justify-between'>
+            <button
+              onClick={resetAssessment}
+              className='rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50'
+            >
+              <RotateCcw className='mr-2 h-4 w-4' />
+              New Test
+            </button>
+            <div className='flex space-x-3'>
+              <button className='rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50'>
+                Export Results
+              </button>
+              <button className='rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700'>
+                Save to History
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

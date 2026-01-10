@@ -23,7 +23,7 @@ export function ReadmePageClient() {
   return (
     <>
       {/* Architecture Overview */}
-      <section className='py-20 bg-white'>
+      <section className='bg-white py-20'>
         <div className='container mx-auto px-6'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -35,7 +35,7 @@ export function ReadmePageClient() {
             <h2 className='mb-12 text-4xl font-bold' style={{ color: '#1D1D1F' }}>
               System Architecture
             </h2>
-            
+
             <div className='mb-16 grid grid-cols-1 gap-8 md:grid-cols-3'>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -129,10 +129,26 @@ export function ReadmePageClient() {
 
             <div className='grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4'>
               {[
-                { icon: Code, title: 'Frontend', items: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS'] },
-                { icon: Database, title: 'Backend', items: ['FastAPI', 'PostgreSQL', 'Supabase', 'Python 3.11'] },
-                { icon: Brain, title: 'AI/ML', items: ['TensorFlow.js', 'ONNX Runtime', 'Whisper', 'MediaPipe'] },
-                { icon: Cloud, title: 'Infrastructure', items: ['Vercel', 'Supabase', 'CDN', 'Edge Computing'] },
+                {
+                  icon: Code,
+                  title: 'Frontend',
+                  items: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS'],
+                },
+                {
+                  icon: Database,
+                  title: 'Backend',
+                  items: ['FastAPI', 'PostgreSQL', 'Supabase', 'Python 3.11'],
+                },
+                {
+                  icon: Brain,
+                  title: 'AI/ML',
+                  items: ['TensorFlow.js', 'ONNX Runtime', 'Whisper', 'MediaPipe'],
+                },
+                {
+                  icon: Cloud,
+                  title: 'Infrastructure',
+                  items: ['Vercel', 'Supabase', 'CDN', 'Edge Computing'],
+                },
               ].map((category, index) => (
                 <motion.div
                   key={category.title}
@@ -147,8 +163,12 @@ export function ReadmePageClient() {
                     {category.title}
                   </h3>
                   <ul className='space-y-2'>
-                    {category.items.map((item) => (
-                      <li key={item} className='flex items-center text-sm' style={{ color: '#86868B' }}>
+                    {category.items.map(item => (
+                      <li
+                        key={item}
+                        className='flex items-center text-sm'
+                        style={{ color: '#86868B' }}
+                      >
                         <CheckCircle className='mr-2 h-4 w-4' style={{ color: '#34C759' }} />
                         {item}
                       </li>
@@ -162,7 +182,7 @@ export function ReadmePageClient() {
       </section>
 
       {/* Assessment Modalities */}
-      <section className='py-20 bg-white'>
+      <section className='bg-white py-20'>
         <div className='container mx-auto px-6'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -180,26 +200,50 @@ export function ReadmePageClient() {
                 {
                   icon: Mic,
                   title: 'Speech Pattern Analysis',
-                  description: 'Advanced AI detects subtle voice changes with 95.2% accuracy for Parkinson\'s detection, 18 months earlier than traditional clinical methods.',
-                  features: ['Real-time Processing', 'MFCC Analysis', 'Prosody Detection', 'Fluency Metrics'],
+                  description:
+                    "Advanced AI detects subtle voice changes with 95.2% accuracy for Parkinson's detection, 18 months earlier than traditional clinical methods.",
+                  features: [
+                    'Real-time Processing',
+                    'MFCC Analysis',
+                    'Prosody Detection',
+                    'Fluency Metrics',
+                  ],
                 },
                 {
                   icon: Eye,
                   title: 'Retinal Imaging Analysis',
-                  description: 'Non-invasive retinal analysis using advanced computer vision to detect early signs of neurological conditions through vascular patterns.',
-                  features: ['Vessel Analysis', 'Cup-Disc Ratio', 'Hemorrhage Detection', 'Risk Assessment'],
+                  description:
+                    'Non-invasive retinal analysis using advanced computer vision to detect early signs of neurological conditions through vascular patterns.',
+                  features: [
+                    'Vessel Analysis',
+                    'Cup-Disc Ratio',
+                    'Hemorrhage Detection',
+                    'Risk Assessment',
+                  ],
                 },
                 {
                   icon: Activity,
                   title: 'Motor Function Assessment',
-                  description: 'Precise movement analysis using computer vision and sensor data to detect motor impairments and tremor patterns.',
-                  features: ['Tremor Detection', 'Coordination Tests', 'Finger Tapping', 'Balance Analysis'],
+                  description:
+                    'Precise movement analysis using computer vision and sensor data to detect motor impairments and tremor patterns.',
+                  features: [
+                    'Tremor Detection',
+                    'Coordination Tests',
+                    'Finger Tapping',
+                    'Balance Analysis',
+                  ],
                 },
                 {
                   icon: Brain,
                   title: 'Cognitive Evaluation',
-                  description: 'Comprehensive cognitive testing through interactive games and assessments to evaluate memory, attention, and executive function.',
-                  features: ['Memory Tests', 'Attention Span', 'Reaction Time', 'Executive Function'],
+                  description:
+                    'Comprehensive cognitive testing through interactive games and assessments to evaluate memory, attention, and executive function.',
+                  features: [
+                    'Memory Tests',
+                    'Attention Span',
+                    'Reaction Time',
+                    'Executive Function',
+                  ],
                 },
               ].map((modality, index) => (
                 <motion.div
@@ -221,7 +265,7 @@ export function ReadmePageClient() {
                       {modality.description}
                     </p>
                     <div className='flex flex-wrap gap-2'>
-                      {modality.features.map((feature) => (
+                      {modality.features.map(feature => (
                         <span
                           key={feature}
                           className='rounded-full px-3 py-1 text-xs font-medium'
