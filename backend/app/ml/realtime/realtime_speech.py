@@ -16,7 +16,12 @@ from scipy.signal import find_peaks
 from sklearn.preprocessing import StandardScaler
 import io
 import torch
-import torchaudio
+try:
+    import torchaudio
+    TORCHAUDIO_AVAILABLE = True
+except ImportError:
+    TORCHAUDIO_AVAILABLE = False
+    torchaudio = None
 try:
     import webrtcvad
     WEBRTC_VAD_AVAILABLE = True
@@ -48,14 +53,15 @@ class RealtimeSpeechAnalyzer:
         self.whisper_processor = None
         self.whisper_model = None
         self.vad = webrtcvad.Vad(2) if WEBRTC_VAD_AVAILABLE else None  # Aggressiveness level 2 (0-3)
+        self._models_loaded = False
 
-        # Load models asynchronously
-        asyncio.create_task(self._load_speech_models())
-
-        logger.info("RealtimeSpeechAnalyzer initializing with Whisper-tiny model...")
+        logger.info("RealtimeSpeechAnalyzer initialized. Models will be loaded on first use.")
     
     async def _load_speech_models(self):
         """Load Whisper-tiny model and speech analysis parameters"""
+        if self._models_loaded:
+            return
+            
         try:
             logger.info("Loading Whisper-tiny model...")
 
@@ -85,6 +91,8 @@ class RealtimeSpeechAnalyzer:
                 'jitter': 0.02,              # Fundamental frequency variation
                 'shimmer': 0.05,             # Amplitude variation
             }
+            
+            self._models_loaded = True
 
             self.model_loaded = True
             logger.info("Speech analysis models loaded successfully")
@@ -129,6 +137,10 @@ class RealtimeSpeechAnalyzer:
             SpeechAnalysisResponse with biomarkers and risk assessment
         """
         start_time = time.perf_counter()
+        
+        # Ensure models are loaded
+        if not self._models_loaded:
+            await self._load_speech_models()
 
         if not self.model_loaded:
             raise Exception("Speech analysis models not loaded. Please wait for initialization.")

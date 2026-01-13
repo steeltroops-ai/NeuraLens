@@ -13,9 +13,20 @@ numpy>=2.3.2
 pillow>=11.0.0
 scikit-learn>=1.6.0
 
+# Deep Learning (for retinal analysis with EfficientNet)
+torch>=2.0.0
+torchvision>=0.15.0
+timm>=0.9.0
+
 # Audio Processing (for speech analysis)
 librosa>=0.10.5
 soundfile>=0.12.1
 
 # Computer Vision (for retinal analysis)
 opencv-python>=4.8.1.78
+scikit-image>=0.21.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+hypothesis>=6.100.0

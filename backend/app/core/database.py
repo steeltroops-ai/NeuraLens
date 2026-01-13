@@ -16,7 +16,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Determine database type and create appropriate engine
-database_url = settings.effective_database_url
+database_url = settings.DATABASE_URL
 is_postgresql = database_url.startswith("postgresql://")
 
 if is_postgresql:

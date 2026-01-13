@@ -3,7 +3,7 @@ Simplified configuration settings for NeuroLens-X Backend
 """
 
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 import os
 
 
@@ -27,21 +27,10 @@ class Settings(BaseSettings):
     
     # Database Configuration
     DATABASE_URL: str = "sqlite:///./neurolens.db"
+    DATABASE_ECHO: bool = False
     
-    class Config:
-        env_file = ".env"
-
-
-settings = Settings()
-                f"postgresql://{self.SUPABASE_DB_USER}:{self.SUPABASE_DB_PASSWORD}"
-                f"@{self.SUPABASE_DB_HOST}:{self.SUPABASE_DB_PORT}/{self.SUPABASE_DB_NAME}"
-            )
-        return self.DATABASE_URL
-
-    @property
-    def is_using_supabase(self) -> bool:
-        """Check if we're using Supabase PostgreSQL"""
-        return bool(self.SUPABASE_DB_HOST and self.SUPABASE_DB_PASSWORD)
+    # Security
+    SECRET_KEY: str = "neurolens-x-hackathon-secret-key-change-in-production"
     
     # ML Model Configuration
     MODEL_PATH: str = "./models"

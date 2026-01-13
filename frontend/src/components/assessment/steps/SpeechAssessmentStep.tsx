@@ -1,8 +1,29 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import { Button } from '@/components/ui';
+import { AudioVisualizer } from '@/components/assessment/AudioVisualizer';
+import {
+  RecordingErrorHandler,
+  RecordingError,
+} from '@/lib/recording/error-handler';
+import {
+  BUTTON_ARIA_LABELS,
+  STATE_ARIA_DESCRIPTIONS,
+  getStateAnnouncement,
+  getAudioLevelAriaLabel,
+  getRecordingTimeAriaLabel,
+  handleRecordingKeyboard,
+  FOCUS_STYLES,
+  getKeyboardShortcutsHelp,
+} from '@/lib/recording/accessibility';
+import {
+  RecordingState,
+  RecordingStateManager,
+  createRecordingStateManager,
+  RecordingManagerState,
+} from '@/lib/recording/state-manager';
 
 interface SpeechAssessmentStepProps {
   onComplete: (audioFile: File) => void;
@@ -10,50 +31,131 @@ interface SpeechAssessmentStepProps {
   onSkip: () => void;
 }
 
-interface RecordingState {
-  isRecording: boolean;
-  hasRecording: boolean;
-  isPaused: boolean;
-  recordingTime: number;
-  audioLevel: number;
-  error: string | null;
-  isInitializing: boolean;
-}
-
+/**
+ * SpeechAssessmentStep Component
+ * 
+ * Implements voice recording for neurological assessment with:
+ * - State machine-based recording management (Requirements 5.3)
+ * - Real-time audio visualization (Requirements 6.1, 6.2, 6.3)
+ * - Categorized error handling (Requirements 7.1, 7.2, 7.3, 7.4)
+ * - Full accessibility support (Requirements 8.1, 8.2, 8.3, 8.4, 8.5)
+ */
 export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
   onComplete,
   onBack,
   onSkip,
 }) => {
-  const [recordingState, setRecordingState] = useState<RecordingState>({
-    isRecording: false,
-    hasRecording: false,
-    isPaused: false,
-    recordingTime: 0,
-    audioLevel: 0,
-    error: null,
-    isInitializing: false,
-  });
+  // Create state manager instance
+  const stateManagerRef = useRef<RecordingStateManager>(createRecordingStateManager());
 
+  // State from the state manager
+  const [managerState, setManagerState] = useState<RecordingManagerState>(
+    stateManagerRef.current.fullState
+  );
+
+  // State for screen reader announcements
+  const [announcement, setAnnouncement] = useState<string>('');
+  const previousStateRef = useRef<RecordingState>('idle');
+
+  // Audio resources refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const recordedBlobRef = useRef<Blob | null>(null);
+  const recordButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Low audio warning state
+  const [showLowAudioWarning, setShowLowAudioWarning] = useState(false);
 
   // Constants
   const MAX_RECORDING_TIME = 120; // 2 minutes
   const MIN_RECORDING_TIME = 5; // 5 seconds
   const TARGET_SAMPLE_RATE = 16000;
 
-  // Initialize audio recording
-  const initializeRecording = useCallback(async () => {
-    try {
-      setRecordingState(prev => ({ ...prev, isInitializing: true, error: null }));
+  // ARIA IDs
+  const AUDIO_LEVEL_ID = 'audio-level-description';
+  const RECORDING_STATUS_ID = 'recording-status';
+  const ERROR_MESSAGE_ID = 'error-message';
+  const LIVE_REGION_ID = 'recording-announcements';
 
+  // Subscribe to state manager changes
+  useEffect(() => {
+    const unsubscribe = stateManagerRef.current.subscribe((newState) => {
+      setManagerState(newState);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Get current state for convenience
+  const currentState = managerState.state;
+  const recordingTime = managerState.recordingTime;
+  const audioLevel = managerState.audioLevel;
+  const error = managerState.error as RecordingError | null;
+
+  // Derived state flags
+  const isRecording = currentState === 'recording';
+  const isInitializing = currentState === 'initializing';
+  const hasRecording = currentState === 'completed';
+  const hasError = currentState === 'error';
+  const isIdle = currentState === 'idle';
+
+  // Announce state changes to screen readers
+  useEffect(() => {
+    if (previousStateRef.current !== currentState) {
+      const announcementText = getStateAnnouncement(currentState, {
+        recordingTime: recordingTime,
+        errorMessage: error?.message,
+      });
+      setAnnouncement(announcementText);
+      previousStateRef.current = currentState;
+    }
+  }, [currentState, recordingTime, error?.message]);
+
+  /**
+   * Cleanup all audio resources
+   */
+  const cleanupResources = useCallback(() => {
+    // Stop all media tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    // Close audio context
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    // Clear timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Clear analyser reference
+    analyserRef.current = null;
+
+    // Clear media recorder
+    mediaRecorderRef.current = null;
+  }, []);
+
+  /**
+   * Initialize audio recording
+   */
+  const initializeRecording = useCallback(async () => {
+    const manager = stateManagerRef.current;
+
+    // Transition to initializing state
+    if (!manager.dispatch('START_INIT')) {
+      console.warn('Cannot start initialization from current state');
+      return;
+    }
+
+    try {
       // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -95,96 +197,47 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         recordedBlobRef.current = blob;
-        setRecordingState(prev => ({ ...prev, hasRecording: true }));
+        manager.setAudioBlob(blob);
       };
 
-      setRecordingState(prev => ({ ...prev, isInitializing: false }));
-    } catch (error) {
-      console.error('Failed to initialize recording:', error);
-      let errorMessage = 'Failed to access microphone. ';
-
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          errorMessage += 'Please allow microphone access and try again.';
-        } else if (error.name === 'NotFoundError') {
-          errorMessage += 'No microphone found. Please connect a microphone.';
-        } else {
-          errorMessage += error.message;
-        }
-      }
-
-      setRecordingState(prev => ({
-        ...prev,
-        error: errorMessage,
-        isInitializing: false,
-      }));
-    }
-  }, []);
-
-  // Monitor audio levels
-  const monitorAudioLevel = useCallback(() => {
-    if (!analyserRef.current) return;
-
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
-
-    const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-    const normalizedLevel = Math.min(average / 128, 1);
-
-    setRecordingState(prev => ({ ...prev, audioLevel: normalizedLevel }));
-
-    if (recordingState.isRecording) {
-      animationFrameRef.current = requestAnimationFrame(monitorAudioLevel);
-    }
-  }, [recordingState.isRecording]);
-
-  // Start recording
-  const handleStartRecording = useCallback(async () => {
-    try {
-      if (!mediaRecorderRef.current) {
-        await initializeRecording();
-        return;
-      }
-
+      // Start recording immediately after successful initialization
       audioChunksRef.current = [];
       recordedBlobRef.current = null;
-
-      setRecordingState(prev => ({
-        ...prev,
-        isRecording: true,
-        hasRecording: false,
-        recordingTime: 0,
-        error: null,
-      }));
-
       mediaRecorderRef.current.start(100); // Collect data every 100ms
 
-      // Start audio level monitoring
-      monitorAudioLevel();
+      // Transition to recording state
+      manager.dispatch('INIT_SUCCESS');
 
       // Start timer
       timerRef.current = setInterval(() => {
-        setRecordingState(prev => {
-          const newTime = prev.recordingTime + 1;
-          if (newTime >= MAX_RECORDING_TIME) {
-            handleStopRecording();
-            return prev;
-          }
-          return { ...prev, recordingTime: newTime };
-        });
+        const currentTime = stateManagerRef.current.recordingTime + 1;
+        if (currentTime >= MAX_RECORDING_TIME) {
+          handleStopRecording();
+        } else {
+          stateManagerRef.current.updateRecordingTime(currentTime);
+        }
       }, 1000);
-    } catch (error) {
-      console.error('Failed to start recording:', error);
-      setRecordingState(prev => ({
-        ...prev,
-        error: 'Failed to start recording. Please try again.',
-      }));
-    }
-  }, [initializeRecording, monitorAudioLevel]);
 
-  // Stop recording
+    } catch (err) {
+      console.error('Failed to initialize recording:', err);
+
+      // Use RecordingErrorHandler to categorize the error
+      const categorizedError = RecordingErrorHandler.categorizeError(
+        err instanceof Error ? err : new Error(String(err))
+      );
+
+      manager.setError(categorizedError);
+      cleanupResources();
+    }
+  }, [cleanupResources]);
+
+  /**
+   * Stop recording
+   */
   const handleStopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && recordingState.isRecording) {
+    const manager = stateManagerRef.current;
+
+    if (mediaRecorderRef.current && manager.state === 'recording') {
       mediaRecorderRef.current.stop();
 
       if (timerRef.current) {
@@ -192,34 +245,55 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
         timerRef.current = null;
       }
 
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-
-      setRecordingState(prev => ({
-        ...prev,
-        isRecording: false,
-        audioLevel: 0,
-      }));
+      // Transition to completed state
+      manager.dispatch('STOP');
     }
-  }, [recordingState.isRecording]);
+  }, []);
 
-  // Convert blob to File and complete
+  /**
+   * Handle audio level updates from AudioVisualizer
+   */
+  const handleAudioLevelChange = useCallback((level: number) => {
+    stateManagerRef.current.updateAudioLevel(level / 100); // Normalize to 0-1
+  }, []);
+
+  /**
+   * Handle low audio warning from AudioVisualizer
+   */
+  const handleLowAudioWarning = useCallback((isLow: boolean) => {
+    setShowLowAudioWarning(isLow);
+  }, []);
+
+  /**
+   * Handle keyboard events for recording controls
+   */
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    handleRecordingKeyboard(event, {
+      onStartStop: () => {
+        if (isRecording) {
+          handleStopRecording();
+        } else if (isIdle && !hasError) {
+          initializeRecording();
+        }
+      },
+    });
+  }, [isRecording, isIdle, hasError, handleStopRecording, initializeRecording]);
+
+  /**
+   * Convert blob to File and complete
+   */
   const handleComplete = useCallback(async () => {
     if (!recordedBlobRef.current) {
-      setRecordingState(prev => ({
-        ...prev,
-        error: 'No recording available. Please record audio first.',
-      }));
+      const noRecordingError = RecordingErrorHandler.createError('processing_failed');
+      noRecordingError.message = 'No recording available. Please record audio first.';
+      stateManagerRef.current.setError(noRecordingError);
       return;
     }
 
-    if (recordingState.recordingTime < MIN_RECORDING_TIME) {
-      setRecordingState(prev => ({
-        ...prev,
-        error: `Recording too short. Please record for at least ${MIN_RECORDING_TIME} seconds.`,
-      }));
+    if (recordingTime < MIN_RECORDING_TIME) {
+      const tooShortError = RecordingErrorHandler.createError('processing_failed');
+      tooShortError.message = `Recording too short. Please record for at least ${MIN_RECORDING_TIME} seconds.`;
+      stateManagerRef.current.setError(tooShortError);
       return;
     }
 
@@ -230,32 +304,52 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
       });
 
       onComplete(audioFile);
-    } catch (error) {
-      console.error('Failed to process recording:', error);
-      setRecordingState(prev => ({
-        ...prev,
-        error: 'Failed to process recording. Please try again.',
-      }));
+    } catch (err) {
+      console.error('Failed to process recording:', err);
+
+      // Use RecordingErrorHandler to categorize the error
+      const categorizedError = RecordingErrorHandler.categorizeError(
+        err instanceof Error ? err : new Error(String(err))
+      );
+
+      stateManagerRef.current.setError(categorizedError);
     }
-  }, [recordingState.recordingTime, onComplete]);
+  }, [recordingTime, onComplete]);
+
+  /**
+   * Reset recording state
+   */
+  const handleReset = useCallback(() => {
+    cleanupResources();
+    recordedBlobRef.current = null;
+    audioChunksRef.current = [];
+    setShowLowAudioWarning(false);
+
+    // Reset state manager
+    if (stateManagerRef.current.state === 'completed') {
+      stateManagerRef.current.dispatch('RESET');
+    } else if (stateManagerRef.current.state === 'error') {
+      stateManagerRef.current.dispatch('RETRY');
+    }
+  }, [cleanupResources]);
+
+  /**
+   * Retry after error
+   */
+  const handleRetry = useCallback(() => {
+    handleReset();
+    // Small delay to ensure state is reset before reinitializing
+    setTimeout(() => {
+      initializeRecording();
+    }, 100);
+  }, [handleReset, initializeRecording]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      cleanupResources();
     };
-  }, []);
+  }, [cleanupResources]);
 
   // Format time display
   const formatTime = (seconds: number) => {
@@ -264,13 +358,58 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Memoize the status text
+  const statusText = useMemo(() => {
+    if (isInitializing) return 'Initializing Microphone...';
+    if (isRecording) return 'Recording in Progress';
+    if (hasRecording) return 'Recording Complete';
+    if (hasError) return 'Recording Error';
+    return 'Ready to Record';
+  }, [isInitializing, isRecording, hasRecording, hasError]);
+
+  // Memoize the description text
+  const descriptionText = useMemo(() => {
+    if (isInitializing) {
+      return 'Setting up your microphone and audio processing...';
+    }
+    if (isRecording) {
+      return `Please speak clearly into your microphone. ${formatTime(MAX_RECORDING_TIME - recordingTime)} remaining`;
+    }
+    if (hasRecording) {
+      return `Your ${formatTime(recordingTime)} speech sample has been captured successfully`;
+    }
+    if (hasError && error) {
+      return error.message;
+    }
+    return 'Tap the record button or press Space to begin your voice assessment. Minimum 5 seconds required.';
+  }, [isInitializing, isRecording, hasRecording, hasError, error, recordingTime]);
+
   return (
-    <div className='min-h-screen bg-gray-50 py-12'>
+    <div
+      className='min-h-screen bg-gray-50 py-12'
+      onKeyDown={handleKeyDown}
+      role="region"
+      aria-label="Voice evaluation assessment"
+    >
+      {/* Screen Reader Live Region for Announcements */}
+      <div
+        id={LIVE_REGION_ID}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </div>
+
       <div className='container mx-auto px-6'>
         <div className='mx-auto max-w-4xl space-y-12'>
           {/* Apple-Style Header */}
           <div className='animate-fade-in space-y-6 text-center'>
-            <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-apple-xl bg-gradient-to-br from-medical-500 to-medical-600 shadow-medical'>
+            <div
+              className='mx-auto flex h-20 w-20 items-center justify-center rounded-apple-xl bg-gradient-to-br from-medical-500 to-medical-600 shadow-medical'
+              aria-hidden="true"
+            >
               <svg
                 className='h-10 w-10 text-white'
                 fill='none'
@@ -294,34 +433,58 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
           </div>
 
           {/* Apple-Style Recording Interface */}
-          <div className='card-apple animate-slide-up p-12'>
+          <div
+            className='card-apple animate-slide-up p-12'
+            role="application"
+            aria-label="Voice recording interface"
+            aria-describedby={RECORDING_STATUS_ID}
+          >
             <div className='space-y-8 text-center'>
-              <div className='mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-medical-50 to-medical-100 shadow-inner'>
-                {recordingState.isRecording ? (
+              {/* Recording Visual Indicator */}
+              <div
+                className='mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-medical-50 to-medical-100 shadow-inner'
+                role="img"
+                aria-label={STATE_ARIA_DESCRIPTIONS[currentState]}
+              >
+                {isRecording ? (
                   <div className='relative h-20 w-20'>
                     <div
                       className='h-20 w-20 animate-pulse rounded-full bg-gradient-to-br from-error-400 to-error-500 shadow-lg'
                       style={{
-                        transform: `scale(${1 + recordingState.audioLevel * 0.3})`,
+                        transform: `scale(${1 + audioLevel * 0.3})`,
                         transition: 'transform 0.1s ease-out',
                       }}
+                      aria-hidden="true"
                     />
-                    <div className='absolute inset-0 flex items-center justify-center'>
+                    <div
+                      className='absolute inset-0 flex items-center justify-center'
+                      aria-hidden="true"
+                    >
                       <div className='text-sm font-bold text-white'>
-                        {formatTime(recordingState.recordingTime)}
+                        {formatTime(recordingTime)}
                       </div>
                     </div>
                   </div>
-                ) : recordingState.hasRecording ? (
-                  <div className='flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-success-400 to-success-500 shadow-lg'>
+                ) : hasRecording ? (
+                  <div
+                    className='flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-success-400 to-success-500 shadow-lg'
+                    aria-hidden="true"
+                  >
                     <svg className='h-12 w-12 text-white' fill='currentColor' viewBox='0 0 24 24'>
                       <path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' />
                     </svg>
                   </div>
-                ) : recordingState.isInitializing ? (
-                  <div className='h-20 w-20 animate-spin rounded-full border-4 border-medical-200 border-t-medical-500' />
+                ) : isInitializing ? (
+                  <div
+                    className='h-20 w-20 animate-spin rounded-full border-4 border-medical-200 border-t-medical-500'
+                    role="progressbar"
+                    aria-label="Initializing microphone"
+                  />
                 ) : (
-                  <div className='flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-medical-400 to-medical-500 shadow-lg'>
+                  <div
+                    className='flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-medical-400 to-medical-500 shadow-lg'
+                    aria-hidden="true"
+                  >
                     <svg
                       className='h-12 w-12 text-white'
                       fill='none'
@@ -339,93 +502,124 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
                 )}
               </div>
 
+              {/* Status Text */}
               <div className='space-y-4'>
-                <h3 className='text-2xl font-semibold text-text-primary'>
-                  {recordingState.isInitializing
-                    ? 'Initializing Microphone...'
-                    : recordingState.isRecording
-                      ? 'Recording in Progress'
-                      : recordingState.hasRecording
-                        ? 'Recording Complete'
-                        : recordingState.error
-                          ? 'Recording Error'
-                          : 'Ready to Record'}
+                <h3
+                  id={RECORDING_STATUS_ID}
+                  className='text-2xl font-semibold text-text-primary'
+                >
+                  {statusText}
                 </h3>
                 <p className='text-lg leading-relaxed text-text-secondary'>
-                  {recordingState.isInitializing
-                    ? 'Setting up your microphone and audio processing...'
-                    : recordingState.isRecording
-                      ? `Please speak clearly into your microphone. ${formatTime(MAX_RECORDING_TIME - recordingState.recordingTime)} remaining`
-                      : recordingState.hasRecording
-                        ? `Your ${formatTime(recordingState.recordingTime)} speech sample has been captured successfully`
-                        : recordingState.error
-                          ? recordingState.error
-                          : 'Tap the record button to begin your voice assessment. Minimum 5 seconds required.'}
+                  {descriptionText}
                 </p>
 
-                {/* Audio Level Indicator */}
-                {recordingState.isRecording && (
-                  <div className='mx-auto w-64'>
-                    <div className='mb-2 text-sm text-text-secondary'>Audio Level</div>
-                    <div className='h-2 overflow-hidden rounded-full bg-gray-200'>
-                      <div
-                        className='h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-100'
-                        style={{ width: `${recordingState.audioLevel * 100}%` }}
-                      />
-                    </div>
+                {/* Error Guidance Display */}
+                {hasError && error && (
+                  <div
+                    id={ERROR_MESSAGE_ID}
+                    className='mx-auto max-w-md rounded-apple-lg border border-error-200 bg-error-50 p-4'
+                    role="alert"
+                    aria-live="assertive"
+                  >
+                    <p className='text-sm text-error-700'>
+                      {error.guidance}
+                    </p>
                   </div>
+                )}
+
+                {/* Audio Visualizer - Integrated Component */}
+                {isRecording && (
+                  <div
+                    className='mx-auto w-80'
+                    role="region"
+                    aria-label="Audio level monitor"
+                  >
+                    <AudioVisualizer
+                      analyser={analyserRef.current}
+                      isActive={isRecording}
+                      onAudioLevelChange={handleAudioLevelChange}
+                      onLowAudioWarning={handleLowAudioWarning}
+                      lowAudioThreshold={10}
+                      lowAudioDuration={2000}
+                      showWaveform={true}
+                      showLevelBar={true}
+                      ariaLabel="Real-time audio level visualization"
+                    />
+                    {/* Screen reader only: detailed audio level */}
+                    <span className="sr-only">
+                      {getRecordingTimeAriaLabel(recordingTime, MAX_RECORDING_TIME)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Low Audio Warning (shown by AudioVisualizer, but we can add extra context) */}
+                {showLowAudioWarning && isRecording && (
+                  <span className="sr-only" role="alert">
+                    {getAudioLevelAriaLabel(audioLevel * 100)}
+                  </span>
                 )}
               </div>
 
               {/* Recording Controls */}
               <div className='flex justify-center space-x-4'>
-                {!recordingState.isRecording &&
-                  !recordingState.hasRecording &&
-                  !recordingState.isInitializing && (
-                    <Button
-                      onClick={handleStartRecording}
-                      disabled={!!recordingState.error}
-                      size='xl'
-                      className='shadow-medical hover:shadow-medical-hover disabled:cursor-not-allowed disabled:opacity-50'
+                {isIdle && !hasError && (
+                  <Button
+                    ref={recordButtonRef}
+                    onClick={initializeRecording}
+                    size='xl'
+                    className={`shadow-medical hover:shadow-medical-hover ${FOCUS_STYLES.recordButton}`}
+                    aria-label={BUTTON_ARIA_LABELS.startRecording}
+                    aria-describedby={RECORDING_STATUS_ID}
+                  >
+                    <svg
+                      className='mr-3 h-6 w-6'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                      aria-hidden="true"
                     >
-                      <svg
-                        className='mr-3 h-6 w-6'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z'
-                        />
-                      </svg>
-                      {recordingState.error ? 'Microphone Error' : 'Start Recording'}
-                    </Button>
-                  )}
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z'
+                      />
+                    </svg>
+                    Start Recording
+                  </Button>
+                )}
 
-                {recordingState.isRecording && (
+                {isRecording && (
                   <Button
                     onClick={handleStopRecording}
                     variant='secondary'
                     size='xl'
-                    className='shadow-medical hover:shadow-medical-hover'
+                    className={`shadow-medical hover:shadow-medical-hover ${FOCUS_STYLES.button}`}
+                    aria-label={BUTTON_ARIA_LABELS.stopRecording}
+                    aria-describedby={AUDIO_LEVEL_ID}
                   >
-                    <svg className='mr-3 h-6 w-6' fill='currentColor' viewBox='0 0 24 24'>
+                    <svg
+                      className='mr-3 h-6 w-6'
+                      fill='currentColor'
+                      viewBox='0 0 24 24'
+                      aria-hidden="true"
+                    >
                       <path d='M6 6h12v12H6z' />
                     </svg>
                     Stop Recording
                   </Button>
                 )}
 
-                {recordingState.hasRecording && (
+                {hasRecording && (
                   <div className='space-y-6'>
                     <Button
                       onClick={handleComplete}
-                      disabled={recordingState.recordingTime < MIN_RECORDING_TIME}
+                      disabled={recordingTime < MIN_RECORDING_TIME}
                       size='xl'
-                      className='shadow-medical hover:shadow-medical-hover disabled:cursor-not-allowed disabled:opacity-50'
+                      className={`shadow-medical hover:shadow-medical-hover disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_STYLES.button}`}
+                      aria-label={BUTTON_ARIA_LABELS.continueAnalysis}
+                      aria-disabled={recordingTime < MIN_RECORDING_TIME}
                     >
                       Continue with Analysis
                       <svg
@@ -433,6 +627,7 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
                         fill='none'
                         stroke='currentColor'
                         viewBox='0 0 24 24'
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap='round'
@@ -444,33 +639,38 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
                     </Button>
                     <Button
                       variant='secondary'
-                      onClick={() => {
-                        setRecordingState(prev => ({
-                          ...prev,
-                          isRecording: false,
-                          hasRecording: false,
-                          recordingTime: 0,
-                          error: null,
-                        }));
-                        recordedBlobRef.current = null;
-                      }}
+                      onClick={handleReset}
                       size='lg'
-                      className='px-8'
+                      className={`px-8 ${FOCUS_STYLES.button}`}
+                      aria-label={BUTTON_ARIA_LABELS.recordAgain}
                     >
                       Record Again
                     </Button>
                   </div>
                 )}
 
-                {recordingState.error && (
+                {hasError && (
                   <Button
-                    onClick={() => {
-                      setRecordingState(prev => ({ ...prev, error: null }));
-                      initializeRecording();
-                    }}
+                    onClick={handleRetry}
                     size='xl'
-                    className='shadow-medical hover:shadow-medical-hover'
+                    className={`shadow-medical hover:shadow-medical-hover ${FOCUS_STYLES.button}`}
+                    aria-label={BUTTON_ARIA_LABELS.tryAgain}
+                    aria-describedby={ERROR_MESSAGE_ID}
                   >
+                    <svg
+                      className='mr-3 h-6 w-6'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                      />
+                    </svg>
                     Try Again
                   </Button>
                 )}
@@ -479,13 +679,20 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
           </div>
 
           {/* Apple-Style Instructions */}
-          <div className='animate-scale-in rounded-apple-lg border border-medical-100 bg-medical-50 p-8'>
+          <div
+            className='animate-scale-in rounded-apple-lg border border-medical-100 bg-medical-50 p-8'
+            role="region"
+            aria-label="Recording instructions"
+          >
             <h4 className='mb-6 text-center text-xl font-semibold text-text-primary'>
               Recording Instructions
             </h4>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <div className='flex items-start space-x-3'>
-                <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'>
+                <div
+                  className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'
+                  aria-hidden="true"
+                >
                   <span className='text-sm font-semibold text-medical-600'>1</span>
                 </div>
                 <div>
@@ -497,7 +704,10 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
               </div>
 
               <div className='flex items-start space-x-3'>
-                <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'>
+                <div
+                  className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'
+                  aria-hidden="true"
+                >
                   <span className='text-sm font-semibold text-medical-600'>2</span>
                 </div>
                 <div>
@@ -509,7 +719,10 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
               </div>
 
               <div className='flex items-start space-x-3'>
-                <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'>
+                <div
+                  className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'
+                  aria-hidden="true"
+                >
                   <span className='text-sm font-semibold text-medical-600'>3</span>
                 </div>
                 <div>
@@ -521,7 +734,10 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
               </div>
 
               <div className='flex items-start space-x-3'>
-                <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'>
+                <div
+                  className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-apple bg-medical-100'
+                  aria-hidden="true"
+                >
                   <span className='text-sm font-semibold text-medical-600'>4</span>
                 </div>
                 <div>
@@ -532,11 +748,33 @@ export const SpeechAssessmentStep: React.FC<SpeechAssessmentStepProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Keyboard shortcuts info for screen readers */}
+            <div className="mt-6 text-center text-sm text-text-secondary">
+              <p>
+                <strong>Keyboard shortcuts:</strong> {getKeyboardShortcutsHelp()}
+              </p>
+            </div>
           </div>
 
           {/* Apple-Style Navigation */}
           <div className='flex animate-fade-in justify-center gap-6'>
-            <Button variant='secondary' onClick={onSkip} size='lg' className='px-8'>
+            <Button
+              variant='secondary'
+              onClick={onBack}
+              size='lg'
+              className={`px-8 ${FOCUS_STYLES.button}`}
+              aria-label={BUTTON_ARIA_LABELS.goBack}
+            >
+              Go Back
+            </Button>
+            <Button
+              variant='secondary'
+              onClick={onSkip}
+              size='lg'
+              className={`px-8 ${FOCUS_STYLES.button}`}
+              aria-label={BUTTON_ARIA_LABELS.skipStep}
+            >
               Skip This Step
             </Button>
           </div>

@@ -161,18 +161,40 @@ export const Header: React.FC = () => {
             {navigationItems.map(item => {
               const isActive = pathname === item.href;
               const isDisabled = item.disabled;
+              // Use full page navigation for routes with different layouts
+              const useFullPageNav = item.href === '/dashboard';
+
+              const linkClassName = cn(
+                'text-sm font-medium transition-colors duration-200 hover:no-underline',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                isActive && 'text-gray-900',
+                !isActive && !isDisabled && 'text-gray-600 hover:text-gray-900',
+                isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
+              );
+
+              if (useFullPageNav && !isDisabled) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={linkClassName}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span className='ml-2 rounded-full bg-blue-500 px-2 py-1 text-xs text-white'>
+                        {item.badge}
+                      </span>
+                    )}
+                  </a>
+                );
+              }
 
               return (
                 <Link
                   key={item.id}
                   href={isDisabled ? '#' : item.href}
-                  className={cn(
-                    'text-sm font-medium transition-colors duration-200 hover:no-underline',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                    isActive && 'text-gray-900',
-                    !isActive && !isDisabled && 'text-gray-600 hover:text-gray-900',
-                    isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
-                  )}
+                  className={linkClassName}
                   aria-current={isActive ? 'page' : undefined}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : 0}
@@ -269,20 +291,42 @@ export const Header: React.FC = () => {
             {navigationItems.map(item => {
               const isActive = pathname === item.href;
               const isDisabled = item.disabled;
+              const useFullPageNav = item.href === '/dashboard';
+
+              const linkClassName = cn(
+                'flex items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white',
+                isActive && 'border border-medical-500/20 bg-medical-500/10 text-medical-600',
+                !isActive &&
+                  !isDisabled &&
+                  'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
+              );
+
+              if (useFullPageNav && !isDisabled) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={linkClassName}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span className='ml-auto rounded-full bg-primary-500 px-2 py-1 text-xs text-white'>
+                        {item.badge}
+                      </span>
+                    )}
+                  </a>
+                );
+              }
 
               return (
                 <Link
                   key={item.id}
                   href={isDisabled ? '#' : item.href}
-                  className={cn(
-                    'flex items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-all duration-200',
-                    'focus:outline-none focus:ring-2 focus:ring-medical-500 focus:ring-offset-2 focus:ring-offset-white',
-                    isActive && 'border border-medical-500/20 bg-medical-500/10 text-medical-600',
-                    !isActive &&
-                      !isDisabled &&
-                      'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                    isDisabled && 'cursor-not-allowed text-gray-400 opacity-50',
-                  )}
+                  className={linkClassName}
                   aria-current={isActive ? 'page' : undefined}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : 0}

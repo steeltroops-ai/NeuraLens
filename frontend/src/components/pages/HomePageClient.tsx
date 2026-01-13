@@ -112,13 +112,13 @@ function HeroSection() {
             </motion.div>
 
             <motion.div {...scaleOnHover}>
-              <Link
+              <a
                 href='/dashboard'
                 className='inline-flex items-center rounded-2xl border border-slate-200 bg-white px-8 py-4 font-semibold text-slate-700 shadow-lg transition-colors hover:bg-slate-50 hover:shadow-xl'
               >
                 View Dashboard
                 <Activity className='ml-2 h-5 w-5' />
-              </Link>
+              </a>
             </motion.div>
           </div>
 
@@ -359,12 +359,12 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
+                <a
                   href='/dashboard'
                   className='text-slate-300 transition-colors hover:text-white'
                 >
                   Dashboard
-                </Link>
+                </a>
               </li>
               <li>
                 <Link href='/docs' className='text-slate-300 transition-colors hover:text-white'>
