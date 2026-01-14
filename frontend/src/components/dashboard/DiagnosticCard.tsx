@@ -8,7 +8,7 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { DiagnosticModule } from '@/data/diagnostic-modules';
 
 export interface DiagnosticCardProps {
@@ -69,7 +69,7 @@ export function DiagnosticCard({
         }
     };
 
-    const cardVariants = {
+    const cardVariants: Variants = {
         initial: { opacity: 0, y: 8 },
         animate: {
             opacity: 1,
@@ -77,7 +77,7 @@ export function DiagnosticCard({
             transition: {
                 duration: 0.2,
                 delay: animationDelay,
-                ease: 'easeOut',
+                ease: 'easeOut' as const,
             },
         },
     };

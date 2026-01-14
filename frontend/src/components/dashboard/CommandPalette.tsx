@@ -146,13 +146,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     );
 
     // Group commands by category
-    const groupedCommands = filteredCommands.reduce((acc, cmd) => {
-        if (!acc[cmd.category]) {
-            acc[cmd.category] = [];
+    const groupedCommands = filteredCommands.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
+        const category = cmd.category;
+        if (!acc[category]) {
+            acc[category] = [];
         }
-        acc[cmd.category].push(cmd);
+        acc[category]!.push(cmd);
         return acc;
-    }, {} as Record<string, CommandItem[]>);
+    }, {});
 
     // Focus input when opened
     useEffect(() => {
