@@ -4,15 +4,7 @@
  * DiagnosticCard Component
  * 
  * Displays a diagnostic module as an interactive card on the dashboard.
- * Follows MediLens Design System patterns with:
- * - Standard card styling with hover lift animation
- * - Module icon with gradient background
- * - Status badge (Available/Coming Soon)
- * - Disabled state for coming-soon modules
- * - 48px minimum touch target
- * - Framer Motion fade-in-up animation
- * 
- * Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 9.2
+ * Industry-grade minimal design with clean borders and subtle interactions.
  */
 
 import { useRouter } from 'next/navigation';
@@ -20,29 +12,18 @@ import { motion } from 'framer-motion';
 import { DiagnosticModule } from '@/data/diagnostic-modules';
 
 export interface DiagnosticCardProps {
-    /** The diagnostic module to display */
     module: DiagnosticModule;
-    /** Optional click handler (overrides default navigation) */
     onClick?: () => void;
-    /** Optional additional CSS classes */
     className?: string;
-    /** Animation delay for staggered animations */
     animationDelay?: number;
 }
 
-/**
- * Status badge component for displaying module availability
- * Uses Caption (12px) typography for labels
- */
 function StatusBadge({ status }: { status: 'available' | 'coming-soon' }) {
     if (status === 'available') {
         return (
             <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-caption font-medium"
-                style={{
-                    backgroundColor: 'rgba(52, 199, 89, 0.1)',
-                    color: '#34C759',
-                }}
+                className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
+                style={{ backgroundColor: '#dcfce7', color: '#166534' }}
                 aria-label="Available"
             >
                 Available
@@ -52,11 +33,8 @@ function StatusBadge({ status }: { status: 'available' | 'coming-soon' }) {
 
     return (
         <span
-            className="inline-flex items-center rounded-full px-3 py-1 text-caption font-medium"
-            style={{
-                backgroundColor: 'rgba(142, 142, 147, 0.1)',
-                color: '#8E8E93',
-            }}
+            className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
+            style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
             aria-label="Coming Soon"
         >
             Coming Soon
@@ -64,13 +42,6 @@ function StatusBadge({ status }: { status: 'available' | 'coming-soon' }) {
     );
 }
 
-/**
- * DiagnosticCard Component
- * 
- * Renders a diagnostic module card with icon, name, description, and status.
- * Available modules are clickable and navigate to their assessment page.
- * Coming-soon modules are disabled with reduced opacity.
- */
 export function DiagnosticCard({
     module,
     onClick,
@@ -81,10 +52,8 @@ export function DiagnosticCard({
     const Icon = module.icon;
     const isAvailable = module.status === 'available';
 
-    // Handle card click - navigate to module page if available
     const handleClick = () => {
         if (!isAvailable) return;
-
         if (onClick) {
             onClick();
         } else {
@@ -92,52 +61,26 @@ export function DiagnosticCard({
         }
     };
 
-    // Handle keyboard navigation
     const handleKeyDown = (event: React.KeyboardEvent) => {
         if (!isAvailable) return;
-
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             handleClick();
         }
     };
 
-    // Animation variants following MediLens Design System
     const cardVariants = {
-        initial: { opacity: 0, y: 20 },
+        initial: { opacity: 0, y: 8 },
         animate: {
             opacity: 1,
             y: 0,
             transition: {
-                duration: 0.5,
+                duration: 0.2,
                 delay: animationDelay,
-                ease: [0.22, 1, 0.36, 1] as const, // ease-out-quint
+                ease: 'easeOut',
             },
         },
     };
-
-    // Base card styles following MediLens Design System
-    const baseCardStyles = `
-        relative flex flex-col rounded-2xl p-4 sm:p-6
-        border transition-all duration-300
-        min-h-[180px]
-        focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#007AFF]/40
-    `;
-
-    // Available card styles with hover effects
-    const availableCardStyles = `
-        bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]
-        hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)]
-        border-black/5
-        cursor-pointer
-        hover:-translate-y-1
-    `;
-
-    // Disabled card styles for coming-soon modules
-    const disabledCardStyles = `
-        bg-[#F2F2F7] border-[#E5E5EA]
-        opacity-60 cursor-not-allowed
-    `;
 
     return (
         <motion.div
@@ -145,8 +88,14 @@ export function DiagnosticCard({
             initial="initial"
             animate="animate"
             className={`
-                ${baseCardStyles}
-                ${isAvailable ? availableCardStyles : disabledCardStyles}
+                relative flex flex-col rounded-lg p-4
+                border transition-all duration-150
+                min-h-[140px]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50
+                ${isAvailable
+                    ? 'bg-white border-[#e2e8f0] cursor-pointer hover:border-[#cbd5e1] hover:shadow-sm'
+                    : 'bg-[#f8fafc] border-[#f0f0f0] opacity-60 cursor-not-allowed'
+                }
                 ${className}
             `}
             onClick={handleClick}
@@ -157,38 +106,27 @@ export function DiagnosticCard({
             aria-label={`${module.name}: ${module.description}. ${isAvailable ? 'Click to start assessment' : 'Coming soon'}`}
             data-testid={`diagnostic-card-${module.id}`}
             data-status={module.status}
-            style={{ minHeight: '48px' }} // Ensure minimum touch target
         >
-            {/* Icon with gradient background */}
+            {/* Icon */}
             <div
-                className={`
-                    mb-4 flex h-12 w-12 items-center justify-center rounded-xl
-                    bg-gradient-to-br ${module.gradient}
-                `}
+                className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${module.gradient}`}
                 aria-hidden="true"
             >
-                <Icon
-                    className="h-6 w-6 text-white"
-                    strokeWidth={2}
-                />
+                <Icon size={18} strokeWidth={1.5} className="text-white" />
             </div>
 
-            {/* Module name - Title 3 (22px) for card titles */}
+            {/* Module name */}
             <h3
-                className="mb-2 text-title3"
-                style={{
-                    color: isAvailable ? '#000000' : '#8E8E93',
-                }}
+                className="mb-1 text-[14px] font-medium"
+                style={{ color: isAvailable ? '#0f172a' : '#64748b' }}
             >
                 {module.name}
             </h3>
 
-            {/* Module description - Subhead (15px) for supporting text */}
+            {/* Module description */}
             <p
-                className="mb-4 flex-1 text-subhead leading-relaxed"
-                style={{
-                    color: isAvailable ? '#3C3C43' : '#8E8E93',
-                }}
+                className="mb-3 flex-1 text-[12px] leading-relaxed"
+                style={{ color: isAvailable ? '#64748b' : '#94a3b8' }}
             >
                 {module.description}
             </p>

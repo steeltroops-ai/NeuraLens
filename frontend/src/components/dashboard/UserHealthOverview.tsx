@@ -23,66 +23,52 @@ const UserHealthOverview = memo(
     const getTrendColor = () => {
       switch (healthTrend) {
         case 'improving':
-          return '#34C759';
+          return '#22c55e';
         case 'stable':
-          return '#007AFF';
+          return '#3b82f6';
         case 'declining':
-          return '#FF9500';
+          return '#f59e0b';
         default:
-          return '#86868B';
+          return '#64748b';
       }
     };
 
     const getTrendIcon = () => {
       switch (healthTrend) {
         case 'improving':
-          return <TrendingUp className='h-4 w-4' style={{ color: getTrendColor() }} />;
+          return <TrendingUp size={14} strokeWidth={1.5} style={{ color: getTrendColor() }} />;
         case 'stable':
-          return <Activity className='h-4 w-4' style={{ color: getTrendColor() }} />;
+          return <Activity size={14} strokeWidth={1.5} style={{ color: getTrendColor() }} />;
         case 'declining':
-          return <TrendingUp className='h-4 w-4 rotate-180' style={{ color: getTrendColor() }} />;
+          return <TrendingUp size={14} strokeWidth={1.5} className="rotate-180" style={{ color: getTrendColor() }} />;
         default:
-          return <Activity className='h-4 w-4' style={{ color: getTrendColor() }} />;
+          return <Activity size={14} strokeWidth={1.5} style={{ color: getTrendColor() }} />;
       }
     };
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className='rounded-2xl border p-6 backdrop-blur-xl'
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.6)',
-          borderColor: 'rgba(0, 0, 0, 0.1)',
-          backdropFilter: 'blur(20px)',
-        }}
+        transition={{ duration: 0.15 }}
+        className="rounded-lg border border-[#e2e8f0] bg-white p-4"
       >
-        <div className='flex items-start justify-between'>
+        <div className="flex items-start justify-between">
           {/* User Info Section */}
-          <div className='flex items-start space-x-4'>
-            <div
-              className='flex h-12 w-12 items-center justify-center rounded-full'
-              style={{ backgroundColor: '#007AFF' }}
-            >
-              <User className='h-6 w-6' style={{ color: '#FFFFFF' }} />
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#3b82f6]">
+              <User size={18} strokeWidth={1.5} className="text-white" />
             </div>
             <div>
-              <h3
-                className='text-xl font-semibold'
-                style={{
-                  color: '#1D1D1F',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                }}
-              >
+              <h3 className="text-[14px] font-medium text-[#0f172a]">
                 {userName}
               </h3>
-              <p className='text-sm' style={{ color: '#86868B' }}>
+              <p className="text-[12px] text-[#64748b]">
                 Healthcare Professional
               </p>
-              <div className='mt-2 flex items-center space-x-2'>
-                <Calendar className='h-4 w-4' style={{ color: '#86868B' }} />
-                <span className='text-sm' style={{ color: '#86868B' }}>
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <Calendar size={12} strokeWidth={1.5} className="text-[#94a3b8]" />
+                <span className="text-[11px] text-[#64748b]">
                   Last assessment: {new Date(lastAssessmentDate).toLocaleDateString()}
                 </span>
               </div>
@@ -90,48 +76,48 @@ const UserHealthOverview = memo(
           </div>
 
           {/* Health Metrics Section */}
-          <div className='text-right'>
-            <div className='text-3xl font-bold' style={{ color: '#007AFF' }}>
+          <div className="text-right">
+            <div className="text-[24px] font-semibold text-[#3b82f6]">
               {lastAssessmentScore}%
             </div>
-            <div className='text-sm font-medium' style={{ color: '#86868B' }}>
+            <div className="text-[11px] text-[#64748b]">
               Latest Score
             </div>
-            <div className='mt-2 flex items-center justify-end space-x-2'>
+            <div className="mt-1.5 flex items-center justify-end gap-1">
               {getTrendIcon()}
-              <span className='text-sm font-medium capitalize' style={{ color: getTrendColor() }}>
+              <span className="text-[11px] font-medium capitalize" style={{ color: getTrendColor() }}>
                 {healthTrend}
               </span>
             </div>
-            <div className='mt-1 text-xs' style={{ color: '#86868B' }}>
+            <div className="mt-0.5 text-[10px] text-[#94a3b8]">
               {totalAssessments} total assessments
             </div>
           </div>
         </div>
 
         {/* Quick Stats Row */}
-        <div className='mt-6 grid grid-cols-3 gap-4'>
-          <div className='text-center'>
-            <div className='text-lg font-semibold' style={{ color: '#1D1D1F' }}>
+        <div className="mt-4 pt-4 border-t border-[#f0f0f0] grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="text-[16px] font-semibold text-[#0f172a]">
               98.2%
             </div>
-            <div className='text-xs' style={{ color: '#86868B' }}>
+            <div className="text-[10px] text-[#64748b]">
               Speech Accuracy
             </div>
           </div>
-          <div className='text-center'>
-            <div className='text-lg font-semibold' style={{ color: '#1D1D1F' }}>
+          <div className="text-center">
+            <div className="text-[16px] font-semibold text-[#0f172a]">
               92.7%
             </div>
-            <div className='text-xs' style={{ color: '#86868B' }}>
+            <div className="text-[10px] text-[#64748b]">
               Motor Function
             </div>
           </div>
-          <div className='text-center'>
-            <div className='text-lg font-semibold' style={{ color: '#1D1D1F' }}>
+          <div className="text-center">
+            <div className="text-[16px] font-semibold text-[#0f172a]">
               96.1%
             </div>
-            <div className='text-xs' style={{ color: '#86868B' }}>
+            <div className="text-[10px] text-[#64748b]">
               Cognitive Score
             </div>
           </div>
@@ -140,5 +126,7 @@ const UserHealthOverview = memo(
     );
   },
 );
+
+UserHealthOverview.displayName = 'UserHealthOverview';
 
 export default UserHealthOverview;

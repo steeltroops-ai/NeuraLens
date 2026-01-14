@@ -36,66 +36,66 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
   const defaultActions: QuickAction[] = [
     {
       id: 'start-assessment',
-      label: 'Start New Assessment',
-      description: 'Begin comprehensive neurological evaluation',
-      icon: <Play className='h-5 w-5' />,
-      color: '#007AFF',
+      label: 'Start Assessment',
+      description: 'Begin neurological evaluation',
+      icon: <Play size={18} strokeWidth={1.5} />,
+      color: '#3b82f6',
       onClick: () => handleActionClick('start-assessment'),
     },
     {
       id: 'view-reports',
       label: 'View Reports',
-      description: 'Access detailed analysis and insights',
-      icon: <FileText className='h-5 w-5' />,
-      color: '#34C759',
+      description: 'Access analysis and insights',
+      icon: <FileText size={18} strokeWidth={1.5} />,
+      color: '#22c55e',
       onClick: () => handleActionClick('view-reports'),
     },
     {
       id: 'schedule-assessment',
-      label: 'Schedule Assessment',
-      description: 'Plan future evaluations and appointments',
-      icon: <Calendar className='h-5 w-5' />,
-      color: '#FF9500',
+      label: 'Schedule',
+      description: 'Plan future evaluations',
+      icon: <Calendar size={18} strokeWidth={1.5} />,
+      color: '#f59e0b',
       onClick: () => handleActionClick('schedule-assessment'),
     },
     {
       id: 'system-settings',
-      label: 'System Settings',
-      description: 'Configure platform preferences',
-      icon: <Settings className='h-5 w-5' />,
-      color: '#86868B',
+      label: 'Settings',
+      description: 'Configure preferences',
+      icon: <Settings size={18} strokeWidth={1.5} />,
+      color: '#64748b',
       onClick: () => handleActionClick('system-settings'),
     },
     {
       id: 'export-data',
       label: 'Export Data',
-      description: 'Download assessment results and analytics',
-      icon: <Download className='h-5 w-5' />,
-      color: '#5856D6',
+      description: 'Download results',
+      icon: <Download size={18} strokeWidth={1.5} />,
+      color: '#8b5cf6',
       onClick: () => handleActionClick('export-data'),
     },
     {
       id: 'manage-patients',
-      label: 'Manage Patients',
-      description: 'View and organize patient profiles',
-      icon: <Users className='h-5 w-5' />,
-      color: '#AF52DE',
+      label: 'Patients',
+      description: 'Manage patient profiles',
+      icon: <Users size={18} strokeWidth={1.5} />,
+      color: '#ec4899',
       onClick: () => handleActionClick('manage-patients'),
     },
     {
       id: 'analytics',
-      label: 'Analytics Dashboard',
-      description: 'View performance metrics and trends',
-      icon: <BarChart3 className='h-5 w-5' />,
-      color: '#FF2D92',
+      label: 'Analytics',
+      description: 'View metrics and trends',
+      icon: <BarChart3 size={18} strokeWidth={1.5} />,
+      color: '#06b6d4',
       onClick: () => handleActionClick('analytics'),
     },
     {
       id: 'ai-insights',
       label: 'AI Insights',
-      description: 'Get personalized recommendations',
-      icon: <Zap className='h-5 w-5' />,
-      color: '#FFD60A',
+      description: 'Get recommendations',
+      icon: <Zap size={18} strokeWidth={1.5} />,
+      color: '#eab308',
       onClick: () => handleActionClick('ai-insights'),
     },
   ];
@@ -103,58 +103,36 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
   const actionList = actions || defaultActions;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className='rounded-2xl border p-6 backdrop-blur-xl'
-      style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(20px)',
-      }}
-    >
+    <div className="rounded-lg border border-[#e2e8f0] bg-white p-4">
       {/* Header */}
-      <div className='mb-6'>
-        <h3
-          className='text-lg font-semibold'
-          style={{
-            color: '#1D1D1F',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          }}
-        >
+      <div className="mb-4">
+        <h3 className="text-[14px] font-medium text-[#0f172a]">
           Quick Actions
         </h3>
-        <p className='mt-1 text-sm' style={{ color: '#86868B' }}>
-          Frequently used tools and features
+        <p className="mt-0.5 text-[12px] text-[#64748b]">
+          Frequently used tools
         </p>
       </div>
 
       {/* Action Grid */}
-      <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {actionList.map((action, index) => (
           <motion.button
             key={action.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15, delay: index * 0.03 }}
             onClick={() => action.onClick()}
             disabled={action.disabled}
-            className={`relative rounded-xl border p-4 backdrop-blur-xl transition-all duration-300 ${
-              action.disabled ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg active:scale-95'
-            } `}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              borderColor: 'rgba(0, 0, 0, 0.1)',
-              backdropFilter: 'blur(20px)',
-            }}
+            className={`relative rounded-lg border border-[#f0f0f0] bg-white p-3 text-left transition-all duration-150 ${action.disabled
+                ? 'cursor-not-allowed opacity-50'
+                : 'hover:border-[#e2e8f0] hover:bg-[#f9fafb]'
+              }`}
           >
             {/* Icon */}
             <div
-              className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'
-              style={{ backgroundColor: `${action.color}20` }}
+              className="mb-2 flex h-8 w-8 items-center justify-center rounded-md"
+              style={{ backgroundColor: `${action.color}15` }}
             >
               {React.cloneElement(action.icon as React.ReactElement, {
                 style: { color: action.color },
@@ -162,56 +140,42 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
             </div>
 
             {/* Label */}
-            <div
-              className='mb-1 text-center text-sm font-medium'
-              style={{
-                color: '#1D1D1F',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              }}
-            >
+            <div className="text-[12px] font-medium text-[#0f172a]">
               {action.label}
             </div>
 
             {/* Description */}
-            <div className='line-clamp-2 text-center text-xs' style={{ color: '#86868B' }}>
+            <div className="text-[11px] text-[#64748b] line-clamp-1">
               {action.description}
             </div>
-
-            {/* Hover Effect Overlay */}
-            <motion.div
-              className='pointer-events-none absolute inset-0 rounded-xl opacity-0'
-              style={{ backgroundColor: `${action.color}10` }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            />
           </motion.button>
         ))}
       </div>
 
       {/* Bottom Action Bar */}
-      <div className='mt-6 border-t pt-4' style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
-        <div className='flex items-center justify-between'>
-          <div className='text-sm' style={{ color: '#86868B' }}>
-            Need help? Check our{' '}
+      <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] text-[#64748b]">
+            Need help?{' '}
             <button
-              className='font-medium transition-opacity hover:opacity-70'
-              style={{ color: '#007AFF' }}
+              className="font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors"
               onClick={() => handleActionClick('help')}
             >
-              documentation
+              View docs
             </button>
           </div>
           <button
-            className='text-sm font-medium transition-opacity hover:opacity-70'
-            style={{ color: '#007AFF' }}
+            className="text-[11px] font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors"
             onClick={() => handleActionClick('customize')}
           >
-            Customize Actions
+            Customize
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
+
+QuickActionButtons.displayName = 'QuickActionButtons';
 
 export default QuickActionButtons;

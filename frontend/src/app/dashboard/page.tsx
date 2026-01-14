@@ -27,33 +27,33 @@ const UserHealthOverview = lazy(() => import('@/components/dashboard/UserHealthO
  */
 function DiagnosticGridSkeleton() {
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Available section skeleton */}
       <div>
-        <div className="mb-6 flex items-center gap-3">
-          <div className="h-7 w-36 animate-pulse rounded bg-gray-200" />
-          <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
+        <div className="mb-4 flex items-center gap-2">
+          <div className="h-5 w-28 animate-pulse rounded bg-[#e2e8f0]" />
+          <div className="h-5 w-16 animate-pulse rounded-full bg-[#e2e8f0]" />
         </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={`available-${i}`}
-              className="h-[180px] animate-pulse rounded-2xl bg-gray-200"
+              className="h-[160px] animate-pulse rounded-lg bg-[#e2e8f0]"
             />
           ))}
         </div>
       </div>
       {/* Coming soon section skeleton */}
       <div>
-        <div className="mb-6 flex items-center gap-3">
-          <div className="h-7 w-36 animate-pulse rounded bg-gray-200" />
-          <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
+        <div className="mb-4 flex items-center gap-2">
+          <div className="h-5 w-28 animate-pulse rounded bg-[#e2e8f0]" />
+          <div className="h-5 w-16 animate-pulse rounded-full bg-[#e2e8f0]" />
         </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={`coming-${i}`}
-              className="h-[180px] animate-pulse rounded-2xl bg-gray-200"
+              className="h-[160px] animate-pulse rounded-lg bg-[#e2e8f0]"
             />
           ))}
         </div>
@@ -67,7 +67,7 @@ function DiagnosticGridSkeleton() {
  */
 function UserHealthSkeleton() {
   return (
-    <div className="h-48 animate-pulse rounded-2xl bg-gray-200" />
+    <div className="h-40 animate-pulse rounded-lg bg-[#e2e8f0]" />
   );
 }
 
@@ -78,7 +78,7 @@ function SystemStatusSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-32 animate-pulse rounded-2xl bg-gray-200" />
+        <div key={i} className="h-28 animate-pulse rounded-lg bg-[#e2e8f0]" />
       ))}
     </div>
   );
@@ -117,10 +117,10 @@ export default function DashboardPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-8"
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="space-y-6"
     >
       <Suspense fallback={<DashboardOverviewSkeleton />}>
         <DashboardOverview systemStatus={systemStatus} />
@@ -134,7 +134,7 @@ export default function DashboardPage() {
  */
 function DashboardOverviewSkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <UserHealthSkeleton />
       <SystemStatusSkeleton />
       <DiagnosticGridSkeleton />
@@ -153,13 +153,13 @@ function DashboardOverviewSkeleton() {
 const DashboardOverview = memo(
   ({ systemStatus: _systemStatus }: { systemStatus: 'healthy' | 'warning' | 'error' }) => {
     return (
-      <div className="space-y-8">
-        {/* Page Header - Title 1 (34px/700) for page titles */}
+      <div className="space-y-6">
+        {/* Page Header */}
         <header>
-          <h1 className="text-title1 text-[#000000]">
+          <h1 className="text-[20px] font-semibold text-[#0f172a]">
             Dashboard
           </h1>
-          <p className="mt-2 text-body text-[#3C3C43] max-w-prose">
+          <p className="mt-1 text-[13px] text-[#64748b]">
             Access AI-powered diagnostic tools and view your health insights
           </p>
         </header>
@@ -186,10 +186,9 @@ const DashboardOverview = memo(
 
         {/* Diagnostic Modules Grid (Requirement 6.1) */}
         <section aria-labelledby="diagnostic-modules-heading">
-          {/* Title 2 (28px/600) for section headers */}
           <h2
             id="diagnostic-modules-heading"
-            className="mb-6 text-title2 text-[#000000]"
+            className="mb-4 text-[16px] font-semibold text-[#0f172a]"
           >
             Diagnostic Modules
           </h2>

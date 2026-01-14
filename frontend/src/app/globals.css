@@ -215,6 +215,19 @@ body {
   background: var(--neutral-500);
 }
 
+/* Hidden Scrollbar Utility - keeps scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
 /* Selection Styling */
 ::selection {
   background: var(--primary-500);

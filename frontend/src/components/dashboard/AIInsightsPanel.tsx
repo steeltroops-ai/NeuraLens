@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Star,
   Target,
-  Activity,
 } from 'lucide-react';
 
 interface AIInsight {
@@ -107,49 +106,47 @@ export default function AIInsightsPanel({ insights, maxInsights = 6 }: AIInsight
   const getInsightIcon = (type: string) => {
     switch (type) {
       case 'recommendation':
-        return <Lightbulb className='h-4 w-4' />;
+        return <Lightbulb size={14} strokeWidth={1.5} />;
       case 'alert':
-        return <AlertTriangle className='h-4 w-4' />;
+        return <AlertTriangle size={14} strokeWidth={1.5} />;
       case 'trend':
-        return <TrendingUp className='h-4 w-4' />;
+        return <TrendingUp size={14} strokeWidth={1.5} />;
       case 'achievement':
-        return <Star className='h-4 w-4' />;
+        return <Star size={14} strokeWidth={1.5} />;
       default:
-        return <Brain className='h-4 w-4' />;
+        return <Brain size={14} strokeWidth={1.5} />;
     }
   };
 
   const getInsightColor = (type: string, priority: string) => {
-    if (priority === 'high') return '#FF3B30';
+    if (priority === 'high') return '#ef4444';
 
     switch (type) {
       case 'recommendation':
-        return '#007AFF';
+        return '#3b82f6';
       case 'alert':
-        return '#FF9500';
+        return '#f59e0b';
       case 'trend':
-        return '#34C759';
+        return '#22c55e';
       case 'achievement':
-        return '#FFD60A';
+        return '#eab308';
       default:
-        return '#86868B';
+        return '#64748b';
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     const colors = {
-      high: '#FF3B30',
-      medium: '#FF9500',
-      low: '#34C759',
+      high: { bg: '#fee2e2', text: '#991b1b' },
+      medium: { bg: '#fef3c7', text: '#92400e' },
+      low: { bg: '#dcfce7', text: '#166534' },
     };
+    const color = colors[priority as keyof typeof colors];
 
     return (
       <span
-        className='rounded-full px-2 py-1 text-xs font-medium'
-        style={{
-          backgroundColor: `${colors[priority as keyof typeof colors]}20`,
-          color: colors[priority as keyof typeof colors],
-        }}
+        className="rounded px-1.5 py-0.5 text-[10px] font-medium"
+        style={{ backgroundColor: color.bg, color: color.text }}
       >
         {priority.toUpperCase()}
       </span>
@@ -157,150 +154,90 @@ export default function AIInsightsPanel({ insights, maxInsights = 6 }: AIInsight
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className='rounded-2xl border p-6 backdrop-blur-xl'
-      style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(20px)',
-      }}
-    >
-      {/* Header */}
-      <div className='mb-6 flex items-center justify-between'>
-        <div className='flex items-center space-x-3'>
-          <div
-            className='flex h-10 w-10 items-center justify-center rounded-full'
-            style={{ backgroundColor: '#007AFF20' }}
-          >
-            <Brain className='h-5 w-5' style={{ color: '#007AFF' }} />
-          </div>
-          <div>
-            <h3
-              className='text-lg font-semibold'
-              style={{
-                color: '#1D1D1F',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              }}
-            >
-              AI Insights
-            </h3>
-            <p className='text-sm' style={{ color: '#86868B' }}>
-              Personalized recommendations and analysis
-            </p>
-          </div>
-        </div>
-        <button
-          className='text-sm font-medium transition-opacity hover:opacity-70'
-          style={{ color: '#007AFF' }}
+    <div className="space-y-2">
+      {insightList.map((insight, index) => (
+        <motion.div
+          key={insight.id}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15, delay: index * 0.03 }}
+          className={`cursor-pointer rounded-lg border p-3 transition-colors duration-150 ${selectedInsight === insight.id
+              ? 'bg-[#f8fafc] border-[#e2e8f0]'
+              : 'bg-white border-[#f0f0f0] hover:bg-[#f9fafb]'
+            }`}
+          onClick={() => setSelectedInsight(selectedInsight === insight.id ? null : insight.id)}
         >
-          View All
-        </button>
-      </div>
-
-      {/* Insights List */}
-      <div className='space-y-3'>
-        {insightList.map((insight, index) => (
-          <motion.div
-            key={insight.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-            className={`cursor-pointer rounded-xl border p-4 transition-all duration-300 ${
-              selectedInsight === insight.id
-                ? 'bg-white/80 shadow-lg'
-                : 'bg-white/40 hover:bg-white/60'
-            } `}
-            style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
-            onClick={() => setSelectedInsight(selectedInsight === insight.id ? null : insight.id)}
-          >
-            <div className='flex items-start justify-between'>
-              {/* Insight Content */}
-              <div className='flex flex-1 items-start space-x-3'>
-                <div
-                  className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full'
-                  style={{
-                    backgroundColor: `${getInsightColor(insight.type, insight.priority)}20`,
-                  }}
-                >
-                  {React.cloneElement(getInsightIcon(insight.type) as React.ReactElement, {
-                    style: { color: getInsightColor(insight.type, insight.priority) },
-                  })}
-                </div>
-                <div className='min-w-0 flex-1'>
-                  <div className='mb-1 flex items-center space-x-2'>
-                    <h4 className='text-sm font-medium' style={{ color: '#1D1D1F' }}>
-                      {insight.title}
-                    </h4>
-                    {getPriorityBadge(insight.priority)}
-                  </div>
-                  <p className='line-clamp-2 text-xs' style={{ color: '#86868B' }}>
-                    {insight.description}
-                  </p>
-                  <div className='mt-2 flex items-center justify-between'>
-                    <div className='flex items-center space-x-3'>
-                      <span className='text-xs' style={{ color: '#86868B' }}>
-                        Confidence: {insight.confidence}%
-                      </span>
-                      {insight.actionable && (
-                        <span className='text-xs font-medium' style={{ color: '#007AFF' }}>
-                          Actionable
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Expand Icon */}
-              <motion.div
-                animate={{ rotate: selectedInsight === insight.id ? 90 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronRight className='h-4 w-4' style={{ color: '#86868B' }} />
-              </motion.div>
+          <div className="flex items-start gap-2.5">
+            {/* Icon */}
+            <div
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md"
+              style={{ backgroundColor: `${getInsightColor(insight.type, insight.priority)}15` }}
+            >
+              {React.cloneElement(getInsightIcon(insight.type) as React.ReactElement, {
+                style: { color: getInsightColor(insight.type, insight.priority) },
+              })}
             </div>
 
-            {/* Expanded Content */}
-            <AnimatePresence>
-              {selectedInsight === insight.id && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className='mt-4 border-t pt-4'
-                  style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}
-                >
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center space-x-4'>
-                      <div className='flex items-center space-x-1'>
-                        <Target className='h-3 w-3' style={{ color: '#86868B' }} />
-                        <span className='text-xs' style={{ color: '#86868B' }}>
-                          Generated: {new Date(insight.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                    {insight.actionable && (
-                      <button
-                        className='rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80'
-                        style={{
-                          backgroundColor: '#007AFF',
-                          color: '#FFFFFF',
-                        }}
-                      >
-                        Take Action
-                      </button>
-                    )}
+            {/* Content */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className="text-[12px] font-medium text-[#0f172a] truncate">
+                  {insight.title}
+                </h4>
+                {getPriorityBadge(insight.priority)}
+              </div>
+              <p className="text-[11px] text-[#64748b] line-clamp-2">
+                {insight.description}
+              </p>
+              <div className="mt-1.5 flex items-center gap-3">
+                <span className="text-[10px] text-[#94a3b8]">
+                  {insight.confidence}% confidence
+                </span>
+                {insight.actionable && (
+                  <span className="text-[10px] font-medium text-[#3b82f6]">
+                    Actionable
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Expand Icon */}
+            <motion.div
+              animate={{ rotate: selectedInsight === insight.id ? 90 : 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <ChevronRight size={14} className="text-[#94a3b8]" />
+            </motion.div>
+          </div>
+
+          {/* Expanded Content */}
+          <AnimatePresence>
+            {selectedInsight === insight.id && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.15 }}
+                className="mt-3 pt-3 border-t border-[#f0f0f0]"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <Target size={12} className="text-[#94a3b8]" />
+                    <span className="text-[10px] text-[#94a3b8]">
+                      {new Date(insight.timestamp).toLocaleString()}
+                    </span>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
+                  {insight.actionable && (
+                    <button className="px-2.5 py-1 text-[11px] font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-md transition-colors">
+                      Take Action
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      ))}
+    </div>
   );
 }
