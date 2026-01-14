@@ -2,7 +2,12 @@
   "compilerOptions": {
     // Language and Module
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "ES6", "ES2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "ES6",
+      "ES2022"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -12,9 +17,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-
     // Type Checking
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -30,7 +34,6 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "alwaysStrict": true,
-
     // Emit
     "declaration": false,
     "declarationMap": false,
@@ -39,26 +42,43 @@
     "removeComments": false,
     "importHelpers": true,
     "downlevelIteration": true,
-
     // Interop Constraints
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-
     // Path Mapping
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/store/*": ["./src/store/*"],
-      "@/config/*": ["./src/config/*"],
-      "@/constants/*": ["./src/constants/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/store/*": [
+        "./src/store/*"
+      ],
+      "@/config/*": [
+        "./src/config/*"
+      ],
+      "@/constants/*": [
+        "./src/constants/*"
+      ]
     },
-
     // Plugin Configuration
     "plugins": [
       {
@@ -72,7 +92,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/**/*",
-    "types/**/*"
+    "types/**/*",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

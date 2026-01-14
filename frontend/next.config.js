@@ -25,11 +25,6 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
 
-  // ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Exclude test pages from build
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
 
@@ -38,27 +33,27 @@ const nextConfig = {
       // Redirect test pages in production
       ...(process.env.NODE_ENV === 'production'
         ? [
-            {
-              source: '/api-test',
-              destination: '/',
-              permanent: false,
-            },
-            {
-              source: '/accessibility-test',
-              destination: '/',
-              permanent: false,
-            },
-            {
-              source: '/assessment-workflow-test',
-              destination: '/',
-              permanent: false,
-            },
-            {
-              source: '/comprehensive-dashboard',
-              destination: '/dashboard',
-              permanent: false,
-            },
-          ]
+          {
+            source: '/api-test',
+            destination: '/',
+            permanent: false,
+          },
+          {
+            source: '/accessibility-test',
+            destination: '/',
+            permanent: false,
+          },
+          {
+            source: '/assessment-workflow-test',
+            destination: '/',
+            permanent: false,
+          },
+          {
+            source: '/comprehensive-dashboard',
+            destination: '/dashboard',
+            permanent: false,
+          },
+        ]
         : []),
     ];
   },
