@@ -22,7 +22,7 @@ import {
     User,
     LucideIcon,
 } from 'lucide-react';
-import { useLogout } from '@/hooks/useLogout';
+import { UserButton, useUser } from '@clerk/nextjs';
 
 // Sidebar item interface
 interface SidebarItem {
@@ -121,77 +121,77 @@ interface SidebarGroupComponentProps {
     setHoveredItem: (id: string | null) => void;
 }
 
-function SidebarGroupComponent({
-    group,
-    collapsed,
-    isActiveRoute,
-    hoveredItem,
-    setHoveredItem,
-}: SidebarGroupComponentProps) {
-    return (
-        <div className={collapsed ? 'mb-3' : 'mb-4'}>
-            {/* Group Label - minimal style */}
-            {!collapsed && (
-                <div className="px-3 mb-1.5 text-[10px] font-medium uppercase tracking-widest text-[#9ca3af]">
-                    {group.label}
-                </div>
-            )}
-
-            {/* Group Items */}
-            <ul className="space-y-0.5" role="list">
-                {group.items.map(item => {
-                    const Icon = item.icon;
-                    const isActive = isActiveRoute(item.route);
-                    const showTooltip = collapsed && hoveredItem === item.id;
-
-                    return (
-                        <li key={item.id}>
-                            <Tooltip content={item.label} visible={showTooltip}>
-                                <Link
-                                    href={item.route}
-                                    className={`
-                                        flex items-center w-full rounded-lg transition-all duration-150
-                                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50
-                                        ${collapsed
-                                            ? 'justify-center px-0 py-2.5 mx-auto w-10 h-10'
-                                            : 'gap-2.5 px-3 py-2'
-                                        }
-                                        ${isActive
-                                            ? 'bg-[#f0f9ff] text-[#0369a1]'
-                                            : 'text-[#4b5563] hover:bg-[#f9fafb] hover:text-[#111827]'
-                                        }
-                                    `}
-                                    aria-current={isActive ? 'page' : undefined}
-                                    aria-label={collapsed ? item.label : undefined}
-                                    onMouseEnter={() => setHoveredItem(item.id)}
-                                    onMouseLeave={() => setHoveredItem(null)}
-                                    data-testid={`sidebar-item-${item.id}`}
-                                    data-active={isActive}
-                                >
-                                    <Icon
-                                        size={18}
-                                        strokeWidth={isActive ? 2 : 1.5}
-                                        className={isActive ? 'text-[#0369a1]' : 'text-[#6b7280]'}
-                                        aria-hidden="true"
-                                    />
-                                    {!collapsed && (
-                                        <span className={`text-[13px] ${isActive ? 'font-medium' : 'font-normal'}`}>
-                                            {item.label}
-                                        </span>
-                                    )}
-                                </Link>
-                            </Tooltip>
-                        </li>
-                    );
-                })}
-            </ul>
-        </div>
-    );
-}
+    function SidebarGroupComponent({
+        group,
+        collapsed,
+        isActiveRoute,
+        hoveredItem,
+        setHoveredItem,
+    }: SidebarGroupComponentProps) {
+        return (
+            <div className={collapsed ? 'mb-3' : 'mb-4'}>
+                {/* Group Label - Matches homepage card secondary text - Robotic/Technical */}
+                {!collapsed && (
+                    <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 font-mono">
+                        {group.label}
+                    </div>
+                )}
+    
+                {/* Group Items */}
+                <ul className="space-y-0.5" role="list">
+                    {group.items.map(item => {
+                        const Icon = item.icon;
+                        const isActive = isActiveRoute(item.route);
+                        const showTooltip = collapsed && hoveredItem === item.id;
+    
+                        return (
+                            <li key={item.id}>
+                                <Tooltip content={item.label} visible={showTooltip}>
+                                    <Link
+                                        href={item.route}
+                                        className={`
+                                            flex items-center w-full rounded-md transition-all duration-200 group
+                                            focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500
+                                            ${collapsed
+                                                ? 'justify-center px-0 py-2.5 mx-auto w-10 h-10'
+                                                : 'gap-3 px-3 py-2'
+                                            }
+                                            ${isActive
+                                                ? 'bg-[#18181b] text-white shadow-sm ring-1 ring-[#27272a]'
+                                                : 'text-zinc-400 hover:bg-white/10 hover:text-white'
+                                            }
+                                        `}
+                                        aria-current={isActive ? 'page' : undefined}
+                                        aria-label={collapsed ? item.label : undefined}
+                                        onMouseEnter={() => setHoveredItem(item.id)}
+                                        onMouseLeave={() => setHoveredItem(null)}
+                                        data-testid={`sidebar-item-${item.id}`}
+                                        data-active={isActive}
+                                    >
+                                        <Icon
+                                            size={16}
+                                            strokeWidth={1.5}
+                                            className={isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}
+                                            aria-hidden="true"
+                                        />
+                                        {!collapsed && (
+                                            <span className={`text-[13px] font-mono tracking-tight ${isActive ? 'font-medium' : 'font-normal'}`}>
+                                                {item.label}
+                                            </span>
+                                        )}
+                                    </Link>
+                                </Tooltip>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        );
+    }
 
 export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
     const pathname = usePathname();
-    const { isLoggingOut, error: logoutError, logout, clearError } = useLogout();
+    const { user } = useUser();
 
     // Sidebar collapse state with localStorage persistence
     const [collapsed, setCollapsed] = useState(false);
@@ -278,13 +278,12 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                 />
             )}
 
-            {/* Sidebar - Clean minimal design */}
             <aside
                 id="main-navigation"
                 data-sidebar
                 data-collapsed={collapsed}
                 className={`
-                    fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-[#f0f0f0]
+                    fixed inset-y-0 left-0 z-50 flex flex-col bg-black border-r border-[#27272a]
                     transition-all duration-200 ease-out
                     ${collapsed ? 'w-[60px]' : 'w-[240px]'}
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -294,19 +293,19 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                 aria-label="Dashboard navigation"
             >
                 {/* Header - Logo area */}
-                <div className={`flex items-center h-14 border-b border-[#f0f0f0] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+                <div className={`flex items-center h-14 border-b border-[#27272a] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
                     {!collapsed ? (
                         <>
                             <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="MediLens Home">
-                                <span className="text-[15px] font-semibold text-[#0f172a]">M</span>
-                                <span className="text-[14px] font-medium text-[#334155]">MediLens</span>
+                                <span className="text-[15px] font-semibold text-white">M</span>
+                                <span className="text-[14px] font-medium text-zinc-100">MediLens</span>
                             </Link>
                             <button
                                 onClick={toggleCollapse}
-                                className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-[#f3f4f6] transition-colors"
+                                className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/5 transition-colors"
                                 aria-label="Collapse sidebar"
                             >
-                                <ChevronLeft size={16} className="text-[#9ca3af]" />
+                                <ChevronLeft size={16} className="text-zinc-400" />
                             </button>
                         </>
                     ) : (
@@ -315,7 +314,7 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                             className="flex items-center justify-center"
                             aria-label="Expand sidebar"
                         >
-                            <span className="text-[15px] font-semibold text-[#0f172a]">M</span>
+                            <span className="text-[15px] font-semibold text-white">M</span>
                         </button>
                     )}
                 </div>
@@ -333,62 +332,42 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                             />
                             {/* Subtle divider */}
                             {index < sidebarGroups.length - 1 && (
-                                <div className={`border-t border-[#f0f0f0] ${collapsed ? 'mx-1 my-2' : 'mx-2 my-3'}`} aria-hidden="true" />
+                                <div className={`border-t border-[#27272a] ${collapsed ? 'mx-1 my-2' : 'mx-2 my-3'}`} aria-hidden="true" />
                             )}
                         </div>
                     ))}
                 </nav>
 
-                {/* Bottom Section - Profile & Logout */}
-                <div className="border-t border-[#f0f0f0]">
-                    {/* Profile */}
-                    <Tooltip content="Profile" visible={collapsed && hoveredBottomItem === 'profile'}>
-                        <button
-                            className={`
-                                flex items-center w-full transition-colors hover:bg-[#f9fafb]
-                                ${collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-4 py-2.5'}
-                            `}
-                            aria-label="User profile"
-                            onMouseEnter={() => setHoveredBottomItem('profile')}
-                            onMouseLeave={() => setHoveredBottomItem(null)}
-                        >
-                            <User size={18} strokeWidth={1.5} className="text-[#6b7280]" />
-                            {!collapsed && <span className="text-[13px] text-[#4b5563]">Profile</span>}
-                        </button>
-                    </Tooltip>
-
-                    {/* Logout */}
-                    <Tooltip content={isLoggingOut ? 'Logging out...' : 'Logout'} visible={collapsed && hoveredBottomItem === 'logout'}>
-                        <button
-                            onClick={logout}
-                            disabled={isLoggingOut}
-                            className={`
-                                flex items-center w-full transition-colors
-                                ${collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-4 py-2.5'}
-                                ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#fef2f2]'}
-                            `}
-                            aria-label={isLoggingOut ? 'Logging out...' : 'Logout'}
-                            onMouseEnter={() => setHoveredBottomItem('logout')}
-                            onMouseLeave={() => setHoveredBottomItem(null)}
-                        >
-                            <LogOut size={18} strokeWidth={1.5} className="text-[#ef4444]" />
-                            {!collapsed && (
-                                <span className="text-[13px] text-[#ef4444]">
-                                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                {/* Bottom Section - User Profile */}
+                <div className="border-t border-[#27272a] p-3">
+                    <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+                        <UserButton 
+                            afterSignOutUrl="/"
+                            appearance={{
+                                elements: {
+                                    avatarBox: "h-8 w-8",
+                                    userButtonTrigger: "focus:shadow-none focus:outline-none"
+                                }
+                            }}
+                        />
+                        
+                        {!collapsed && user && (
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="text-sm font-medium text-zinc-200 truncate">
+                                    {user.fullName || user.username || 'User'}
                                 </span>
-                            )}
-                        </button>
-                    </Tooltip>
-
-                    {/* Error display */}
-                    {logoutError && !collapsed && (
-                        <div className="px-4 py-2 text-xs text-[#ef4444]">
-                            {logoutError}
-                            <button onClick={clearError} className="ml-2 underline hover:no-underline">
-                                Dismiss
-                            </button>
-                        </div>
-                    )}
+                                <span className="text-xs text-zinc-500 truncate">
+                                    {user.primaryEmailAddress?.emailAddress}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {!collapsed && !user && (
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-zinc-200">Guest</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </aside>
         </>

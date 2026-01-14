@@ -42,12 +42,11 @@ export default function SpeechAnalysisPage() {
 
         try {
             const formData = new FormData();
-            formData.append('audio_file', audioData);
+            formData.append('audio', audioData); // Match what usage in route.ts expects
             formData.append('session_id', `speech_${Date.now()}`);
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-            const response = await fetch(`${apiUrl}/api/v1/speech/analyze/enhanced`, {
+            // Use the Next.js API route as a proxy
+            const response = await fetch('/api/speech/analyze', {
                 method: 'POST',
                 body: formData,
             });

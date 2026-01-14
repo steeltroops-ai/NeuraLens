@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, User, X, ChevronRight, Search } from 'lucide-react';
+import { Bell, X, ChevronRight, Search } from 'lucide-react';
 import { sidebarItems, sidebarGroups } from './DashboardSidebar';
 import dynamic from 'next/dynamic';
 
@@ -110,7 +110,7 @@ export function DashboardHeader({
 
     return (
         <header
-            className="sticky top-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-[#f0f0f0] h-14"
+            className="sticky top-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-black border-b border-[#27272a] h-14"
             role="banner"
             aria-label="Dashboard header"
             data-testid="dashboard-header"
@@ -125,19 +125,19 @@ export function DashboardHeader({
                                 {index > 0 && (
                                     <ChevronRight
                                         size={14}
-                                        className="mx-1.5 text-[#d1d5db]"
+                                        className="mx-1.5 text-zinc-500"
                                         aria-hidden="true"
                                     />
                                 )}
                                 {crumb.href && index < breadcrumbs.length - 1 ? (
                                     <Link
                                         href={crumb.href}
-                                        className="text-[13px] text-[#9ca3af] hover:text-[#6b7280] transition-colors"
+                                        className="text-[13px] text-zinc-400 hover:text-white transition-colors"
                                     >
                                         {crumb.label}
                                     </Link>
                                 ) : (
-                                    <span className={`text-[13px] ${index === breadcrumbs.length - 1 ? 'text-[#111827] font-medium' : 'text-[#9ca3af]'}`}>
+                                    <span className={`text-[13px] ${index === breadcrumbs.length - 1 ? 'text-white font-medium' : 'text-zinc-400'}`}>
                                         {crumb.label}
                                     </span>
                                 )}
@@ -153,11 +153,11 @@ export function DashboardHeader({
                 {showSearch && (
                     <button
                         onClick={onSearchClick}
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[#f3f4f6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50"
+                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
                         aria-label="Open search (⌘K)"
                         data-testid="search-trigger"
                     >
-                        <Search size={16} strokeWidth={1.5} className="text-[#6b7280]" aria-hidden="true" />
+                        <Search size={16} strokeWidth={1.5} className="text-zinc-300" aria-hidden="true" />
                     </button>
                 )}
 
@@ -165,17 +165,17 @@ export function DashboardHeader({
                 <div className="relative" data-notifications-panel>
                     <button
                         onClick={() => setNotificationsOpen(!notificationsOpen)}
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[#f3f4f6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50"
+                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
                         aria-label={`Notifications (${notificationCount} unread)`}
                         aria-expanded={notificationsOpen}
                         aria-haspopup="dialog"
                         aria-controls="notifications-panel"
                         data-testid="notifications-trigger"
                     >
-                        <Bell size={16} strokeWidth={1.5} className="text-[#6b7280]" aria-hidden="true" />
+                        <Bell size={16} strokeWidth={1.5} className="text-zinc-300" aria-hidden="true" />
                         {notificationCount > 0 && (
                             <span
-                                className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#ef4444] text-[10px] font-medium text-white"
+                                className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold text-black border border-[#27272a]"
                                 aria-hidden="true"
                                 data-testid="notification-badge"
                             >
@@ -264,15 +264,7 @@ export function DashboardHeader({
                     </div>
                 </div>
 
-                {/* User Profile */}
-                <button
-                    className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[#f3f4f6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50"
-                    aria-label="Profile"
-                    aria-haspopup="menu"
-                    data-testid="user-profile-trigger"
-                >
-                    <User size={16} strokeWidth={1.5} className="text-[#6b7280]" aria-hidden="true" />
-                </button>
+                {/* User Profile removed - relocated to sidebar */}
             </div>
         </header>
     );
