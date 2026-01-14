@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import NRIFusionRequest, NRIFusionResponse
-from app.ml.realtime.realtime_nri import realtime_nri_fusion
+from .analyzer import realtime_nri_fusion
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

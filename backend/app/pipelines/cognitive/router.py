@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import CognitiveAssessmentRequest, CognitiveAssessmentResponse
-from app.ml.realtime.realtime_cognitive import realtime_cognitive_analyzer
+from .analyzer import realtime_cognitive_analyzer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

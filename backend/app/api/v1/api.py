@@ -5,7 +5,7 @@ Hackathon-optimized multi-modal assessment endpoints
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import speech, retinal, motor, cognitive, nri, validation
+from app.pipelines import speech, retinal, motor, cognitive, nri, validation
 
 
 # Create main API router

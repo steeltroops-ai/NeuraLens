@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.schemas.assessment import MotorAssessmentRequest, MotorAssessmentResponse
-from app.ml.realtime.realtime_motor import realtime_motor_analyzer
+from .analyzer import realtime_motor_analyzer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
-from app.ml.realtime.realtime_validation import realtime_validation_engine
+from .analyzer import realtime_validation_engine
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

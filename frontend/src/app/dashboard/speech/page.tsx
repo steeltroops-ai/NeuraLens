@@ -23,8 +23,8 @@ import {
     AlertCircle,
     Loader2,
 } from 'lucide-react';
-import { SpeechRecorder } from '@/components/speech/SpeechRecorder';
-import { SpeechResultsPanel } from '@/components/speech/SpeechResultsPanel';
+import { SpeechRecorder } from './_components/SpeechRecorder';
+import { SpeechResultsPanel } from './_components/SpeechResultsPanel';
 import type { EnhancedSpeechAnalysisResponse } from '@/types/speech-enhanced';
 
 type AnalysisState = 'idle' | 'recording' | 'uploading' | 'processing' | 'complete' | 'error';

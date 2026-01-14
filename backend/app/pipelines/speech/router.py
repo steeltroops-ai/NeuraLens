@@ -21,12 +21,12 @@ from app.schemas.speech_enhanced import (
     EnhancedBiomarkers,
     BiomarkerResult,
 )
-from app.ml.realtime.realtime_speech import realtime_speech_analyzer
+from .analyzer import realtime_speech_analyzer
 from app.core.config import settings
 from app.services.supabase_storage import storage_service
-from app.services.audio_validator import audio_validator
-from app.services.error_handler import speech_error_handler
-from app.services.biomarker_extractor import biomarker_extractor, ExtractedBiomarkers
+from .validator import audio_validator
+from .error_handler import speech_error_handler
+from .processor import biomarker_extractor, ExtractedBiomarkers
 
 
 router = APIRouter()
