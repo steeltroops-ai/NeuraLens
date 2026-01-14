@@ -543,9 +543,10 @@ body {
 /* ===== TOUCH TARGET MINIMUM SIZE (48px) ===== */
 
 /* Ensure all interactive elements meet 48px minimum touch target */
-button,
-[role="button"],
-a,
+/* Exception: Header navigation uses compact sizing for desktop */
+button:not(header button):not(nav button),
+[role="button"]:not(header [role="button"]),
+a:not(header a):not(nav a),
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
@@ -555,6 +556,15 @@ input[type="reset"],
 .btn-secondary {
   min-height: 48px;
   min-width: 48px;
+}
+
+/* Header-specific compact buttons */
+header button,
+header a,
+nav[aria-label="Main navigation"] button,
+nav[aria-label="Main navigation"] a {
+  min-height: auto;
+  min-width: auto;
 }
 
 /* Icon buttons should also meet touch target requirements */
@@ -590,8 +600,8 @@ input[type="radio"]+label {
   padding: 12px 0;
 }
 
-/* Navigation links touch targets */
-nav a,
+/* Navigation links touch targets - exclude main header nav */
+nav:not([aria-label="Main navigation"]) a,
 .nav-link,
 .sidebar-item {
   min-height: 48px;

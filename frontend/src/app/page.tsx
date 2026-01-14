@@ -78,10 +78,10 @@ export const metadata: Metadata = {
 // Loading component for Suspense
 function HomePageLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-[#E8F4FF] to-[#F2F2F7] flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-[#3C3C43] font-medium">Loading MediLens...</p>
+        <div className="w-12 h-12 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-[14px] text-slate-300 font-medium">Loading MediLens...</p>
       </div>
     </div>
   );

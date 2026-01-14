@@ -10,6 +10,7 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs';
+import { Activity } from 'lucide-react';
 
 import { cn } from '@/components/ui';
 import { useSafeNavigation } from '@/components/SafeNavigation';
@@ -21,21 +22,9 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-  {
-    id: 'home',
-    label: 'Home',
-    href: '/',
-  },
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    href: '/dashboard',
-  },
-  {
-    id: 'about',
-    label: 'About',
-    href: '/about',
-  },
+  { id: 'home', label: 'Home', href: '/' },
+  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+  { id: 'about', label: 'About', href: '/about' },
 ];
 
 export const Header: React.FC = () => {
@@ -45,75 +34,77 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { preload } = useSafeNavigation();
 
-  // Handle hydration
+  const isHomePage = pathname === '/';
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Handle scroll effect
   useEffect(() => {
     if (!mounted) return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 50);
     };
 
-    // Set initial scroll state
     handleScroll();
-
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [mounted]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Handle mobile menu toggle
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Handle keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsMobileMenuOpen(false);
     }
   };
 
+  const isTransparent = mounted && isHomePage && !isScrolled;
+
   return (
     <header
       className={cn(
         'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
-        // Always render initial state on server, apply scroll styles after hydration
-        mounted && isScrolled
-          ? 'border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-xl'
-          : 'bg-white/90 backdrop-blur-md',
+        isTransparent
+          ? 'bg-transparent'
+          : 'bg-black/95 backdrop-blur-md border-b border-zinc-800',
       )}
       onKeyDown={handleKeyDown}
       suppressHydrationWarning
     >
       <nav
-        className='container mx-auto px-4'
-        role='navigation'
-        aria-label='Main navigation'
-        id='main-navigation'
+        className="mx-auto max-w-6xl px-4 sm:px-6"
+        role="navigation"
+        aria-label="Main navigation"
+        id="main-navigation"
       >
-        <div className='flex h-16 items-center justify-between lg:h-20'>
+        <div className="flex h-14 items-center justify-between">
           {/* Brand */}
-          <div className='flex-shrink-0'>
-            <Link
-              href='/'
-              className='text-xl font-semibold text-[#1D1D1F] transition-colors duration-200'
-              aria-label='MediLens Home'
-            >
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 transition-colors duration-200"
+            aria-label="MediLens Home"
+          >
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800">
+              <Activity className="h-4.5 w-4.5 text-red-500" strokeWidth={2} />
+            </div>
+            <span className={cn(
+              'text-[15px] font-semibold tracking-tight transition-colors duration-200',
+              isTransparent ? 'text-white' : 'text-white'
+            )}>
               MediLens
-            </Link>
-          </div>
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className='hidden lg:flex lg:items-center lg:space-x-8'>
+          <div className="hidden md:flex md:items-center md:gap-1">
             {navigationItems.map(item => {
               const isActive = pathname === item.href;
 
@@ -122,9 +113,15 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={item.href}
                   className={cn(
-                    'text-sm font-medium transition-colors duration-200',
-                    isActive ? 'text-[#000000]' : 'text-[#8E8E93] hover:text-[#000000]',
-                  )}
+                      'px-3 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200',
+                      isTransparent
+                        ? isActive
+                          ? 'text-white bg-white/10 backdrop-blur-sm'
+                          : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        : isActive
+                          ? 'text-white bg-white/10'
+                          : 'text-zinc-400 hover:text-white hover:bg-white/5',
+                    )}
                   aria-current={isActive ? 'page' : undefined}
                   onMouseEnter={() => preload(item.href)}
                 >
@@ -134,31 +131,25 @@ export const Header: React.FC = () => {
             })}
           </div>
 
-          {/* CTA Button */}
-          <div className='hidden lg:flex lg:items-center lg:gap-4'>
+          {/* CTA Buttons */}
+          <div className="hidden md:flex md:items-center md:gap-1.5">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className='text-sm font-medium text-[#3C3C43] transition-colors duration-200 hover:text-[#000000]'>
+                <button className="px-3 py-1.5 text-[13px] font-medium text-zinc-400 transition-colors duration-200 hover:text-white">
                   Sign In
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className='rounded-full bg-[#007AFF] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0062CC]'>
+                <button className="px-4 py-1.5 text-[13px] font-medium rounded-full bg-white text-black transition-all duration-200 hover:bg-zinc-200">
                   Get Started
                 </button>
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <Link
-                href="/dashboard"
-                className='rounded-full bg-[#007AFF] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0062CC]'
-              >
-                Go to Dashboard
-              </Link>
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: 'w-9 h-9',
+                    avatarBox: 'w-6 h-6',
                   },
                 }}
               />
@@ -166,31 +157,26 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className='lg:hidden'>
+          <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
               aria-expanded={isMobileMenuOpen}
-              aria-controls='mobile-menu'
+              aria-controls="mobile-menu"
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-              className='flex h-10 w-10 items-center justify-center rounded-lg text-[#3C3C43] transition-colors hover:bg-[#F2F2F7]'
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded transition-colors',
+                isTransparent
+                  ? 'text-white hover:bg-white/10'
+                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white',
+              )}
             >
               {isMobileMenuOpen ? (
-                <svg className='h-6 w-6' fill='none' stroke='currentColor' viewBox='0 0 24 24' aria-hidden='true'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M6 18L18 6M6 6l12 12'
-                  />
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className='h-6 w-6' fill='none' stroke='currentColor' viewBox='0 0 24 24' aria-hidden='true'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M4 6h16M4 12h16M4 18h16'
-                  />
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
@@ -199,14 +185,17 @@ export const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         <div
-          id='mobile-menu'
+          id="mobile-menu"
           className={cn(
-            'overflow-hidden transition-all duration-300 ease-in-out lg:hidden',
+            'overflow-hidden transition-all duration-300 ease-in-out md:hidden',
             isMobileMenuOpen ? 'max-h-[400px] pb-4 opacity-100' : 'max-h-0 opacity-0',
           )}
           aria-hidden={!isMobileMenuOpen}
         >
-          <div className='space-y-1 border-t border-[#E5E5EA] pt-4'>
+          <div className={cn(
+            'space-y-1 pt-3',
+            isTransparent ? 'border-t border-white/10' : 'border-t border-zinc-800',
+          )}>
             {navigationItems.map(item => {
               const isActive = pathname === item.href;
 
@@ -215,10 +204,12 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={item.href}
                   className={cn(
-                    'block rounded-lg px-4 py-3 text-base font-medium transition-colors',
+                    'block rounded px-3 py-2 text-[13px] font-medium transition-colors',
                     isActive
-                      ? 'bg-[#007AFF]/10 text-[#007AFF]'
-                      : 'text-[#3C3C43] hover:bg-[#F2F2F7]',
+                      ? 'bg-blue-900/50 text-blue-400'
+                      : isTransparent
+                        ? 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-white',
                   )}
                   aria-current={isActive ? 'page' : undefined}
                   onMouseEnter={() => preload(item.href)}
@@ -229,31 +220,36 @@ export const Header: React.FC = () => {
             })}
 
             {/* Mobile CTA */}
-            <div className='px-4 pt-4 space-y-3'>
+            <div className="pt-3 space-y-2">
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className='block w-full rounded-full border border-[#007AFF] px-5 py-3 text-center text-base font-medium text-[#007AFF] transition-colors hover:bg-[#007AFF]/5'>
+                  <button className={cn(
+                    'block w-full rounded border px-3 py-2 text-center text-[13px] font-medium transition-colors',
+                    isTransparent
+                      ? 'border-white/20 text-white hover:bg-white/10'
+                      : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800',
+                  )}>
                     Sign In
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className='block w-full rounded-full bg-[#007AFF] px-5 py-3 text-center text-base font-medium text-white transition-colors hover:bg-[#0062CC]'>
+                  <button className="block w-full rounded bg-blue-600 px-3 py-2 text-center text-[13px] font-medium text-white hover:bg-blue-700">
                     Get Started
                   </button>
                 </SignUpButton>
               </SignedOut>
               <SignedIn>
                 <Link
-                  href='/dashboard'
-                  className='block w-full rounded-full bg-[#007AFF] px-5 py-3 text-center text-base font-medium text-white transition-colors hover:bg-[#0062CC]'
+                  href="/dashboard"
+                  className="block w-full rounded bg-blue-600 px-3 py-2 text-center text-[13px] font-medium text-white hover:bg-blue-700"
                 >
                   Go to Dashboard
                 </Link>
-                <div className='flex items-center justify-center pt-2'>
+                <div className="flex items-center justify-center pt-2">
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox: 'w-10 h-10',
+                        avatarBox: 'w-8 h-8',
                       },
                     }}
                   />

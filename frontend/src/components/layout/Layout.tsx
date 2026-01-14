@@ -46,7 +46,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <main
         className={cn(
           'flex-1',
-          showHeader && 'pt-16 lg:pt-20',
+          showHeader && 'pt-14',
           containerized && 'container mx-auto px-4',
         )}
         id='main-content'
