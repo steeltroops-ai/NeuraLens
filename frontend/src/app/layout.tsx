@@ -1,4 +1,5 @@
 import { Inter } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
@@ -104,105 +105,106 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html
-      lang='en'
-      className={inter.variable}
-      data-scroll-behavior='smooth'
-      suppressHydrationWarning
-    >
-      <head>
-        {/* PWA Meta Tags */}
-        <link rel='manifest' href='/manifest.json' />
-        <meta name='application-name' content='MediLens' />
-        <meta name='apple-mobile-web-app-capable' content='yes' />
-        <meta name='apple-mobile-web-app-status-bar-style' content='default' />
-        <meta name='apple-mobile-web-app-title' content='MediLens' />
-        <meta name='mobile-web-app-capable' content='yes' />
-        <meta name='msapplication-config' content='/browserconfig.xml' />
-        <meta name='msapplication-TileColor' content='#3B82F6' />
-        <meta name='msapplication-tap-highlight' content='no' />
-
-        {/* Apple Touch Icons */}
-        <link
-          rel='apple-touch-icon'
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
-        />
-
-        {/* Favicons */}
-        <link
-          rel='icon'
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
-        />
-
-        {/* Preconnect to external domains */}
-        <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
-
-        {/* DNS Prefetch */}
-        <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
-        <link rel='dns-prefetch' href='https://fonts.gstatic.com' />
-
-        {/* Preload critical resources */}
-        {/* Font preloading removed - using Google Fonts instead */}
-
-        {/* Security Headers */}
-        <meta httpEquiv='X-Content-Type-Options' content='nosniff' />
-        <meta httpEquiv='X-XSS-Protection' content='1; mode=block' />
-        <meta httpEquiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
-
-        {/* Performance Hints */}
-        <meta httpEquiv='Accept-CH' content='DPR, Viewport-Width, Width' />
-
-        {/* Structured Data */}
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'MedicalWebPage',
-              name: 'MediLens',
-              description: 'AI-powered medical diagnostics platform providing multiple diagnostic tools for various medical conditions',
-              url: 'https://medilens.com',
-              medicalAudience: {
-                '@type': 'MedicalAudience',
-                audienceType: 'Patient',
-              },
-              about: {
-                '@type': 'MedicalCondition',
-                name: 'Medical Diagnostics',
-              },
-              provider: {
-                '@type': 'Organization',
-                name: 'MediLens',
-                url: 'https://medilens.com',
-              },
-            }),
-          }}
-        />
-      </head>
-      <body
-        className='bg-surface-background min-h-screen text-text-primary antialiased'
+    <ClerkProvider>
+      <html
+        lang='en'
+        className={inter.variable}
+        data-scroll-behavior='smooth'
         suppressHydrationWarning
       >
-        {/* Main Application */}
-        <div id='root' className='relative'>
-          {children}
-        </div>
+        <head>
+          {/* PWA Meta Tags */}
+          <link rel='manifest' href='/manifest.json' />
+          <meta name='application-name' content='MediLens' />
+          <meta name='apple-mobile-web-app-capable' content='yes' />
+          <meta name='apple-mobile-web-app-status-bar-style' content='default' />
+          <meta name='apple-mobile-web-app-title' content='MediLens' />
+          <meta name='mobile-web-app-capable' content='yes' />
+          <meta name='msapplication-config' content='/browserconfig.xml' />
+          <meta name='msapplication-TileColor' content='#3B82F6' />
+          <meta name='msapplication-tap-highlight' content='no' />
 
-        {/* Live Regions for Screen Readers */}
-        <div
-          id='live-region-announcements'
-          aria-live='polite'
-          aria-atomic='true'
-          className='sr-only'
-        />
-        <div id='live-region-alerts' aria-live='assertive' aria-atomic='true' className='sr-only' />
+          {/* Apple Touch Icons */}
+          <link
+            rel='apple-touch-icon'
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
+          />
 
-        {/* Service Worker Registration - Production Only */}
-        {process.env.NODE_ENV === 'production' && (
+          {/* Favicons */}
+          <link
+            rel='icon'
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
+          />
+
+          {/* Preconnect to external domains */}
+          <link rel='preconnect' href='https://fonts.googleapis.com' />
+          <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
+
+          {/* DNS Prefetch */}
+          <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+          <link rel='dns-prefetch' href='https://fonts.gstatic.com' />
+
+          {/* Preload critical resources */}
+          {/* Font preloading removed - using Google Fonts instead */}
+
+          {/* Security Headers */}
+          <meta httpEquiv='X-Content-Type-Options' content='nosniff' />
+          <meta httpEquiv='X-XSS-Protection' content='1; mode=block' />
+          <meta httpEquiv='Referrer-Policy' content='strict-origin-when-cross-origin' />
+
+          {/* Performance Hints */}
+          <meta httpEquiv='Accept-CH' content='DPR, Viewport-Width, Width' />
+
+          {/* Structured Data */}
           <script
+            type='application/ld+json'
             dangerouslySetInnerHTML={{
-              __html: `
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'MedicalWebPage',
+                name: 'MediLens',
+                description: 'AI-powered medical diagnostics platform providing multiple diagnostic tools for various medical conditions',
+                url: 'https://medilens.com',
+                medicalAudience: {
+                  '@type': 'MedicalAudience',
+                  audienceType: 'Patient',
+                },
+                about: {
+                  '@type': 'MedicalCondition',
+                  name: 'Medical Diagnostics',
+                },
+                provider: {
+                  '@type': 'Organization',
+                  name: 'MediLens',
+                  url: 'https://medilens.com',
+                },
+              }),
+            }}
+          />
+        </head>
+        <body
+          className='bg-surface-background min-h-screen text-text-primary antialiased'
+          suppressHydrationWarning
+        >
+          {/* Main Application */}
+          <div id='root' className='relative'>
+            {children}
+          </div>
+
+          {/* Live Regions for Screen Readers */}
+          <div
+            id='live-region-announcements'
+            aria-live='polite'
+            aria-atomic='true'
+            className='sr-only'
+          />
+          <div id='live-region-alerts' aria-live='assertive' aria-atomic='true' className='sr-only' />
+
+          {/* Service Worker Registration - Production Only */}
+          {process.env.NODE_ENV === 'production' && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
                 if ('serviceWorker' in navigator) {
                   window.addEventListener('load', function() {
                     navigator.serviceWorker.register('/sw.js')
@@ -215,14 +217,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   });
                 }
               `,
-            }}
-          />
-        )}
+              }}
+            />
+          )}
 
-        {/* Accessibility Initialization */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+          {/* Accessibility Initialization */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
               // Initialize accessibility features
               (function() {
                 // Detect reduced motion preference
@@ -268,9 +270,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 });
               })();
             `,
-          }}
-        />
-      </body>
-    </html>
+            }}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

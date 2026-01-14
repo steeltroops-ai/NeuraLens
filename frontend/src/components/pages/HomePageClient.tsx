@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import {
-  Brain,
   Shield,
   Clock,
   Zap,
@@ -107,18 +106,18 @@ function HeroSection() {
           {/* CTA Buttons - Apple-style compact */}
           <div className="flex flex-col items-center justify-center gap-3 pt-8 sm:flex-row">
             <Link
-              href="/assessment"
+              href="/dashboard"
               className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#007AFF] px-6 py-3 text-base font-medium text-white transition-all duration-200 hover:bg-[#0062CC] active:scale-[0.98]"
             >
-              Start Assessment
+              Go to Dashboard
               <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/about"
               className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-[#D1D1D6] bg-white px-6 py-3 text-base font-medium text-[#000000] transition-all duration-200 hover:bg-[#F2F2F7] active:scale-[0.98]"
             >
-              View Dashboard
+              Learn More
             </Link>
           </div>
 

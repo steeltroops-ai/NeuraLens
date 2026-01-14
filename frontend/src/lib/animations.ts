@@ -554,17 +554,17 @@ export function createStaggerContainer(staggerDelay: number = 0.1): Variants {
  * Create a delayed animation variant
  */
 export function withDelay<T extends Variants>(variants: T, delay: number): T {
-    const result = { ...variants };
+    const result = { ...variants } as Record<string, unknown>;
     if (result.animate && typeof result.animate === 'object') {
         result.animate = {
-            ...result.animate,
+            ...(result.animate as object),
             transition: {
-                ...(result.animate as any).transition,
+                ...((result.animate as Record<string, unknown>).transition as object),
                 delay,
             },
         };
     }
-    return result;
+    return result as T;
 }
 
 // ============================================================================

@@ -3,6 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs';
 
 import { cn } from '@/components/ui';
 import { useSafeNavigation } from '@/components/SafeNavigation';
@@ -18,6 +25,11 @@ const navigationItems: NavigationItem[] = [
     id: 'home',
     label: 'Home',
     href: '/',
+  },
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    href: '/dashboard',
   },
   {
     id: 'about',
@@ -123,13 +135,34 @@ export const Header: React.FC = () => {
           </div>
 
           {/* CTA Button */}
-          <div className='hidden lg:flex lg:items-center'>
-            <Link
-              href="/assessment"
-              className='rounded-full bg-[#007AFF] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0062CC]'
-            >
-              Get Started
-            </Link>
+          <div className='hidden lg:flex lg:items-center lg:gap-4'>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className='text-sm font-medium text-[#3C3C43] transition-colors duration-200 hover:text-[#000000]'>
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className='rounded-full bg-[#007AFF] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0062CC]'>
+                  Get Started
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                className='rounded-full bg-[#007AFF] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0062CC]'
+              >
+                Go to Dashboard
+              </Link>
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: 'w-9 h-9',
+                  },
+                }}
+              />
+            </SignedIn>
           </div>
 
           {/* Mobile Menu Button */}
@@ -196,13 +229,36 @@ export const Header: React.FC = () => {
             })}
 
             {/* Mobile CTA */}
-            <div className='px-4 pt-4'>
-              <Link
-                href='/assessment'
-                className='block w-full rounded-full bg-[#007AFF] px-5 py-3 text-center text-base font-medium text-white transition-colors hover:bg-[#0062CC]'
-              >
-                Get Started
-              </Link>
+            <div className='px-4 pt-4 space-y-3'>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className='block w-full rounded-full border border-[#007AFF] px-5 py-3 text-center text-base font-medium text-[#007AFF] transition-colors hover:bg-[#007AFF]/5'>
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className='block w-full rounded-full bg-[#007AFF] px-5 py-3 text-center text-base font-medium text-white transition-colors hover:bg-[#0062CC]'>
+                    Get Started
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <Link
+                  href='/dashboard'
+                  className='block w-full rounded-full bg-[#007AFF] px-5 py-3 text-center text-base font-medium text-white transition-colors hover:bg-[#0062CC]'
+                >
+                  Go to Dashboard
+                </Link>
+                <div className='flex items-center justify-center pt-2'>
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: 'w-10 h-10',
+                      },
+                    }}
+                  />
+                </div>
+              </SignedIn>
             </div>
           </div>
         </div>
