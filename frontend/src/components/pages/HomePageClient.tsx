@@ -5,10 +5,8 @@ import {
   Shield,
   Zap,
   ArrowRight,
-  CheckCircle,
   Users,
   Award,
-  Sparkles,
   FileText,
   Lock,
   Activity,
@@ -86,12 +84,12 @@ function HeroSection() {
   return (
     <section className="relative min-h-screen -mt-14 pt-14 flex items-center overflow-hidden bg-black selection:bg-white/20">
       {/* Spotlight Effect - Subtle top center glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-red-500/[0.04] blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] lg:w-[800px] h-[300px] sm:h-[400px] lg:h-[500px] bg-red-500/[0.04] blur-[80px] sm:blur-[100px] lg:blur-[120px] rounded-full pointer-events-none" />
 
       {/* Very faint grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] sm:bg-[size:48px_48px] lg:bg-[size:64px_64px]" />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-24">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,17 +101,17 @@ function HeroSection() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2.5 rounded-full bg-zinc-900/50 border border-zinc-800 px-3 py-1 text-[11px] font-medium text-zinc-300 mb-8"
+            className="inline-flex items-center gap-2 sm:gap-2.5 rounded-full bg-zinc-900/50 border border-zinc-800 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-medium text-zinc-300 mb-6 sm:mb-8"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-20"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
-            <span className="tracking-wide uppercase font-semibold text-[10px] text-zinc-400">{TOTAL_MODULES_COUNT} Diagnostic Modules</span>
+            <span className="tracking-wide uppercase font-semibold text-[9px] sm:text-[10px] text-zinc-400">{TOTAL_MODULES_COUNT} Diagnostic Modules</span>
           </motion.div>
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-semibold leading-[1.05] tracking-tight mb-8 text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.1] sm:leading-[1.05] tracking-tight mb-6 sm:mb-8 text-white px-2">
             AI-Powered Diagnostics
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-600">
@@ -122,42 +120,42 @@ function HeroSection() {
           </h1>
 
           {/* Dynamic feature */}
-          <div className="h-7 flex items-center justify-center mb-6">
+          <div className="h-6 sm:h-7 flex items-center justify-center mb-4 sm:mb-6 px-4">
             <motion.div
               key={currentFeature}
               initial={{ opacity: 0, filter: 'blur(4px)' }}
               animate={{ opacity: 1, filter: 'blur(0px)' }}
               exit={{ opacity: 0, filter: 'blur(4px)' }}
               transition={{ duration: 0.4 }}
-              className="flex items-center gap-3 text-[15px]"
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 text-[13px] sm:text-[15px]"
             >
               <span className="font-medium text-white">
                 {features[currentFeature]?.name}
               </span>
-              <span className="h-4 w-[1px] bg-zinc-800" />
-              <span className="text-zinc-500 font-mono tracking-tight text-[13px] uppercase">{features[currentFeature]?.specialty}</span>
+              <span className="hidden sm:block h-4 w-[1px] bg-zinc-800" />
+              <span className="text-zinc-500 font-mono tracking-tight text-[11px] sm:text-[13px] uppercase">{features[currentFeature]?.specialty}</span>
             </motion.div>
           </div>
 
           {/* Description */}
-          <p className="mx-auto max-w-2xl text-[15px] sm:text-[16px] leading-relaxed text-slate-400 mb-10">
+          <p className="mx-auto max-w-2xl text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed text-slate-400 mb-8 sm:mb-10 px-4">
             MediLens unifies AI diagnostics across ophthalmology, radiology, dermatology,
             cardiology, neurology, and pathology — enabling faster, more accurate clinical decisions
             with validated models and real-time processing.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
             <Link
               href="/dashboard"
-              className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-[14px] font-medium text-black transition-all duration-200 hover:bg-zinc-200"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 sm:px-8 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-medium text-black transition-all duration-200 hover:bg-zinc-200"
             >
               Start Diagnosing
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/about"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-zinc-800 bg-white/5 px-8 py-3.5 text-[14px] font-medium text-white transition-all duration-200 hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-800 bg-white/5 px-6 sm:px-8 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-medium text-white transition-all duration-200 hover:bg-white/10"
             >
               <Play className="h-4 w-4 text-zinc-400" />
               Watch Demo
@@ -165,16 +163,16 @@ function HeroSection() {
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 lg:gap-x-8 gap-y-3 sm:gap-y-4 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 px-4">
             {[
               { icon: Shield, label: 'HIPAA Compliant' },
               { icon: Award, label: '95%+ Accuracy' },
               { icon: Zap, label: '< 200ms Latency' },
               { icon: Globe, label: 'Global Standard' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <item.icon className="h-4 w-4 text-zinc-400" />
-                <span className="text-[12px] font-medium text-zinc-500">{item.label}</span>
+              <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-zinc-400" />
+                <span className="text-[11px] sm:text-[12px] font-medium text-zinc-500">{item.label}</span>
               </div>
             ))}
           </div>
@@ -182,11 +180,10 @@ function HeroSection() {
       </div>
 
       {/* Bottom fade - smooth transition to next section */}
-      {/* Bottom fade - smooth transition to next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-black to-transparent" />
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-500">
+      {/* Scroll indicator - hidden on mobile */}
+      <div className="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 text-zinc-500">
         <span className="text-[11px] font-medium tracking-wide">SCROLL</span>
         <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-800 to-transparent">
           <motion.div
@@ -258,11 +255,11 @@ function DiagnosticModuleCard({ module }: { module: DiagnosticModule }) {
 
         {/* Methods */}
         <div className="pt-4 border-t border-zinc-800/50 flex justify-between items-center bg-transparent group-hover:border-zinc-700/50 transition-colors">
-             <p className="text-[11px] text-zinc-500 font-mono group-hover:text-zinc-400 transition-colors">{module.howItWorks}</p>
-             {/* Hover arrow */}
-            {isAvailable && (
-              <ChevronRight className={`h-4 w-4 text-zinc-600 group-hover:text-white transition-colors transform group-hover:translate-x-1`} />
-            )}
+          <p className="text-[11px] text-zinc-500 font-mono group-hover:text-zinc-400 transition-colors">{module.howItWorks}</p>
+          {/* Hover arrow */}
+          {isAvailable && (
+            <ChevronRight className={`h-4 w-4 text-zinc-600 group-hover:text-white transition-colors transform group-hover:translate-x-1`} />
+          )}
         </div>
       </div>
 
@@ -278,23 +275,23 @@ function AvailableNowSection() {
   const availableModules = getAvailableModules();
 
   return (
-    <section className="bg-black py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-black py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-10 sm:mb-12"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Available Now</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Available Now</span>
           </div>
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             Clinical-Grade Modules
           </h2>
-          <p className="max-w-xl text-[15px] text-zinc-400 leading-relaxed">
+          <p className="max-w-xl text-[14px] sm:text-[15px] text-zinc-400 leading-relaxed">
             Four validated AI diagnostic modules with real-time processing,
             clinical-grade accuracy, and seamless workflow integration.
           </p>
@@ -326,9 +323,9 @@ function StatsSection() {
   ];
 
   return (
-    <section className="bg-black py-16 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <section className="bg-black py-12 sm:py-16 lg:py-20 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -338,11 +335,11 @@ function StatsSection() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="text-center"
             >
-              <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800`}>
-                <stat.icon className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <div className={`mx-auto mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800`}>
+                <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" strokeWidth={1.5} />
               </div>
-              <div className="text-3xl sm:text-4xl font-semibold text-white mb-1 tracking-tight">{stat.value}</div>
-              <div className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-1 tracking-tight">{stat.value}</div>
+              <div className="text-[11px] sm:text-[12px] font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</div>
             </motion.div>
           ))}
         </div>
@@ -393,24 +390,24 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section className="bg-zinc-950 py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-zinc-950 py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             Workflow Integration
           </h2>
-          <p className="mx-auto max-w-xl text-[15px] text-zinc-400">
+          <p className="mx-auto max-w-xl text-[14px] sm:text-[15px] text-zinc-400 px-4">
             From data upload to clinical insights in four simple steps.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {steps.map((step, index) => (
             <motion.div
               key={step.number}
@@ -418,14 +415,14 @@ function HowItWorksSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`group relative bg-zinc-900/50 rounded-xl p-8 border border-zinc-800 transition-all duration-300 hover:bg-zinc-900 ${step.border}`}
+              className={`group relative bg-zinc-900/50 rounded-xl p-6 sm:p-8 border border-zinc-800 transition-all duration-300 hover:bg-zinc-900 ${step.border}`}
             >
-              <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-lg ${step.bg} border border-zinc-800`}>
-                <step.icon className={`h-5 w-5 ${step.color}`} strokeWidth={1.5} />
+              <div className={`mb-5 sm:mb-6 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg ${step.bg} border border-zinc-800`}>
+                <step.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${step.color}`} strokeWidth={1.5} />
               </div>
-              <div className="text-[10px] font-mono text-zinc-600 mb-3 uppercase tracking-wider">Step {step.number}</div>
-              <h3 className="text-[16px] font-medium text-white mb-2">{step.title}</h3>
-              <p className="text-[13px] text-zinc-500 leading-relaxed">{step.description}</p>
+              <div className="text-[9px] sm:text-[10px] font-mono text-zinc-600 mb-2 sm:mb-3 uppercase tracking-wider">Step {step.number}</div>
+              <h3 className="text-[15px] sm:text-[16px] font-medium text-white mb-2">{step.title}</h3>
+              <p className="text-[12px] sm:text-[13px] text-zinc-500 leading-relaxed">{step.description}</p>
             </motion.div>
           ))}
         </div>
@@ -439,23 +436,23 @@ function ComingSoonSection() {
   const comingSoonModules = getComingSoonModules();
 
   return (
-    <section className="bg-black py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-black py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-10 sm:mb-12"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <span className="flex h-1.5 w-1.5 rounded-full bg-zinc-700" />
-            <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest">In Development</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-zinc-500 uppercase tracking-widest">In Development</span>
           </div>
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             Expanding Capabilities
           </h2>
-          <p className="max-w-xl text-[15px] text-zinc-400 leading-relaxed">
+          <p className="max-w-xl text-[14px] sm:text-[15px] text-zinc-400 leading-relaxed">
             Radiology, dermatology, cardiology, pathology, pulmonology — each built with
             specialty-specific AI models trained on validated medical datasets.
           </p>
@@ -478,8 +475,6 @@ function ComingSoonSection() {
 }
 
 
-// Technology Section
-// Technology Section
 // Technology Section
 function TechnologySection() {
   const technologies = [
@@ -518,19 +513,19 @@ function TechnologySection() {
   ];
 
   return (
-    <section className="bg-black py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-black py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             State-of-the-Art AI Models
           </h2>
-          <p className="mx-auto max-w-xl text-[15px] text-zinc-400">
+          <p className="mx-auto max-w-xl text-[14px] sm:text-[15px] text-zinc-400 px-4">
             Each module uses specialty-specific architectures trained on validated medical datasets.
           </p>
         </motion.div>
@@ -543,15 +538,15 @@ function TechnologySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`group rounded-xl bg-zinc-900/50 border border-zinc-800 p-6 hover:bg-zinc-900 transition-all duration-300 ${tech.border}`}
+              className={`group rounded-xl bg-zinc-900/50 border border-zinc-800 p-5 sm:p-6 hover:bg-zinc-900 transition-all duration-300 ${tech.border}`}
             >
-              <div className={`mb-5 flex h-10 w-10 items-center justify-center rounded-lg ${tech.bg} border border-white/5`}>
-                <tech.icon className={`h-5 w-5 ${tech.color}`} strokeWidth={1.5} />
+              <div className={`mb-4 sm:mb-5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg ${tech.bg} border border-white/5`}>
+                <tech.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${tech.color}`} strokeWidth={1.5} />
               </div>
-              <h3 className="text-[15px] font-medium text-white mb-4">{tech.category}</h3>
+              <h3 className="text-[14px] sm:text-[15px] font-medium text-white mb-3 sm:mb-4">{tech.category}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {tech.items.map((item, i) => (
-                  <span key={i} className="text-[11px] text-zinc-400 bg-black/50 border border-zinc-800 rounded px-2 py-1 group-hover:border-zinc-700 transition-colors">
+                  <span key={i} className="text-[10px] sm:text-[11px] text-zinc-400 bg-black/50 border border-zinc-800 rounded px-2 py-1 group-hover:border-zinc-700 transition-colors">
                     {item}
                   </span>
                 ))}
@@ -564,7 +559,6 @@ function TechnologySection() {
   );
 }
 
-// Clinical Standards Section
 // Clinical Standards Section
 function ClinicalStandardsSection() {
   const standards = [
@@ -603,19 +597,19 @@ function ClinicalStandardsSection() {
   ];
 
   return (
-    <section className="bg-zinc-950 py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-zinc-950 py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             Security & Compliance
           </h2>
-          <p className="mx-auto max-w-xl text-[15px] text-zinc-400">
+          <p className="mx-auto max-w-xl text-[14px] sm:text-[15px] text-zinc-400 px-4">
             Enterprise-grade infrastructure built for healthcare.
           </p>
         </motion.div>
@@ -628,13 +622,13 @@ function ClinicalStandardsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`group rounded-xl bg-black border border-zinc-800 p-6 hover:border-zinc-700 transition-all duration-300 ${standard.border}`}
+              className={`group rounded-xl bg-black border border-zinc-800 p-5 sm:p-6 hover:border-zinc-700 transition-all duration-300 ${standard.border}`}
             >
-              <div className={`mb-5 flex h-10 w-10 items-center justify-center rounded-lg ${standard.bg} border border-white/5`}>
-                <standard.icon className={`h-5 w-5 ${standard.color}`} />
+              <div className={`mb-4 sm:mb-5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg ${standard.bg} border border-white/5`}>
+                <standard.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${standard.color}`} />
               </div>
-              <h3 className="text-[15px] font-medium text-white mb-2">{standard.title}</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed">{standard.description}</p>
+              <h3 className="text-[14px] sm:text-[15px] font-medium text-white mb-2">{standard.title}</h3>
+              <p className="text-[12px] sm:text-[13px] text-zinc-400 leading-relaxed">{standard.description}</p>
             </motion.div>
           ))}
         </div>
@@ -643,7 +637,6 @@ function ClinicalStandardsSection() {
   );
 }
 
-// Target Users Section
 // Target Users Section
 function TargetUsersSection() {
   const users = [
@@ -674,24 +667,24 @@ function TargetUsersSection() {
   ];
 
   return (
-    <section className="bg-black py-24 border-t border-zinc-900">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-black py-16 sm:py-20 lg:py-24 border-t border-zinc-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-3 sm:mb-4 tracking-tight">
             Designed for Professionals
           </h2>
-          <p className="mx-auto max-w-xl text-[15px] text-zinc-400">
+          <p className="mx-auto max-w-xl text-[14px] sm:text-[15px] text-zinc-400 px-4">
             Tailored workflows for every healthcare role.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {users.map((user, index) => (
             <motion.div
               key={user.title}
@@ -699,13 +692,13 @@ function TargetUsersSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`group text-center p-6 rounded-2xl border border-transparent transition-all duration-300 ${user.border}`}
+              className={`group text-center p-6 sm:p-8 rounded-2xl border border-transparent transition-all duration-300 ${user.border}`}
             >
-              <div className={`mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${user.bg} border border-white/5`}>
-                <user.icon className={`h-6 w-6 ${user.color}`} strokeWidth={1.5} />
+              <div className={`mx-auto mb-5 sm:mb-6 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl ${user.bg} border border-white/5`}>
+                <user.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${user.color}`} strokeWidth={1.5} />
               </div>
-              <h3 className="text-[15px] font-medium text-white mb-2">{user.title}</h3>
-              <p className="text-[13px] text-zinc-500 leading-relaxed">{user.description}</p>
+              <h3 className="text-[14px] sm:text-[15px] font-medium text-white mb-2">{user.title}</h3>
+              <p className="text-[12px] sm:text-[13px] text-zinc-500 leading-relaxed">{user.description}</p>
             </motion.div>
           ))}
         </div>
@@ -717,20 +710,20 @@ function TargetUsersSection() {
 // CTA Section
 function CTASection() {
   return (
-    <section className="bg-zinc-950 border-t border-zinc-900 py-24">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
-        <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-6 tracking-tight">
+    <section className="bg-zinc-950 border-t border-zinc-900 py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white mb-4 sm:mb-6 tracking-tight px-4">
           Ready to Modernize Your Practice?
         </h2>
-        <p className="text-[16px] text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-[14px] sm:text-[15px] lg:text-[16px] text-zinc-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-4">
           Join thousands of clinicians using MediLens for faster, more accurate diagnostics.
         </p>
 
         <SignedIn>
-          <div className="flex justify-center">
+          <div className="flex justify-center px-4">
             <Link
               href="/dashboard"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-[14px] font-medium text-black transition-colors hover:bg-zinc-200"
+              className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full bg-white px-6 sm:px-8 text-[13px] sm:text-[14px] font-medium text-black transition-colors hover:bg-zinc-200 w-full sm:w-auto"
             >
               Go to Dashboard
             </Link>
@@ -738,17 +731,17 @@ function CTASection() {
         </SignedIn>
 
         <SignedOut>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-4">
             <Link
               href="/dashboard"
-              className="group inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-8 text-[14px] font-medium text-black transition-all hover:bg-zinc-200"
+              className="group inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 sm:px-8 text-[13px] sm:text-[14px] font-medium text-black transition-all hover:bg-zinc-200"
             >
               Get Started Free
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/about"
-              className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-700 bg-transparent px-8 text-[14px] font-medium text-white transition-colors hover:bg-zinc-900 hover:border-zinc-500"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-700 bg-transparent px-6 sm:px-8 text-[13px] sm:text-[14px] font-medium text-white transition-colors hover:bg-zinc-900 hover:border-zinc-500"
             >
               View Documentation
             </Link>

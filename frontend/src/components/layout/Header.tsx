@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { preload } = useSafeNavigation();
 
-  const isHomePage = pathname === '/';
+  const isTransparentPage = pathname === '/' || pathname?.startsWith('/about');
 
   useEffect(() => {
     setMounted(true);
@@ -66,7 +66,7 @@ export const Header: React.FC = () => {
     }
   };
 
-  const isTransparent = mounted && isHomePage && !isScrolled;
+  const isTransparent = mounted && isTransparentPage && !isScrolled;
 
   return (
     <header
