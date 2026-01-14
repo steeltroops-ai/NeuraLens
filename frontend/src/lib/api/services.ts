@@ -16,6 +16,7 @@ import {
     NRIFusionRequest,
     NRIFusionResponse,
 } from './types';
+import type { EnhancedSpeechAnalysisResponse } from '@/types/speech-enhanced';
 
 /**
  * Speech Analysis Service
@@ -50,6 +51,37 @@ export const SpeechAnalysisService = {
         const formData = new FormData();
         formData.append('audio_file', file);
         return apiClient.postFormData('/speech/validate', formData);
+    },
+
+    /**
+     * Enhanced speech analysis with all 9 biomarkers
+     */
+    async analyzeEnhanced(
+        audioFile: File | Blob,
+        sessionId?: string,
+        baselineSessionId?: string
+    ): Promise<ApiResponse<EnhancedSpeechAnalysisResponse>> {
+        const formData = new FormData();
+        formData.append('audio_file', audioFile);
+        if (sessionId) {
+            formData.append('session_id', sessionId);
+        }
+        if (baselineSessionId) {
+            formData.append('baseline_session_id', baselineSessionId);
+        }
+        return apiClient.postFormData<EnhancedSpeechAnalysisResponse>('/speech/analyze/enhanced', formData);
+    },
+
+    /**
+     * Get available speech features and supported formats
+     */
+    async getFeatures(): Promise<ApiResponse<{
+        biomarkers: string[];
+        supported_formats: string[];
+        max_duration: number;
+        max_file_size: number;
+    }>> {
+        return apiClient.get('/speech/features');
     },
 };
 
