@@ -159,7 +159,7 @@ const PWAInstallPrompt: React.FC = () => {
           </div>
 
           <div className='min-w-0 flex-1'>
-            <h3 className='text-sm font-semibold text-text-primary'>Install NeuroLens-X</h3>
+            <h3 className='text-sm font-semibold text-text-primary'>Install MediLens</h3>
             <p className='mt-1 text-xs text-text-secondary'>
               Install our app for faster access and offline capability.
             </p>

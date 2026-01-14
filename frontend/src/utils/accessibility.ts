@@ -38,7 +38,6 @@ export const announceToScreenReader = (
  */
 export class FocusManager {
   private focusHistory: HTMLElement[] = [];
-  private skipLinks: Array<{ target: string; label: string }> = [];
 
   /**
    * Sets focus to an element and adds it to history
@@ -93,7 +92,7 @@ export class FocusManager {
   trapFocus(container: HTMLElement): () => void {
     // Check if we're in a browser environment
     if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return () => {}; // Return empty cleanup function
+      return () => { }; // Return empty cleanup function
     }
 
     const focusableElements = container.querySelectorAll(
@@ -137,42 +136,6 @@ export class FocusManager {
     return () => {
       container.removeEventListener('keydown', handleTabKey);
     };
-  }
-
-  /**
-   * Adds skip links for keyboard navigation
-   */
-  addSkipLink(target: string, label: string): void {
-    this.skipLinks.push({ target, label });
-    this.renderSkipLinks();
-  }
-
-  private renderSkipLinks(): void {
-    // Check if we're in a browser environment
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return;
-    }
-
-    // Remove existing skip links
-    const existingSkipLinks = document.querySelectorAll('.skip-link');
-    existingSkipLinks.forEach(link => link.remove());
-
-    // Create new skip links
-    this.skipLinks.forEach(({ target, label }) => {
-      const skipLink = document.createElement('a');
-      skipLink.href = `#${target}`;
-      skipLink.textContent = label;
-      skipLink.className = 'skip-link';
-      skipLink.addEventListener('click', e => {
-        e.preventDefault();
-        const targetElement = document.getElementById(target);
-        if (targetElement) {
-          this.setFocus(targetElement);
-        }
-      });
-
-      document.body.insertBefore(skipLink, document.body.firstChild);
-    });
   }
 }
 
@@ -622,19 +585,12 @@ export const initializeAccessibility = (): void => {
   liveRegionManager.createRegion?.('announcements', 'polite');
   liveRegionManager.createRegion?.('alerts', 'assertive');
 
-  // Add skip links
-  focusManager.addSkipLink?.('main-content', 'Skip to main content');
-  focusManager.addSkipLink?.('main-navigation', 'Skip to navigation');
-
   // Initialize voice navigation if supported
   if (voiceNavigation.initialize?.()) {
     if (process.env.NODE_ENV === 'development') {
       console.debug('Voice navigation available');
     }
   }
-
-  // Announce initialization
-  announceToScreenReader('NeuroLens-X accessibility features initialized', 'polite');
 };
 
 /**

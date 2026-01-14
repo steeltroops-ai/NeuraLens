@@ -7,7 +7,12 @@ import { cn } from '@/utils/cn';
 import type { InputProps } from '@/types/design-system';
 
 /**
- * Clinical-grade Input component with validation and accessibility support
+ * MediLens Design System Input Component
+ * 
+ * Clinical-grade input with validation and accessibility support.
+ * Follows MediLens Design System specifications:
+ * - h-12, rounded-xl, bg-surface-secondary
+ * - Focus states with medilens-blue-500 border and ring
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
@@ -42,32 +47,37 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const errorId = error ? `${inputId}-error` : undefined;
     const helperId = helperText ? `${inputId}-helper` : undefined;
 
-    // Base input classes
+    // MediLens Design System base input classes
     const baseClasses = [
       'w-full',
+      'h-12',           // MediLens: h-12 height
       'px-4',
-      'py-3',
-      'bg-surface-secondary',
-      'border',
-      'rounded-lg',
+      'bg-surface-secondary',  // MediLens: bg-surface-secondary
       'text-text-primary',
-      'placeholder:text-text-muted',
+      'text-[17px]',    // MediLens body text size
+      'rounded-xl',     // MediLens: rounded-xl
+      'border',
+      'border-transparent',
       'transition-all',
-      'duration-fast',
-      'ease-out',
+      'duration-200',
+      'ease-out-quint',
+      'placeholder:text-text-quaternary',  // MediLens placeholder color
+      // MediLens focus states
       'focus:outline-none',
-      'focus:ring-2',
-      'focus:ring-primary-500',
-      'focus:border-transparent',
+      'focus:bg-white',
+      'focus:border-medilens-blue-500',
+      'focus:ring-4',
+      'focus:ring-medilens-blue-500/20',
+      // Disabled states
       'disabled:opacity-50',
       'disabled:cursor-not-allowed',
-      'disabled:bg-neutral-800',
+      'disabled:bg-surface-tertiary',
     ];
 
     // State-dependent classes
     const stateClasses = error
-      ? ['border-error', 'focus:ring-error', 'bg-error/5']
-      : ['border-neutral-700', 'hover:border-neutral-600', 'focus:border-primary-500'];
+      ? ['border-error-500', 'focus:ring-error-500/20', 'focus:border-error-500', 'bg-error-50']
+      : [];
 
     // Icon spacing classes
     const iconClasses = {
@@ -104,7 +114,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className='relative'>
         {/* Left Icon */}
         {leftIcon && (
-          <div className='text-text-muted pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transform'>
+          <div className='text-text-tertiary pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transform' aria-hidden='true'>
             {leftIcon}
           </div>
         )}
@@ -128,13 +138,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           onBlur={handleBlur}
           onFocus={handleFocus}
           aria-invalid={Boolean(error)}
+          aria-required={required}
           aria-describedby={cn(errorId, helperId).trim() || undefined}
           {...props}
         />
 
         {/* Right Icon */}
         {rightIcon && (
-          <div className='text-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform'>
+          <div className='text-text-tertiary pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform' aria-hidden='true'>
             {rightIcon}
           </div>
         )}
@@ -145,14 +156,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             htmlFor={inputId}
             className={cn(
               'pointer-events-none absolute left-4 transition-all duration-200',
-              'text-text-muted',
+              'text-text-tertiary',
               isFocused || hasValue
-                ? 'top-2 text-xs text-primary-500'
+                ? 'top-2 text-xs text-medilens-blue-500'
                 : 'top-1/2 -translate-y-1/2 text-base',
             )}
           >
             {props['aria-label'] || 'Input'}
-            {required && <span className='text-error ml-1'>*</span>}
+            {required && <span className='text-error-500 ml-1'>*</span>}
           </label>
         )}
 
@@ -160,7 +171,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <div
             id={errorId}
-            className='text-error mt-2 flex items-center gap-2 text-sm'
+            className='text-error-500 mt-2 flex items-center gap-2 text-sm'
             role='alert'
             aria-live='polite'
           >
@@ -177,7 +188,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Helper Text */}
         {helperText && !error && (
-          <div id={helperId} className='text-text-muted mt-2 text-sm'>
+          <div id={helperId} className='text-text-tertiary mt-2 text-sm'>
             {helperText}
           </div>
         )}
@@ -189,7 +200,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = 'Input';
 
 /**
- * Textarea component with similar styling and functionality
+ * MediLens Design System Textarea Component
+ * 
+ * Textarea with similar styling and functionality to Input.
  */
 interface TextareaProps extends Omit<InputProps, 'type' | 'leftIcon' | 'rightIcon'> {
   rows?: number;
@@ -222,32 +235,37 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const errorId = error ? `${textareaId}-error` : undefined;
     const helperId = helperText ? `${textareaId}-helper` : undefined;
 
-    // Base textarea classes
+    // MediLens Design System base textarea classes
     const baseClasses = [
       'w-full',
       'px-4',
       'py-3',
       'bg-surface-secondary',
-      'border',
-      'rounded-lg',
       'text-text-primary',
-      'placeholder:text-text-muted',
+      'text-[17px]',
+      'rounded-xl',
+      'border',
+      'border-transparent',
       'transition-all',
-      'duration-fast',
-      'ease-out',
+      'duration-200',
+      'ease-out-quint',
+      'placeholder:text-text-quaternary',
+      // MediLens focus states
       'focus:outline-none',
-      'focus:ring-2',
-      'focus:ring-primary-500',
-      'focus:border-transparent',
+      'focus:bg-white',
+      'focus:border-medilens-blue-500',
+      'focus:ring-4',
+      'focus:ring-medilens-blue-500/20',
+      // Disabled states
       'disabled:opacity-50',
       'disabled:cursor-not-allowed',
-      'disabled:bg-neutral-800',
+      'disabled:bg-surface-tertiary',
     ];
 
     // State-dependent classes
     const stateClasses = error
-      ? ['border-error', 'focus:ring-error', 'bg-error/5']
-      : ['border-neutral-700', 'hover:border-neutral-600', 'focus:border-primary-500'];
+      ? ['border-error-500', 'focus:ring-error-500/20', 'focus:border-error-500', 'bg-error-50']
+      : [];
 
     // Resize classes
     const resizeClasses = {
@@ -286,6 +304,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           onBlur={handleBlur}
           onFocus={handleFocus}
           aria-invalid={Boolean(error)}
+          aria-required={required}
           aria-describedby={cn(errorId, helperId).trim() || undefined}
           {...props}
         />
@@ -294,7 +313,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {error && (
           <div
             id={errorId}
-            className='text-error mt-2 flex items-center gap-2 text-sm'
+            className='text-error-500 mt-2 flex items-center gap-2 text-sm'
             role='alert'
             aria-live='polite'
           >
@@ -311,7 +330,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         {/* Helper Text */}
         {helperText && !error && (
-          <div id={helperId} className='text-text-muted mt-2 text-sm'>
+          <div id={helperId} className='text-text-tertiary mt-2 text-sm'>
             {helperText}
           </div>
         )}

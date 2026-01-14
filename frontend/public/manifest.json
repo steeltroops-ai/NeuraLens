@@ -1,7 +1,7 @@
 {
-  "name": "Neuralens - Neurological Risk Assessment",
-  "short_name": "Neuralens",
-  "description": "AI-powered neurological risk assessment platform for early detection of neurological disorders through multi-modal analysis.",
+  "name": "MediLens - AI-Powered Medical Diagnostics",
+  "short_name": "MediLens",
+  "description": "AI-powered medical diagnostics platform providing multiple diagnostic tools for various medical conditions - all in one place.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,16 +10,20 @@
   "scope": "/",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["medical", "health", "productivity"],
+  "categories": [
+    "medical",
+    "health",
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
@@ -29,11 +33,11 @@
     {
       "name": "Start Assessment",
       "short_name": "Assessment",
-      "description": "Begin neurological risk assessment",
+      "description": "Begin medical diagnostic assessment",
       "url": "/dashboard",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>",
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>",
           "sizes": "96x96"
         }
       ]
@@ -41,11 +45,11 @@
   ],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720' fill='%23f8fafc'><rect width='100%' height='100%' fill='%23f8fafc'/><text x='50%' y='50%' text-anchor='middle' font-size='48' fill='%233b82f6'>Neuralens Dashboard</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720' fill='%23f8fafc'><rect width='100%' height='100%' fill='%23f8fafc'/><text x='50%' y='50%' text-anchor='middle' font-size='48' fill='%233b82f6'>MediLens Dashboard</text></svg>",
       "sizes": "1280x720",
       "type": "image/svg+xml",
       "form_factor": "wide",
-      "label": "Neuralens Dashboard"
+      "label": "MediLens Dashboard"
     }
   ],
   "related_applications": [],

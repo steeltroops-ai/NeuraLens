@@ -44,21 +44,6 @@ export interface UseStateAnnouncerReturn {
 
 /**
  * Hook for managing screen reader announcements
- * 
- * @param currentState - Current recording state
- * @param options - Configuration options
- * @returns Announcement state and control functions
- * 
- * @example
- * ```tsx
- * const { announcement, announce, liveRegionProps } = useStateAnnouncer(recordingState);
- * 
- * return (
- *   <div {...liveRegionProps}>
- *     {announcement}
- *   </div>
- * );
- * ```
  */
 export function useStateAnnouncer(
     currentState: RecordingState,
@@ -76,9 +61,6 @@ export function useStateAnnouncer(
     const clearTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const announceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    /**
-     * Clear any pending timeouts
-     */
     const clearTimeouts = useCallback(() => {
         if (clearTimeoutRef.current) {
             clearTimeout(clearTimeoutRef.current);
@@ -90,27 +72,17 @@ export function useStateAnnouncer(
         }
     }, []);
 
-    /**
-     * Clear the current announcement
-     */
     const clearAnnouncement = useCallback(() => {
         setAnnouncement('');
     }, []);
 
-    /**
-     * Announce a message to screen readers
-     */
     const announce = useCallback((message: string, isUrgent: boolean = false) => {
         clearTimeouts();
-
-        // Set politeness based on urgency
         setCurrentPoliteness(isUrgent ? 'assertive' : politeness);
 
-        // Delay announcement slightly to ensure screen readers pick it up
         announceTimeoutRef.current = setTimeout(() => {
             setAnnouncement(message);
 
-            // Clear announcement after timeout if configured
             if (clearAfter > 0) {
                 clearTimeoutRef.current = setTimeout(() => {
                     setAnnouncement('');
@@ -119,9 +91,6 @@ export function useStateAnnouncer(
         }, delay);
     }, [clearTimeouts, politeness, delay, clearAfter]);
 
-    /**
-     * Announce state changes automatically
-     */
     useEffect(() => {
         if (previousStateRef.current !== currentState) {
             const stateAnnouncement = STATE_ANNOUNCEMENTS[currentState];
@@ -132,18 +101,12 @@ export function useStateAnnouncer(
         }
     }, [currentState, announce]);
 
-    /**
-     * Cleanup on unmount
-     */
     useEffect(() => {
         return () => {
             clearTimeouts();
         };
     }, [clearTimeouts]);
 
-    /**
-     * Props for the live region element
-     */
     const liveRegionProps = {
         role: currentPoliteness === 'assertive' ? 'alert' as const : 'status' as const,
         'aria-live': currentPoliteness,
@@ -163,23 +126,14 @@ export function useStateAnnouncer(
  * Component props for the LiveRegion component
  */
 export interface LiveRegionProps {
-    /** The message to announce */
     message: string;
-    /** Politeness level */
     politeness?: 'polite' | 'assertive';
-    /** Additional CSS classes */
     className?: string;
-    /** ID for the element */
     id?: string;
 }
 
 /**
  * Standalone LiveRegion component for announcements
- * 
- * @example
- * ```tsx
- * <LiveRegion message={announcement} politeness="polite" />
- * ```
  */
 export function LiveRegion({
     message,
@@ -189,15 +143,14 @@ export function LiveRegion({
 }: LiveRegionProps): JSX.Element {
     return (
         <div
-            id= { id }
-    role = { politeness === 'assertive' ? 'alert' : 'status'
-}
-aria - live={ politeness }
-aria - atomic={ true }
-className = { className }
-    >
-    { message }
-    </div>
+            id={id}
+            role={politeness === 'assertive' ? 'alert' : 'status'}
+            aria-live={politeness}
+            aria-atomic={true}
+            className={className}
+        >
+            {message}
+        </div>
     );
 }
 

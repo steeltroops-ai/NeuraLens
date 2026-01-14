@@ -92,7 +92,7 @@ const MockDashboard = () => {
       default:
         return (
           <div data-testid="dashboard-overview">
-            <h1>NeuraLens Dashboard</h1>
+            <h1>MediLens Dashboard</h1>
             <div>Total Assessments: 247</div>
             <div>Completed Today: 12</div>
             <button onClick={() => handleNavigation('speech')}>Speech Analysis</button>
@@ -179,7 +179,7 @@ describe('Assessment Workflow Integration', () => {
 
     // Start at overview
     expect(screen.getByTestId('dashboard-overview')).toBeInTheDocument();
-    expect(screen.getByText('NeuraLens Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('MediLens Dashboard')).toBeInTheDocument();
 
     // Navigate to speech assessment
     await user.click(screen.getByText('Speech Analysis'));

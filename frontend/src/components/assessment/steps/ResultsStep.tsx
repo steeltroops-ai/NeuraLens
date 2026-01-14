@@ -27,7 +27,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'NeuroLens-X Health Check Results',
+          title: 'MediLens Health Check Results',
           text: `My brain health check shows a health score of ${results.nriResult.nri_score} (${results.nriResult.risk_category} risk)`,
           url: window.location.href,
         });
@@ -36,7 +36,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({ results, onRestart, on
       }
     } else {
       // Fallback: copy to clipboard
-      const shareText = `My NeuroLens-X health check: Health Score ${results.nriResult.nri_score} (${results.nriResult.risk_category} risk)`;
+      const shareText = `My MediLens health check: Health Score ${results.nriResult.nri_score} (${results.nriResult.risk_category} risk)`;
       try {
         await navigator.clipboard.writeText(shareText);
         alert('Results copied to clipboard!');

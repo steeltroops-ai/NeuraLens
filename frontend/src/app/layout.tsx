@@ -11,59 +11,59 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'NeuroLens | Neuro Health Screening',
-    template: '%s | NeuroLens',
+    default: 'MediLens | AI-Powered Medical Diagnostics',
+    template: '%s | MediLens',
   },
   description:
-    'AI-powered brain health screening platform for early detection of neurological conditions through voice evaluation, eye health scans, and health questionnaires.',
+    'AI-powered medical diagnostics platform providing multiple diagnostic tools for various medical conditions - all in one place.',
   keywords: [
-    'brain health',
-    'neurological screening',
-    'early detection',
+    'medical diagnostics',
     'AI healthcare',
-    'voice evaluation',
-    'eye health scan',
-    'health questionnaire',
-    'dementia screening',
+    'early detection',
+    'speech analysis',
+    'retinal imaging',
+    'motor assessment',
+    'cognitive testing',
     "Parkinson's detection",
-    'cognitive health',
+    'diabetic retinopathy',
+    'neurological screening',
   ],
-  authors: [{ name: 'NeuraLens - Mayank' }],
-  creator: 'NeuroLens',
-  publisher: 'NeuraLens',
+  authors: [{ name: 'MediLens Team' }],
+  creator: 'MediLens',
+  publisher: 'MediLens',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://neuralens.com'),
+  metadataBase: new URL('https://medilens.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://neuralens.com',
-    siteName: 'NeuroLens',
-    title: 'NeuraLens | Neuralogical Risk Assessment',
+    url: 'https://medilens.com',
+    siteName: 'MediLens',
+    title: 'MediLens | AI-Powered Medical Diagnostics',
     description:
-      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
+      'Centralized web platform providing multiple AI-powered diagnostic tools for various medical conditions.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NeuraLens - Neurological Risk Assessment Platform',
+        alt: 'MediLens - AI-Powered Medical Diagnostics Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NeuraLens | Neurological Risk Assessment',
+    title: 'MediLens | AI-Powered Medical Diagnostics',
     description:
-      'Multi-modal neurological risk assessment platform for early detection of neurological disorders.',
+      'Centralized web platform providing multiple AI-powered diagnostic tools for various medical conditions.',
     images: ['/twitter-image.png'],
-    creator: '@steeltroosp_ai',
+    creator: '@medilens_ai',
   },
   robots: {
     index: true,
@@ -113,10 +113,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head>
         {/* PWA Meta Tags */}
         <link rel='manifest' href='/manifest.json' />
-        <meta name='application-name' content='NeuroLens-X' />
+        <meta name='application-name' content='MediLens' />
         <meta name='apple-mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-status-bar-style' content='default' />
-        <meta name='apple-mobile-web-app-title' content='NeuroLens-X' />
+        <meta name='apple-mobile-web-app-title' content='MediLens' />
         <meta name='mobile-web-app-capable' content='yes' />
         <meta name='msapplication-config' content='/browserconfig.xml' />
         <meta name='msapplication-TileColor' content='#3B82F6' />
@@ -160,21 +160,21 @@ export default function RootLayout({ children }: RootLayoutProps) {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'MedicalWebPage',
-              name: 'NeuroLens-X',
-              description: 'Multi-modal neurological risk assessment platform',
-              url: 'https://neurolens-x.com',
+              name: 'MediLens',
+              description: 'AI-powered medical diagnostics platform providing multiple diagnostic tools for various medical conditions',
+              url: 'https://medilens.com',
               medicalAudience: {
                 '@type': 'MedicalAudience',
                 audienceType: 'Patient',
               },
               about: {
                 '@type': 'MedicalCondition',
-                name: 'Neurological Disorders',
+                name: 'Medical Diagnostics',
               },
               provider: {
                 '@type': 'Organization',
-                name: 'NeuroLens-X',
-                url: 'https://neurolens-x.com',
+                name: 'MediLens',
+                url: 'https://medilens.com',
               },
             }),
           }}
@@ -184,20 +184,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className='bg-surface-background min-h-screen text-text-primary antialiased'
         suppressHydrationWarning
       >
-        {/* Skip Links for Accessibility */}
-        <a
-          href='#main-content'
-          className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
-        >
-          Skip to main content
-        </a>
-        <a
-          href='#main-navigation'
-          className='skip-link sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg'
-        >
-          Skip to navigation
-        </a>
-
         {/* Main Application */}
         <div id='root' className='relative'>
           {children}
@@ -212,10 +198,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
         <div id='live-region-alerts' aria-live='assertive' aria-atomic='true' className='sr-only' />
 
-        {/* PWA Install Prompt */}
-        <div id='pwa-install-prompt' className='pwa-install-prompt' />
-
-        {/* Service Worker Registration - Disabled in Development */}
+        {/* Service Worker Registration - Production Only */}
         {process.env.NODE_ENV === 'production' && (
           <script
             dangerouslySetInnerHTML={{

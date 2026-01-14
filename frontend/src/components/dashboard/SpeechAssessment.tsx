@@ -1,5 +1,5 @@
 /**
- * Speech Assessment Component for Neuralens Dashboard
+ * Speech Assessment Component for MediLens Dashboard
  *
  * This component integrates the ML-powered Speech Analysis Card into the
  * Dashboard interface, providing comprehensive speech analysis capabilities

@@ -1,5 +1,5 @@
 /**
- * Speech Analysis Card Component for Neuralens Dashboard
+ * Speech Analysis Card Component for MediLens Dashboard
  *
  * This component provides the user interface for speech analysis testing,
  * integrating with the Speech Processor and Audio Recorder for real-time
@@ -302,9 +302,8 @@ export const SpeechAnalysisCard: React.FC<SpeechAnalysisCardProps> = ({
       return (
         <div
           key={i}
-          className={`h-8 w-2 rounded-full transition-all duration-100 ${
-            isActive ? 'bg-green-500' : 'bg-gray-300'
-          }`}
+          className={`h-8 w-2 rounded-full transition-all duration-100 ${isActive ? 'bg-green-500' : 'bg-gray-300'
+            }`}
           style={{
             height: `${Math.max(8, recordingState.audioLevel * 32)}px`,
           }}

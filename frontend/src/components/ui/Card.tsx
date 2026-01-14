@@ -7,7 +7,14 @@ import { cn } from '@/utils/cn';
 import type { CardProps } from '@/types/design-system';
 
 /**
- * Clinical-grade Card component with multiple variants and accessibility support
+ * MediLens Design System Card Component
+ * 
+ * Clinical-grade card with multiple variants and accessibility support.
+ * Follows MediLens Design System specifications:
+ * - Standard: shadow-apple, rounded-2xl, p-6
+ * - Featured: gradient background, shadow-nri
+ * - Glass: backdrop-blur
+ * - Hover lift animation (-translate-y-1)
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   (
@@ -19,71 +26,95 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       children,
       className,
       testId,
+      'aria-label': ariaLabel,
+      'aria-describedby': ariaDescribedBy,
       ...props
     },
     ref,
   ) => {
-    // Apple-style base card classes
+    // MediLens Design System base card classes
     const baseClasses = [
-      'card-apple',
       'relative',
       'transition-all',
       'duration-300',
       'ease-out-quint',
     ];
 
-    // Apple-style padding classes
+    // MediLens padding classes
     const paddingClasses = {
       'component-padding-sm': 'p-4',
       'component-padding-md': 'p-6',
-      'component-padding-lg': 'p-8',
-      'component-padding-xl': 'p-10',
+      'component-padding-lg': 'p-6', // Standard card padding per MediLens spec
+      'component-padding-xl': 'p-8', // Featured card padding
     };
 
-    // Apple-inspired variant classes
+    // MediLens Design System variant classes
     const variantClasses = {
-      default: ['bg-white', 'border', 'border-gray-200', 'shadow-apple'],
-      glass: [
-        'glass-card',
-        'bg-surface-glass',
-        'backdrop-blur-xl',
+      // Standard Card: white bg, rounded-2xl, p-6, shadow-apple, border border-black/5
+      default: [
+        'bg-white',
+        'rounded-2xl',
+        'shadow-apple',
         'border',
-        'border-white/10',
+        'border-black/5',
+      ],
+      // Glass Card: backdrop-blur, rounded-2xl, p-6
+      glass: [
+        'bg-white/80',
+        'backdrop-blur-[16px]',
+        'rounded-2xl',
+        'border',
+        'border-white/20',
         'shadow-glass',
       ],
-      clinical: ['bg-surface-primary', 'border-2', 'border-primary-500', 'shadow-clinical'],
+      // Featured Card: gradient background, rounded-3xl, p-8, shadow-nri
+      featured: [
+        'bg-gradient-to-br',
+        'from-white',
+        'to-medilens-blue-50',
+        'rounded-3xl',
+        'shadow-nri',
+        'border',
+        'border-medilens-blue-100',
+      ],
+      // Clinical Card: for assessment results
+      clinical: [
+        'bg-white',
+        'rounded-2xl',
+        'border-2',
+        'border-medilens-blue-500',
+        'shadow-medical',
+      ],
+      // Results Card: gradient for NRI results
       results: [
         'bg-gradient-to-br',
-        'from-surface-primary',
+        'from-white',
         'to-surface-secondary',
+        'rounded-2xl',
         'border',
-        'border-primary-500/30',
+        'border-medilens-blue-500/30',
         'shadow-xl',
       ],
     };
 
-    // Hover effects
+    // MediLens hover effects: -translate-y-1 lift animation
     const hoverClasses = hover
       ? [
-          'hover:border-neutral-700',
-          'hover:shadow-xl',
-          'hover:-translate-y-1',
-          'hover:scale-[1.01]',
-          'cursor-pointer',
-        ]
+        'hover:shadow-apple-hover',
+        'hover:-translate-y-1',
+        'cursor-pointer',
+      ]
       : [];
 
-    // Interactive classes for clickable cards
+    // Interactive classes for clickable cards with MediLens focus ring
     const interactiveClasses = onClick
       ? [
-          'cursor-pointer',
-          'focus:outline-none',
-          'focus:ring-2',
-          'focus:ring-primary-500',
-          'focus:ring-offset-2',
-          'focus:ring-offset-surface-background',
-          'active:scale-[0.99]',
-        ]
+        'cursor-pointer',
+        'focus:outline-none',
+        'focus-visible:ring-[3px]',
+        'focus-visible:ring-medilens-blue-500/40',
+        'active:scale-[0.99]',
+      ]
       : [];
 
     // Combine all classes
@@ -112,6 +143,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         onKeyDown={handleKeyDown}
         tabIndex={onClick ? 0 : undefined}
         role={onClick ? 'button' : undefined}
+        aria-label={onClick ? ariaLabel : undefined}
+        aria-describedby={ariaDescribedBy}
         data-testid={testId}
         {...props}
       >

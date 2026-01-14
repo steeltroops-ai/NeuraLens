@@ -24,19 +24,19 @@ import { ReadmePageClient } from '@/components/pages/ReadmePageClient';
 
 // Static metadata for SSG optimization
 export const metadata: Metadata = {
-  title: 'NeuraLens Technical Documentation - Advanced AI Healthcare Platform',
+  title: 'MediLens Technical Documentation - Advanced AI Healthcare Platform',
   description:
-    'Comprehensive technical documentation for NeuraLens multi-modal neurological assessment platform. Built with Next.js 15, TypeScript, and advanced AI/ML technologies.',
+    'Comprehensive technical documentation for MediLens multi-modal medical assessment platform. Built with Next.js 15, TypeScript, and advanced AI/ML technologies.',
   keywords: [
     'technical documentation',
     'AI healthcare',
     'Next.js',
     'TypeScript',
     'machine learning',
-    'neurological assessment',
+    'medical assessment',
   ],
   openGraph: {
-    title: 'NeuraLens Technical Documentation',
+    title: 'MediLens Technical Documentation',
     description: 'Advanced AI healthcare platform technical specifications and architecture.',
     type: 'website',
   },
@@ -60,7 +60,7 @@ export default function ReadmePage() {
                     Advanced AI Healthcare Platform
                   </p>
                   <p className='mx-auto mt-6 max-w-4xl text-lg leading-relaxed text-slate-600 sm:text-xl'>
-                    Comprehensive technical specifications for NeuraLens multi-modal neurological
+                    Comprehensive technical specifications for MediLens multi-modal medical
                     assessment platform.
                   </p>
                 </div>

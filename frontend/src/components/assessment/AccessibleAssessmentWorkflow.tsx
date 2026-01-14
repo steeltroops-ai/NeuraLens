@@ -239,7 +239,7 @@ export function AccessibleAssessmentWorkflow({
         {/* Header */}
         <div className='border-b border-gray-200 p-6'>
           <h1 className='text-3xl font-bold text-gray-900' id='assessment-title'>
-            NeuraLens Assessment Workflow
+            MediLens Assessment Workflow
           </h1>
           <p className='mt-2 text-gray-600'>
             Complete neurological assessment with real-time ML processing

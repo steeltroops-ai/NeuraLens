@@ -13,36 +13,69 @@ module.exports = {
   darkMode: 'media', // Use media query for dark mode detection
   theme: {
     extend: {
-      // Apple-inspired color system
+      // MediLens Design System Colors
       colors: {
-        // Primary Medical Blue (Apple's signature blue)
+        // MediLens Blue - Primary Brand Color (#007AFF)
+        'medilens-blue': {
+          50: '#E8F4FF',   // Subtle backgrounds
+          100: '#C5E4FF',  // Hover states
+          200: '#9DD1FF',  // Light accents
+          300: '#6BBAFF',  // Secondary elements
+          400: '#3AA3FF',  // Interactive elements
+          500: '#007AFF',  // Primary brand color
+          600: '#0062CC',  // Hover on primary
+          700: '#004A99',  // Active states
+          800: '#003366',  // Dark accents
+          900: '#001A33',  // Deep backgrounds
+        },
+
+        // Primary (alias for medilens-blue)
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#007AFF', // Apple's signature medical blue
-          600: '#0056CC',
-          700: '#003D99',
-          800: '#002966',
+          50: '#E8F4FF',
+          100: '#C5E4FF',
+          200: '#9DD1FF',
+          300: '#6BBAFF',
+          400: '#3AA3FF',
+          500: '#007AFF',
+          600: '#0062CC',
+          700: '#004A99',
+          800: '#003366',
           900: '#001A33',
           950: '#000D1A',
         },
 
-        // Medical Blue (alias for primary)
+        // Medical Blue (alias for medilens-blue)
         medical: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#007AFF', // Apple blue
-          600: '#0056CC',
-          700: '#003D99',
-          800: '#002966',
+          50: '#E8F4FF',
+          100: '#C5E4FF',
+          200: '#9DD1FF',
+          300: '#6BBAFF',
+          400: '#3AA3FF',
+          500: '#007AFF',
+          600: '#0062CC',
+          700: '#004A99',
+          800: '#003366',
           900: '#001A33',
           950: '#000D1A',
+        },
+
+        // NRI Risk Gradient Colors
+        nri: {
+          minimal: '#34C759',   // 0-25: Minimal risk
+          low: '#30D158',       // 26-40: Low risk
+          moderate: '#FFD60A',  // 41-55: Moderate risk
+          elevated: '#FF9F0A',  // 56-70: Elevated risk
+          high: '#FF6B6B',      // 71-85: High risk
+          critical: '#FF3B30',  // 86-100: Critical risk
+        },
+
+        // Semantic Status Colors
+        status: {
+          healthy: '#34C759',    // Low risk, positive results
+          caution: '#FF9500',    // Moderate risk, attention needed
+          alert: '#FF3B30',      // High risk, immediate attention
+          info: '#5AC8FA',       // Informational, neutral
+          processing: '#AF52DE', // AI processing, analysis
         },
 
         // Success Green (Apple Green)
@@ -101,6 +134,14 @@ module.exports = {
           900: '#581C87',
         },
 
+        // Surface Colors (MediLens Design System)
+        surface: {
+          primary: '#FFFFFF',    // Cards, modals
+          secondary: '#F2F2F7',  // Page backgrounds
+          tertiary: '#E5E5EA',   // Dividers, borders
+          elevated: '#FFFFFF',   // Elevated cards
+        },
+
         // Apple-style neutrals
         gray: {
           50: '#F2F2F7', // Apple light gray
@@ -120,11 +161,12 @@ module.exports = {
         background: '#F2F2F7', // Apple light background
         card: '#FFFFFF', // Pure white cards
 
-        // Text colors
+        // Text colors (MediLens Design System)
         text: {
-          primary: '#000000', // Maximum readability
-          secondary: '#3C3C43', // Apple secondary text
-          tertiary: '#8E8E93', // Apple tertiary text
+          primary: '#000000',    // Headlines, primary content
+          secondary: '#3C3C43',  // Body text, descriptions
+          tertiary: '#8E8E93',   // Captions, metadata
+          quaternary: '#C7C7CC', // Placeholders, disabled
         },
       },
 
@@ -176,6 +218,14 @@ module.exports = {
         15: '60px', // Major spacing
         18: '72px', // Hero spacing
         22: '88px', // Massive spacing
+        // Breathe principle spacing (Requirements 18.5)
+        'breathe-sm': '24px',  // Small breathe gap
+        'breathe-md': '32px',  // Medium breathe gap
+        'breathe-lg': '48px',  // Large breathe gap
+        'breathe-xl': '64px',  // Extra large breathe gap
+        'breathe-2xl': '80px', // Section breathe gap
+        'section-mobile': '48px', // Section padding mobile
+        'section-desktop': '80px', // Section padding desktop
       },
 
       // Apple-style animations
@@ -235,24 +285,27 @@ module.exports = {
         },
       },
 
-      // Apple-style easing functions
+      // MediLens Animation Easing Functions
       transitionTimingFunction: {
         apple: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-        'out-quint': 'cubic-bezier(0.22, 1, 0.36, 1)',
-        'in-out-cubic': 'cubic-bezier(0.65, 0, 0.35, 1)',
-        spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        'out-quint': 'cubic-bezier(0.22, 1, 0.36, 1)',      // Primary MediLens easing
+        'in-out-cubic': 'cubic-bezier(0.65, 0, 0.35, 1)',   // Modals
+        spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',  // Playful
         bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
 
-      // Apple-style shadows
+      // MediLens Design System Shadows
       boxShadow: {
-        apple: '0 2px 16px rgba(0, 0, 0, 0.08)',
-        'apple-hover': '0 8px 32px rgba(0, 0, 0, 0.12)',
+        // Apple-style shadows
+        apple: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'apple-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'apple-pressed': '0 1px 4px rgba(0, 0, 0, 0.16)',
-        medical: '0 4px 14px rgba(0, 122, 255, 0.25)',
-        'medical-hover': '0 6px 20px rgba(0, 122, 255, 0.35)',
-        glass: '0 8px 32px rgba(31, 38, 135, 0.37)',
-        nri: '0 10px 40px rgba(0, 122, 255, 0.3)',
+        // MediLens medical shadows
+        medical: '0 4px 14px 0 rgba(0, 122, 255, 0.15)',
+        'medical-hover': '0 8px 25px 0 rgba(0, 122, 255, 0.25)',
+        // NRI and glass shadows
+        nri: '0 8px 30px 0 rgba(0, 122, 255, 0.12)',
+        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
       },
 
       // Apple-style border radius
@@ -290,6 +343,13 @@ module.exports = {
         'touch-lg': '48px', // Large touch target
       },
 
+      // Maximum width for readability (MediLens Typography System)
+      maxWidth: {
+        prose: '65ch', // Optimal reading width for body text
+        'prose-sm': '55ch', // Narrower reading width
+        'prose-lg': '75ch', // Wider reading width
+      },
+
       // Apple-style screens (breakpoints)
       screens: {
         xs: '375px', // iPhone SE
@@ -301,7 +361,8 @@ module.exports = {
         '3xl': '1920px', // Ultra-wide
       },
 
-      // Container with Apple-style padding
+      // MediLens Container Widths (Requirements 18.1)
+      // sm (640px), md (768px), lg (1024px), xl (1280px), 2xl (1440px)
       container: {
         center: true,
         padding: {
@@ -312,6 +373,42 @@ module.exports = {
           xl: '40px',
           '2xl': '48px',
         },
+        screens: {
+          sm: '640px',   // Narrow content
+          md: '768px',   // Standard content
+          lg: '1024px',  // Wide content
+          xl: '1280px',  // Full-width content
+          '2xl': '1440px', // Maximum width
+        },
+      },
+
+      // MediLens Layout Widths
+      width: {
+        'sidebar': '280px',        // Dashboard sidebar width (Requirements 18.2)
+        'sidebar-collapsed': '64px', // Collapsed sidebar width
+        'container-sm': '640px',   // Narrow content container
+        'container-md': '768px',   // Standard content container
+        'container-lg': '1024px',  // Wide content container
+        'container-xl': '1280px',  // Full-width content container
+        'container-2xl': '1440px', // Maximum width container
+      },
+
+      // MediLens Max Widths
+      maxWidth: {
+        'container-sm': '640px',   // Narrow content
+        'container-md': '768px',   // Standard content
+        'container-lg': '1024px',  // Wide content
+        'container-xl': '1280px',  // Full-width content
+        'container-2xl': '1440px', // Maximum width
+        prose: '65ch', // Optimal reading width for body text
+        'prose-sm': '55ch', // Narrower reading width
+        'prose-lg': '75ch', // Wider reading width
+      },
+
+      // MediLens Grid Templates (Requirements 18.2)
+      gridTemplateColumns: {
+        'dashboard': '280px 1fr',           // Dashboard layout with sidebar
+        'dashboard-collapsed': '64px 1fr',  // Dashboard layout with collapsed sidebar
       },
     },
   },

@@ -27,7 +27,7 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext, onExit }) => {
               </svg>
             </div>
             <h1 className='text-5xl font-bold tracking-tight text-text-primary'>
-              Welcome to NeuroLens-X
+              Welcome to MediLens
             </h1>
             <p className='mx-auto max-w-2xl text-xl leading-relaxed text-text-secondary'>
               90-second brain health check powered by AI

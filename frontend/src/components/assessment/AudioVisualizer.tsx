@@ -97,7 +97,8 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         const centerY = height / 2;
 
         for (let i = 0; i < dataArray.length; i++) {
-            const normalizedValue = dataArray[i] / 255;
+            const value = dataArray[i] ?? 0;
+            const normalizedValue = value / 255;
             const barHeight = normalizedValue * height * 0.8;
 
             const x = i * barWidth;

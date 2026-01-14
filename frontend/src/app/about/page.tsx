@@ -21,7 +21,7 @@ export default function AboutPage() {
                 className='mx-auto max-w-4xl space-y-6 text-center'
               >
                 <h1 className='text-4xl font-bold' style={{ color: '#1D1D1F' }}>
-                  About NeuraLens
+                  About MediLens
                 </h1>
                 <p className='text-xl leading-relaxed text-slate-600'>
                   Pioneering the future of neurological health assessment through advanced AI
@@ -172,10 +172,10 @@ export default function AboutPage() {
                   Get in Touch
                 </h2>
                 <p className='text-xl leading-relaxed text-slate-600'>
-                  Have questions about NeuraLens? We'd love to hear from you.
+                  Have questions about MediLens? We'd love to hear from you.
                 </p>
                 <p className='text-lg text-slate-600'>
-                  Email: <span style={{ color: '#007AFF' }}>contact@neuralens.ai</span>
+                  Email: <span style={{ color: '#007AFF' }}>contact@medilens.ai</span>
                 </p>
               </motion.div>
             </div>

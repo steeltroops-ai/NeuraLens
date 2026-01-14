@@ -4,8 +4,8 @@ import { Layout } from '@/components/layout';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Neurological Assessment',
-  description: 'Complete your multi-modal neurological risk assessment with NeuroLens-X.',
+  title: 'Medical Assessment',
+  description: 'Complete your multi-modal medical risk assessment with MediLens.',
 };
 
 export default function AssessmentPage() {
