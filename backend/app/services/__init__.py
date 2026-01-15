@@ -1,16 +1,26 @@
 """
 Database services for NeuraLens backend
-Provides CRUD operations and business logic for all models
+Provides database session management and health utilities
 """
 
-from .database_service import DatabaseService
-from .assessment_service import AssessmentService
-from .user_service import UserService
-from .validation_service import ValidationService
+from app.core.database import (
+    get_db,
+    get_db_sync,
+    get_db_context,
+    init_db,
+    close_db,
+    health_check,
+    DatabaseManager,
+    Base
+)
 
 __all__ = [
-    "DatabaseService",
-    "AssessmentService", 
-    "UserService",
-    "ValidationService"
+    "get_db",
+    "get_db_sync", 
+    "get_db_context",
+    "init_db",
+    "close_db",
+    "health_check",
+    "DatabaseManager",
+    "Base"
 ]

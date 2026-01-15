@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import init_db, close_db
 from app.core.response import (
     api_exception_handler,
     health_check_response,
@@ -27,6 +27,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
     print("🚀 Starting NeuroLens-X Backend...")
+    print("📡 Connecting to Neon PostgreSQL database...")
     await init_db()
     print("✅ Database initialized")
     print("🧠 ML models loading...")
@@ -35,6 +36,8 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     print("🛑 Shutting down NeuroLens-X Backend...")
+    await close_db()
+    print("✅ Database connections closed")
 
 
 # Create FastAPI application
@@ -64,7 +67,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 @app.get("/api/v1/health")
 async def health_check():
     """Health check endpoint for monitoring"""
-    from app.services.database_service import DatabaseManager
+    from app.core.database import DatabaseManager
 
     # Check database health
     db_health = DatabaseManager.health_check()

@@ -25,9 +25,11 @@ class Settings(BaseSettings):
         "https://neurolens-x.vercel.app"
     ]
     
-    # Database Configuration
-    DATABASE_URL: str = "sqlite:///./neurolens.db"
+    # Database Configuration - Neon PostgreSQL
+    DATABASE_URL: str = "postgresql://neondb_owner:npg_4cdl3REegNOW@ep-small-hill-ae8q73zu-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require"
     DATABASE_ECHO: bool = False
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_MAX_OVERFLOW: int = 10
     
     # Security
     SECRET_KEY: str = "neurolens-x-hackathon-secret-key-change-in-production"

@@ -2,445 +2,528 @@
 inclusion: always
 ---
 
----
-inclusion: always
----
-
-# MediLens Technology Stack & Development Guidelines
+# MediLens Technical Standards
 
 ## Technology Stack
 
-### Frontend Stack
-- **Framework**: Next.js 15 with App Router (NEVER use Pages Router)
-- **Language**: TypeScript with strict mode enabled
-- **Package Manager**: Bun (use `bun` commands, not `npm` or `yarn`)
-- **Styling**: Tailwind CSS with hex color values in className (never CSS variables)
-- **Components**: Functional components only, no class components
-- **State Management**: React hooks + Context API (no Redux, Zustand, or external state libraries)
-- **Icons**: `lucide-react` package exclusively
-- **Animations**: `framer-motion` for smooth transitions (minimal use)
-- **HTTP Client**: Native `fetch` API wrapped in custom hooks
+### Frontend
+- **Framework**: Next.js 15 (App Router only, NOT Pages Router)
+- **Language**: TypeScript (strict mode enabled)
+- **Styling**: Tailwind CSS with custom design tokens
+- **Package Manager**: Bun (NOT npm or yarn)
+- **State Management**: React hooks + Server Components
+- **Testing**: Vitest + Playwright
 
-### Backend Stack
-- **Framework**: FastAPI with Python 3.11+
-- **Database**: SQLite (dev) with SQLAlchemy ORM + async patterns
-- **Migrations**: Alembic for ALL schema changes (never modify DB directly)
-- **ML Stack**: scikit-learn, librosa, opencv-python, numpy
-- **Server**: Uvicorn ASGI server
-- **Validation**: Pydantic v2 for request/response schemas
+### Backend
+- **Framework**: FastAPI (Python 3.10+)
+- **Database**: PostgreSQL with async SQLAlchemy
+- **Migrations**: Alembic (NEVER modify database directly)
+- **ML Framework**: TensorFlow/PyTorch for model inference
+- **API Validation**: Pydantic schemas
 
-## Critical Development Commands
+## Code Style & Conventions
 
-### Frontend Commands
-```bash
-cd frontend
-bun install                 # Install dependencies
-bun run dev                # Dev server (localhost:3000)
-bun run build              # Production build
-bun run lint               # ESLint validation
-```
+### TypeScript/React
 
-### Backend Commands
-```bash
-cd backend
-pip install -r requirements.txt           # Install dependencies
-uvicorn app.main:app --reload            # Dev server (localhost:8000)
-alembic upgrade head                     # Apply migrations
-alembic revision --autogenerate -m "msg" # Create migration
-pytest                                   # Run tests
-```
+**Naming Conventions:**
+- Components: `PascalCase.tsx` (e.g., `SpeechAssessment.tsx`)
+- Hooks: `camelCase.ts` with `use` prefix (e.g., `useRetinalAnalysis.ts`)
+- Types: `kebab-case.ts` (e.g., `speech-analysis.ts`)
+- Utilities: `camelCase.ts` (e.g., `apiClient.ts`)
 
-## Code Standards & Patterns
+**Import Rules:**
+- ALWAYS use absolute imports with `@/` alias
+- NEVER use relative imports like `../../../`
+- Order: external packages → internal `@/` imports → types (with `type` keyword)
 
-### TypeScript/React Rules
-
-**Component Structure:**
-```tsx
-// ✅ CORRECT - Functional component with TypeScript
-interface Props {
-  title: string;
-  onSubmit: (data: FormData) => void;
-}
-
-export function MyComponent({ title, onSubmit }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
-  
-  return <div className="bg-[#f8fafc] text-[#334155]">...</div>;
-}
-
-// ❌ WRONG - Class component
-export class MyComponent extends React.Component { }
-
-// ❌ WRONG - CSS variables in Tailwind
-<div className="bg-slate-50 text-slate-700">
-```
-
-**Import Conventions:**
-```tsx
-// ✅ CORRECT - Absolute imports with @ alias
+```typescript
+// ✅ CORRECT
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/hooks/useAuth';
-import type { Assessment } from '@/types/assessment';
+import type { SpeechAnalysis } from '@/types/speech-analysis';
 
-// ❌ WRONG - Relative imports
+// ❌ WRONG
 import { Button } from '../../../components/ui/Button';
 ```
 
-**State Management:**
-```tsx
-// ✅ CORRECT - Use React hooks
-const [data, setData] = useState<Assessment[]>([]);
-const { user } = useAuth();
+**Component Patterns:**
+- Use Server Components by default
+- Add `'use client'` directive ONLY when needed (interactivity, hooks, browser APIs)
+- Wrap client components with `<ErrorBoundary>` for error handling
+- Use `<Suspense>` boundaries for async data loading
 
-// ❌ WRONG - External state libraries
-const data = useSelector(state => state.assessments);
-```
+**Type Safety:**
+- Enable TypeScript strict mode
+- Avoid `any` type - use `unknown` or proper types
+- Define explicit return types for functions
+- Use discriminated unions for complex state
 
-**API Calls:**
-```tsx
-// ✅ CORRECT - Custom hook wrapping fetch
-export function useAssessment(id: string) {
-  const [data, setData] = useState<Assessment | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    fetch(`/api/v1/assessments/${id}`)
-      .then(res => res.json())
-      .then(setData)
-      .finally(() => setLoading(false));
-  }, [id]);
-  
-  return { data, loading };
-}
+### Python/FastAPI
 
-// ❌ WRONG - Direct fetch in component
-const MyComponent = () => {
-  fetch('/api/v1/assessments').then(...)
-}
-```
+**Naming Conventions:**
+- All files: `snake_case.py`
+- Classes: `PascalCase`
+- Functions/variables: `snake_case`
+- Constants: `UPPER_SNAKE_CASE`
 
-### Python/FastAPI Rules
+**Import Rules:**
+- Use absolute imports from `app` package
+- NEVER use relative imports across packages
 
-**Type Hints (Required):**
 ```python
-# ✅ CORRECT - Type hints on all functions
-async def get_assessment(
-    db: AsyncSession,
-    assessment_id: str
-) -> Assessment | None:
-    result = await db.execute(
-        select(Assessment).where(Assessment.id == assessment_id)
-    )
-    return result.scalar_one_or_none()
+# ✅ CORRECT
+from app.core.database import get_db
+from app.models.assessment import Assessment
 
-# ❌ WRONG - No type hints
-async def get_assessment(db, assessment_id):
-    return await db.execute(...)
+# ❌ WRONG
+from ...core.database import get_db
 ```
 
-**Async Patterns:**
+**Async/Await:**
+- ALL I/O operations MUST be async
+- Use `AsyncSession` for database queries
+- Use `await` for all async calls
+
+**Type Hints:**
+- Add type hints to ALL function parameters and return values
+- Use Pydantic models for request/response validation
+
 ```python
-# ✅ CORRECT - Async for I/O operations
-@router.post("/analyze")
+# ✅ CORRECT
 async def analyze_speech(
-    audio: UploadFile,
+    audio_data: bytes,
     db: AsyncSession = Depends(get_db)
-) -> dict:
-    processor = RealtimeSpeechProcessor()
-    result = await processor.analyze(audio)
-    return success_response(data=result)
+) -> SpeechAnalysisResponse:
+    ...
 
-# ❌ WRONG - Sync operations for I/O
-def analyze_speech(audio: UploadFile):
-    result = processor.analyze(audio)  # Blocking
+# ❌ WRONG - missing type hints
+async def analyze_speech(audio_data, db):
+    ...
+```
+
+## Architecture Patterns
+
+### Frontend Architecture
+
+**Server vs Client Components:**
+- Default to Server Components for static content
+- Use Client Components for: forms, event handlers, browser APIs, React hooks
+- Keep client components small and focused
+
+**Data Fetching:**
+- Server Components: Use native `fetch` with caching
+- Client Components: Use custom hooks (e.g., `useApi`, `useRetinalAnalysis`)
+- API routes: Proxy to backend, add error handling
+
+**Error Handling:**
+- Wrap client components with `<ErrorBoundary>`
+- Use `error.tsx` files for route-level error handling
+- Display user-friendly error messages, log technical details
+
+**Loading States:**
+- Use `loading.tsx` files for route-level loading
+- Use `<Suspense>` for component-level loading
+- Show progress indicators for long operations (>500ms)
+
+### Backend Architecture
+
+**Pipeline Pattern:**
+Each diagnostic module follows this structure:
+```
+pipelines/{modality}/
+├── __init__.py
+├── analyzer.py       # Core ML analysis logic
+├── router.py         # API routing (if complex)
+├── validator.py      # Input validation
+├── models.py         # Domain models
+├── schemas.py        # Pydantic schemas
+└── report_generator.py
 ```
 
 **Dependency Injection:**
-```python
-# ✅ CORRECT - Use FastAPI dependencies
-from fastapi import Depends
-from app.core.database import get_db
+- Use FastAPI's `Depends()` for database sessions, auth, config
+- Keep endpoints thin - delegate to service layer
 
-@router.get("/results/{id}")
-async def get_results(
-    id: str,
-    db: AsyncSession = Depends(get_db)
-):
-    return await fetch_results(db, id)
-
-# ❌ WRONG - Manual session management
-@router.get("/results/{id}")
-async def get_results(id: str):
-    db = create_session()  # Don't do this
-```
+**Response Structure:**
+- Use `success_response()` and `error_response()` helpers from `app.core.response`
+- Always include: `status`, `data`, `message`, `timestamp`
 
 **Error Handling:**
-```python
-# ✅ CORRECT - Structured error responses
-from fastapi import HTTPException
-from app.core.response import success_response, error_response
-
-@router.post("/analyze")
-async def analyze(data: AnalysisRequest):
-    try:
-        if not data.audio_file:
-            raise HTTPException(status_code=400, detail="Audio file required")
-        result = await process(data)
-        return success_response(data=result)
-    except Exception as e:
-        return error_response(message=str(e), status_code=500)
-
-# ❌ WRONG - Unhandled exceptions
-@router.post("/analyze")
-async def analyze(data: AnalysisRequest):
-    result = await process(data)  # No error handling
-    return result
-```
+- Catch specific exceptions, not bare `except:`
+- Return appropriate HTTP status codes
+- Log errors with context (user_id, request_id)
+- NEVER expose stack traces to clients
 
 ### Database Patterns
 
-**CRITICAL: Always Use Alembic for Schema Changes**
-```bash
-# ✅ CORRECT - Use Alembic migrations
-cd backend
-alembic revision --autogenerate -m "Add user preferences column"
-alembic upgrade head
+**Alembic Migrations:**
+- NEVER modify database schema directly
+- Always create migration: `alembic revision --autogenerate -m "description"`
+- Review generated migration before applying
+- Test migrations on dev environment first
 
-# ❌ WRONG - Direct database modification
-sqlite3 neurolens.db "ALTER TABLE users ADD COLUMN preferences JSON"
-```
-
-**Async SQLAlchemy Patterns:**
+**Async SQLAlchemy:**
 ```python
-# ✅ CORRECT - Async queries
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+# ✅ CORRECT
+async with db.begin():
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
 
-async def get_user(db: AsyncSession, user_id: str) -> User | None:
-    result = await db.execute(
-        select(User).where(User.id == user_id)
-    )
-    return result.scalar_one_or_none()
-
-# ❌ WRONG - Sync queries
-def get_user(db: Session, user_id: str):
-    return db.query(User).filter(User.id == user_id).first()
+# ❌ WRONG - synchronous query
+user = db.query(User).filter(User.id == user_id).first()
 ```
 
-**Naming Conventions:**
-```python
-# ✅ CORRECT - snake_case for tables and columns
-class Assessment(Base):
-    __tablename__ = "assessments"
-    
-    id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    created_at = Column(DateTime)
-    nri_score = Column(Float)
+**Naming:**
+- Tables: `snake_case` plural (e.g., `assessments`, `users`)
+- Columns: `snake_case` (e.g., `created_at`, `user_id`)
+- Relationships: Use `back_populates` for bidirectional
 
-# ❌ WRONG - camelCase or PascalCase
-class Assessment(Base):
-    __tablename__ = "Assessments"
-    userId = Column(String)
-    createdAt = Column(DateTime)
-```
+## API Design
 
-## Assessment Modality Implementation Pattern
+### Endpoint Conventions
 
-**CRITICAL: All assessment types MUST follow this exact structure**
+**URL Structure:**
+- `/api/v1/{modality}/analyze` - Main analysis endpoint
+- `/api/v1/{modality}/results/{id}` - Retrieve results
+- `/api/v1/{modality}/validate` - Validate input
 
-### Backend Structure (per modality)
-```
-backend/app/
-├── api/v1/endpoints/{modality}.py          # API endpoints
-├── schemas/{modality}.py                   # Pydantic schemas
-├── services/{modality}_service.py          # Business logic
-└── ml/realtime/realtime_{modality}.py      # ML processing
-```
+**HTTP Methods:**
+- `POST` - Create/analyze (e.g., analyze speech)
+- `GET` - Retrieve data (e.g., get results)
+- `PUT` - Full update
+- `PATCH` - Partial update
+- `DELETE` - Remove data
 
-### Frontend Structure (per modality)
-```
-frontend/src/
-├── app/dashboard/assessments/{modality}/page.tsx
-├── components/assessment/steps/{Modality}AssessmentStep.tsx
-├── hooks/use{Modality}Analysis.ts
-├── types/{modality}-analysis.ts
-└── lib/api/endpoints/{modality}.ts
-```
+**Request/Response:**
+- Always validate with Pydantic schemas
+- Return consistent structure: `{status, data, message, timestamp}`
+- Include confidence scores with predictions
+- Provide error details in development, generic messages in production
 
-### Required Endpoints (per modality)
-```python
-# POST /api/v1/{modality}/analyze - Main analysis endpoint
-# GET /api/v1/{modality}/results/{id} - Retrieve results
-# POST /api/v1/{modality}/validate - Validate input data
-```
+### Error Responses
 
-### Example Implementation
-```python
-# backend/app/api/v1/endpoints/speech.py
-@router.post("/analyze")
-async def analyze_speech(
-    audio: UploadFile,
-    db: AsyncSession = Depends(get_db)
-) -> dict:
-    processor = RealtimeSpeechProcessor()
-    result = await processor.analyze(audio)
-    # Save to database
-    return success_response(data=result)
-```
-
-```tsx
-// frontend/src/hooks/useSpeechAnalysis.ts
-export function useSpeechAnalysis() {
-  const [result, setResult] = useState<SpeechAnalysisResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  
-  const analyze = async (audioFile: File) => {
-    setLoading(true);
-    try {
-      const data = await analyzeSpeech(audioFile);
-      setResult(data);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  return { result, loading, analyze };
+```json
+{
+  "status": "error",
+  "message": "Invalid audio format",
+  "details": {
+    "field": "audio_file",
+    "expected": "wav, mp3, or flac",
+    "received": "txt"
+  },
+  "timestamp": "2026-01-15T10:30:00Z"
 }
 ```
 
-## Performance Requirements
+## Performance Standards
 
-**Non-Negotiable Targets:**
-- API response time: <200ms for real-time processing
-- ML inference time: <500ms per modality
-- Database queries: <100ms for standard operations
-- Page load time: <2 seconds (initial), <500ms (navigation)
-- Frontend rendering: <16ms per frame (60fps)
+### Frontend Performance
 
-**Optimization Strategies:**
-- Frontend: Use `React.memo` for expensive components
-- Backend: Implement async processing for ML operations
-- Database: Add indexes on frequently queried columns
-- Caching: Implement response caching for repeated requests
+**Targets:**
+- Initial page load: <2s
+- Route navigation: <500ms
+- API response: <200ms
+- ML inference: <500ms per modality
 
-## Security & Healthcare Compliance
+**Optimization:**
+- Use Next.js Image component for images
+- Implement code splitting with dynamic imports
+- Enable React Server Components for static content
+- Use `loading.tsx` and `<Suspense>` for perceived performance
 
-**HIPAA Compliance (Required for ALL features):**
-- Encrypt all patient data at rest (AES-256) and in transit (TLS 1.3)
-- Anonymize data in logs, analytics, and error reports
+### Backend Performance
+
+**Targets:**
+- API response: <200ms (excluding ML inference)
+- ML inference: <500ms per model
+- Database queries: <100ms
+- Batch processing: 100+ concurrent assessments
+
+**Optimization:**
+- Use async/await for all I/O
+- Implement connection pooling for database
+- Cache frequently accessed data (Redis)
+- Use background tasks for long operations (Celery)
+
+## Security Standards
+
+### Authentication & Authorization
+
+- Use JWT tokens with short expiration (15 min access, 7 day refresh)
 - Implement role-based access control (RBAC)
-- Audit trail for all data access and modifications
-- Secure file upload with virus scanning
 - Session timeout after 15 minutes of inactivity
+- Multi-factor authentication for sensitive operations
+
+### Data Protection
+
+**Encryption:**
+- TLS 1.3 for data in transit
+- AES-256 for data at rest
+- Encrypted backups with separate key management
+
+**HIPAA Compliance:**
+- Strip EXIF data from uploaded images
+- Remove patient identifiers from logs
+- Anonymize data for model training
+- Audit logs for all data access
 
 **Input Validation:**
-```python
-# ✅ CORRECT - Validate all inputs with Pydantic
-from pydantic import BaseModel, Field, validator
+- Validate ALL user inputs with Pydantic/Zod
+- Sanitize file uploads (check magic bytes, not just extension)
+- Limit file sizes (50MB max)
+- Rate limiting on API endpoints
 
-class SpeechAnalysisRequest(BaseModel):
-    audio_file: UploadFile
-    task_type: str = Field(..., regex="^(sustained_vowel|pa_ta_ka|reading)$")
-    
-    @validator('audio_file')
-    def validate_audio(cls, v):
-        if not v.content_type.startswith('audio/'):
-            raise ValueError('Invalid audio file')
-        return v
+## Testing Standards
 
-# ❌ WRONG - No validation
-@router.post("/analyze")
-async def analyze(audio: UploadFile):
-    # No validation of file type or content
-```
+### Frontend Testing
+
+**Unit Tests (Vitest):**
+- Test components in isolation
+- Mock external dependencies
+- Test edge cases and error states
+- Aim for >80% code coverage
+
+**Integration Tests:**
+- Test component interactions
+- Test API integration
+- Test user workflows
+
+**E2E Tests (Playwright):**
+- Test critical user paths
+- Test across browsers (Chrome, Firefox, Safari)
+- Test mobile responsiveness
+
+### Backend Testing
+
+**Unit Tests (pytest):**
+- Test business logic in isolation
+- Mock database and external services
+- Test validation logic
+- Aim for >80% code coverage
+
+**Integration Tests:**
+- Test API endpoints end-to-end
+- Test database operations
+- Test ML pipeline integration
+
+**Load Tests:**
+- Test concurrent user scenarios
+- Test batch processing limits
+- Identify performance bottlenecks
+
+## ML Model Standards
+
+### Model Performance
+
+**Minimum Thresholds:**
+- Sensitivity: >90% for critical conditions
+- Specificity: >85%
+- AUC-ROC: >0.90 for binary classification
+- Inference time: <500ms per prediction
+
+### Model Deployment
+
+**Versioning:**
+- Tag models with semantic versioning (v1.0.0)
+- Store model metadata (training date, dataset, performance)
+- Support A/B testing for model updates
+
+**Monitoring:**
+- Track prediction confidence distribution
+- Monitor for model drift
+- Log false positive/negative reports
+- Alert on performance degradation
 
 ## Development Workflow
 
-### When Adding Features
-1. **Backend First**: Implement API endpoint with Pydantic schemas
-2. **ML Integration**: Add processing logic in `ml/realtime/`
-3. **Frontend Integration**: Create components following assessment pattern
-4. **Type Safety**: Define TypeScript interfaces matching backend schemas
-5. **Testing**: Add integration tests for complete workflow
-6. **Documentation**: Update API docs and user guides
+### Git Conventions
 
-### Database Changes Workflow
+**Branch Naming:**
+- `feature/description` - New features
+- `fix/description` - Bug fixes
+- `refactor/description` - Code refactoring
+- `docs/description` - Documentation updates
+
+**Commit Messages:**
+- Use conventional commits: `type(scope): description`
+- Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+- Example: `feat(speech): add real-time audio visualization`
+
+### Code Review Checklist
+
+- [ ] Code follows naming conventions
+- [ ] Type hints/types are present
+- [ ] Error handling is implemented
+- [ ] Tests are included
+- [ ] Documentation is updated
+- [ ] No sensitive data in code
+- [ ] Performance impact considered
+- [ ] Accessibility requirements met
+
+## Environment Configuration
+
+### Frontend (.env.local)
+
 ```bash
-# 1. Modify SQLAlchemy models in backend/app/models/
-# 2. Generate migration
-cd backend
-alembic revision --autogenerate -m "Add user preferences"
-
-# 3. Review generated migration file in alembic/versions/
-# 4. Apply migration
-alembic upgrade head
-
-# 5. Test on development database before deploying
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_ENV=development
 ```
 
-### Error Handling Strategy
-- **Frontend**: Error boundaries + user-friendly messages
-- **Backend**: Structured error responses with proper HTTP codes
-- **ML Processing**: Graceful degradation for failed analyses
-- **Database**: Transaction rollback on failures
+### Backend (.env)
+
+```bash
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost/medilens
+SECRET_KEY=your-secret-key
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+```
+
+**Rules:**
+- NEVER commit `.env` files
+- Use `.env.example` as template
+- Validate required env vars on startup
+- Use different values per environment
+
+## Logging Standards
+
+### Frontend Logging
+
+```typescript
+// Development: console.log
+console.log('User action:', action);
+
+// Production: Send to monitoring service
+logger.info('User action', { action, userId, timestamp });
+```
+
+### Backend Logging
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Include context in logs
+logger.info(
+    "Speech analysis completed",
+    extra={
+        "user_id": user_id,
+        "duration_ms": duration,
+        "confidence": confidence
+    }
+)
+```
+
+**Log Levels:**
+- `DEBUG` - Detailed diagnostic info
+- `INFO` - General informational messages
+- `WARNING` - Warning messages (recoverable issues)
+- `ERROR` - Error messages (handled exceptions)
+- `CRITICAL` - Critical issues (system failure)
+
+## Accessibility Requirements
+
+### WCAG 2.1 AA Compliance
+
+- Keyboard navigation for all interactive elements
+- Screen reader compatibility (semantic HTML, ARIA labels)
+- Color contrast ratio ≥4.5:1 for text
+- Focus indicators visible on all interactive elements
+- Alt text for all images
+- Captions for audio/video content
+
+### Implementation
+
+```typescript
+// ✅ CORRECT - Accessible button
+<button
+  onClick={handleClick}
+  aria-label="Start speech assessment"
+  className="focus:ring-2 focus:ring-blue-500"
+>
+  Start Assessment
+</button>
+
+// ❌ WRONG - Not accessible
+<div onClick={handleClick}>Start Assessment</div>
+```
 
 ## Common Pitfalls to Avoid
 
 ### Frontend
 - ❌ Using Pages Router instead of App Router
-- ❌ Using class components instead of functional components
-- ❌ Using external state libraries (Redux, Zustand)
 - ❌ Using relative imports instead of `@/` alias
-- ❌ Using Tailwind color classes instead of hex values
-- ❌ Hardcoding API URLs instead of environment variables
-- ❌ Ignoring TypeScript errors
+- ❌ Mixing Server and Client Components incorrectly
+- ❌ Not using TypeScript strict mode
+- ❌ Using `npm` or `yarn` instead of `bun`
+- ❌ Missing error boundaries around client components
+- ❌ Not implementing loading states
 
 ### Backend
 - ❌ Modifying database directly instead of using Alembic
-- ❌ Omitting type hints on functions
-- ❌ Using sync operations for I/O instead of async/await
-- ❌ Exposing raw errors to users
-- ❌ Skipping input validation
-- ❌ Hardcoding secrets instead of environment variables
-- ❌ Mixing ML logic with API logic
+- ❌ Using sync operations instead of async/await
+- ❌ Missing type hints on functions
+- ❌ Not validating inputs with Pydantic
+- ❌ Mixing business logic with API endpoints
+- ❌ Exposing stack traces to clients
+- ❌ Using bare `except:` clauses
 
-## File Naming Conventions
+### General
+- ❌ Inconsistent naming conventions
+- ❌ Missing error handling
+- ❌ Hardcoding configuration instead of using env vars
+- ❌ Skipping tests for new features
+- ❌ Not following the established pipeline pattern
+- ❌ Committing sensitive data (API keys, passwords)
 
-### Frontend (TypeScript/React)
-- Components: `PascalCase.tsx` (e.g., `AssessmentFlow.tsx`)
-- Utilities & Hooks: `camelCase.ts` (e.g., `useAssessment.ts`)
-- Types: `kebab-case.ts` (e.g., `speech-analysis.ts`)
-- Pages: `page.tsx` (App Router convention)
-- Layouts: `layout.tsx` (App Router convention)
+## Quick Reference
 
-### Backend (Python/FastAPI)
-- All files: `snake_case.py` (e.g., `speech_analysis.py`)
-- Endpoint files: Match domain name (e.g., `speech.py`, `retinal.py`)
-- ML processors: Prefix with `realtime_` (e.g., `realtime_speech.py`)
+### Adding a New Diagnostic Module
 
-## Environment Variables
+**Backend:**
+1. Create `app/pipelines/{modality}/` with analyzer, validator
+2. Create `app/api/v1/endpoints/{modality}.py`
+3. Create `app/schemas/{modality}.py`
+4. Add routes to `app/api/v1/api.py`
+5. Create database models + Alembic migration
 
-### Frontend (.env.local)
+**Frontend:**
+1. Create `src/app/dashboard/{modality}/page.tsx`
+2. Create `src/app/dashboard/{modality}/_components/`
+3. Create `src/app/api/{modality}/route.ts`
+4. Create `src/types/{modality}-analysis.ts`
+5. Create `src/hooks/use{Modality}Analysis.ts`
+6. Add navigation link in `DashboardSidebar.tsx`
+
+### Running the Application
+
+**Frontend:**
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_APP_NAME=MediLens
+cd frontend
+bun install
+bun run dev  # http://localhost:3000
 ```
 
-### Backend (.env)
+**Backend:**
 ```bash
-DATABASE_URL=sqlite+aiosqlite:///./neurolens.db
-SECRET_KEY=your-secret-key-here
-ENVIRONMENT=development
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload  # http://localhost:8000
 ```
 
-## Testing Requirements
+### Running Tests
 
-**Before deploying any feature:**
-- [ ] Unit tests for business logic
-- [ ] Integration tests for API endpoints
-- [ ] E2E tests for critical user flows
-- [ ] Performance tests meet targets (<200ms API, <500ms ML)
-- [ ] Security audit passes (HIPAA compliance)
-- [ ] Accessibility audit passes (WCAG 2.1 AA)
-- [ ] Code review approved by 2+ team members
+**Frontend:**
+```bash
+bun run test          # Unit tests
+bun run test:e2e      # E2E tests
+```
+
+**Backend:**
+```bash
+pytest                # All tests
+pytest -v             # Verbose
+pytest --cov          # With coverage
+```
