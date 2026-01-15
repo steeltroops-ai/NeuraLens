@@ -12,11 +12,11 @@
 import { Suspense, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load the RetinalAssessment component (Requirement 4.2)
 const RetinalAssessment = dynamic(
-    () => import('@/components/dashboard/RetinalAssessment'),
+    () => import('./_components/RetinalAssessment'),
     {
         ssr: false,
         loading: () => <RetinalAssessmentSkeleton />,

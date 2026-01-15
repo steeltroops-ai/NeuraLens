@@ -1,6 +1,6 @@
 
-import { apiClient } from '../../client';
-import { RetinalAnalysisResult, ImageValidationResult } from '../../../types/retinal-analysis';
+import { apiClient } from '../client';
+import { RetinalAnalysisResult, ImageValidationResult } from '@/types/retinal-analysis';
 
 export async function analyzeRetinalImage(
   imageFile: File,
@@ -18,6 +18,9 @@ export async function analyzeRetinalImage(
     }
   );
   
+  if (!response.data) {
+    throw new Error('No data returned from retinal analysis');
+  }
   return response.data;
 }
 
@@ -35,6 +38,9 @@ export async function validateRetinalImage(
     }
   );
   
+  if (!response.data) {
+    throw new Error('No data returned from image validation');
+  }
   return response.data;
 }
 
@@ -45,16 +51,21 @@ export async function getRetinalResults(
     `/retinal/results/${assessmentId}`
   );
   
+  if (!response.data) {
+    throw new Error('No data returned for assessment');
+  }
   return response.data;
 }
 
 export async function generateRetinalReport(
   assessmentId: string
 ): Promise<Blob> {
-  const response = await apiClient.get(
-    `/retinal/report/${assessmentId}`,
-    { responseType: 'blob' }
+  const response = await apiClient.get<Blob>(
+    `/retinal/report/${assessmentId}`
   );
   
+  if (!response.data) {
+    throw new Error('No report data returned');
+  }
   return response.data;
 }

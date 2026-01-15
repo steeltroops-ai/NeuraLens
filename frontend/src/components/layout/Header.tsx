@@ -13,7 +13,7 @@ import {
 import { Activity } from 'lucide-react';
 
 import { cn } from '@/components/ui';
-import { useSafeNavigation } from '@/components/SafeNavigation';
+import { useSafeNavigation } from '@/components/common/SafeNavigation';
 
 interface NavigationItem {
   id: string;

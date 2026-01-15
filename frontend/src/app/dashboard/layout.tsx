@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { DashboardSidebar, SIDEBAR_COLLAPSED_KEY } from '@/components/dashboard/DashboardSidebar';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { CommandPalette } from '@/components/dashboard/CommandPalette';
+import { DashboardSidebar, SIDEBAR_COLLAPSED_KEY } from './_components/DashboardSidebar';
+import { DashboardHeader } from './_components/DashboardHeader';
+import { CommandPalette } from './_components/CommandPalette';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

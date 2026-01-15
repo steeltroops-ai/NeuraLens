@@ -12,11 +12,11 @@
 import { Suspense, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load the MultiModalAssessment component (Requirement 4.2)
 const MultiModalAssessment = dynamic(
-    () => import('@/components/dashboard/MultiModalAssessment'),
+    () => import('./_components/MultiModalAssessment'),
     {
         ssr: false,
         loading: () => <MultiModalAssessmentSkeleton />,

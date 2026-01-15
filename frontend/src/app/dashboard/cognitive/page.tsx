@@ -12,11 +12,11 @@
 import { Suspense, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load the CognitiveAssessment component (Requirement 4.2)
 const CognitiveAssessment = dynamic(
-    () => import('@/components/dashboard/CognitiveAssessment'),
+    () => import('./_components/CognitiveAssessment'),
     {
         ssr: false,
         loading: () => <CognitiveAssessmentSkeleton />,

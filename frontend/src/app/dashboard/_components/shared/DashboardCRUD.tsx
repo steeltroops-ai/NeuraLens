@@ -18,10 +18,10 @@ import {
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Import assessment components
-import SpeechAssessment from './SpeechAssessment';
-import RetinalAssessment from './RetinalAssessment';
-import MotorAssessment from './MotorAssessment';
+// Import assessment components from their module-specific locations
+import SpeechAssessment from '@/app/dashboard/speech/_components/SpeechAssessment';
+import RetinalAssessment from '@/app/dashboard/retinal/_components/RetinalAssessment';
+import MotorAssessment from '@/app/dashboard/motor/_components/MotorAssessment';
 import AssessmentHistory from './AssessmentHistory';
 
 interface DashboardCRUDProps {

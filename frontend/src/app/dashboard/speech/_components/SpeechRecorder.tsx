@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Upload, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { AudioVisualizer } from './AudioVisualizer';
 
 interface SpeechRecorderProps {
     onRecordingComplete: (audioBlob: Blob) => void;
@@ -226,6 +227,20 @@ export const SpeechRecorder: React.FC<SpeechRecorderProps> = ({
                         </span>
                     )}
                 </div>
+
+                {/* Audio Visualizer */}
+                {isRecording && (
+                    <div className="w-full max-w-md mt-4">
+                        <AudioVisualizer
+                            analyser={analyserRef.current}
+                            isActive={isRecording}
+                            showWaveform={true}
+                            showLevelBar={true}
+                            onAudioLevelChange={(level) => setAudioLevel(level / 100)}
+                            className="rounded-lg"
+                        />
+                    </div>
+                )}
 
                 {/* Progress bar during recording */}
                 {isRecording && (

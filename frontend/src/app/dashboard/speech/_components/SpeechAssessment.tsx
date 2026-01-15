@@ -37,10 +37,10 @@ import {
 } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 
-import { SPEECH_ANALYSIS_CONSTANTS } from '../../types/speech-analysis';
-import { SpeechAnalysisCard } from '../assessment/SpeechAnalysisCard';
+import { SPEECH_ANALYSIS_CONSTANTS } from '@/types/speech-analysis';
+import { SpeechAnalysisCard } from './SpeechAnalysisCard';
 
-import type { SpeechResult, SpeechAnalysisError } from '../../types/speech-analysis';
+import type { SpeechResult, SpeechAnalysisError } from '@/types/speech-analysis';
 
 interface SpeechAssessmentProps {
   onProcessingChange: (isProcessing: boolean) => void;

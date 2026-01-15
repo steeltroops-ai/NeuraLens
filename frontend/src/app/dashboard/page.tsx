@@ -18,9 +18,9 @@ import { useState, useEffect, memo, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 
 // Lazy load dashboard components for optimal performance (Requirement 12.1)
-const DiagnosticGrid = lazy(() => import('@/components/dashboard/DiagnosticGrid'));
-const SystemStatusCards = lazy(() => import('@/components/dashboard/SystemStatusCards'));
-const UserHealthOverview = lazy(() => import('@/components/dashboard/UserHealthOverview'));
+const DiagnosticGrid = lazy(() => import('./_components/DiagnosticGrid'));
+const SystemStatusCards = lazy(() => import('./_components/SystemStatusCards'));
+const UserHealthOverview = lazy(() => import('./_components/UserHealthOverview'));
 
 /**
  * Loading skeleton for the diagnostic grid

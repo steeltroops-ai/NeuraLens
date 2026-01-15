@@ -12,11 +12,11 @@
 import { Suspense, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load the NRIFusionDashboard component (Requirement 4.2)
 const NRIFusionDashboard = dynamic(
-    () => import('@/components/dashboard/NRIFusionDashboard'),
+    () => import('./_components/NRIFusionDashboard'),
     {
         ssr: false,
         loading: () => <NRIFusionSkeleton />,

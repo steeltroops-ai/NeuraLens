@@ -26,11 +26,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Play, Square, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { AudioRecorder } from '../../lib/ml/audio-recorder';
-import { SpeechProcessor } from '../../lib/ml/speech-processor';
-import { SpeechAnalysisError, SPEECH_ANALYSIS_CONSTANTS } from '../../types/speech-analysis';
+import { AudioRecorder } from '@/lib/ml/audio-recorder';
+import { SpeechProcessor } from '@/lib/ml/speech-processor';
+import { SpeechAnalysisError, SPEECH_ANALYSIS_CONSTANTS } from '@/types/speech-analysis';
 
-import type { SpeechResult, RecordingState } from '../../types/speech-analysis';
+import type { SpeechResult, RecordingState } from '@/types/speech-analysis';
 
 interface SpeechAnalysisCardProps {
   onResult?: (result: SpeechResult) => void;

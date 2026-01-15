@@ -62,3 +62,45 @@ export interface ImageValidationResult {
   has_optic_disc: boolean;
   has_macula: boolean;
 }
+
+// Types for client-side retinal analysis (used by API route)
+export interface RetinalRiskFeatures {
+  vesselDensity: number;
+  tortuosityIndex: number;
+  averageVesselWidth: number;
+  arteriovenousRatio: number;
+  opticDiscArea: number;
+  opticCupArea: number;
+  hemorrhageCount: number;
+  microaneurysmCount: number;
+  hardExudateArea: number;
+  softExudateCount: number;
+  imageQuality: number;
+  spatialFeatures: number[];
+}
+
+export interface RetinalMetadata {
+  processingTime: number;
+  imageDimensions: { width: number; height: number };
+  imageSize: number;
+  modelVersion: string;
+  preprocessingSteps: string[];
+  timestamp: Date;
+  gpuAccelerated: boolean;
+}
+
+export interface RetinalResult {
+  vascularScore: number;
+  cupDiscRatio: number;
+  confidence: number;
+  riskFeatures: RetinalRiskFeatures;
+  metadata: RetinalMetadata;
+}
+
+export interface RetinalAnalysisResponse {
+  result: RetinalResult;
+  success: boolean;
+  cacheKey: string;
+  nriContribution: number;
+}
+

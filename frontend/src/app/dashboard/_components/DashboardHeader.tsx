@@ -8,7 +8,7 @@ import { sidebarItems, sidebarGroups } from './DashboardSidebar';
 import dynamic from 'next/dynamic';
 
 // Lazy load AI Insights Panel for notifications
-const AIInsightsPanel = dynamic(() => import('@/components/dashboard/AIInsightsPanel'), {
+const AIInsightsPanel = dynamic(() => import('./shared/AIInsightsPanel'), {
     ssr: false,
     loading: () => (
         <div className="animate-pulse space-y-3">

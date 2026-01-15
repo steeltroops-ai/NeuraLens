@@ -12,11 +12,11 @@
 import { Suspense, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load the MotorAssessment component (Requirement 4.2)
 const MotorAssessment = dynamic(
-    () => import('@/components/dashboard/MotorAssessment'),
+    () => import('./_components/MotorAssessment'),
     {
         ssr: false,
         loading: () => <MotorAssessmentSkeleton />,

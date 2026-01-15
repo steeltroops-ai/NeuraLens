@@ -21,7 +21,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 
-import type { RetinalResult, RetinalAnalysisResponse } from '../../../types/retinal-analysis';
+import type { RetinalResult, RetinalAnalysisResponse } from '@/types/retinal-analysis';
 
 /**
  * POST /api/retinal
