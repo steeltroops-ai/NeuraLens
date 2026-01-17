@@ -5,7 +5,7 @@
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const API_VERSION = '/api/v1';
+const API_VERSION = '/api';
 const API_TIMEOUT = 30000;
 
 // Standard API Response Interface
@@ -70,7 +70,12 @@ class MediLensApiClient {
     const { timeout = API_TIMEOUT, retries = 2, headers = {} } = config;
 
     const url = `${this.baseUrl}${endpoint}`;
-    const requestHeaders = { ...this.defaultHeaders, ...headers };
+    
+    // For FormData, don't set Content-Type - let browser set it with boundary
+    const isFormData = options.body instanceof FormData;
+    const requestHeaders = isFormData 
+      ? { Accept: 'application/json', ...headers }
+      : { ...this.defaultHeaders, ...headers };
 
     // Create abort controller for timeout
     const controller = new AbortController();

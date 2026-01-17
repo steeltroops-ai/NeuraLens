@@ -80,11 +80,10 @@ export async function analyzeRetinalImage(
     formData.append('metadata', JSON.stringify(options.metadata));
   }
 
-  const response = await apiClient.post<RetinalAnalysisResult>(
+  const response = await apiClient.postFormData<RetinalAnalysisResult>(
     `${API_BASE}/analyze`,
     formData,
     {
-      headers: { 'Content-Type': 'multipart/form-data' },
       timeout: ANALYSIS_TIMEOUT,
     }
   );
@@ -125,12 +124,9 @@ export async function validateRetinalImage(
     formData.append('check_anatomy', String(options.check_anatomy));
   }
   
-  const response = await apiClient.post<ImageValidationResult>(
+  const response = await apiClient.postFormData<ImageValidationResult>(
     `${API_BASE}/validate`,
-    formData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }
+    formData
   );
   
   if (!response.data) {

@@ -21,9 +21,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Forward to FastAPI backend
+        // Forward to FastAPI backend with timeout
         const backendUrl = `${BACKEND_URL}/api/explain`;
         console.log('[API] Forwarding to backend:', backendUrl);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -34,8 +37,11 @@ export async function POST(request: NextRequest) {
                 patient_context,
                 voice_output: voice_output || false,
                 voice_provider: voice_provider || 'elevenlabs'
-            })
+            }),
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             const errorText = await response.text();

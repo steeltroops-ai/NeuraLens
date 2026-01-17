@@ -1,382 +1,796 @@
-/**
- * Retinal Imaging Module Page
- * 
- * Dedicated page for the Retinal Imaging diagnostic module.
- * Features:
- * - Lazy loading with skeleton
- * - Error boundary with recovery
- * - Full accessibility compliance (WCAG 2.1 AA)
- * - Keyboard navigation
- * - Screen reader support
- * 
- * Requirements: 4.1, 4.2, 7.1, 8.1, 12.1-12.10
- * 
- * @module app/dashboard/retinal/page
- */
-
 'use client';
 
-import { Suspense, useState, useCallback, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
-import { 
-  Eye, 
-  Activity, 
-  Clock, 
-  Brain, 
-  Shield,
-  AlertCircle,
-  RefreshCw,
-  HelpCircle,
-  CheckCircle2
+/**
+ * Retinal Imaging Module Page - PRD v2.0.0 Compliant
+ * 
+ * Complete implementation matching PRD Section 6 Frontend Integration:
+ * - Image upload zone with drag-and-drop & preview
+ * - Quality check feedback
+ * - DR grade display with color-coded badge
+ * - Biomarker cards with status indicators (8 total)
+ * - Risk gauge (0-100)
+ * - Urgency indicator
+ * - Heatmap overlay with toggle
+ * - Recommendations panel
+ * - Findings list
+ */
+
+import React, { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Eye,
+    Info,
+    Shield,
+    Clock,
+    Target,
+    AlertCircle,
+    Loader2,
+    Upload,
+    ImageIcon,
+    Brain,
+    Activity,
+    CheckCircle2,
+    AlertTriangle,
+    XCircle,
+    Download,
+    RefreshCw,
+    ZoomIn,
+    Layers,
+    Heart,
+    Droplet,
 } from 'lucide-react';
-import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 
 // ============================================================================
-// Lazy Load Components (Requirement 4.2)
+// PRD-Compliant Types (Section 5 Response Schema)
 // ============================================================================
 
-const RetinalAssessmentStep = dynamic(
-  () => import('./_components/RetinalAssessmentStep'),
-  {
-    ssr: false,
-    loading: () => <RetinalAssessmentSkeleton />,
-  }
-);
+interface BiomarkerValue {
+    value: number;
+    normal_range?: number[];
+    threshold?: number;
+    status: 'normal' | 'abnormal' | 'borderline';
+}
+
+interface DiabeticRetinopathy {
+    grade: number;
+    grade_name: string;
+    probability: number;
+    referral_urgency: string;
+}
+
+interface Finding {
+    type: string;
+    location: string;
+    severity: 'normal' | 'mild' | 'moderate' | 'severe';
+    description: string;
+}
+
+interface ImageQuality {
+    score: number;
+    issues: string[];
+    usable: boolean;
+}
+
+interface RiskAssessment {
+    overall_score: number;
+    category: string;
+    confidence: number;
+    primary_finding: string;
+}
+
+interface RetinalAnalysisResponse {
+    success: boolean;
+    session_id: string;
+    timestamp: string;
+    processing_time_ms: number;
+    risk_assessment: RiskAssessment;
+    diabetic_retinopathy: DiabeticRetinopathy;
+    biomarkers: Record<string, BiomarkerValue>;
+    findings: Finding[];
+    heatmap_base64?: string;
+    image_quality: ImageQuality;
+    recommendations: string[];
+}
+
+type AnalysisState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
 
 // ============================================================================
-// Loading Skeleton (Requirement 7.1)
+// Biomarker Display Configuration (PRD Section 4)
 // ============================================================================
 
-function RetinalAssessmentSkeleton() {
-  return (
-    <div 
-      className="space-y-6 animate-pulse"
-      role="status"
-      aria-label="Loading retinal analysis module"
-    >
-      {/* Step Indicator Skeleton */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4 w-full">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center flex-1">
-              <div className="flex flex-col items-center">
-                <div className="h-10 w-10 rounded-full bg-zinc-200" />
-                <div className="h-3 w-16 mt-2 rounded bg-zinc-200" />
-              </div>
-              {i < 3 && <div className="flex-1 h-0.5 bg-zinc-200 mx-4" />}
+const BIOMARKER_CONFIG: Record<string, { 
+    displayName: string; 
+    icon: React.ElementType;
+    unit: string;
+    format: (v: number) => string;
+}> = {
+    vessel_tortuosity: { displayName: "Vessel Tortuosity", icon: Activity, unit: "index", format: (v) => v.toFixed(3) },
+    av_ratio: { displayName: "AV Ratio", icon: Target, unit: "ratio", format: (v) => v.toFixed(2) },
+    cup_disc_ratio: { displayName: "Cup-to-Disc Ratio", icon: Eye, unit: "ratio", format: (v) => v.toFixed(2) },
+    vessel_density: { displayName: "Vessel Density", icon: Droplet, unit: "index", format: (v) => v.toFixed(2) },
+    hemorrhage_count: { displayName: "Hemorrhages", icon: XCircle, unit: "count", format: (v) => v.toFixed(0) },
+    microaneurysm_count: { displayName: "Microaneurysms", icon: AlertTriangle, unit: "count", format: (v) => v.toFixed(0) },
+    exudate_area: { displayName: "Exudate Area", icon: Layers, unit: "%", format: (v) => v.toFixed(2) + "%" },
+    rnfl_thickness: { displayName: "RNFL Thickness", icon: Brain, unit: "norm", format: (v) => v.toFixed(2) },
+};
+
+// DR Grade colors (PRD Section 6)
+const DR_GRADE_COLORS: Record<number, { bg: string; text: string; border: string }> = {
+    0: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+    1: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+    2: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+    3: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+    4: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300' },
+};
+
+// ============================================================================
+// Component: Risk Gauge (PRD Section 6)
+// ============================================================================
+
+function RiskGauge({ score, category, confidence }: { score: number; category: string; confidence: number }) {
+    const angle = (score / 100) * 180 - 90; // -90 to 90 degrees
+    
+    const getCategoryColor = () => {
+        switch (category) {
+            case 'minimal': return 'text-green-600';
+            case 'low': return 'text-green-500';
+            case 'moderate': return 'text-yellow-500';
+            case 'elevated': return 'text-orange-500';
+            case 'high': return 'text-red-500';
+            case 'critical': return 'text-red-700';
+            default: return 'text-zinc-500';
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center p-6 bg-white rounded-xl border border-zinc-200">
+            <h3 className="text-[14px] font-semibold text-zinc-700 mb-4">Risk Assessment</h3>
+            
+            {/* Semi-circular gauge */}
+            <div className="relative w-48 h-24 overflow-hidden">
+                <svg className="w-48 h-48 -mt-24" viewBox="0 0 100 50">
+                    {/* Background arc */}
+                    <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
+                        fill="none"
+                        stroke="#e5e7eb"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                    />
+                    {/* Colored arc based on score */}
+                    <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
+                        fill="none"
+                        stroke="url(#gradient)"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(score / 100) * 125.6} 125.6`}
+                    />
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#22c55e" />
+                            <stop offset="50%" stopColor="#eab308" />
+                            <stop offset="100%" stopColor="#ef4444" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                {/* Score display */}
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+                    <span className={`text-3xl font-bold ${getCategoryColor()}`}>{score.toFixed(0)}</span>
+                </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Upload Interface Skeleton */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="border-2 border-dashed border-zinc-300 rounded-lg p-8">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-zinc-200" />
-            <div className="h-5 w-48 rounded bg-zinc-200" />
-            <div className="h-4 w-64 rounded bg-zinc-200" />
-            <div className="h-10 w-40 rounded-lg bg-zinc-200" />
-          </div>
-        </div>
-      </div>
-
-      {/* Screen Reader Announcement */}
-      <span className="sr-only">Loading retinal analysis interface, please wait...</span>
-    </div>
-  );
-}
-
-// ============================================================================
-// Error Fallback (Requirement 8.1, 13.1-13.3)
-// ============================================================================
-
-interface RetinalAssessmentErrorProps {
-  error?: Error;
-  resetError?: () => void;
-}
-
-function RetinalAssessmentError({ error, resetError }: RetinalAssessmentErrorProps) {
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3;
-
-  const handleRetry = () => {
-    if (retryCount < maxRetries && resetError) {
-      setRetryCount(prev => prev + 1);
-      resetError();
-    }
-  };
-
-  return (
-    <div 
-      className="rounded-xl border border-red-200 bg-red-50 p-8"
-      role="alert"
-      aria-live="assertive"
-    >
-      <div className="flex flex-col items-center text-center">
-        {/* Error Icon */}
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
-          <AlertCircle className="h-8 w-8 text-red-600" aria-hidden="true" />
-        </div>
-
-        {/* Error Message */}
-        <h2 className="text-xl font-semibold text-red-900 mb-2">
-          Retinal Analysis Unavailable
-        </h2>
-        <p className="text-red-700 mb-6 max-w-md">
-          {error?.message || 'An error occurred while loading the retinal imaging module.'}
-        </p>
-
-        {/* Recovery Steps */}
-        <div className="text-left max-w-sm mb-6">
-          <h3 className="text-sm font-semibold text-red-800 mb-2">
-            Troubleshooting Steps:
-          </h3>
-          <ul className="space-y-2 text-sm text-red-700">
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              Ensure your image file is in JPG or PNG format
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              Check that the file size is under 10MB
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              Verify your internet connection
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              Try refreshing the page
-            </li>
-          </ul>
-        </div>
-
-        {/* Retry Info */}
-        {retryCount > 0 && (
-          <p className="text-xs text-red-600 mb-4" aria-live="polite">
-            Retry attempt {retryCount} of {maxRetries}
-          </p>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          {resetError && retryCount < maxRetries && (
-            <button
-              onClick={handleRetry}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[48px] bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-              aria-label={`Retry loading, attempt ${retryCount + 1} of ${maxRetries}`}
-            >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Try Again
-            </button>
-          )}
-          
-          <a
-            href="/support"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[48px] border border-red-300 text-red-700 font-semibold rounded-xl hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            aria-label="Get help from support team"
-          >
-            <HelpCircle className="h-4 w-4" aria-hidden="true" />
-            Contact Support
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// Page Header Component
-// ============================================================================
-
-interface PageHeaderProps {
-  isProcessing: boolean;
-}
-
-function PageHeader({ isProcessing }: PageHeaderProps) {
-  return (
-    <header 
-      className="relative overflow-hidden bg-white rounded-2xl border border-zinc-200/80 p-8"
-      role="banner"
-    >
-      {/* Gradient Background */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-cyan-50/40 via-transparent to-blue-50/30 pointer-events-none" 
-        aria-hidden="true"
-      />
-
-      <div className="relative">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            {/* Icon */}
-            <div 
-              className="p-3 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20"
-              aria-hidden="true"
-            >
-              <Eye className="h-7 w-7 text-white" strokeWidth={2} />
-            </div>
-
-            {/* Title and Description */}
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-[24px] font-semibold text-zinc-900">
-                  Retinal Analysis
-                </h1>
-                <span 
-                  className="px-2.5 py-1 bg-cyan-100 text-cyan-700 text-[11px] font-medium rounded-full"
-                  aria-label="Model version: EfficientNet-B0"
-                >
-                  EfficientNet-B0
+            
+            <div className="text-center mt-2">
+                <span className={`text-[14px] font-semibold capitalize ${getCategoryColor()}`}>
+                    {category} Risk
                 </span>
-                {isProcessing && (
-                  <span 
-                    className="px-2.5 py-1 bg-blue-100 text-blue-700 text-[11px] font-medium rounded-full animate-pulse"
-                    aria-live="polite"
-                  >
-                    Processing...
-                  </span>
-                )}
-              </div>
-              <p className="text-[14px] text-zinc-600 max-w-xl">
-                Advanced fundus image analysis with deep learning for neurological risk assessment
-              </p>
+                <div className="text-[11px] text-zinc-500 mt-1">
+                    Confidence: {(confidence * 100).toFixed(0)}%
+                </div>
             </div>
-          </div>
         </div>
-
-        {/* Feature Pills */}
-        <div 
-          className="flex flex-wrap gap-2 mt-6"
-          role="list"
-          aria-label="Key features"
-        >
-          <div 
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg"
-            role="listitem"
-          >
-            <Clock className="h-4 w-4 text-cyan-600" aria-hidden="true" />
-            <span className="text-[12px] font-medium text-zinc-700">Processing: &lt;500ms</span>
-          </div>
-          <div 
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg"
-            role="listitem"
-          >
-            <Activity className="h-4 w-4 text-blue-600" aria-hidden="true" />
-            <span className="text-[12px] font-medium text-zinc-700">AI-Powered Analysis</span>
-          </div>
-          <div 
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg"
-            role="listitem"
-          >
-            <Brain className="h-4 w-4 text-purple-600" aria-hidden="true" />
-            <span className="text-[12px] font-medium text-zinc-700">Neurological Biomarkers</span>
-          </div>
-          <div 
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg"
-            role="listitem"
-          >
-            <Shield className="h-4 w-4 text-green-600" aria-hidden="true" />
-            <span className="text-[12px] font-medium text-zinc-700">HIPAA Compliant</span>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
+    );
 }
 
+// ============================================================================
+// Component: DR Grade Badge (PRD Section 6)
+// ============================================================================
 
+function DRGradeBadge({ dr }: { dr: DiabeticRetinopathy }) {
+    const colors = DR_GRADE_COLORS[dr.grade] || DR_GRADE_COLORS[0];
+    
+    const getUrgencyLabel = () => {
+        switch (dr.referral_urgency) {
+            case 'routine_12_months': return 'Routine (12 mo)';
+            case 'monitor_6_months': return 'Monitor (6 mo)';
+            case 'refer_1_month': return 'Refer (1 mo)';
+            case 'urgent_1_week': return 'URGENT (1 wk)';
+            default: return dr.referral_urgency;
+        }
+    };
+
+    return (
+        <div className={`p-4 rounded-xl border ${colors.bg} ${colors.border}`}>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] font-medium text-zinc-500">Diabetic Retinopathy</span>
+                <span className={`px-2 py-0.5 text-[11px] font-semibold rounded-full ${colors.bg} ${colors.text}`}>
+                    Grade {dr.grade}
+                </span>
+            </div>
+            <div className={`text-[16px] font-bold ${colors.text}`}>
+                {dr.grade_name}
+            </div>
+            <div className="flex items-center justify-between mt-2 text-[12px]">
+                <span className="text-zinc-500">Probability: {(dr.probability * 100).toFixed(0)}%</span>
+                <span className={`font-medium ${colors.text}`}>{getUrgencyLabel()}</span>
+            </div>
+        </div>
+    );
+}
+
+// ============================================================================
+// Component: Biomarker Card (PRD Section 6)
+// ============================================================================
+
+function BiomarkerCard({ name, biomarker }: { name: string; biomarker: BiomarkerValue }) {
+    const config = BIOMARKER_CONFIG[name];
+    if (!config) return null;
+
+    const Icon = config.icon;
+    
+    const getStatusColor = () => {
+        switch (biomarker.status) {
+            case 'normal': return { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-500' };
+            case 'borderline': return { bg: 'bg-yellow-50', border: 'border-yellow-200', icon: 'text-yellow-500' };
+            case 'abnormal': return { bg: 'bg-red-50', border: 'border-red-200', icon: 'text-red-500' };
+            default: return { bg: 'bg-zinc-50', border: 'border-zinc-200', icon: 'text-zinc-500' };
+        }
+    };
+
+    const colors = getStatusColor();
+    const normalRange = biomarker.normal_range;
+
+    return (
+        <div className={`p-3 rounded-lg border ${colors.bg} ${colors.border}`}>
+            <div className="flex items-center gap-2 mb-2">
+                <Icon className={`h-4 w-4 ${colors.icon}`} />
+                <span className="text-[12px] font-medium text-zinc-700">{config.displayName}</span>
+            </div>
+            <div className="text-[18px] font-bold text-zinc-900">
+                {config.format(biomarker.value)}
+            </div>
+            {normalRange && (
+                <div className="text-[10px] text-zinc-500 mt-1">
+                    Normal: {normalRange[0]} - {normalRange[1]}
+                </div>
+            )}
+            <div className="flex items-center gap-1 mt-2">
+                {biomarker.status === 'normal' && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                {biomarker.status === 'borderline' && <AlertTriangle className="h-3 w-3 text-yellow-500" />}
+                {biomarker.status === 'abnormal' && <XCircle className="h-3 w-3 text-red-500" />}
+                <span className={`text-[10px] font-medium capitalize ${colors.icon}`}>
+                    {biomarker.status}
+                </span>
+            </div>
+        </div>
+    );
+}
+
+// ============================================================================
+// Component: Findings List (PRD Section 6)
+// ============================================================================
+
+function FindingsList({ findings }: { findings: Finding[] }) {
+    const getSeverityIcon = (severity: string) => {
+        switch (severity) {
+            case 'normal': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+            case 'mild': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+            case 'moderate': return <AlertCircle className="h-4 w-4 text-orange-500" />;
+            case 'severe': return <XCircle className="h-4 w-4 text-red-500" />;
+            default: return <Info className="h-4 w-4 text-zinc-500" />;
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+            <h3 className="text-[14px] font-semibold text-zinc-900 mb-3">Clinical Findings</h3>
+            <ul className="space-y-2">
+                {findings.map((finding, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                        {getSeverityIcon(finding.severity)}
+                        <div className="flex-1">
+                            <div className="text-[13px] font-medium text-zinc-700">{finding.type}</div>
+                            <div className="text-[11px] text-zinc-500">{finding.description}</div>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+// ============================================================================
+// Component: Recommendations Panel (PRD Section 6)
+// ============================================================================
+
+function RecommendationsPanel({ recommendations }: { recommendations: string[] }) {
+    return (
+        <div className="bg-blue-50 rounded-xl border border-blue-200 p-4">
+            <h3 className="text-[14px] font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Recommendations
+            </h3>
+            <ul className="space-y-2">
+                {recommendations.map((rec, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-[13px] text-blue-700">
+                        <span className="text-blue-400">-</span>
+                        {rec}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+// ============================================================================
+// Component: Heatmap Overlay (PRD Section 6)
+// ============================================================================
+
+function HeatmapOverlay({ 
+    originalUrl, 
+    heatmapBase64,
+    showHeatmap,
+    onToggle
+}: { 
+    originalUrl: string; 
+    heatmapBase64?: string;
+    showHeatmap: boolean;
+    onToggle: () => void;
+}) {
+    return (
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-[14px] font-semibold text-zinc-900">Analysis View</h3>
+                <button
+                    onClick={onToggle}
+                    className={`px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all ${
+                        showHeatmap 
+                            ? 'bg-cyan-600 text-white' 
+                            : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                    }`}
+                >
+                    <span className="flex items-center gap-1.5">
+                        <Layers className="h-3.5 w-3.5" />
+                        {showHeatmap ? 'Hide Heatmap' : 'Show Heatmap'}
+                    </span>
+                </button>
+            </div>
+            
+            <div className="relative aspect-square bg-zinc-900 rounded-lg overflow-hidden">
+                {/* Original image */}
+                <img
+                    src={originalUrl}
+                    alt="Fundus photograph"
+                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                        showHeatmap ? 'opacity-0' : 'opacity-100'
+                    }`}
+                />
+                {/* Heatmap overlay */}
+                {heatmapBase64 && (
+                    <img
+                        src={`data:image/png;base64,${heatmapBase64}`}
+                        alt="Grad-CAM attention heatmap"
+                        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                            showHeatmap ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
+                )}
+                
+                {/* Zoom hint */}
+                <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1">
+                    <ZoomIn className="h-3 w-3" />
+                    Click to zoom
+                </div>
+            </div>
+            
+            <div className="mt-2 text-[11px] text-zinc-500 text-center">
+                {showHeatmap 
+                    ? 'Grad-CAM attention map highlighting regions of interest' 
+                    : 'Original fundus photograph'
+                }
+            </div>
+        </div>
+    );
+}
 
 // ============================================================================
 // Main Page Component
 // ============================================================================
 
-export default function RetinalPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentStep, setCurrentStep] = useState<string>('upload');
-  const [lastAssessmentId, setLastAssessmentId] = useState<string | null>(null);
+export default function RetinalAnalysisPage() {
+    const [state, setState] = useState<AnalysisState>('idle');
+    const [results, setResults] = useState<RetinalAnalysisResponse | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [showHeatmap, setShowHeatmap] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle processing state change
-  const handleProcessingChange = useCallback((processing: boolean) => {
-    setIsProcessing(processing);
-  }, []);
+    const analyzeImage = useCallback(async (imageFile: File) => {
+        setState('processing');
+        setError(null);
 
-  // Handle step change
-  const handleStepChange = useCallback((step: string) => {
-    setCurrentStep(step);
-  }, []);
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            formData.append('patient_id', `PATIENT_${Date.now()}`);
+            formData.append('session_id', crypto.randomUUID());
 
-  // Handle result available
-  const handleResultAvailable = useCallback((assessmentId: string) => {
-    setLastAssessmentId(assessmentId);
-  }, []);
+            const response = await fetch('http://localhost:8000/api/retinal/analyze', {
+                method: 'POST',
+                body: formData,
+            });
 
-  // Update document title based on state
-  useEffect(() => {
-    let title = 'Retinal Analysis - NeuraLens';
-    if (isProcessing) {
-      title = 'Processing... - Retinal Analysis - NeuraLens';
-    } else if (currentStep === 'results') {
-      title = 'Results Ready - Retinal Analysis - NeuraLens';
-    }
-    document.title = title;
-  }, [isProcessing, currentStep]);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Analysis failed: ${response.status}`);
+            }
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Alt + N for new analysis
-      if (e.altKey && e.key === 'n') {
+            const data: RetinalAnalysisResponse = await response.json();
+            setResults(data);
+            setState('complete');
+        } catch (err) {
+            console.error('Retinal analysis error:', err);
+            setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.');
+            setState('error');
+        }
+    }, []);
+
+    const handleFileSelect = useCallback((file: File) => {
+        if (!file.type.startsWith('image/')) {
+            setError('Please select an image file (JPG, PNG, TIFF)');
+            return;
+        }
+        if (file.size > 15 * 1024 * 1024) {
+            setError('File size must be less than 15MB');
+            return;
+        }
+
+        setPreviewUrl(URL.createObjectURL(file));
+        setState('uploading');
+        analyzeImage(file);
+    }, [analyzeImage]);
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
-        // Trigger new analysis - would need to be connected to state
-      }
-      // Alt + H for help
-      if (e.altKey && e.key === 'h') {
-        e.preventDefault();
-        window.location.href = '/support';
-      }
-    };
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelect(file);
+    }, [handleFileSelect]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    const handleReset = useCallback(() => {
+        setState('idle');
+        setResults(null);
+        setError(null);
+        setShowHeatmap(false);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+    }, [previewUrl]);
 
-  return (
-    <motion.main
-        id="main-content"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="space-y-6"
-        role="main"
-        aria-label="Retinal Analysis Module"
-      >
-        {/* Page Header */}
-        <PageHeader isProcessing={isProcessing} />
+    const isProcessing = state === 'processing' || state === 'uploading';
 
-        {/* Assessment Content */}
-        <ErrorBoundary
-          fallback={<RetinalAssessmentError />}
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6"
         >
-          <Suspense fallback={<RetinalAssessmentSkeleton />}>
-            <RetinalAssessmentStep 
-              patientId="DEMO-PATIENT"
-              onProcessingChange={handleProcessingChange}
-              onStepChange={handleStepChange}
-              onResultAvailable={handleResultAvailable}
-            />
-          </Suspense>
-        </ErrorBoundary>
+            {/* Header with stats (PRD Section 6) */}
+            <div className="bg-white rounded-xl border border-zinc-200 p-6">
+                <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-cyan-50">
+                        <Eye className="h-6 w-6 text-cyan-600" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1">
+                        <h1 className="text-[20px] font-semibold text-zinc-900">
+                            Retinal Analysis
+                        </h1>
+                        <p className="text-[13px] text-zinc-500 mt-1">
+                            AI-powered fundus image analysis for diabetic retinopathy screening, 
+                            glaucoma risk assessment, and neurological biomarker extraction.
+                        </p>
+                    </div>
+                </div>
 
-        {/* Keyboard Shortcuts Help */}
-        <div className="text-center text-xs text-zinc-400 pt-4 border-t border-zinc-100">
-          <p>
-            Keyboard shortcuts: <kbd className="px-1.5 py-0.5 bg-zinc-100 rounded">Alt+N</kbd> New Analysis • 
-            <kbd className="px-1.5 py-0.5 bg-zinc-100 rounded ml-2">Alt+H</kbd> Help • 
-            <kbd className="px-1.5 py-0.5 bg-zinc-100 rounded ml-2">Esc</kbd> Cancel/Reset
-          </p>
-        </div>
-      </motion.main>
-  );
+                {/* Stats cards (PRD accuracy specs) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Target className="h-4 w-4 text-cyan-500" />
+                        <div>
+                            <div className="text-[13px] font-medium text-zinc-900">93%</div>
+                            <div className="text-[11px] text-zinc-500">DR Accuracy</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Clock className="h-4 w-4 text-blue-500" />
+                        <div>
+                            <div className="text-[13px] font-medium text-zinc-900">&lt;2s</div>
+                            <div className="text-[11px] text-zinc-500">Processing</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Shield className="h-4 w-4 text-green-500" />
+                        <div>
+                            <div className="text-[13px] font-medium text-zinc-900">HIPAA</div>
+                            <div className="text-[11px] text-zinc-500">Compliant</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Brain className="h-4 w-4 text-purple-500" />
+                        <div>
+                            <div className="text-[13px] font-medium text-zinc-900">8</div>
+                            <div className="text-[11px] text-zinc-500">Biomarkers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <AnimatePresence mode="wait">
+                {state === 'complete' && results ? (
+                    <motion.div
+                        key="results"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="space-y-6"
+                    >
+                        {/* Results Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Left Column: Image & Heatmap */}
+                            <div className="space-y-4">
+                                {previewUrl && (
+                                    <HeatmapOverlay
+                                        originalUrl={previewUrl}
+                                        heatmapBase64={results.heatmap_base64}
+                                        showHeatmap={showHeatmap}
+                                        onToggle={() => setShowHeatmap(!showHeatmap)}
+                                    />
+                                )}
+                                
+                                {/* DR Grade Badge */}
+                                <DRGradeBadge dr={results.diabetic_retinopathy} />
+                                
+                                {/* Risk Gauge */}
+                                <RiskGauge 
+                                    score={results.risk_assessment.overall_score}
+                                    category={results.risk_assessment.category}
+                                    confidence={results.risk_assessment.confidence}
+                                />
+                            </div>
+                            
+                            {/* Center Column: Biomarkers & Findings */}
+                            <div className="space-y-4">
+                                <div className="bg-white rounded-xl border border-zinc-200 p-4">
+                                    <h3 className="text-[14px] font-semibold text-zinc-900 mb-3">
+                                        Biomarker Analysis (8 Markers)
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {Object.entries(results.biomarkers).map(([name, biomarker]) => (
+                                            <BiomarkerCard key={name} name={name} biomarker={biomarker as BiomarkerValue} />
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <FindingsList findings={results.findings} />
+                                
+                                <RecommendationsPanel recommendations={results.recommendations} />
+                            </div>
+                            
+                            {/* Right Column: AI Explanation */}
+                            <div>
+                                <ExplanationPanel 
+                                    pipeline="retinal"
+                                    results={results}
+                                    patientContext={{ age: 55, sex: 'unknown' }}
+                                />
+                            </div>
+                        </div>
+                        
+                        {/* Action Bar */}
+                        <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl border border-zinc-200">
+                            <div className="text-[12px] text-zinc-500">
+                                Session: {results.session_id.slice(0, 8)}... | 
+                                Processed in {results.processing_time_ms}ms | 
+                                Quality: {(results.image_quality.score * 100).toFixed(0)}%
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50">
+                                    <Download className="h-4 w-4" />
+                                    Export PDF
+                                </button>
+                                <button 
+                                    onClick={handleReset}
+                                    className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700"
+                                >
+                                    <RefreshCw className="h-4 w-4" />
+                                    New Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="uploader"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="bg-white rounded-xl border border-zinc-200 p-6"
+                    >
+                        {/* Image Requirements (PRD Section 5) */}
+                        <div className="mb-6">
+                            <h2 className="text-[14px] font-semibold text-zinc-900 mb-2">
+                                Image Requirements
+                            </h2>
+                            <ul className="space-y-1.5 text-[13px] text-zinc-500">
+                                <li className="flex items-start gap-2">
+                                    <span className="text-cyan-600">1.</span>
+                                    High-quality fundus photograph (minimum 512x512, recommended 1024x1024)
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-cyan-600">2.</span>
+                                    Clear visibility of optic disc, vessels, and macular region
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-cyan-600">3.</span>
+                                    Supported formats: JPEG, PNG (max 15MB)
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Upload Zone */}
+                        <div
+                            className={`
+                                relative border-2 border-dashed rounded-xl p-8 
+                                transition-all duration-200 cursor-pointer
+                                ${isDragging 
+                                    ? 'border-cyan-400 bg-cyan-50' 
+                                    : 'border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50'
+                                }
+                                ${isProcessing ? 'pointer-events-none opacity-60' : ''}
+                            `}
+                            onDrop={handleDrop}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/tiff"
+                                className="hidden"
+                                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                                disabled={isProcessing}
+                            />
+
+                            <div className="flex flex-col items-center text-center">
+                                {previewUrl && isProcessing ? (
+                                    <div className="relative mb-4">
+                                        <img
+                                            src={previewUrl}
+                                            alt="Selected fundus image"
+                                            className="h-32 w-32 object-cover rounded-lg border border-zinc-200"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg">
+                                            <Loader2 className="h-8 w-8 text-cyan-600 animate-spin" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className={`
+                                        h-16 w-16 rounded-full flex items-center justify-center mb-4
+                                        ${isDragging ? 'bg-cyan-100' : 'bg-zinc-100'}
+                                    `}>
+                                        {isDragging ? (
+                                            <Upload className="h-8 w-8 text-cyan-600" />
+                                        ) : (
+                                            <ImageIcon className="h-8 w-8 text-zinc-400" />
+                                        )}
+                                    </div>
+                                )}
+
+                                <p className="text-[14px] font-medium text-zinc-700 mb-1">
+                                    {isProcessing 
+                                        ? 'Analyzing fundus image...' 
+                                        : isDragging 
+                                            ? 'Drop image here' 
+                                            : 'Drop fundus photograph here or click to browse'
+                                    }
+                                </p>
+                                <p className="text-[12px] text-zinc-500">
+                                    JPEG, PNG up to 15MB
+                                </p>
+
+                                {!isProcessing && (
+                                    <button
+                                        className="mt-4 px-4 py-2 bg-cyan-600 text-white text-[13px] font-medium rounded-lg hover:bg-cyan-700 transition-colors"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            fileInputRef.current?.click();
+                                        }}
+                                    >
+                                        Choose Image File
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Processing State */}
+                        {isProcessing && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Loader2 className="h-5 w-5 text-cyan-600 animate-spin" />
+                                    <div>
+                                        <div className="text-[13px] font-medium text-cyan-800">
+                                            Running AI analysis...
+                                        </div>
+                                        <div className="text-[12px] text-cyan-600">
+                                            Extracting 8 biomarkers, grading DR, generating heatmap
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Error State */}
+                        {state === 'error' && error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+                            >
+                                <div className="flex items-start gap-3">
+                                    <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                        <div className="text-[13px] font-medium text-red-800">
+                                            Analysis Failed
+                                        </div>
+                                        <div className="text-[12px] text-red-700 mt-1">{error}</div>
+                                        <button
+                                            onClick={handleReset}
+                                            className="mt-3 text-[12px] font-medium text-red-500 hover:text-red-700"
+                                        >
+                                            Try Again
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Info Panel */}
+            <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-6">
+                <div className="flex items-start gap-3">
+                    <Info className="h-4 w-4 text-zinc-500 flex-shrink-0 mt-0.5" />
+                    <div className="text-[12px] text-zinc-500">
+                        <p className="font-medium text-zinc-700 mb-1">About Retinal Analysis</p>
+                        <p>
+                            This module analyzes fundus photographs using EfficientNet-B4 and 
+                            specialized biomarker extraction to detect Diabetic Retinopathy (ICDR grades 0-4),
+                            assess glaucoma risk via cup-to-disc ratio, and identify vascular abnormalities 
+                            associated with hypertension and neurodegeneration. Results include Grad-CAM 
+                            attention visualization and clinical recommendations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
 }

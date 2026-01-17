@@ -28,6 +28,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Log audio file details for debugging
+        const file = audioFile as File | Blob;
+        const fileSize = file.size;
+        const fileType = file.type || 'unknown';
+        const fileName = file instanceof File ? file.name : 'blob';
+        console.log(`[API] Audio file received: ${fileName}, size: ${fileSize} bytes, type: ${fileType}`);
+
         // Create new FormData for backend with correct field name
         const backendFormData = new FormData();
         backendFormData.append('audio', audioFile as Blob);
