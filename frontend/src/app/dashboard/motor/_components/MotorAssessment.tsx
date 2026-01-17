@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 
 interface MotorAssessmentProps {
   onProcessingChange: (isProcessing: boolean) => void;
@@ -551,6 +552,16 @@ export default function MotorAssessment({ onProcessingChange }: MotorAssessmentP
               </div>
             </div>
           </div>
+
+
+
+          {/* AI Explanation */}
+          <ExplanationPanel
+            pipeline="motor"
+            results={analysisResult}
+             patientContext={{ age: 65, sex: 'male' }}
+             className="mb-6"
+          />
 
           {/* Recommendations */}
           {analysisResult.recommendations.length > 0 && (

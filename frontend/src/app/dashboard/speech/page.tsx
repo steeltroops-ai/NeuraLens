@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { SpeechRecorder } from './_components/SpeechRecorder';
 import { SpeechResultsPanel } from './_components/SpeechResultsPanel';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 import type { EnhancedSpeechAnalysisResponse } from '@/types/speech-enhanced';
 
 type AnalysisState = 'idle' | 'recording' | 'uploading' | 'processing' | 'complete' | 'error';
@@ -149,11 +150,22 @@ export default function SpeechAnalysisPage() {
             {/* Main Content */}
             <AnimatePresence mode="wait">
                 {state === 'complete' && results ? (
-                    <SpeechResultsPanel
-                        key="results"
-                        results={results}
-                        onReset={handleReset}
-                    />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                            <SpeechResultsPanel
+                                key="results"
+                                results={results}
+                                onReset={handleReset}
+                            />
+                        </div>
+                        <div className="lg:col-span-1">
+                             <ExplanationPanel 
+                                pipeline="speech"
+                                results={results}
+                                patientContext={{ age: 65, sex: 'female' }} // Demo context
+                            />
+                        </div>
+                    </div>
                 ) : (
                     <motion.div
                         key="recorder"

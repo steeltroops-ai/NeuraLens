@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, Scan, AlertCircle, CheckCircle2, Loader2, Download, Share2, Activity, Zap, TrendingUp } from 'lucide-react';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 
 interface DiagnosisResult {
     condition: string;
@@ -253,6 +254,17 @@ export function RadiologyAssessment() {
                             </div>
                         )}
                     </div>
+
+
+
+                    {/* AI Explanation */}
+                    {results && (
+                        <ExplanationPanel
+                            pipeline="radiology"
+                            results={{ diagnosis: results }}
+                            patientContext={{ age: 45, sex: 'male' }}
+                        />
+                    )}
 
                     {/* Detected Conditions Summary */}
                     {results && (

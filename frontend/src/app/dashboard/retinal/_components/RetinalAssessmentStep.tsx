@@ -36,6 +36,7 @@ import {
 import { useRetinalAnalysis, AnalysisStage } from '@/hooks/useRetinalAnalysis';
 import { ImageUploadCard } from '@/components/retinal/ImageUploadCard';
 import { RetinalResultsCard } from '@/components/retinal/RetinalResultsCard';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 
 // ============================================================================
 // Types
@@ -536,13 +537,24 @@ export default function RetinalAssessmentStep({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
           >
-            <RetinalResultsCard
-              result={result}
-              showVisualizations={true}
-              enableReport={true}
-              onReportDownload={handleReportDownload}
-              onNewAnalysis={handleNewAnalysis}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <RetinalResultsCard
+                  result={result}
+                  showVisualizations={true}
+                  enableReport={true}
+                  onReportDownload={handleReportDownload}
+                  onNewAnalysis={handleNewAnalysis}
+                />
+              </div>
+              <div className="lg:col-span-1">
+                <ExplanationPanel
+                  pipeline="retinal"
+                  results={result}
+                  patientContext={{ age: 65, sex: 'female' }}
+                />
+              </div>
+            </div>
           </motion.div>
         )}
 

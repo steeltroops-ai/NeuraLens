@@ -24,6 +24,7 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   { id: 'home', label: 'Home', href: '/' },
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+  { id: 'vision', label: 'Vision', href: '/vision' },
   { id: 'about', label: 'About', href: '/about' },
 ];
 
@@ -34,7 +35,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { preload } = useSafeNavigation();
 
-  const isTransparentPage = pathname === '/' || pathname?.startsWith('/about');
+  const isTransparentPage = pathname === '/' || pathname?.startsWith('/about') || pathname === '/vision';
 
   useEffect(() => {
     setMounted(true);

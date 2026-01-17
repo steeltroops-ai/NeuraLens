@@ -1,6 +1,6 @@
 /**
  * Speech Analysis API Route
- * Proxies requests to FastAPI backend
+ * Proxies requests to FastAPI backend with proper form handling
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -13,14 +13,36 @@ export async function POST(request: NextRequest) {
 
         // Get form data from request
         const formData = await request.formData();
+        
+        // Get the audio file - check both 'audio' and 'audio_file' keys
+        const audioFile = formData.get('audio') || formData.get('audio_file');
+        const sessionId = formData.get('session_id');
+
+        if (!audioFile) {
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    error_message: 'No audio file provided',
+                },
+                { status: 400 }
+            );
+        }
+
+        // Create new FormData for backend with correct field name
+        const backendFormData = new FormData();
+        backendFormData.append('audio', audioFile as Blob);
+        
+        if (sessionId) {
+            backendFormData.append('session_id', sessionId.toString());
+        }
 
         // Forward to FastAPI backend
-        const backendUrl = `${BACKEND_URL}/api/v1/speech/analyze`;
+        const backendUrl = `${BACKEND_URL}/api/speech/analyze`;
         console.log('[API] Forwarding to backend:', backendUrl);
 
         const response = await fetch(backendUrl, {
             method: 'POST',
-            body: formData,
+            body: backendFormData,
             // Don't set Content-Type header - let fetch set it with boundary
         });
 
@@ -31,7 +53,7 @@ export async function POST(request: NextRequest) {
             let errorDetail = 'Speech analysis failed';
             try {
                 const errorJson = JSON.parse(errorText);
-                errorDetail = errorJson.detail || errorDetail;
+                errorDetail = errorJson.detail || errorJson.error_message || errorDetail;
             } catch {
                 errorDetail = errorText || errorDetail;
             }
@@ -46,7 +68,11 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await response.json();
-        console.log('[API] Speech analysis successful');
+        console.log('[API] Speech analysis successful:', {
+            session_id: data.session_id,
+            risk_score: data.risk_score,
+            status: data.status
+        });
 
         return NextResponse.json(data);
 
@@ -64,11 +90,24 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-    return NextResponse.json(
-        {
+    // Check backend health
+    try {
+        const healthUrl = `${BACKEND_URL}/api/speech/health`;
+        const response = await fetch(healthUrl);
+        const data = await response.json();
+        
+        return NextResponse.json({
             message: 'Speech analysis endpoint. Use POST to analyze audio.',
             methods: ['POST'],
-        },
-        { status: 200 }
-    );
+            backend_status: data.status || 'unknown',
+            parselmouth_available: data.parselmouth_available || false,
+            audio_libs_available: data.audio_libs_available || false
+        });
+    } catch {
+        return NextResponse.json({
+            message: 'Speech analysis endpoint. Use POST to analyze audio.',
+            methods: ['POST'],
+            backend_status: 'unavailable'
+        });
+    }
 }

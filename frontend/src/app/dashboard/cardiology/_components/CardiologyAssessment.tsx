@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, Heart, AlertTriangle, CheckCircle2, Loader2, Activity, Zap, TrendingUp } from 'lucide-react';
+import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
 
 interface ECGAnalysisResult {
     rhythm: string;
@@ -387,6 +388,17 @@ export function CardiologyAssessment() {
                             </div>
                         )}
                     </div>
+
+
+
+                    {/* AI Explanation */}
+                    {result && (
+                        <ExplanationPanel
+                            pipeline="cardiology"
+                            results={result}
+                            patientContext={{ age: 65, sex: 'male' }}
+                        />
+                    )}
 
                     {/* ECG Parameters */}
                     {result && (
