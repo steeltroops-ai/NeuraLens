@@ -39,6 +39,56 @@ except ImportError:
     PARSELMOUTH_AVAILABLE = False
     logger.warning("parselmouth not available - using librosa fallback")
 
+# Import pydub for robust audio format conversion
+try:
+    from pydub import AudioSegment
+    import shutil
+    import os
+    import glob
+    
+    # Find ffmpeg path
+    FFMPEG_PATH = shutil.which('ffmpeg')
+    if FFMPEG_PATH:
+        AudioSegment.converter = FFMPEG_PATH
+        PYDUB_AVAILABLE = True
+        logger.info(f"pydub configured with FFmpeg at: {FFMPEG_PATH}")
+    else:
+        # Try common Windows paths including WinGet
+        common_paths = [
+            r"C:\ProgramData\chocolatey\bin\ffmpeg.exe",
+            r"C:\ffmpeg\bin\ffmpeg.exe",
+            os.path.expanduser(r"~\scoop\apps\ffmpeg\current\bin\ffmpeg.exe"),
+            os.path.expanduser(r"~\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe"),
+        ]
+        
+        # Also search WinGet packages dynamically
+        winget_pattern = os.path.expanduser(r"~\AppData\Local\Microsoft\WinGet\Packages\*\*\bin\ffmpeg.exe")
+        common_paths.extend(glob.glob(winget_pattern))
+        
+        # Also check for ffmpeg in a numbered folder structure (WinGet specific)
+        winget_pattern2 = os.path.expanduser(r"~\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg*\*\bin\ffmpeg.exe")
+        common_paths.extend(glob.glob(winget_pattern2))
+        
+        # Deeper nested pattern for Microsoft.Winget.Source installations
+        winget_pattern3 = os.path.expanduser(r"~\AppData\Local\Microsoft\WinGet\Packages\*\*\*\bin\ffmpeg.exe")
+        common_paths.extend(glob.glob(winget_pattern3))
+        
+        for path in common_paths:
+            if os.path.exists(path):
+                AudioSegment.converter = path
+                AudioSegment.ffmpeg = path
+                AudioSegment.ffprobe = path.replace('ffmpeg.exe', 'ffprobe.exe')
+                FFMPEG_PATH = path
+                PYDUB_AVAILABLE = True
+                logger.info(f"pydub configured with FFmpeg at: {path}")
+                break
+        else:
+            PYDUB_AVAILABLE = False
+            logger.warning("FFmpeg not found - WebM conversion will fail")
+except ImportError:
+    PYDUB_AVAILABLE = False
+    logger.warning("pydub not available - WebM conversion will fail")
+
 # Clinical normal ranges based on published research
 BIOMARKER_NORMAL_RANGES = {
     'jitter': (0.01, 0.04),
@@ -82,11 +132,17 @@ class SpeechAnalyzer:
         """Full speech analysis pipeline"""
         start_time = time.perf_counter()
         
+        # LOG: Show we received audio for analysis
+        logger.info(f"[ANALYZE] Session {session_id}: Received {len(audio_bytes)} bytes, type={content_type}, file={filename}")
+        
         try:
             # Step 1: Load and preprocess audio
             audio_data, file_info = await self._load_audio(
                 audio_bytes, filename, content_type
             )
+            
+            # LOG: Show audio was loaded successfully
+            logger.info(f"[ANALYZE] Session {session_id}: Audio loaded - {len(audio_data)} samples, {file_info.duration:.2f}s duration")
             
             # Step 2: Extract biomarkers
             biomarkers = await self._extract_biomarkers(audio_data)
@@ -139,7 +195,11 @@ class SpeechAnalyzer:
         filename: Optional[str],
         content_type: Optional[str]
     ) -> tuple:
-        """Load and preprocess audio data"""
+        """Load and preprocess audio data with support for browser formats (WebM, etc.)"""
+        import subprocess
+        import tempfile
+        import os
+        
         file_info = FileInfo(
             filename=filename,
             size=len(audio_bytes),
@@ -153,46 +213,119 @@ class SpeechAnalyzer:
             file_info.duration = len(audio_data) / self.sample_rate
             return audio_data, file_info
         
-        try:
-            # Try to load with soundfile first (more formats)
-            audio_data, sr = sf.read(io.BytesIO(audio_bytes))
-            
-            # Convert to mono if stereo
-            if len(audio_data.shape) > 1:
-                audio_data = np.mean(audio_data, axis=1)
-            
-            # Resample if needed
-            if sr != self.sample_rate:
-                audio_data = librosa.resample(
-                    audio_data.astype(np.float32),
-                    orig_sr=sr,
-                    target_sr=self.sample_rate
-                )
-                file_info.resampled = True
-                file_info.sample_rate = self.sample_rate
-            
-            file_info.duration = len(audio_data) / self.sample_rate
-            
-            # Normalize
-            max_val = np.abs(audio_data).max()
-            if max_val > 0:
-                audio_data = audio_data / max_val
-            
-            return audio_data.astype(np.float32), file_info
-            
-        except Exception as e:
-            logger.warning(f"soundfile load failed: {e}, trying librosa")
+        # Detect if this is a browser format that needs conversion
+        needs_conversion = False
+        if content_type:
+            browser_formats = ['audio/webm', 'audio/ogg', 'video/webm', 'application/octet-stream']
+            needs_conversion = any(fmt in content_type.lower() for fmt in browser_formats)
+        if filename:
+            browser_extensions = ['.webm', '.ogg', '.opus']
+            needs_conversion = needs_conversion or any(filename.lower().endswith(ext) for ext in browser_extensions)
+        
+        # Try direct loading first for standard formats (WAV, MP3, FLAC)
+        if not needs_conversion:
             try:
-                audio_data, sr = librosa.load(
-                    io.BytesIO(audio_bytes),
-                    sr=self.sample_rate,
-                    mono=True
-                )
+                audio_data, sr = sf.read(io.BytesIO(audio_bytes))
+                
+                # Convert to mono if stereo
+                if len(audio_data.shape) > 1:
+                    audio_data = np.mean(audio_data, axis=1)
+                
+                # Resample if needed
+                if sr != self.sample_rate:
+                    audio_data = librosa.resample(
+                        audio_data.astype(np.float32),
+                        orig_sr=sr,
+                        target_sr=self.sample_rate
+                    )
+                    file_info.resampled = True
+                    file_info.sample_rate = self.sample_rate
+                
                 file_info.duration = len(audio_data) / self.sample_rate
-                return audio_data, file_info
-            except Exception as e2:
-                logger.error(f"librosa load also failed: {e2}")
-                raise HTTPException(400, f"Could not load audio file: {e2}")
+                
+                # Normalize
+                max_val = np.abs(audio_data).max()
+                if max_val > 0:
+                    audio_data = audio_data / max_val
+                
+                return audio_data.astype(np.float32), file_info
+                
+            except Exception as e:
+                logger.warning(f"Direct load failed: {e}, will try FFmpeg conversion")
+                needs_conversion = True
+        
+        # Use pydub to convert browser formats (WebM, OGG, Opus) to WAV
+        if needs_conversion:
+            if not PYDUB_AVAILABLE:
+                raise HTTPException(
+                    400, 
+                    "Cannot process browser audio format. pydub/FFmpeg not available. Please upload a WAV or MP3 file."
+                )
+            
+            try:
+                import tempfile
+                import os
+                
+                # Save audio bytes to temp file
+                with tempfile.NamedTemporaryFile(suffix='.webm', delete=False) as input_file:
+                    input_file.write(audio_bytes)
+                    input_path = input_file.name
+                
+                try:
+                    # Load with pydub (handles format detection automatically)
+                    audio_segment = AudioSegment.from_file(input_path)
+                    
+                    # Convert to mono
+                    if audio_segment.channels > 1:
+                        audio_segment = audio_segment.set_channels(1)
+                    
+                    # Resample to target rate
+                    if audio_segment.frame_rate != self.sample_rate:
+                        audio_segment = audio_segment.set_frame_rate(self.sample_rate)
+                    
+                    # Get raw samples as numpy array
+                    samples = np.array(audio_segment.get_array_of_samples())
+                    
+                    # Normalize to float32 [-1.0, 1.0]
+                    max_val = 2 ** (audio_segment.sample_width * 8 - 1)
+                    audio_data = samples.astype(np.float32) / max_val
+                    
+                    file_info.duration = len(audio_data) / self.sample_rate
+                    file_info.resampled = True
+                    
+                    # Normalize amplitude
+                    amp_max = np.abs(audio_data).max()
+                    if amp_max > 0:
+                        audio_data = audio_data / amp_max
+                    
+                    logger.info(f"[PYDUB] Converted audio: {len(audio_data)} samples, {file_info.duration:.2f}s")
+                    return audio_data.astype(np.float32), file_info
+                    
+                finally:
+                    # Cleanup temp file
+                    if os.path.exists(input_path):
+                        try:
+                            os.unlink(input_path)
+                        except:
+                            pass
+                            
+            except Exception as e:
+                logger.error(f"pydub conversion failed: {e}")
+                # Final fallback: try librosa with audioread backend
+                try:
+                    audio_data, sr = librosa.load(
+                        io.BytesIO(audio_bytes),
+                        sr=self.sample_rate,
+                        mono=True
+                    )
+                    file_info.duration = len(audio_data) / self.sample_rate
+                    return audio_data, file_info
+                except Exception as e2:
+                    logger.error(f"All audio loading methods failed: {e2}")
+                    raise HTTPException(
+                        400, 
+                        f"Could not load audio file. Please upload a WAV or MP3 file. Error: {str(e)[:100]}"
+                    )
     
     async def _extract_biomarkers(
         self,
@@ -788,13 +921,46 @@ async def analyze_speech(
     if len(audio_bytes) < 1000:  # Too small
         raise HTTPException(400, "File too small or empty.")
     
+    logger.info(f"[SPEECH] Received {len(audio_bytes)} bytes, session={session_id}, type={file.content_type}")
+    
     # Run analysis
-    return await analyzer.analyze(
+    result = await analyzer.analyze(
         audio_bytes=audio_bytes,
         session_id=session_id,
         filename=file.filename,
         content_type=file.content_type
     )
+    
+    # Store audio in database for records (async, don't block response)
+    try:
+        from app.database import SessionLocal
+        from app.models.assessment import AudioRecording
+        
+        db = SessionLocal()
+        try:
+            recording = AudioRecording(
+                session_id=session_id,
+                filename=file.filename or "recording.webm",
+                content_type=file.content_type or "audio/webm",
+                file_size=len(audio_bytes),
+                duration_seconds=result.file_info.duration if result.file_info else None,
+                sample_rate=16000,
+                audio_data=audio_bytes,
+                analysis_session_id=result.session_id,
+                risk_score=result.risk_score
+            )
+            db.add(recording)
+            db.commit()
+            logger.info(f"[SPEECH] Stored audio recording for session {session_id}")
+        except Exception as db_err:
+            logger.warning(f"[SPEECH] Failed to store audio: {db_err}")
+            db.rollback()
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"[SPEECH] Database storage skipped: {e}")
+    
+    return result
 
 
 @router.get("/health")

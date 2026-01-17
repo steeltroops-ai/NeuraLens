@@ -432,3 +432,4 @@ async def health():
         "cerebras_available": CEREBRAS_AVAILABLE,
         "model": "llama-3.3-70b" if CEREBRAS_AVAILABLE else "mock"
     }
+
