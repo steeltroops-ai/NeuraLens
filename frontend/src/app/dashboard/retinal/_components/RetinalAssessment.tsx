@@ -219,30 +219,45 @@ export default function RetinalAssessment({ onProcessingChange }: RetinalAssessm
 
   return (
     <div className='space-y-6'>
-      {/* Header */}
-      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-        <div className='mb-4 flex items-center space-x-3'>
-          <div className='rounded-lg bg-gradient-to-r from-green-500 to-green-600 p-3'>
-            <Eye className='h-6 w-6 text-white' />
-          </div>
-          <div>
-            <h1 className='text-2xl font-bold text-slate-900'>Retinal Analysis</h1>
-            <p className='text-slate-600'>Advanced fundus image analysis with EfficientNet-B0</p>
-          </div>
-        </div>
+      {/* Header - Enhanced with ophthalmology theme */}
+      <div className='relative overflow-hidden bg-white rounded-2xl border border-zinc-200/80 p-8'>
+        {/* Gradient background */}
+        <div className='absolute inset-0 bg-gradient-to-br from-cyan-50/40 via-transparent to-blue-50/30 pointer-events-none' />
 
-        <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-3'>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Clock className='h-4 w-4' />
-            <span>Processing Time: &lt;200ms</span>
+        <div className='relative'>
+          <div className='flex items-start justify-between'>
+            <div className='flex items-start gap-4'>
+              <div className='p-3 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20'>
+                <Eye className='h-7 w-7 text-white' strokeWidth={2} />
+              </div>
+              <div>
+                <div className='flex items-center gap-3 mb-2'>
+                  <h1 className='text-[24px] font-semibold text-zinc-900'>Retinal Analysis</h1>
+                  <span className='px-2.5 py-1 bg-cyan-100 text-cyan-700 text-[11px] font-medium rounded-full'>
+                    EfficientNet-B0
+                  </span>
+                </div>
+                <p className='text-[14px] text-zinc-600 max-w-xl'>
+                  Advanced fundus image analysis with deep learning vessel detection
+                </p>
+              </div>
+            </div>
           </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Activity className='h-4 w-4' />
-            <span>Computer Vision Pipeline</span>
-          </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <TrendingUp className='h-4 w-4' />
-            <span>Vessel Analysis</span>
+
+          {/* Feature pills */}
+          <div className='flex flex-wrap gap-2 mt-6'>
+            <div className='flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg'>
+              <Clock className='h-4 w-4 text-cyan-600' strokeWidth={2} />
+              <span className='text-[12px] font-medium text-zinc-700'>Processing: &lt;200ms</span>
+            </div>
+            <div className='flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg'>
+              <Activity className='h-4 w-4 text-blue-600' strokeWidth={2} />
+              <span className='text-[12px] font-medium text-zinc-700'>Computer Vision</span>
+            </div>
+            <div className='flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-lg'>
+              <TrendingUp className='h-4 w-4 text-purple-600' strokeWidth={2} />
+              <span className='text-[12px] font-medium text-zinc-700'>Vessel Analysis</span>
+            </div>
           </div>
         </div>
       </div>
@@ -258,19 +273,17 @@ export default function RetinalAssessment({ onProcessingChange }: RetinalAssessm
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`rounded-lg border-2 border-dashed p-8 text-center transition-all duration-300 ${
-                uploadState.isDragActive
-                  ? 'scale-105 border-green-500 bg-green-50'
-                  : 'border-slate-300 hover:border-green-400 hover:bg-slate-50'
-              }`}
+              className={`rounded-lg border-2 border-dashed p-8 text-center transition-all duration-300 ${uploadState.isDragActive
+                ? 'scale-105 border-green-500 bg-green-50'
+                : 'border-slate-300 hover:border-green-400 hover:bg-slate-50'
+                }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
               <Upload
-                className={`mx-auto mb-4 h-12 w-12 transition-colors ${
-                  uploadState.isDragActive ? 'text-green-500' : 'text-slate-400'
-                }`}
+                className={`mx-auto mb-4 h-12 w-12 transition-colors ${uploadState.isDragActive ? 'text-green-500' : 'text-slate-400'
+                  }`}
               />
               <h3 className='mb-2 text-lg font-medium text-slate-900'>
                 {uploadState.isDragActive ? 'Drop image here' : 'Upload Retinal Image'}
@@ -468,25 +481,23 @@ export default function RetinalAssessment({ onProcessingChange }: RetinalAssessm
                 </div>
                 <div className='mt-2 h-3 rounded-full bg-slate-200'>
                   <div
-                    className={`h-3 rounded-full ${
-                      analysisResult.riskScore < 0.3
-                        ? 'bg-gradient-to-r from-green-500 to-green-600'
-                        : analysisResult.riskScore < 0.7
-                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
-                          : 'bg-gradient-to-r from-red-500 to-red-600'
-                    }`}
+                    className={`h-3 rounded-full ${analysisResult.riskScore < 0.3
+                      ? 'bg-gradient-to-r from-green-500 to-green-600'
+                      : analysisResult.riskScore < 0.7
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                        : 'bg-gradient-to-r from-red-500 to-red-600'
+                      }`}
                     style={{ width: `${analysisResult.riskScore * 100}%` }}
                   />
                 </div>
               </div>
               <div
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  analysisResult.riskScore < 0.3
-                    ? 'bg-green-100 text-green-800'
-                    : analysisResult.riskScore < 0.7
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                }`}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${analysisResult.riskScore < 0.3
+                  ? 'bg-green-100 text-green-800'
+                  : analysisResult.riskScore < 0.7
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {analysisResult.riskScore < 0.3
                   ? 'Low Risk'

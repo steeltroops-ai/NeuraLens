@@ -219,32 +219,32 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             data-testid="command-palette"
         >
             <div
-                className="w-full max-w-lg rounded-lg bg-white border border-[#e2e8f0] shadow-lg overflow-hidden"
+                className="w-full max-w-lg rounded-lg bg-white border border-zinc-200 shadow-lg overflow-hidden"
                 style={{
                     animation: 'commandPaletteIn 150ms ease-out',
                 }}
                 onKeyDown={handleKeyDown}
             >
                 {/* Search Input */}
-                <div className="flex items-center border-b border-[#f0f0f0]">
+                <div className="flex items-center border-b border-zinc-100">
                     <div className="flex items-center justify-center w-12 h-12">
-                        <Search size={16} strokeWidth={1.5} className="text-[#94a3b8]" aria-hidden="true" />
+                        <Search size={16} strokeWidth={1.5} className="text-zinc-400" aria-hidden="true" />
                     </div>
                     <input
                         ref={inputRef}
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 h-12 pr-4 text-[14px] text-[#334155] bg-transparent border-none outline-none placeholder:text-[#94a3b8]"
+                        className="flex-1 h-12 pr-4 text-[14px] text-zinc-700 bg-transparent border-none outline-none placeholder:text-zinc-400"
                         placeholder="Search commands..."
                         aria-label="Search commands"
                         data-testid="command-palette-input"
                     />
                     <div className="flex items-center gap-1.5 pr-3">
-                        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-[#64748b] bg-[#f1f5f9] rounded">
+                        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 bg-zinc-100 rounded">
                             <Command size={10} />K
                         </kbd>
-                        <kbd className="px-1.5 py-0.5 text-[10px] font-medium text-[#64748b] bg-[#f1f5f9] rounded">
+                        <kbd className="px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 bg-zinc-100 rounded">
                             ESC
                         </kbd>
                     </div>
@@ -255,7 +255,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     {Object.entries(groupedCommands).length > 0 ? (
                         Object.entries(groupedCommands).map(([category, items]) => (
                             <div key={category} className="mb-2">
-                                <p className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-widest text-[#94a3b8]">
+                                <p className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-widest text-zinc-400">
                                     {category}
                                 </p>
                                 <div className="space-y-0.5">
@@ -270,8 +270,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                                                     flex w-full items-center gap-2.5 px-2 py-2 rounded-md text-left
                                                     transition-colors duration-100
                                                     ${isSelected
-                                                        ? 'bg-[#3b82f6] text-white'
-                                                        : 'hover:bg-[#f1f5f9] text-[#334155]'
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'hover:bg-zinc-100 text-zinc-700'
                                                     }
                                                 `}
                                                 onClick={cmd.action}
@@ -281,10 +281,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                                                 <div
                                                     className={`
                                                         flex h-7 w-7 items-center justify-center rounded-md
-                                                        ${isSelected ? 'bg-white/20' : 'bg-[#f1f5f9]'}
+                                                        ${isSelected ? 'bg-white/20' : 'bg-zinc-100'}
                                                     `}
                                                 >
-                                                    <span className={isSelected ? 'text-white' : 'text-[#64748b]'}>
+                                                    <span className={isSelected ? 'text-white' : 'text-zinc-500'}>
                                                         {cmd.icon}
                                                     </span>
                                                 </div>
@@ -293,7 +293,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                                                         {cmd.label}
                                                     </p>
                                                     {cmd.description && (
-                                                        <p className={`text-[11px] truncate ${isSelected ? 'text-white/70' : 'text-[#94a3b8]'}`}>
+                                                        <p className={`text-[11px] truncate ${isSelected ? 'text-white/70' : 'text-zinc-400'}`}>
                                                             {cmd.description}
                                                         </p>
                                                     )}
@@ -304,7 +304,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                                                             px-1.5 py-0.5 text-[10px] font-medium rounded
                                                             ${isSelected
                                                                 ? 'bg-white/20 text-white'
-                                                                : 'bg-[#f1f5f9] text-[#64748b]'
+                                                                : 'bg-zinc-100 text-zinc-500'
                                                             }
                                                         `}
                                                     >
@@ -319,19 +319,19 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         ))
                     ) : (
                         <div className="py-8 text-center">
-                            <p className="text-[13px] text-[#64748b]">No commands found</p>
-                            <p className="text-[11px] text-[#94a3b8] mt-1">Try a different search term</p>
+                            <p className="text-[13px] text-zinc-500">No commands found</p>
+                            <p className="text-[11px] text-zinc-400 mt-1">Try a different search term</p>
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-3 py-2 border-t border-[#f0f0f0] bg-[#f8fafc]">
-                    <span className="text-[11px] text-[#64748b]">
+                <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100 bg-zinc-50">
+                    <span className="text-[11px] text-zinc-500">
                         <span className="hidden sm:inline">↑↓ navigate • </span>
                         ↵ select • ESC close
                     </span>
-                    <span className="text-[11px] text-[#94a3b8]">
+                    <span className="text-[11px] text-zinc-400">
                         {filteredCommands.length} command{filteredCommands.length !== 1 ? 's' : ''}
                     </span>
                 </div>

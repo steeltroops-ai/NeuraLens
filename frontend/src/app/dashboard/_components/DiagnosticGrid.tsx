@@ -33,14 +33,14 @@ function SectionHeader({
 }) {
     return (
         <div className="mb-4 flex items-center gap-2">
-            <h2 className="text-[14px] font-medium text-[#0f172a]">
+            <h2 className="text-[14px] font-medium text-zinc-900">
                 {title}
             </h2>
             <span
                 className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
                 style={{
-                    backgroundColor: variant === 'available' ? '#dbeafe' : '#f1f5f9',
-                    color: variant === 'available' ? '#1d4ed8' : '#64748b',
+                    backgroundColor: variant === 'available' ? '#dbeafe' : '#f4f4f5',
+                    color: variant === 'available' ? '#1d4ed8' : '#71717a',
                 }}
             >
                 {count}

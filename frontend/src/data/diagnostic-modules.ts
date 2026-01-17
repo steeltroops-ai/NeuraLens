@@ -8,7 +8,7 @@
  * Requirements: 3.1, 3.4, 3.5
  */
 
-import { LucideIcon, Mic, Eye, Hand, Brain, Activity, Zap, Scan, Microscope, Heart, Wind, Footprints, Bone } from 'lucide-react';
+import { LucideIcon, Mic, Eye, Hand, Brain, Activity, Zap, Scan, Microscope, Heart, Wind, Footprints, Bone, Sparkles } from 'lucide-react';
 
 /**
  * Diagnostic Module Interface
@@ -41,16 +41,16 @@ export interface DiagnosticModule {
  * All diagnostic modules available in MediLens
  * 
  * Current Available Modules (4):
- * - Speech Analysis (SpeechMD AI)
- * - Retinal Imaging (RetinaScan AI)
- * - Motor Assessment
- * - Cognitive Testing
+ * - RetinaScan AI (Ophthalmology)
+ * - ChestXplorer AI (Radiology)
+ * - CardioPredict AI (Cardiology)
+ * - SpeechMD AI (Speech & Cognitive)
  * 
  * Coming Soon Modules (7):
- * - Radiology (ChestXplorer AI)
- * - Dermatology (SkinSense AI)
+ * - SkinSense AI (Dermatology)
+ * - Motor Assessment
+ * - Cognitive Testing
  * - Pathology (HistoVision AI)
- * - Cardiology (CardioPredict AI)
  * - Neurology (NeuroScan AI)
  * - Pulmonology (RespiRate AI)
  * - Diabetic Foot Care (FootCare AI)
@@ -58,31 +58,71 @@ export interface DiagnosticModule {
  */
 export const diagnosticModules: DiagnosticModule[] = [
     // ============================================
-    // CURRENT AVAILABLE MODULES
+    // CURRENT AVAILABLE MODULES (Top 4 for Hackathon)
     // ============================================
+    {
+        id: 'retinal',
+        name: 'RetinaScan AI',
+        description: 'Retinal imaging for diabetic retinopathy and eye diseases',
+        icon: Eye,
+        route: '/dashboard/retinal',
+        status: 'available',
+        category: 'current',
+        diagnoses: ['Diabetic Retinopathy', 'Glaucoma', 'AMD', 'Hypertensive Retinopathy'],
+        howItWorks: 'Upload retinal fundus images for AI heatmap analysis',
+        gradient: 'from-cyan-500 to-teal-500',
+    },
+    {
+        id: 'radiology',
+        name: 'ChestXplorer AI',
+        description: 'Chest X-ray analysis for pneumonia, TB, and lung conditions',
+        icon: Scan,
+        route: '/dashboard/radiology',
+        status: 'available',
+        category: 'current',
+        diagnoses: ['Pneumonia', 'COVID-19', 'TB', 'Lung cancer', 'Pleural effusion'],
+        howItWorks: 'Upload chest X-ray for multi-class classification',
+        gradient: 'from-sky-500 to-blue-500',
+    },
+    {
+        id: 'cardiology',
+        name: 'CardioPredict AI',
+        description: 'ECG analysis for arrhythmia and cardiac conditions',
+        icon: Heart,
+        route: '/dashboard/cardiology',
+        status: 'available',
+        category: 'current',
+        diagnoses: ['Arrhythmia', 'Atrial Fibrillation', 'Myocardial Infarction', 'Heart murmur'],
+        howItWorks: 'Upload ECG signal for rhythm abnormality detection',
+        gradient: 'from-red-500 to-pink-500',
+    },
     {
         id: 'speech',
         name: 'SpeechMD AI',
-        description: 'Voice tremor analysis for Parkinson\'s detection',
+        description: 'Voice analysis for Parkinson\'s and cognitive assessment',
         icon: Mic,
         route: '/dashboard/speech',
         status: 'available',
         category: 'current',
         diagnoses: ['Parkinson\'s disease', 'Aphasia', 'Early dementia', 'Depression/anxiety'],
         howItWorks: 'Record patient speech for acoustic feature extraction',
-        gradient: 'from-medilens-blue-500 to-cyan-500',
+        gradient: 'from-blue-500 to-cyan-500',
     },
+
+    // ============================================
+    // COMING SOON MODULES
+    // ============================================
     {
-        id: 'retinal',
-        name: 'RetinaScan AI',
-        description: 'Retinal imaging for neurological indicators',
-        icon: Eye,
-        route: '/dashboard/retinal',
-        status: 'available',
-        category: 'current',
-        diagnoses: ['Diabetic Retinopathy', 'Glaucoma', 'AMD', 'Hypertensive Retinopathy'],
-        howItWorks: 'Upload retinal fundus images for AI analysis',
-        gradient: 'from-emerald-500 to-teal-500',
+        id: 'dermatology',
+        name: 'SkinSense AI',
+        description: 'Skin lesion classification and melanoma detection',
+        icon: Sparkles,
+        route: '/dashboard/dermatology',
+        status: 'coming-soon',
+        category: 'upcoming',
+        diagnoses: ['Melanoma', 'Basal cell carcinoma', 'Benign nevi', 'Eczema', 'Psoriasis'],
+        howItWorks: 'Upload smartphone photo for ABCDE criteria analysis',
+        gradient: 'from-purple-400 to-pink-400',
     },
     {
         id: 'motor',
@@ -90,11 +130,11 @@ export const diagnosticModules: DiagnosticModule[] = [
         description: 'Movement pattern and tremor detection',
         icon: Hand,
         route: '/dashboard/motor',
-        status: 'available',
-        category: 'current',
+        status: 'coming-soon',
+        category: 'upcoming',
         diagnoses: ['Bradykinesia', 'Tremor', 'Coordination issues'],
         howItWorks: 'Interactive finger tapping and coordination tests',
-        gradient: 'from-purple-500 to-indigo-500',
+        gradient: 'from-purple-400 to-indigo-400',
     },
     {
         id: 'cognitive',
@@ -102,39 +142,11 @@ export const diagnosticModules: DiagnosticModule[] = [
         description: 'Memory and executive function assessment',
         icon: Brain,
         route: '/dashboard/cognitive',
-        status: 'available',
-        category: 'current',
+        status: 'coming-soon',
+        category: 'upcoming',
         diagnoses: ['MCI', 'Memory impairment', 'Executive dysfunction'],
         howItWorks: 'Comprehensive cognitive evaluation tasks',
-        gradient: 'from-orange-500 to-red-500',
-    },
-
-    // ============================================
-    // COMING SOON MODULES
-    // ============================================
-    {
-        id: 'radiology',
-        name: 'ChestXplorer AI',
-        description: 'Chest X-ray and bone fracture analysis',
-        icon: Scan,
-        route: '/dashboard/radiology',
-        status: 'coming-soon',
-        category: 'upcoming',
-        diagnoses: ['Pneumonia', 'TB', 'Lung cancer', 'Bone fractures'],
-        howItWorks: 'Upload X-ray for multi-class classification',
-        gradient: 'from-slate-400 to-gray-400',
-    },
-    {
-        id: 'dermatology',
-        name: 'SkinSense AI',
-        description: 'Skin lesion classification and cancer detection',
-        icon: Scan,
-        route: '/dashboard/dermatology',
-        status: 'coming-soon',
-        category: 'upcoming',
-        diagnoses: ['Melanoma', 'Basal cell carcinoma', 'Eczema', 'Psoriasis'],
-        howItWorks: 'Upload smartphone photo of skin lesion',
-        gradient: 'from-pink-400 to-rose-400',
+        gradient: 'from-orange-400 to-red-400',
     },
     {
         id: 'pathology',
@@ -147,18 +159,6 @@ export const diagnosticModules: DiagnosticModule[] = [
         diagnoses: ['Cancer detection', 'Malaria', 'Leukemia'],
         howItWorks: 'Upload microscopy images for cell analysis',
         gradient: 'from-violet-400 to-purple-400',
-    },
-    {
-        id: 'cardiology',
-        name: 'CardioPredict AI',
-        description: 'ECG and heart sound analysis',
-        icon: Heart,
-        route: '/dashboard/cardiology',
-        status: 'coming-soon',
-        category: 'upcoming',
-        diagnoses: ['Arrhythmia', 'AFib', 'Heart murmur', 'MI'],
-        howItWorks: 'Upload ECG signal or heart sound recording',
-        gradient: 'from-red-400 to-pink-400',
     },
     {
         id: 'neurology',

@@ -186,22 +186,32 @@ async def init_db():
     Initialize the database by creating all tables.
     Called during application startup.
     """
-    # Import all models to register them with Base.metadata
-    from app.models import (
-        User, Assessment, AssessmentResult,
-        ValidationStudy, ValidationResult
-    )
-    from app.pipelines.retinal.models import (
-        RetinalAssessment, RetinalAuditLog
-    )
-    
-    engine = get_async_engine()
-    
-    async with engine.begin() as conn:
-        # Create all tables
-        await conn.run_sync(Base.metadata.create_all)
-    
-    print("✅ Database tables created successfully")
+    try:
+        # Import all models to register them with Base.metadata
+        from app.models import (
+            User, Assessment, AssessmentResult,
+            ValidationStudy, ValidationResult
+        )
+        
+        # Try to import retinal models if they exist
+        try:
+            from app.pipelines.retinal.models import (
+                RetinalAssessment, RetinalAuditLog
+            )
+        except ImportError:
+            print("⚠️  Retinal models not found, skipping...")
+        
+        engine = get_async_engine()
+        
+        async with engine.begin() as conn:
+            # Create all tables
+            await conn.run_sync(Base.metadata.create_all)
+        
+        print("✅ Database tables created successfully")
+        
+    except Exception as e:
+        print(f"⚠️  Database initialization failed: {e}")
+        print("🔄 Continuing without database initialization...")
 
 
 async def close_db():

@@ -30,43 +30,43 @@ function MotorAssessmentSkeleton() {
     return (
         <div className="space-y-6 animate-pulse">
             {/* Header skeleton */}
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center space-x-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-gray-200" />
+                    <div className="h-12 w-12 rounded-lg bg-zinc-200" />
                     <div className="space-y-2">
-                        <div className="h-6 w-56 rounded bg-gray-200" />
-                        <div className="h-4 w-72 rounded bg-gray-200" />
+                        <div className="h-6 w-56 rounded bg-zinc-200" />
+                        <div className="h-4 w-72 rounded bg-zinc-200" />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="h-10 rounded-lg bg-gray-200" />
+                        <div key={i} className="h-10 rounded-lg bg-zinc-200" />
                     ))}
                 </div>
             </div>
 
             {/* Finger tapping test skeleton */}
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="h-6 w-44 rounded bg-gray-200 mb-6" />
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="h-6 w-44 rounded bg-zinc-200 mb-6" />
                 <div className="flex flex-col items-center space-y-6">
-                    <div className="h-48 w-48 rounded-full bg-gray-200" />
-                    <div className="h-10 w-48 rounded-lg bg-gray-200" />
+                    <div className="h-48 w-48 rounded-full bg-zinc-200" />
+                    <div className="h-10 w-48 rounded-lg bg-zinc-200" />
                     <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-                        <div className="h-20 rounded-lg bg-gray-200" />
-                        <div className="h-20 rounded-lg bg-gray-200" />
+                        <div className="h-20 rounded-lg bg-zinc-200" />
+                        <div className="h-20 rounded-lg bg-zinc-200" />
                     </div>
                 </div>
             </div>
 
             {/* Results skeleton */}
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="h-6 w-48 rounded bg-gray-200 mb-6" />
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="h-6 w-48 rounded bg-zinc-200 mb-6" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-28 rounded-lg bg-gray-200" />
+                        <div key={i} className="h-28 rounded-lg bg-zinc-200" />
                     ))}
                 </div>
-                <div className="h-24 rounded-lg bg-gray-200" />
+                <div className="h-24 rounded-lg bg-zinc-200" />
             </div>
         </div>
     );

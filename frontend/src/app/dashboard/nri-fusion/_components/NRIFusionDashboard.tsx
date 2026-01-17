@@ -11,43 +11,45 @@ export default function NRIFusionDashboard({ onProcessingChange }: NRIFusionDash
   return (
     <div className='space-y-6'>
       {/* Header */}
-      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-        <div className='mb-4 flex items-center space-x-3'>
-          <div className='rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 p-3'>
-            <TrendingUp className='h-6 w-6 text-white' />
+      <div className='rounded-xl border border-zinc-200 bg-white p-6'>
+        <div className='flex items-start gap-4'>
+          <div className='p-3 rounded-lg bg-yellow-50'>
+            <TrendingUp className='h-6 w-6 text-yellow-600' strokeWidth={1.5} />
           </div>
-          <div>
-            <h1 className='text-2xl font-bold text-slate-900'>NRI Fusion Engine</h1>
-            <p className='text-slate-600'>
+          <div className='flex-1'>
+            <h1 className='text-[20px] font-semibold text-zinc-900'>NRI Fusion Engine</h1>
+            <p className='text-[13px] text-zinc-600 mt-1'>
               Advanced Neurological Risk Index calculation and analytics
             </p>
           </div>
         </div>
 
-        <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-3'>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Clock className='h-4 w-4' />
-            <span>Processing Time: ~0.3ms</span>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4'>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <Clock className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>Processing: ~0.3ms</span>
           </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Activity className='h-4 w-4' />
-            <span>Accuracy: 97%</span>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <Activity className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>Accuracy: 97%</span>
           </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Zap className='h-4 w-4' />
-            <span>Bayesian Fusion</span>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <Zap className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>Bayesian Fusion</span>
           </div>
         </div>
       </div>
 
       {/* Coming Soon */}
-      <div className='rounded-xl border border-yellow-200 bg-gradient-to-r from-yellow-50 to-yellow-100 p-6'>
+      <div className='rounded-xl border border-yellow-200 bg-yellow-50 p-8'>
         <div className='text-center'>
-          <TrendingUp className='mx-auto mb-4 h-16 w-16 text-yellow-600' />
-          <h2 className='mb-2 text-xl font-bold text-yellow-900'>
+          <div className='inline-flex p-4 rounded-full bg-yellow-100 mb-4'>
+            <TrendingUp className='h-12 w-12 text-yellow-600' strokeWidth={1.5} />
+          </div>
+          <h2 className='mb-2 text-[18px] font-semibold text-yellow-900'>
             NRI Fusion Dashboard Coming Soon
           </h2>
-          <p className='mb-4 text-yellow-700'>
+          <p className='mb-6 text-[13px] text-yellow-700 max-w-2xl mx-auto leading-relaxed'>
             Advanced analytics dashboard for Neurological Risk Index fusion, featuring real-time
             risk calculation, uncertainty quantification, and predictive modeling capabilities.
           </p>

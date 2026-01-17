@@ -182,7 +182,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
       case 'error':
         return 'text-red-600 bg-red-50 border-red-200';
       default:
-        return 'text-slate-600 bg-slate-50 border-slate-200';
+        return 'text-zinc-600 bg-zinc-50 border-zinc-200';
     }
   };
 
@@ -197,7 +197,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
       case 'error':
         return <AlertCircle className='h-5 w-5 text-red-600' />;
       default:
-        return <Clock className='h-5 w-5 text-slate-400' />;
+        return <Clock className='h-5 w-5 text-zinc-400' />;
     }
   };
 
@@ -212,46 +212,46 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
       case 'very_high':
         return 'text-red-600 bg-red-50';
       default:
-        return 'text-slate-600 bg-slate-50';
+        return 'text-zinc-600 bg-zinc-50';
     }
   };
 
   return (
     <div className='space-y-6'>
       {/* Header */}
-      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-        <div className='mb-4 flex items-center space-x-3'>
-          <div className='rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 p-3'>
-            <Activity className='h-6 w-6 text-white' />
+      <div className='rounded-xl border border-zinc-200 bg-white p-6'>
+        <div className='flex items-start gap-4'>
+          <div className='p-3 rounded-lg bg-purple-50'>
+            <Activity className='h-6 w-6 text-purple-600' strokeWidth={1.5} />
           </div>
-          <div>
-            <h1 className='text-2xl font-bold text-slate-900'>Multi-Modal Assessment</h1>
-            <p className='text-slate-600'>
+          <div className='flex-1'>
+            <h1 className='text-[20px] font-semibold text-zinc-900'>Multi-Modal Assessment</h1>
+            <p className='text-[13px] text-zinc-600 mt-1'>
               Comprehensive neurological evaluation across all modalities
             </p>
           </div>
         </div>
 
-        <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-3'>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Activity className='h-4 w-4' />
-            <span>4 Assessment Modalities</span>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4'>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <Activity className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>4 Modalities</span>
           </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <TrendingUp className='h-4 w-4' />
-            <span>96% Combined Accuracy</span>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <TrendingUp className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>96% Accuracy</span>
           </div>
-          <div className='flex items-center space-x-2 text-slate-600'>
-            <Zap className='h-4 w-4' />
-            <span>Real-time NRI Fusion</span>
+          <div className='flex items-center gap-2 p-3 bg-zinc-50 rounded-lg'>
+            <Zap className='h-4 w-4 text-zinc-500' />
+            <span className='text-[13px] text-zinc-700'>Real-time NRI</span>
           </div>
         </div>
       </div>
 
       {/* Assessment Control */}
-      <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
+      <div className='rounded-xl border border-zinc-200 bg-white p-6 shadow-sm'>
         <div className='mb-6 flex items-center justify-between'>
-          <h2 className='text-lg font-semibold text-slate-900'>Assessment Progress</h2>
+          <h2 className='text-lg font-semibold text-zinc-900'>Assessment Progress</h2>
           {!isRunning && !nriResult && (
             <motion.button
               onClick={runMultiModalAssessment}
@@ -279,7 +279,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                 <div className='flex items-center space-x-3'>
                   <div className='rounded-lg bg-white p-2 shadow-sm'>{modality.icon}</div>
                   <div>
-                    <h3 className='font-medium text-slate-900'>{modality.name}</h3>
+                    <h3 className='font-medium text-zinc-900'>{modality.name}</h3>
                     <div className='flex items-center space-x-2 text-sm'>
                       {getStatusIcon(modality.status)}
                       <span className='capitalize'>{modality.status}</span>
@@ -289,10 +289,10 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
 
                 {modality.result && (
                   <div className='text-right'>
-                    <div className='text-lg font-bold text-slate-900'>
+                    <div className='text-lg font-bold text-zinc-900'>
                       {(modality.result.risk_score * 100).toFixed(1)}%
                     </div>
-                    <div className='text-xs text-slate-500'>
+                    <div className='text-xs text-zinc-500'>
                       {modality.result.processing_time.toFixed(1)}ms
                     </div>
                   </div>
@@ -301,7 +301,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
 
               {modality.status === 'processing' && currentStep === index && (
                 <div className='mt-3'>
-                  <div className='h-2 w-full rounded-full bg-slate-200'>
+                  <div className='h-2 w-full rounded-full bg-zinc-200'>
                     <motion.div
                       className='h-2 rounded-full bg-blue-500'
                       initial={{ width: 0 }}
@@ -326,7 +326,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                   <Zap className='h-5 w-5 text-yellow-600' />
                 </div>
                 <div>
-                  <h3 className='font-medium text-slate-900'>NRI Fusion Engine</h3>
+                  <h3 className='font-medium text-zinc-900'>NRI Fusion Engine</h3>
                   <div className='flex items-center space-x-2 text-sm'>
                     <div className='h-4 w-4 animate-spin rounded-full border-2 border-yellow-600 border-t-transparent' />
                     <span>Calculating Neurological Risk Index...</span>
@@ -357,8 +357,8 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
             className='space-y-6'
           >
             {/* Overall NRI Score */}
-            <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-              <h2 className='mb-4 text-lg font-semibold text-slate-900'>
+            <div className='rounded-xl border border-zinc-200 bg-white p-6 shadow-sm'>
+              <h2 className='mb-4 text-lg font-semibold text-zinc-900'>
                 Neurological Risk Index (NRI)
               </h2>
 
@@ -367,7 +367,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                   <div className='mb-2 text-4xl font-bold text-blue-600'>
                     {nriResult.nri_score.toFixed(1)}
                   </div>
-                  <div className='text-sm text-slate-600'>NRI Score</div>
+                  <div className='text-sm text-zinc-600'>NRI Score</div>
                   <div
                     className={`mt-2 inline-block rounded-full px-3 py-1 text-sm font-medium ${getRiskCategoryColor(nriResult.risk_category)}`}
                   >
@@ -379,31 +379,31 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                   <div className='mb-2 text-4xl font-bold text-green-600'>
                     {(nriResult.confidence * 100).toFixed(1)}%
                   </div>
-                  <div className='text-sm text-slate-600'>Confidence</div>
+                  <div className='text-sm text-zinc-600'>Confidence</div>
                 </div>
 
                 <div className='text-center'>
                   <div className='mb-2 text-4xl font-bold text-purple-600'>
                     {(nriResult.consistency_score * 100).toFixed(1)}%
                   </div>
-                  <div className='text-sm text-slate-600'>Consistency</div>
+                  <div className='text-sm text-zinc-600'>Consistency</div>
                 </div>
 
                 <div className='text-center'>
                   <div className='mb-2 text-4xl font-bold text-orange-600'>0.3ms</div>
-                  <div className='text-sm text-slate-600'>Fusion Time</div>
+                  <div className='text-sm text-zinc-600'>Fusion Time</div>
                 </div>
               </div>
             </div>
 
             {/* Modality Contributions */}
-            <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-              <h2 className='mb-4 text-lg font-semibold text-slate-900'>Modality Contributions</h2>
+            <div className='rounded-xl border border-zinc-200 bg-white p-6 shadow-sm'>
+              <h2 className='mb-4 text-lg font-semibold text-zinc-900'>Modality Contributions</h2>
 
               <div className='space-y-4'>
                 {nriResult.modality_contributions.map((contrib, index) => (
                   <div key={contrib.modality} className='flex items-center space-x-4'>
-                    <div className='w-24 text-sm font-medium capitalize text-slate-700'>
+                    <div className='w-24 text-sm font-medium capitalize text-zinc-700'>
                       {contrib.modality}
                     </div>
                     <div className='flex-1'>
@@ -411,7 +411,7 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                         <span>Risk: {(contrib.risk_score * 100).toFixed(1)}%</span>
                         <span>Contribution: {(contrib.contribution * 100).toFixed(1)}%</span>
                       </div>
-                      <div className='h-2 w-full rounded-full bg-slate-200'>
+                      <div className='h-2 w-full rounded-full bg-zinc-200'>
                         <div
                           className='h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000'
                           style={{ width: `${contrib.contribution * 100}%` }}
@@ -424,17 +424,17 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
             </div>
 
             {/* Clinical Summary */}
-            <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
-              <h2 className='mb-4 text-lg font-semibold text-slate-900'>Clinical Summary</h2>
+            <div className='rounded-xl border border-zinc-200 bg-white p-6 shadow-sm'>
+              <h2 className='mb-4 text-lg font-semibold text-zinc-900'>Clinical Summary</h2>
 
               <div className='space-y-3'>
                 <div className='flex items-start space-x-3 rounded-lg bg-blue-50 p-3'>
                   <Info className='mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600' />
                   <div>
-                    <p className='mb-1 text-sm font-medium text-slate-900'>
+                    <p className='mb-1 text-sm font-medium text-zinc-900'>
                       Multi-Modal Assessment Complete
                     </p>
-                    <p className='text-sm text-slate-700'>
+                    <p className='text-sm text-zinc-700'>
                       Comprehensive evaluation across {modalities.length} neurological assessment
                       modalities with {(nriResult.confidence * 100).toFixed(0)}% confidence and{' '}
                       {(nriResult.consistency_score * 100).toFixed(0)}% cross-modal consistency.
@@ -445,10 +445,10 @@ export default function MultiModalAssessment({ onProcessingChange }: MultiModalA
                 <div className='flex items-start space-x-3 rounded-lg bg-green-50 p-3'>
                   <CheckCircle className='mt-0.5 h-5 w-5 flex-shrink-0 text-green-600' />
                   <div>
-                    <p className='mb-1 text-sm font-medium text-slate-900'>
+                    <p className='mb-1 text-sm font-medium text-zinc-900'>
                       Real-Time Processing Achieved
                     </p>
-                    <p className='text-sm text-slate-700'>
+                    <p className='text-sm text-zinc-700'>
                       All assessments completed with sub-second NRI fusion, enabling immediate
                       clinical decision support.
                     </p>

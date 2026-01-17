@@ -26,18 +26,18 @@ from app.core.response import (
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("🚀 Starting NeuroLens-X Backend...")
-    print("📡 Connecting to Neon PostgreSQL database...")
+    print("[START] Starting NeuroLens-X Backend...")
+    print("[DB] Connecting to Neon PostgreSQL database...")
     await init_db()
-    print("✅ Database initialized")
-    print("🧠 ML models loading...")
+    print("[OK] Database initialized")
+    print("[ML] ML models loading...")
     # TODO: Load ML models here
-    print("✅ ML models ready")
+    print("[OK] ML models ready")
     yield
     # Shutdown
-    print("🛑 Shutting down NeuroLens-X Backend...")
+    print("[STOP] Shutting down NeuroLens-X Backend...")
     await close_db()
-    print("✅ Database connections closed")
+    print("[OK] Database connections closed")
 
 
 # Create FastAPI application

@@ -21,20 +21,18 @@ export interface DiagnosticCardProps {
 function StatusBadge({ status }: { status: 'available' | 'coming-soon' }) {
     if (status === 'available') {
         return (
-            <span
-                className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: '#dcfce7', color: '#166534' }}
-                aria-label="Available"
-            >
-                Available
-            </span>
+            <div className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 border border-green-300">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[11px] font-medium text-green-700" aria-label="Available">
+                    Live
+                </span>
+            </div>
         );
     }
 
     return (
         <span
-            className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
-            style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
+            className="inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-medium bg-zinc-100 text-zinc-600 border border-zinc-300"
             aria-label="Coming Soon"
         >
             Coming Soon
@@ -88,13 +86,13 @@ export function DiagnosticCard({
             initial="initial"
             animate="animate"
             className={`
-                relative flex flex-col rounded-lg p-4
-                border transition-all duration-150
-                min-h-[140px]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/50
+                relative flex flex-col rounded-xl p-5
+                border transition-all duration-200
+                min-h-[160px]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
                 ${isAvailable
-                    ? 'bg-white border-[#e2e8f0] cursor-pointer hover:border-[#cbd5e1] hover:shadow-sm'
-                    : 'bg-[#f8fafc] border-[#f0f0f0] opacity-60 cursor-not-allowed'
+                    ? 'bg-white border-gray-300 shadow-md cursor-pointer hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5'
+                    : 'bg-gray-50 border-gray-200 opacity-70 cursor-not-allowed'
                 }
                 ${className}
             `}
@@ -107,27 +105,29 @@ export function DiagnosticCard({
             data-testid={`diagnostic-card-${module.id}`}
             data-status={module.status}
         >
+            {/* Top accent line */}
+            {isAvailable && (
+                <div
+                    className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-gradient-to-r ${module.gradient}`}
+                    aria-hidden="true"
+                />
+            )}
+
             {/* Icon */}
             <div
-                className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${module.gradient}`}
+                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${module.gradient} shadow-sm`}
                 aria-hidden="true"
             >
-                <Icon size={18} strokeWidth={1.5} className="text-white" />
+                <Icon size={20} strokeWidth={1.5} className="text-white" />
             </div>
 
             {/* Module name */}
-            <h3
-                className="mb-1 text-[14px] font-medium"
-                style={{ color: isAvailable ? '#0f172a' : '#64748b' }}
-            >
+            <h3 className={`mb-2 text-[15px] font-semibold ${isAvailable ? 'text-gray-900' : 'text-gray-500'}`}>
                 {module.name}
             </h3>
 
             {/* Module description */}
-            <p
-                className="mb-3 flex-1 text-[12px] leading-relaxed"
-                style={{ color: isAvailable ? '#64748b' : '#94a3b8' }}
-            >
+            <p className={`mb-4 flex-1 text-[13px] leading-relaxed ${isAvailable ? 'text-gray-600' : 'text-gray-400'}`}>
                 {module.description}
             </p>
 

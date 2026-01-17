@@ -97,16 +97,16 @@ export default function SpeechAnalysisPage() {
             className="space-y-6"
         >
             {/* Header */}
-            <div className="bg-white rounded-lg border border-[#e2e8f0] p-5">
+            <div className="bg-white rounded-xl border border-zinc-200 p-6">
                 <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-[#eff6ff]">
-                        <Mic className="h-6 w-6 text-[#3b82f6]" strokeWidth={1.5} />
+                    <div className="p-3 rounded-lg bg-blue-50">
+                        <Mic className="h-6 w-6 text-blue-600" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-[20px] font-semibold text-[#0f172a]">
+                        <h1 className="text-[20px] font-semibold text-zinc-900">
                             Speech Analysis
                         </h1>
-                        <p className="text-[13px] text-[#64748b] mt-1">
+                        <p className="text-[13px] text-zinc-500 mt-1">
                             AI-powered voice biomarker analysis for neurological assessment.
                             Record a speech sample or upload an audio file for analysis.
                         </p>
@@ -115,32 +115,32 @@ export default function SpeechAnalysisPage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-                    <div className="flex items-center gap-2 p-3 bg-[#f8fafc] rounded-lg">
-                        <Target className="h-4 w-4 text-[#64748b]" />
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Target className="h-4 w-4 text-zinc-500" />
                         <div>
-                            <div className="text-[13px] font-medium text-[#0f172a]">95.2%</div>
-                            <div className="text-[11px] text-[#64748b]">Accuracy</div>
+                            <div className="text-[13px] font-medium text-zinc-900">95.2%</div>
+                            <div className="text-[11px] text-zinc-500">Accuracy</div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-[#f8fafc] rounded-lg">
-                        <Clock className="h-4 w-4 text-[#64748b]" />
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Clock className="h-4 w-4 text-zinc-500" />
                         <div>
-                            <div className="text-[13px] font-medium text-[#0f172a]">&lt;3s</div>
-                            <div className="text-[11px] text-[#64748b]">Processing</div>
+                            <div className="text-[13px] font-medium text-zinc-900">&lt;3s</div>
+                            <div className="text-[11px] text-zinc-500">Processing</div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-[#f8fafc] rounded-lg">
-                        <Shield className="h-4 w-4 text-[#64748b]" />
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Shield className="h-4 w-4 text-zinc-500" />
                         <div>
-                            <div className="text-[13px] font-medium text-[#0f172a]">HIPAA</div>
-                            <div className="text-[11px] text-[#64748b]">Compliant</div>
+                            <div className="text-[13px] font-medium text-zinc-900">HIPAA</div>
+                            <div className="text-[11px] text-zinc-500">Compliant</div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-[#f8fafc] rounded-lg">
-                        <Info className="h-4 w-4 text-[#64748b]" />
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-lg">
+                        <Info className="h-4 w-4 text-zinc-500" />
                         <div>
-                            <div className="text-[13px] font-medium text-[#0f172a]">9</div>
-                            <div className="text-[11px] text-[#64748b]">Biomarkers</div>
+                            <div className="text-[13px] font-medium text-zinc-900">9</div>
+                            <div className="text-[11px] text-zinc-500">Biomarkers</div>
                         </div>
                     </div>
                 </div>
@@ -160,24 +160,24 @@ export default function SpeechAnalysisPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="bg-white rounded-lg border border-[#e2e8f0] p-5"
+                        className="bg-white rounded-xl border border-zinc-200 p-6"
                     >
                         {/* Instructions */}
                         <div className="mb-6">
-                            <h2 className="text-[14px] font-semibold text-[#0f172a] mb-2">
+                            <h2 className="text-[14px] font-semibold text-zinc-900 mb-2">
                                 Recording Instructions
                             </h2>
-                            <ul className="space-y-1.5 text-[13px] text-[#64748b]">
+                            <ul className="space-y-1.5 text-[13px] text-zinc-500">
                                 <li className="flex items-start gap-2">
-                                    <span className="text-[#3b82f6]">1.</span>
+                                    <span className="text-blue-600">1.</span>
                                     Find a quiet environment with minimal background noise
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-[#3b82f6]">2.</span>
+                                    <span className="text-blue-600">2.</span>
                                     Speak naturally for 10-30 seconds (reading or conversation)
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-[#3b82f6]">3.</span>
+                                    <span className="text-blue-600">3.</span>
                                     Maintain consistent distance from microphone
                                 </li>
                             </ul>
@@ -196,15 +196,15 @@ export default function SpeechAnalysisPage() {
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mt-6 p-4 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg"
+                                className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"
                             >
                                 <div className="flex items-center gap-3">
-                                    <Loader2 className="h-5 w-5 text-[#3b82f6] animate-spin" />
+                                    <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
                                     <div>
-                                        <div className="text-[13px] font-medium text-[#1e40af]">
+                                        <div className="text-[13px] font-medium text-blue-800">
                                             {state === 'uploading' ? 'Uploading audio...' : 'Analyzing speech patterns...'}
                                         </div>
-                                        <div className="text-[12px] text-[#3b82f6]">
+                                        <div className="text-[12px] text-blue-600">
                                             Extracting biomarkers and calculating risk score
                                         </div>
                                     </div>
@@ -217,18 +217,18 @@ export default function SpeechAnalysisPage() {
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mt-6 p-4 bg-[#fef2f2] border border-[#fecaca] rounded-lg"
+                                className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg"
                             >
                                 <div className="flex items-start gap-3">
-                                    <AlertCircle className="h-5 w-5 text-[#ef4444] flex-shrink-0 mt-0.5" />
+                                    <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                                     <div className="flex-1">
-                                        <div className="text-[13px] font-medium text-[#991b1b]">
+                                        <div className="text-[13px] font-medium text-red-800">
                                             Analysis Failed
                                         </div>
-                                        <div className="text-[12px] text-[#b91c1c] mt-1">{error}</div>
+                                        <div className="text-[12px] text-red-700 mt-1">{error}</div>
                                         <button
                                             onClick={handleReset}
-                                            className="mt-3 text-[12px] font-medium text-[#ef4444] hover:text-[#dc2626]"
+                                            className="mt-3 text-[12px] font-medium text-red-500 hover:text-red-700"
                                         >
                                             Try Again
                                         </button>
@@ -241,11 +241,11 @@ export default function SpeechAnalysisPage() {
             </AnimatePresence>
 
             {/* Info Panel */}
-            <div className="bg-[#f8fafc] rounded-lg border border-[#e2e8f0] p-4">
+            <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-6">
                 <div className="flex items-start gap-3">
-                    <Info className="h-4 w-4 text-[#64748b] flex-shrink-0 mt-0.5" />
-                    <div className="text-[12px] text-[#64748b]">
-                        <p className="font-medium text-[#475569] mb-1">About Speech Analysis</p>
+                    <Info className="h-4 w-4 text-zinc-500 flex-shrink-0 mt-0.5" />
+                    <div className="text-[12px] text-zinc-500">
+                        <p className="font-medium text-zinc-700 mb-1">About Speech Analysis</p>
                         <p>
                             This module analyzes voice biomarkers associated with neurological conditions
                             including Parkinson's disease, early dementia, and speech disorders.

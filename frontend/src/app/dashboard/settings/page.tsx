@@ -1,15 +1,23 @@
 'use client';
 
 /**
- * Settings Page
+ * Settings Page - Neurologist Focus
  * 
- * Placeholder page for settings functionality.
- * 
- * Requirements: 4.1
+ * Professional settings for neurologists with clinical preferences
+ * and diagnostic tool configurations.
  */
 
 import { motion } from 'framer-motion';
-import { Settings, User, Bell, Shield, Palette, Globe, HelpCircle, LogOut } from 'lucide-react';
+import {
+    Settings,
+    Shield,
+    Brain,
+    Stethoscope,
+    FileText,
+    Clock,
+    AlertTriangle,
+    LogOut
+} from 'lucide-react';
 
 /**
  * Settings Page Component
@@ -23,16 +31,20 @@ export default function SettingsPage() {
             className="space-y-6"
         >
             {/* Header */}
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center space-x-3 mb-4">
-                    <div className="rounded-lg bg-gradient-to-r from-gray-500 to-gray-600 p-3">
-                        <Settings className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                        <p className="text-gray-600">
-                            Manage your account and application preferences
-                        </p>
+            <div className="relative overflow-hidden bg-white rounded-2xl border border-zinc-200/80 p-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-50/60 via-transparent to-slate-50/40 pointer-events-none" />
+
+                <div className="relative">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 shadow-lg shadow-zinc-500/20">
+                            <Settings className="h-7 w-7 text-white" strokeWidth={2} />
+                        </div>
+                        <div className="flex-1">
+                            <h1 className="text-[24px] font-semibold text-zinc-900 mb-2">Clinical Settings</h1>
+                            <p className="text-[14px] text-zinc-600 max-w-xl">
+                                Configure your neurological practice preferences and diagnostic tool settings
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -41,89 +53,122 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Settings */}
                 <div className="lg:col-span-2 space-y-4">
-                    {/* Profile Settings */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-blue-100 p-2">
-                                <User className="h-5 w-5 text-blue-600" />
+                    {/* Professional Profile */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                                    <Stethoscope className="h-5 w-5 text-blue-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Professional Profile</h2>
                             </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Manage your personal information and account details.
-                        </p>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Display Name</span>
-                                <span className="text-sm text-gray-400">Not set</span>
+                            <p className="text-[13px] text-zinc-600 mb-5 leading-relaxed">
+                                Manage your medical credentials and practice information.
+                            </p>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Medical License</span>
+                                    <span className="text-[13px] text-green-600 font-medium">MD-NY-2019-4567</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Specialty</span>
+                                    <span className="text-[13px] text-zinc-900 font-medium">Neurology</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Institution</span>
+                                    <span className="text-[13px] text-zinc-500">Mount Sinai Hospital</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">Years of Practice</span>
+                                    <span className="text-[13px] text-zinc-500">12 years</span>
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Email</span>
-                                <span className="text-sm text-gray-400">Not set</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-gray-700">Date of Birth</span>
-                                <span className="text-sm text-gray-400">Not set</span>
-                            </div>
-                        </div>
-                        <button
-                            disabled
-                            className="mt-4 w-full rounded-lg bg-gray-100 py-2 text-sm font-medium text-gray-400 cursor-not-allowed"
-                        >
-                            Edit Profile (Coming Soon)
-                        </button>
-                    </div>
-
-                    {/* Notification Settings */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-purple-100 p-2">
-                                <Bell className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Configure how you receive updates and alerts.
-                        </p>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Assessment Reminders</span>
-                                <div className="h-6 w-11 rounded-full bg-gray-200 cursor-not-allowed" />
-                            </div>
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Results Ready</span>
-                                <div className="h-6 w-11 rounded-full bg-gray-200 cursor-not-allowed" />
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-gray-700">Health Insights</span>
-                                <div className="h-6 w-11 rounded-full bg-gray-200 cursor-not-allowed" />
-                            </div>
+                            <button
+                                disabled
+                                className="mt-5 w-full rounded-lg bg-zinc-100 py-2.5 text-[13px] font-medium text-zinc-400 cursor-not-allowed"
+                            >
+                                Update Credentials (Coming Soon)
+                            </button>
                         </div>
                     </div>
 
-                    {/* Privacy & Security */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-green-100 p-2">
-                                <Shield className="h-5 w-5 text-green-600" />
+                    {/* Diagnostic Preferences */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-purple-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-purple-50 group-hover:bg-purple-100 transition-colors">
+                                    <Brain className="h-5 w-5 text-purple-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Diagnostic Preferences</h2>
                             </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Privacy & Security</h2>
+                            <p className="text-[13px] text-zinc-600 mb-5 leading-relaxed">
+                                Configure your preferred diagnostic thresholds and assessment protocols.
+                            </p>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Risk Score Threshold</span>
+                                    <span className="text-[13px] text-zinc-900 font-medium">75% (High Sensitivity)</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Auto-Generate Reports</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Critical Alert Notifications</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">Default Assessment Duration</span>
+                                    <span className="text-[13px] text-zinc-500">15 minutes</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Manage your data privacy and security settings.
-                        </p>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Two-Factor Authentication</span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Coming Soon</span>
+                    </div>
+
+                    {/* Clinical Alerts */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-red-50 group-hover:bg-red-100 transition-colors">
+                                    <AlertTriangle className="h-5 w-5 text-red-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Clinical Alerts</h2>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-700">Data Export</span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Coming Soon</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-gray-700">Delete Account</span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Coming Soon</span>
+                            <p className="text-[13px] text-zinc-600 mb-5 leading-relaxed">
+                                Configure when and how you receive critical patient alerts.
+                            </p>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Stroke Risk Alerts</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Parkinson's Progression</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5 border-b border-zinc-100">
+                                    <span className="text-[13px] font-medium text-zinc-700">Cognitive Decline</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between py-3.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">Emergency Referrals</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -131,76 +176,89 @@ export default function SettingsPage() {
 
                 {/* Sidebar Settings */}
                 <div className="space-y-4">
-                    {/* Appearance */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-orange-100 p-2">
-                                <Palette className="h-5 w-5 text-orange-600" />
+                    {/* Report Templates */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-green-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-green-50 group-hover:bg-green-100 transition-colors">
+                                    <FileText className="h-5 w-5 text-green-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Report Templates</h2>
                             </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Appearance</h2>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-gray-700">Theme</span>
-                                <span className="text-sm text-gray-400">Light</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Language */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-cyan-100 p-2">
-                                <Globe className="h-5 w-5 text-cyan-600" />
-                            </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Language</h2>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-gray-700">Display Language</span>
-                                <span className="text-sm text-gray-400">English</span>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between py-3">
+                                    <span className="text-[13px] font-medium text-zinc-700">Default Template</span>
+                                    <span className="text-[13px] text-zinc-500">Neurological Assessment</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3">
+                                    <span className="text-[13px] font-medium text-zinc-700">Include Recommendations</span>
+                                    <div className="h-6 w-11 rounded-full bg-blue-500 relative">
+                                        <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white transition-transform" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Help & Support */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="rounded-lg bg-indigo-100 p-2">
-                                <HelpCircle className="h-5 w-5 text-indigo-600" />
+                    {/* Schedule Settings */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-orange-50 group-hover:bg-orange-100 transition-colors">
+                                    <Clock className="h-5 w-5 text-orange-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Schedule</h2>
                             </div>
-                            <h2 className="text-lg font-semibold text-gray-900">Help & Support</h2>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between py-3">
+                                    <span className="text-[13px] font-medium text-zinc-700">Working Hours</span>
+                                    <span className="text-[13px] text-zinc-500">9 AM - 5 PM</span>
+                                </div>
+                                <div className="flex items-center justify-between py-3">
+                                    <span className="text-[13px] font-medium text-zinc-700">Time Zone</span>
+                                    <span className="text-[13px] text-zinc-500">EST</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <button
-                                disabled
-                                className="w-full text-left text-sm text-gray-400 py-2 cursor-not-allowed"
-                            >
-                                Documentation
-                            </button>
-                            <button
-                                disabled
-                                className="w-full text-left text-sm text-gray-400 py-2 cursor-not-allowed"
-                            >
-                                Contact Support
-                            </button>
-                            <button
-                                disabled
-                                className="w-full text-left text-sm text-gray-400 py-2 cursor-not-allowed"
-                            >
-                                Privacy Policy
-                            </button>
+                    </div>
+
+                    {/* Privacy & Security */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
+                                    <Shield className="h-5 w-5 text-indigo-600" strokeWidth={2} />
+                                </div>
+                                <h2 className="text-[17px] font-semibold text-zinc-900">Security</h2>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between py-2.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">HIPAA Compliance</span>
+                                    <span className="text-[11px] text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">Active</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">Data Encryption</span>
+                                    <span className="text-[11px] text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">AES-256</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2.5">
+                                    <span className="text-[13px] font-medium text-zinc-700">Audit Logging</span>
+                                    <span className="text-[11px] text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">Enabled</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Sign Out */}
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+                    <div className="rounded-2xl border border-red-200/80 bg-gradient-to-br from-red-50/50 to-red-50/30 p-6">
                         <button
                             disabled
-                            className="w-full flex items-center justify-center space-x-2 text-red-400 cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-2 text-red-500 cursor-not-allowed"
                         >
-                            <LogOut className="h-5 w-5" />
-                            <span className="font-medium">Sign Out (Coming Soon)</span>
+                            <LogOut className="h-5 w-5" strokeWidth={2} />
+                            <span className="text-[13px] font-semibold">Sign Out (Coming Soon)</span>
                         </button>
                     </div>
                 </div>

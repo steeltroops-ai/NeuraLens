@@ -21,6 +21,10 @@ import {
     LogOut,
     User,
     LucideIcon,
+    Scan,
+    Stethoscope,
+    Heart,
+    Sparkles,
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/nextjs';
 
@@ -51,10 +55,19 @@ const sidebarGroups: SidebarGroup[] = [
     },
     {
         id: 'diagnostics',
-        label: 'Diagnostics',
+        label: 'AI Diagnostics',
         items: [
-            { id: 'speech', label: 'Speech Analysis', icon: Mic, route: '/dashboard/speech' },
-            { id: 'retinal', label: 'Retinal Imaging', icon: Eye, route: '/dashboard/retinal' },
+            { id: 'retinal', label: 'RetinaScan AI', icon: Eye, route: '/dashboard/retinal' },
+            { id: 'radiology', label: 'ChestXplorer AI', icon: Scan, route: '/dashboard/radiology' },
+            { id: 'cardiology', label: 'CardioPredict AI', icon: Heart, route: '/dashboard/cardiology' },
+            { id: 'speech', label: 'SpeechMD AI', icon: Mic, route: '/dashboard/speech' },
+        ],
+    },
+    {
+        id: 'coming-soon',
+        label: 'Coming Soon',
+        items: [
+            { id: 'dermatology', label: 'SkinSense AI', icon: Sparkles, route: '/dashboard/dermatology' },
             { id: 'motor', label: 'Motor Assessment', icon: Hand, route: '/dashboard/motor' },
             { id: 'cognitive', label: 'Cognitive Testing', icon: Brain, route: '/dashboard/cognitive' },
             { id: 'multimodal', label: 'Multi-Modal', icon: Activity, route: '/dashboard/multimodal' },
@@ -121,73 +134,80 @@ interface SidebarGroupComponentProps {
     setHoveredItem: (id: string | null) => void;
 }
 
-    function SidebarGroupComponent({
-        group,
-        collapsed,
-        isActiveRoute,
-        hoveredItem,
-        setHoveredItem,
-    }: SidebarGroupComponentProps) {
-        return (
-            <div className={collapsed ? 'mb-3' : 'mb-4'}>
-                {/* Group Label - Matches homepage card secondary text - Robotic/Technical */}
-                {!collapsed && (
-                    <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 font-mono">
-                        {group.label}
-                    </div>
-                )}
-    
-                {/* Group Items */}
-                <ul className="space-y-0.5" role="list">
-                    {group.items.map(item => {
-                        const Icon = item.icon;
-                        const isActive = isActiveRoute(item.route);
-                        const showTooltip = collapsed && hoveredItem === item.id;
-    
-                        return (
-                            <li key={item.id}>
-                                <Tooltip content={item.label} visible={showTooltip}>
-                                    <Link
-                                        href={item.route}
-                                        className={`
+function SidebarGroupComponent({
+    group,
+    collapsed,
+    isActiveRoute,
+    hoveredItem,
+    setHoveredItem,
+}: SidebarGroupComponentProps) {
+    return (
+        <div className={collapsed ? 'mb-3' : 'mb-4'}>
+            {/* Group Label - Matches homepage card secondary text - Robotic/Technical */}
+            {!collapsed && (
+                <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 font-mono">
+                    {group.label}
+                </div>
+            )}
+
+            {/* Group Items */}
+            <ul className="space-y-0.5" role="list">
+                {group.items.map(item => {
+                    const Icon = item.icon;
+                    const isActive = isActiveRoute(item.route);
+                    const showTooltip = collapsed && hoveredItem === item.id;
+
+                    return (
+                        <li key={item.id}>
+                            <Tooltip content={item.label} visible={showTooltip}>
+                                <Link
+                                    href={item.route}
+                                    className={`
                                             flex items-center w-full rounded-md transition-all duration-200 group
                                             focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500
                                             ${collapsed
-                                                ? 'justify-center px-0 py-2.5 mx-auto w-10 h-10'
-                                                : 'gap-3 px-3 py-2'
-                                            }
+                                            ? 'justify-center px-0 py-2.5 mx-auto w-10 h-10'
+                                            : 'gap-3 px-3 py-2'
+                                        }
                                             ${isActive
-                                                ? 'bg-[#18181b] text-white shadow-sm ring-1 ring-[#27272a]'
-                                                : 'text-zinc-400 hover:bg-white/10 hover:text-white'
-                                            }
+                                            ? 'bg-[#18181b] text-white shadow-sm ring-1 ring-[#27272a]'
+                                            : 'text-zinc-400 hover:bg-white/10 hover:text-white'
+                                        }
                                         `}
-                                        aria-current={isActive ? 'page' : undefined}
-                                        aria-label={collapsed ? item.label : undefined}
-                                        onMouseEnter={() => setHoveredItem(item.id)}
-                                        onMouseLeave={() => setHoveredItem(null)}
-                                        data-testid={`sidebar-item-${item.id}`}
-                                        data-active={isActive}
-                                    >
-                                        <Icon
-                                            size={16}
-                                            strokeWidth={1.5}
-                                            className={isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}
-                                            aria-hidden="true"
-                                        />
-                                        {!collapsed && (
-                                            <span className={`text-[13px] font-mono tracking-tight ${isActive ? 'font-medium' : 'font-normal'}`}>
+                                    aria-current={isActive ? 'page' : undefined}
+                                    aria-label={collapsed ? item.label : undefined}
+                                    onMouseEnter={() => setHoveredItem(item.id)}
+                                    onMouseLeave={() => setHoveredItem(null)}
+                                    data-testid={`sidebar-item-${item.id}`}
+                                    data-active={isActive}
+                                >
+                                    <Icon
+                                        size={16}
+                                        strokeWidth={1.5}
+                                        className={isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}
+                                        aria-hidden="true"
+                                    />
+                                    {!collapsed && (
+                                        <>
+                                            <span className={`text-[13px] font-mono tracking-tight flex-1 ${isActive ? 'font-medium' : 'font-normal'}`}>
                                                 {item.label}
                                             </span>
-                                        )}
-                                    </Link>
-                                </Tooltip>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        );
-    }
+                                            {item.badge === 'new' && (
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                                    New
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                </Link>
+                            </Tooltip>
+                        </li>
+                    );
+                })}
+            </ul>
+        </div>
+    );
+}
 
 export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
     const pathname = usePathname();
@@ -253,10 +273,10 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
 
     return (
         <>
-            {/* Mobile Menu Button - minimal */}
+            {/* Mobile Menu Button - positioned to avoid header overlap */}
             <button
                 onClick={toggleMobileMenu}
-                className="fixed left-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-[#e5e7eb] shadow-sm lg:hidden hover:bg-[#f9fafb] transition-colors"
+                className="fixed left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-[#e5e7eb] shadow-sm lg:hidden hover:bg-[#f9fafb] transition-colors"
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileOpen}
                 aria-controls="main-navigation"
@@ -341,7 +361,7 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                 {/* Bottom Section - User Profile */}
                 <div className="border-t border-[#27272a] p-3">
                     <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-                        <UserButton 
+                        <UserButton
                             afterSignOutUrl="/"
                             appearance={{
                                 elements: {
@@ -350,7 +370,7 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                                 }
                             }}
                         />
-                        
+
                         {!collapsed && user && (
                             <div className="flex flex-col overflow-hidden">
                                 <span className="text-sm font-medium text-zinc-200 truncate">
@@ -361,7 +381,7 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
                                 </span>
                             </div>
                         )}
-                        
+
                         {!collapsed && !user && (
                             <div className="flex flex-col">
                                 <span className="text-sm font-medium text-zinc-200">Guest</span>

@@ -109,16 +109,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           transitionTimingFunction: 'ease-out',
         }}
       >
-        {/* Dashboard Header - 56px height (Requirements 3.1, 3.6) */}
+        {/* Dashboard Header - Fixed at top, 56px height (Requirements 3.1, 3.6) */}
         <DashboardHeader
           showSearch={true}
           onSearchClick={handleSearchClick}
         />
 
-        {/* Main Content Area (Requirements 1.4, 7.6) */}
+        {/* Main Content Area - Offset by header height (Requirements 1.4, 7.6) */}
         <main
           id="main-content"
-          className="flex-1 bg-[#f8fafc] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide"
+          className="flex-1 bg-[#f8fafc] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide pt-14"
           role="main"
           aria-labelledby="page-title"
         >

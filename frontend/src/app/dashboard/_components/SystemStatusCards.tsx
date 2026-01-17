@@ -71,7 +71,7 @@ const SystemStatusCards = memo(({ metrics }: SystemStatusCardsProps) => {
       case 'error':
         return '#ef4444';
       default:
-        return '#64748b';
+        return '#71717a';
     }
   };
 
@@ -112,7 +112,7 @@ const SystemStatusCards = memo(({ metrics }: SystemStatusCardsProps) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15, delay: index * 0.05 }}
-          className="rounded-lg border border-[#e2e8f0] bg-white p-4 transition-colors duration-150 hover:border-[#cbd5e1]"
+          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-150 hover:border-zinc-300 hover:shadow-md"
         >
           {/* Header with Icon and Status */}
           <div className="mb-3 flex items-center justify-between">
@@ -133,11 +133,11 @@ const SystemStatusCards = memo(({ metrics }: SystemStatusCardsProps) => {
           {/* Metric Value */}
           <div className="mb-1">
             <div className="flex items-baseline gap-0.5">
-              <span className="text-[20px] font-semibold text-[#0f172a]">
+              <span className="text-[20px] font-semibold text-zinc-900">
                 {metric.value}
               </span>
               {metric.unit && (
-                <span className="text-[12px] font-medium text-[#64748b]">
+                <span className="text-[12px] font-medium text-zinc-500">
                   {metric.unit}
                 </span>
               )}
@@ -145,13 +145,13 @@ const SystemStatusCards = memo(({ metrics }: SystemStatusCardsProps) => {
           </div>
 
           {/* Metric Label */}
-          <div className="text-[12px] text-[#64748b]">
+          <div className="text-[12px] text-zinc-500">
             {metric.label}
           </div>
 
           {/* Mini Visualization Bar */}
           <div className="mt-3">
-            <div className="h-1 rounded-full bg-[#f1f5f9]">
+            <div className="h-1 rounded-full bg-zinc-100">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{

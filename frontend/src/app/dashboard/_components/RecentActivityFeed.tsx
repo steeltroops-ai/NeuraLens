@@ -164,28 +164,14 @@ export default function RecentActivityFeed({ activities, maxItems = 8 }: RecentA
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className='rounded-2xl border p-6 backdrop-blur-xl'
-      style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(20px)',
-      }}
+      className='rounded-2xl border border-zinc-200 bg-white/60 p-6 backdrop-blur-xl'
     >
       {/* Header */}
       <div className='mb-6 flex items-center justify-between'>
-        <h3
-          className='text-lg font-semibold'
-          style={{
-            color: '#1D1D1F',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          }}
-        >
+        <h3 className='text-lg font-semibold text-zinc-900'>
           Recent Activity
         </h3>
-        <button
-          className='text-sm font-medium transition-opacity hover:opacity-70'
-          style={{ color: '#007AFF' }}
-        >
+        <button className='text-sm font-medium text-blue-500 transition-opacity hover:opacity-70'>
           View All
         </button>
       </div>
@@ -198,7 +184,7 @@ export default function RecentActivityFeed({ activities, maxItems = 8 }: RecentA
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            className='flex items-start space-x-4 rounded-xl p-3 transition-colors hover:bg-white/30'
+            className='flex items-start space-x-4 rounded-xl p-3 transition-colors hover:bg-white/50'
           >
             {/* Activity Icon */}
             <div
@@ -214,16 +200,16 @@ export default function RecentActivityFeed({ activities, maxItems = 8 }: RecentA
             <div className='min-w-0 flex-1'>
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
-                  <h4 className='truncate text-sm font-medium' style={{ color: '#1D1D1F' }}>
+                  <h4 className='truncate text-sm font-medium text-zinc-900'>
                     {activity.title}
                   </h4>
-                  <p className='mt-1 line-clamp-2 text-xs' style={{ color: '#86868B' }}>
+                  <p className='mt-1 line-clamp-2 text-xs text-zinc-500'>
                     {activity.description}
                   </p>
                   {activity.user && (
                     <div className='mt-2 flex items-center space-x-1'>
-                      <User className='h-3 w-3' style={{ color: '#86868B' }} />
-                      <span className='text-xs' style={{ color: '#86868B' }}>
+                      <User className='h-3 w-3 text-zinc-400' />
+                      <span className='text-xs text-zinc-400'>
                         {activity.user}
                       </span>
                     </div>
@@ -241,7 +227,7 @@ export default function RecentActivityFeed({ activities, maxItems = 8 }: RecentA
                   )}
                 </div>
               </div>
-              <div className='mt-2 text-xs' style={{ color: '#86868B' }}>
+              <div className='mt-2 text-xs text-zinc-400'>
                 {formatTimestamp(activity.timestamp)}
               </div>
             </div>

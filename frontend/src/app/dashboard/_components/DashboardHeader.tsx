@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Bell, X, ChevronRight, Search } from 'lucide-react';
-import { sidebarItems, sidebarGroups } from './DashboardSidebar';
+import { sidebarItems, sidebarGroups, SIDEBAR_COLLAPSED_KEY } from './DashboardSidebar';
 import dynamic from 'next/dynamic';
 
 // Lazy load AI Insights Panel for notifications
@@ -34,7 +34,7 @@ export interface DashboardHeaderProps {
 /**
  * Dashboard Header Component
  * 
- * Minimal, professional design matching sidebar aesthetic
+ * Fixed header that stays at the top and adjusts position based on sidebar state
  * Height: 56px (h-14) - same as sidebar logo tab
  * 
  * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6
@@ -47,6 +47,50 @@ export function DashboardHeader({
     const pathname = usePathname();
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [notificationCount] = useState(3);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(false);
+
+    // Initialize client-side state and listen for sidebar changes
+    useEffect(() => {
+        setIsClient(true);
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+            if (saved !== null) {
+                setSidebarCollapsed(JSON.parse(saved));
+            }
+            setIsDesktop(window.innerWidth >= 1024);
+        }
+    }, []);
+
+    // Listen for sidebar collapse state changes and window resize
+    useEffect(() => {
+        if (!isClient) return;
+
+        const handleStorageChange = () => {
+            const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+            if (saved !== null) {
+                setSidebarCollapsed(JSON.parse(saved));
+            }
+        };
+
+        const handleResize = () => {
+            setIsDesktop(window.innerWidth >= 1024);
+        };
+
+        // Check for changes periodically (for same-tab updates)
+        const interval = setInterval(handleStorageChange, 100);
+
+        // Also listen for storage events (cross-tab) and resize
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [isClient]);
 
     // Close notifications when clicking outside
     useEffect(() => {
@@ -108,9 +152,15 @@ export function DashboardHeader({
     const breadcrumbs = getBreadcrumbs();
     const pageTitle = getCurrentPageTitle();
 
+    // Calculate header left offset based on sidebar state
+    const headerLeftOffset = isDesktop ? (sidebarCollapsed ? 60 : 240) : 0;
+
     return (
         <header
-            className="sticky top-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-black border-b border-[#27272a] h-14"
+            className="fixed top-0 right-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-black border-b border-[#27272a] h-14 transition-[left] duration-200 ease-out"
+            style={{
+                left: `${headerLeftOffset}px`
+            }}
             role="banner"
             aria-label="Dashboard header"
             data-testid="dashboard-header"

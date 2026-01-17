@@ -103,13 +103,13 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
   const actionList = actions || defaultActions;
 
   return (
-    <div className="rounded-lg border border-[#e2e8f0] bg-white p-4">
+    <div className="rounded-lg border border-zinc-200 bg-white p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-[14px] font-medium text-[#0f172a]">
+        <h3 className="text-[14px] font-medium text-zinc-900">
           Quick Actions
         </h3>
-        <p className="mt-0.5 text-[12px] text-[#64748b]">
+        <p className="mt-0.5 text-[12px] text-zinc-500">
           Frequently used tools
         </p>
       </div>
@@ -124,9 +124,9 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
             transition={{ duration: 0.15, delay: index * 0.03 }}
             onClick={() => action.onClick()}
             disabled={action.disabled}
-            className={`relative rounded-lg border border-[#f0f0f0] bg-white p-3 text-left transition-all duration-150 ${action.disabled
+            className={`relative rounded-lg border border-zinc-100 bg-white p-3 text-left transition-all duration-150 ${action.disabled
                 ? 'cursor-not-allowed opacity-50'
-                : 'hover:border-[#e2e8f0] hover:bg-[#f9fafb]'
+                : 'hover:border-zinc-200 hover:bg-zinc-50'
               }`}
           >
             {/* Icon */}
@@ -140,12 +140,12 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
             </div>
 
             {/* Label */}
-            <div className="text-[12px] font-medium text-[#0f172a]">
+            <div className="text-[12px] font-medium text-zinc-900">
               {action.label}
             </div>
 
             {/* Description */}
-            <div className="text-[11px] text-[#64748b] line-clamp-1">
+            <div className="text-[11px] text-zinc-500 line-clamp-1">
               {action.description}
             </div>
           </motion.button>
@@ -153,19 +153,19 @@ const QuickActionButtons = memo(({ actions, onActionClick }: QuickActionButtonsP
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
+      <div className="mt-4 pt-3 border-t border-zinc-100">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] text-[#64748b]">
+          <div className="text-[11px] text-zinc-500">
             Need help?{' '}
             <button
-              className="font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors"
+              className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
               onClick={() => handleActionClick('help')}
             >
               View docs
             </button>
           </div>
           <button
-            className="text-[11px] font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors"
+            className="text-[11px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
             onClick={() => handleActionClick('customize')}
           >
             Customize
