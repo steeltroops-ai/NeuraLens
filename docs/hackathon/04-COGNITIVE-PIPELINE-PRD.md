@@ -1,450 +1,437 @@
-# Cognitive Pipeline - Product Requirements Document
+# MediLens Cognitive Assessment Pipeline PRD
 
-## Agent Assignment: COGNITIVE-AGENT-04
-## Branch: `feature/cognitive-pipeline-fix`
-## Priority: P1 (Important for Complete Demo)
-
----
-
-## Overview
-
-The Cognitive Testing Pipeline assesses memory, attention, and executive function to detect Mild Cognitive Impairment (MCI). This pipeline is interactive and gamified, making it engaging for demo videos.
-
-**Demo Appeal**:
-- Interactive memory games
-- Real-time reaction time measurement
-- Clear domain-specific results (Memory, Attention, Executive)
+## Document Info
+| Field | Value |
+|-------|-------|
+| Version | 2.0.0 |
+| Priority | P1 - High (Interactive Demo) |
+| Est. Dev Time | 5 hours |
+| Clinical Validation | Standardized cognitive tests |
 
 ---
 
-## Current Architecture
+## 1. Overview
 
-### Backend Files
+### Purpose
+Evaluate cognitive function through standardized digital tests for:
+- **Memory** (immediate, delayed, recognition)
+- **Attention** (sustained, selective, divided)
+- **Executive Function** (planning, inhibition, flexibility)
+- **Processing Speed** (reaction time, throughput)
+- **Language** (verbal fluency, naming)
+- **Visuospatial** (construction, mental rotation)
 
-```
-backend/app/pipelines/cognitive/
-  |-- __init__.py     (31 bytes)
-  |-- analyzer.py     (15,438 bytes) - Cognitive scoring
-  |-- router.py       (9,096 bytes)  - FastAPI routes
-```
+### Clinical Basis
+Digital cognitive testing correlates highly (r=0.85+) with paper-based neuropsychological assessments. Early cognitive changes can precede dementia diagnosis by 5-10 years, making screening valuable for early intervention.
 
-### Frontend Files
+---
 
-```
-frontend/src/app/dashboard/cognitive/
-  |-- page.tsx            - Main cognitive page
-  |-- _components/        - Cognitive-specific components
+## 2. Technology Stack
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Scoring** | Rule-based algorithms | No ML needed |
+| **Normative Data** | Published age norms | Age-adjusted scores |
+| **Timer** | High-precision JS | Accurate RT measurement |
+| **Statistics** | NumPy/SciPy | Statistical analysis |
+
+### Key Insight
+Cognitive testing is **rule-based scoring**, not machine learning. We implement standardized tests and compare to published normative data.
+
+### Installation
+```bash
+pip install numpy scipy  # That's all!
 ```
 
 ---
 
-## Requirements
+## 3. Test Battery
 
-### Functional Requirements
+### Memory Tests
 
-| ID | Requirement | Priority | Status |
-|----|-------------|----------|--------|
-| CG-F01 | Memory test - word list recall | P0 | Needs implementation |
-| CG-F02 | Attention test - reaction time game | P0 | Needs implementation |
-| CG-F03 | Executive function - pattern matching | P1 | Needs implementation |
-| CG-F04 | Age-adjusted scoring | P0 | Needs implementation |
-| CG-F05 | Domain-specific scores | P0 | Needs implementation |
-| CG-F06 | Composite cognitive index | P0 | Needs implementation |
-| CG-F07 | Progress tracking across tests | P1 | Not started |
-| CG-F08 | Practice trials before tests | P1 | Not started |
+| Test | Description | Duration | Metrics |
+|------|-------------|----------|---------|
+| **Word List Learning** | Learn 10 words, 3 trials | 3 min | Words recalled per trial |
+| **Delayed Recall** | Recall words after delay | 1 min | Words recalled |
+| **Recognition** | Identify learned vs new words | 2 min | Hits, false positives |
 
----
+### Attention Tests
 
-## Agent Task Breakdown
+| Test | Description | Duration | Metrics |
+|------|-------------|----------|---------|
+| **Simple Reaction Time** | Press on stimulus | 2 min | Mean RT, variability |
+| **Go/No-Go** | Respond to target only | 3 min | Accuracy, commission errors |
+| **Continuous Performance** | Monitor for target pattern | 5 min | Hits, vigilance decrement |
 
-### Step 1: Implement Memory Test Backend (2 hours)
+### Executive Function Tests
 
-**File**: `backend/app/pipelines/cognitive/analyzer.py`
+| Test | Description | Duration | Metrics |
+|------|-------------|----------|---------|
+| **Trail Making A** | Connect 1-2-3-4... | 1 min | Completion time |
+| **Trail Making B** | Connect 1-A-2-B-3-C... | 2 min | Completion time, errors |
+| **Stroop Test** | Name color, ignore word | 2 min | Interference score |
+| **Tower Task** | Plan moves to goal | 3 min | Moves, planning time |
 
-**Tasks**:
-1. Score immediate word recall (10 words shown, count recalled)
-2. Score delayed recall (after 5 minutes)
-3. Calculate recognition accuracy (correct vs false positives)
-4. Normalize scores to 0.0-1.0
+### Processing Speed
 
-**Implementation**:
-```python
-def score_memory_test(test_results: dict) -> dict:
-    """Score memory test components"""
-    
-    # Immediate recall: 10 words shown, how many recalled correctly
-    immediate_score = test_results["immediate_recall_count"] / 10.0
-    
-    # Delayed recall: same list after 5-10 minute delay
-    delayed_score = test_results["delayed_recall_count"] / 10.0
-    
-    # Recognition: shown 20 words (10 original + 10 distractors)
-    true_positives = test_results["recognition_correct"]
-    false_positives = test_results["recognition_incorrect"]
-    recognition_score = (true_positives - false_positives * 0.5) / 10.0
-    recognition_score = max(0, min(1, recognition_score))
-    
-    # Learning curve: improvement across trials
-    trial_scores = test_results.get("trial_scores", [])
-    if len(trial_scores) >= 3:
-        learning_slope = (trial_scores[-1] - trial_scores[0]) / len(trial_scores)
-        learning_score = min(1, max(0, 0.5 + learning_slope * 5))
-    else:
-        learning_score = 0.5
-    
-    return {
-        "immediate_recall": round(immediate_score, 2),
-        "delayed_recall": round(delayed_score, 2),
-        "recognition": round(recognition_score, 2),
-        "learning_curve": round(learning_score, 2),
-        "domain_score": round(
-            0.3 * immediate_score + 
-            0.35 * delayed_score + 
-            0.2 * recognition_score +
-            0.15 * learning_score, 
-            2
-        )
-    }
-```
-
-### Step 2: Implement Attention Test Backend (2 hours)
-
-**File**: `backend/app/pipelines/cognitive/analyzer.py`
-
-**Tasks**:
-1. Score reaction time (average and variability)
-2. Calculate sustained attention (performance over time)
-3. Measure selective attention (correct vs incorrect responses)
-4. Add divided attention task
-
-**Implementation**:
-```python
-def score_attention_test(test_results: dict) -> dict:
-    """Score attention test components"""
-    
-    reaction_times = test_results["reaction_times_ms"]
-    
-    # Mean reaction time (normalize: 200ms = 1.0, 600ms = 0.0)
-    mean_rt = sum(reaction_times) / len(reaction_times)
-    rt_score = max(0, min(1, 1 - (mean_rt - 200) / 400))
-    
-    # RT variability (lower is better)
-    rt_std = (sum((rt - mean_rt)**2 for rt in reaction_times) / len(reaction_times)) ** 0.5
-    variability_score = max(0, min(1, 1 - rt_std / 100))
-    
-    # Sustained attention: compare first half vs second half
-    first_half = reaction_times[:len(reaction_times)//2]
-    second_half = reaction_times[len(reaction_times)//2:]
-    sustained_diff = sum(second_half)/len(second_half) - sum(first_half)/len(first_half)
-    sustained_score = max(0, min(1, 1 - sustained_diff / 100))
-    
-    # Accuracy (correct responses / total stimuli)
-    accuracy = test_results["correct_responses"] / test_results["total_stimuli"]
-    
-    return {
-        "reaction_time_ms": round(mean_rt, 1),
-        "rt_variability": round(rt_std, 1),
-        "sustained_attention": round(sustained_score, 2),
-        "accuracy": round(accuracy, 2),
-        "domain_score": round(
-            0.25 * rt_score +
-            0.25 * variability_score +
-            0.25 * sustained_score +
-            0.25 * accuracy,
-            2
-        )
-    }
-```
-
-### Step 3: Implement Executive Function Backend (1.5 hours)
-
-**File**: `backend/app/pipelines/cognitive/analyzer.py`
-
-**Tasks**:
-1. Score planning tasks (e.g., Tower of London)
-2. Score inhibition (e.g., Stroop-like interference)
-3. Score flexibility (e.g., set-shifting)
-4. Include working memory component
-
-**Implementation**:
-```python
-def score_executive_test(test_results: dict) -> dict:
-    """Score executive function components"""
-    
-    # Planning: moves to solve vs optimal moves
-    planning_score = test_results["optimal_moves"] / max(1, test_results["actual_moves"])
-    planning_score = min(1, planning_score)
-    
-    # Inhibition: incongruent trial accuracy
-    inhibition_score = test_results["incongruent_correct"] / test_results["incongruent_total"]
-    
-    # Flexibility: successful switches / total switches
-    flexibility_score = test_results["successful_switches"] / max(1, test_results["total_switches"])
-    
-    # Working memory: n-back accuracy
-    working_memory_score = test_results.get("nback_accuracy", 0.7)
-    
-    return {
-        "planning": round(planning_score, 2),
-        "inhibition": round(inhibition_score, 2),
-        "flexibility": round(flexibility_score, 2),
-        "working_memory": round(working_memory_score, 2),
-        "domain_score": round(
-            0.25 * planning_score +
-            0.30 * inhibition_score +
-            0.25 * flexibility_score +
-            0.20 * working_memory_score,
-            2
-        )
-    }
-```
-
-### Step 4: Add Age-Adjusted Scoring (1 hour)
-
-**File**: `backend/app/pipelines/cognitive/analyzer.py`
-
-**Tasks**:
-1. Define age-based normative data
-2. Calculate z-scores against age norms
-3. Convert to percentile ranks
-
-**Implementation**:
-```python
-# Age-based normative data (simplified)
-AGE_NORMS = {
-    "memory": {
-        (18, 30): {"mean": 0.85, "std": 0.10},
-        (31, 50): {"mean": 0.80, "std": 0.12},
-        (51, 65): {"mean": 0.72, "std": 0.14},
-        (66, 80): {"mean": 0.65, "std": 0.16},
-        (81, 100): {"mean": 0.55, "std": 0.18}
-    },
-    "attention": {
-        (18, 30): {"mean": 0.90, "std": 0.08},
-        (31, 50): {"mean": 0.85, "std": 0.10},
-        (51, 65): {"mean": 0.78, "std": 0.12},
-        (66, 80): {"mean": 0.70, "std": 0.14},
-        (81, 100): {"mean": 0.60, "std": 0.16}
-    },
-    "executive": {
-        (18, 30): {"mean": 0.88, "std": 0.09},
-        (31, 50): {"mean": 0.82, "std": 0.11},
-        (51, 65): {"mean": 0.75, "std": 0.13},
-        (66, 80): {"mean": 0.68, "std": 0.15},
-        (81, 100): {"mean": 0.58, "std": 0.17}
-    }
-}
-
-def get_age_adjusted_score(raw_score: float, domain: str, age: int) -> dict:
-    """Convert raw score to age-adjusted z-score and percentile"""
-    
-    # Find age bracket
-    for (min_age, max_age), norms in AGE_NORMS[domain].items():
-        if min_age <= age <= max_age:
-            z_score = (raw_score - norms["mean"]) / norms["std"]
-            percentile = norm.cdf(z_score) * 100  # From scipy.stats
-            break
-    else:
-        z_score = 0
-        percentile = 50
-    
-    return {
-        "raw_score": raw_score,
-        "z_score": round(z_score, 2),
-        "percentile": round(percentile, 1)
-    }
-```
-
-### Step 5: Build Frontend Tests (2 hours)
-
-**File**: `frontend/src/app/dashboard/cognitive/page.tsx`
-
-**Tasks**:
-1. Create memory word list display (show 10 words for 30 seconds)
-2. Create recall input interface
-3. Create reaction time game (click when target appears)
-4. Show real-time feedback
+| Test | Description | Duration | Metrics |
+|------|-------------|----------|---------|
+| **Symbol Digit** | Match symbols to digits | 90 sec | Correct matches |
+| **Coding** | Copy symbol patterns | 2 min | Symbols completed |
 
 ---
 
-## API Contract
+## 4. Biomarkers Specification
 
-### POST /api/v1/cognitive/analyze
+### Primary Biomarkers (6 Domain Scores)
 
-**Request**:
+| # | Domain | Normal Range | Abnormal | Scoring Basis |
+|---|--------|--------------|----------|---------------|
+| 1 | **Memory** | 0.70-1.00 | <0.50 | Recall accuracy |
+| 2 | **Attention** | 0.70-1.00 | <0.50 | RT + accuracy combined |
+| 3 | **Executive** | 0.70-1.00 | <0.50 | Time + errors |
+| 4 | **Processing Speed** | 0.70-1.00 | <0.50 | Items completed |
+| 5 | **Language** | 0.70-1.00 | <0.50 | Words generated |
+| 6 | **Visuospatial** | 0.70-1.00 | <0.50 | Accuracy score |
+
+### Clinical Interpretation
+
+| Pattern | Possible Condition | Recommendation |
+|---------|-------------------|----------------|
+| Memory ↓↓, Executive ↓ | Alzheimer's type | Neurology referral |
+| Executive ↓↓, Attention ↓ | Vascular/frontal | MRI recommended |
+| All domains ↓ mildly | MCI | Monitor 6 months |
+| Processing speed ↓↓ only | Subcortical | Rule out depression |
+
+---
+
+## 5. API Specification
+
+### Endpoint
+```
+POST /api/cognitive/analyze
+Content-Type: application/json
+```
+
+### Request
 ```json
 {
-  "session_id": "uuid",
-  "demographics": {
-    "age": 62,
-    "education_years": 16
+  "session_id": "cog_session_123",
+  "patient_info": {
+    "age": 68,
+    "education_years": 16,
+    "primary_language": "english"
   },
+  "test_battery": ["memory", "attention", "executive"],
   "test_results": {
     "memory": {
-      "immediate_recall_count": 7,
-      "delayed_recall_count": 5,
-      "recognition_correct": 8,
-      "recognition_incorrect": 1,
-      "trial_scores": [5, 6, 7]
+      "trial1_correct": 5,
+      "trial2_correct": 7,
+      "trial3_correct": 8,
+      "delayed_correct": 6,
+      "recognition_hits": 9,
+      "recognition_false_positives": 1
     },
     "attention": {
-      "reaction_times_ms": [320, 345, 298, 410, 335, 380, 355, 312],
-      "correct_responses": 38,
-      "total_stimuli": 40
+      "simple_rt_mean_ms": 285,
+      "simple_rt_sd_ms": 45,
+      "go_nogo_accuracy": 0.92,
+      "commission_errors": 2,
+      "omission_errors": 1
     },
     "executive": {
-      "optimal_moves": 12,
-      "actual_moves": 15,
-      "incongruent_correct": 28,
-      "incongruent_total": 32,
-      "successful_switches": 14,
-      "total_switches": 16
+      "trail_a_time_sec": 32,
+      "trail_a_errors": 0,
+      "trail_b_time_sec": 68,
+      "trail_b_errors": 1,
+      "stroop_congruent_ms": 620,
+      "stroop_incongruent_ms": 850
     }
-  }
+  },
+  "difficulty": "standard"
 }
 ```
 
-**Response**:
+### Response
 ```json
 {
   "success": true,
-  "data": {
-    "risk_score": 22.0,
-    "risk_category": "low",
-    "confidence": 0.91,
-    "domain_scores": {
-      "memory": {
-        "raw_score": 0.78,
-        "z_score": 0.5,
-        "percentile": 69,
-        "components": {
-          "immediate_recall": 0.70,
-          "delayed_recall": 0.50,
-          "recognition": 0.75,
-          "learning_curve": 0.60
-        }
-      },
-      "attention": {
-        "raw_score": 0.82,
-        "z_score": 0.3,
-        "percentile": 62,
-        "components": {
-          "reaction_time_ms": 344,
-          "rt_variability": 38.2,
-          "sustained_attention": 0.85,
-          "accuracy": 0.95
-        }
-      },
-      "executive": {
-        "raw_score": 0.80,
-        "z_score": 0.4,
-        "percentile": 65,
-        "components": {
-          "planning": 0.80,
-          "inhibition": 0.875,
-          "flexibility": 0.875,
-          "working_memory": 0.70
-        }
+  "session_id": "cog_session_123",
+  "timestamp": "2026-01-17T14:30:00Z",
+  "processing_time_ms": 125,
+  
+  "overall_assessment": {
+    "cognitive_score": 0.82,
+    "risk_score": 18.0,
+    "category": "normal",
+    "confidence": 0.88,
+    "age_adjusted": true
+  },
+  
+  "domain_scores": {
+    "memory": {
+      "raw_score": 0.78,
+      "age_adjusted_score": 0.82,
+      "percentile": 55,
+      "status": "normal",
+      "components": {
+        "learning_slope": 1.5,
+        "delayed_retention": 0.75,
+        "recognition_discriminability": 0.90
       }
     },
-    "composite_score": 0.80,
-    "interpretation": "Cognitive performance within normal limits for age 62. All domains show age-appropriate function.",
-    "recommendations": [
-      "Continue regular cognitive activities",
-      "Maintain cardiovascular health",
-      "Follow-up assessment in 12 months"
-    ],
-    "processing_time_ms": 85
-  }
+    "attention": {
+      "raw_score": 0.85,
+      "age_adjusted_score": 0.88,
+      "percentile": 68,
+      "status": "normal",
+      "components": {
+        "processing_speed": 0.82,
+        "sustained_attention": 0.88,
+        "inhibitory_control": 0.85
+      }
+    },
+    "executive": {
+      "raw_score": 0.79,
+      "age_adjusted_score": 0.83,
+      "percentile": 58,
+      "status": "normal",
+      "components": {
+        "cognitive_flexibility": 0.78,
+        "inhibition": 0.80,
+        "processing_speed": 0.79
+      }
+    }
+  },
+  
+  "detailed_metrics": {
+    "memory": {
+      "total_learning": 20,
+      "learning_slope": 1.5,
+      "delayed_recall": 6,
+      "retention_percent": 75,
+      "recognition_hits": 9,
+      "false_positive_rate": 0.1
+    },
+    "attention": {
+      "mean_rt_ms": 285,
+      "rt_variability": 45,
+      "accuracy": 0.92,
+      "commission_rate": 0.04,
+      "omission_rate": 0.02
+    },
+    "executive": {
+      "trail_a_time": 32,
+      "trail_b_time": 68,
+      "trail_b_a_ratio": 2.13,
+      "stroop_interference": 230,
+      "stroop_ratio": 1.37
+    }
+  },
+  
+  "normative_comparison": {
+    "age_group": "65-69",
+    "education_matched": true,
+    "reference_population": "NACC normative sample"
+  },
+  
+  "recommendations": [
+    "Cognitive function within normal limits for age and education",
+    "Memory performance in average range",
+    "Executive function intact",
+    "Continue mentally stimulating activities",
+    "Recommend annual cognitive screening"
+  ],
+  
+  "clinical_notes": "All assessed domains within normal limits. Learning curve and retention percentage suggest intact memory encoding and consolidation. Executive function performance appropriate for age."
 }
 ```
 
 ---
 
-## Cognitive Test Design
+## 6. Scoring Algorithms
 
-### Memory Test - Word List Recall
-
+### Memory Scoring
+```python
+def score_memory(results: dict) -> dict:
+    """Score memory test results"""
+    
+    # Learning trials (max 30 = 10 words x 3 trials)
+    total_learning = (
+        results['trial1_correct'] + 
+        results['trial2_correct'] + 
+        results['trial3_correct']
+    )
+    learning_score = total_learning / 30
+    
+    # Learning slope (improvement across trials)
+    slope = (results['trial3_correct'] - results['trial1_correct']) / 2
+    
+    # Delayed recall (max 10)
+    delayed_score = results['delayed_correct'] / 10
+    
+    # Retention percentage
+    retention = results['delayed_correct'] / max(results['trial3_correct'], 1)
+    
+    # Recognition discriminability
+    hits = results['recognition_hits'] / 10
+    fa = results['recognition_false_positives'] / 10
+    discriminability = hits - fa
+    
+    # Combined score (weighted)
+    memory_score = (
+        learning_score * 0.30 +
+        delayed_score * 0.40 +  # Delayed recall weighted highest
+        discriminability * 0.30
+    )
+    
+    return {
+        'score': memory_score,
+        'total_learning': total_learning,
+        'learning_slope': slope,
+        'delayed_recall': results['delayed_correct'],
+        'retention_percent': retention * 100,
+        'discriminability': discriminability
+    }
 ```
-Test Structure:
-1. Show 10 common words, one at a time (2 seconds each)
-2. Immediately ask to type recalled words (60 seconds)
-3. Do interference task (attention test)
-4. Delayed recall after 5 minutes (60 seconds)
-5. Recognition: show 20 words, identify original 10
 
-Word List Example:
-["apple", "chair", "sunset", "pencil", "ocean", 
- "garden", "mirror", "kitchen", "blanket", "forest"]
-```
+### Age Adjustment
+```python
+# Normative data (example for memory score)
+MEMORY_NORMS = {
+    # age_group: (mean, sd)
+    '55-59': (0.85, 0.10),
+    '60-64': (0.82, 0.11),
+    '65-69': (0.78, 0.12),
+    '70-74': (0.74, 0.13),
+    '75-79': (0.70, 0.14),
+    '80-84': (0.65, 0.15),
+}
 
-### Attention Test - Reaction Time
-
-```
-Test Structure:
-1. Show fixation cross
-2. After random delay (0.5-2s), show target (green circle)
-3. User clicks as fast as possible
-4. 40 trials total, ~3 minutes
-
-Scoring:
-- Mean RT < 300ms = excellent
-- Mean RT 300-400ms = good
-- Mean RT 400-500ms = moderate
-- Mean RT > 500ms = impaired
-```
-
-### Executive Function - Card Sorting
-
-```
-Test Structure:
-1. Sort cards by rule (color, shape, or number)
-2. Rule changes without warning
-3. Count successful switches vs perseverative errors
-
-Simplified Version for Demo:
-- Show pattern, user selects matching card
-- Rule changes every ~5 trials
+def age_adjust_score(raw_score: float, age: int, domain: str) -> float:
+    """Convert raw score to age-adjusted percentile"""
+    
+    age_group = f"{(age // 5) * 5}-{(age // 5) * 5 + 4}"
+    norms = MEMORY_NORMS.get(age_group, (0.75, 0.12))
+    
+    # Z-score
+    z = (raw_score - norms[0]) / norms[1]
+    
+    # Convert to percentile (using scipy.stats.norm.cdf)
+    from scipy.stats import norm
+    percentile = norm.cdf(z) * 100
+    
+    return percentile
 ```
 
 ---
 
-## Verification Checklist
+## 7. Frontend Integration
 
-- [ ] Memory test word display works
-- [ ] Memory recall input captures responses
-- [ ] Attention test measures reaction time accurately
-- [ ] Reaction time displayed in real-time
-- [ ] Executive function test switches rules
-- [ ] Age-adjusted scoring applied
-- [ ] Domain scores calculated correctly
-- [ ] Radar chart visualization works
-- [ ] Progress bar shows test completion
-- [ ] Results interpretation is clear
+### Required UI Components
+
+#### 1. Test Selection
+- Domain toggles (Memory, Attention, etc.)
+- Difficulty selector (easy/standard/hard)
+- Estimated time display
+- Start button
+
+#### 2. Interactive Tests
+- **Word List**: Display words -> Input recall
+- **Reaction Time**: Wait -> Click button
+- **Trail Making**: Canvas with numbered circles
+- **Stroop**: Color words with conflicting colors
+
+#### 3. Results Display
+- Radar chart (6 domains)
+- Domain score cards
+- Percentile comparisons
+- Age-adjusted indicators
+- Recommendations
+
+### Trail Making Test Implementation
+```javascript
+const TrailMakingTest = () => {
+  const [circles, setCircles] = useState([]);
+  const [currentTarget, setCurrentTarget] = useState(1);
+  const [path, setPath] = useState([]);
+  const [startTime, setStartTime] = useState(null);
+  const [errors, setErrors] = useState(0);
+  
+  const handleCircleClick = (label) => {
+    if (label === currentTarget || label === getExpectedLabel()) {
+      setPath([...path, label]);
+      setCurrentTarget(currentTarget + 1);
+    } else {
+      setErrors(errors + 1);
+      // Visual feedback for error
+    }
+  };
+  
+  const getExpectedLabel = () => {
+    // For Trail B: 1, A, 2, B, 3, C...
+    const index = currentTarget - 1;
+    if (index % 2 === 0) {
+      return Math.floor(index / 2) + 1;
+    } else {
+      return String.fromCharCode(65 + Math.floor(index / 2));
+    }
+  };
+  
+  return (
+    <canvas onClick={handleCircleClick}>
+      {circles.map(c => <Circle key={c.label} {...c} />)}
+    </canvas>
+  );
+};
+```
 
 ---
 
-## Demo Script
+## 8. Implementation Checklist
 
-For the hackathon video, demonstrate:
+### Backend
+- [ ] Test result validation
+- [ ] Memory scoring algorithm
+- [ ] Attention scoring algorithm
+- [ ] Executive function scoring
+- [ ] Processing speed scoring
+- [ ] Age normalization
+- [ ] Percentile calculation
+- [ ] Risk score computation
+- [ ] Pattern analysis
+- [ ] Recommendation generation
 
-1. "Now let's assess cognitive function"
-2. Show memory test: "Here are 10 words to remember"
-3. Show reaction time game: "Click when you see the green circle"
-4. Show results: "Domain scores for memory, attention, and executive function"
-5. Point to radar chart: "This shows a comprehensive cognitive profile"
-6. Highlight age adjustment: "Scores are normalized for the user's age group"
+### Frontend
+- [ ] Test selection interface
+- [ ] Word list memory test
+- [ ] Reaction time test
+- [ ] Go/No-Go test
+- [ ] Trail Making canvas
+- [ ] Stroop test
+- [ ] Timer component
+- [ ] Results radar chart
+- [ ] Domain score cards
+- [ ] Percentile visualization
 
 ---
 
-## Estimated Time
+## 9. Clinical References
 
-| Task | Hours |
-|------|-------|
-| Memory test backend | 2.0 |
-| Attention test backend | 2.0 |
-| Executive function backend | 1.5 |
-| Age-adjusted scoring | 1.0 |
-| Frontend test UI | 2.0 |
-| Testing | 1.5 |
-| **Total** | **10.0 hours** |
+1. Weintraub et al. (2009) - "The Alzheimer's Disease Centers' Uniform Data Set (UDS)"
+2. Nasreddine et al. (2005) - "The Montreal Cognitive Assessment (MoCA)"
+3. Reitan (1958) - "Trail Making Test"
+4. Stroop (1935) - "Studies of interference in serial verbal reactions"
+
+---
+
+## 10. Files
+
+```
+app/pipelines/cognitive/
+├── __init__.py
+├── router.py           # FastAPI endpoints
+├── analyzer.py         # Scoring algorithms
+├── normative_data.py   # Age/education norms
+└── patterns.py         # Pattern interpretation
+```

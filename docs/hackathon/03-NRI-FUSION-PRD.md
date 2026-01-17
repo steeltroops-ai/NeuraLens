@@ -1,494 +1,405 @@
-# NRI Fusion Pipeline - Product Requirements Document
+# MediLens NRI Fusion Pipeline PRD
 
-## Agent Assignment: NRI-AGENT-03
-## Branch: `feature/nri-fusion-fix`
-## Priority: P0 (Core USP - Unified Risk Score)
-
----
-
-## Overview
-
-The NRI (Neurological Risk Index) Fusion Pipeline is the **most unique selling point** of NeuraLens. It combines results from all assessment modalities (Speech, Retinal, Motor, Cognitive) into a single unified risk score. This is what differentiates us from point solutions.
-
-**Why This Matters for Judges**:
-- Shows sophisticated multi-modal AI
-- Demonstrates Bayesian fusion techniques
-- Provides clear, actionable output (0-100 score)
-- More clinically relevant than individual tests
+## Document Info
+| Field | Value |
+|-------|-------|
+| Version | 2.0.0 |
+| Priority | P0 - Critical (Core Feature) |
+| Est. Dev Time | 4 hours |
+| Clinical Validation | Multi-modal fusion approach |
 
 ---
 
-## Current Architecture
+## 1. Overview
 
-### Backend Files
+### Purpose
+Combine risk assessments from all individual pipelines (Speech, Retinal, Cardiology, Radiology, Cognitive, Motor) into a unified **Neurological Risk Index (NRI)** using weighted Bayesian fusion with confidence estimation.
 
-```
-backend/app/pipelines/nri/
-  |-- __init__.py     (31 bytes)
-  |-- analyzer.py     (13,015 bytes) - Fusion algorithm
-  |-- router.py       (9,609 bytes)  - FastAPI routes
-```
+### Clinical Basis
+Multi-modal assessment is more reliable than single-modality testing. Research shows that combining biomarkers from different physiological systems improves diagnostic accuracy by 15-25% compared to individual tests.
 
-### Frontend Files
+---
 
-```
-frontend/src/app/dashboard/nri-fusion/
-  |-- page.tsx            - Main NRI page
-  |-- _components/        - Fusion-specific components
+## 2. Technology Stack
 
-frontend/src/lib/ml/
-  |-- nri-fusion.ts       (16,720 bytes) - Frontend fusion logic
-  |-- risk-assessment.ts  (17,444 bytes) - Risk calculation
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Fusion Algorithm** | Weighted Average | Interpretable combination |
+| **Confidence** | Bayesian Estimation | Uncertainty quantification |
+| **Normalization** | Z-score + Min-Max | Standardize inputs |
+| **Visualization** | Radar Chart | Multi-axis display |
+
+### Installation
+```bash
+pip install numpy scipy  # Core math only
 ```
 
 ---
 
-## Requirements
+## 3. Modality Weights
 
-### Functional Requirements
+### Clinical Weight Distribution
 
-| ID | Requirement | Priority | Status |
-|----|-------------|----------|--------|
-| NRI-F01 | Accept modality scores from 1-4 pipelines | P0 | Needs improvement |
-| NRI-F02 | Calculate weighted fusion score | P0 | Existing |
-| NRI-F03 | Handle missing modalities gracefully | P0 | Needs implementation |
-| NRI-F04 | Apply evidence-based modality weights | P0 | Needs calibration |
-| NRI-F05 | Calculate confidence intervals | P1 | Needs implementation |
-| NRI-F06 | Provide risk category (Low/Moderate/High/Very High) | P0 | Existing |
-| NRI-F07 | Show modality contribution breakdown | P1 | Needs improvement |
-| NRI-F08 | Generate clinical recommendations | P1 | Existing |
-| NRI-F09 | Support Bayesian fusion method | P2 | Partial |
+| Modality | Weight | Rationale |
+|----------|--------|-----------|
+| **Retinal** | 22% | Direct vascular observation, strong neuro correlation |
+| **Cognitive** | 20% | Direct cognitive function measurement |
+| **Speech** | 18% | Early Parkinson's/AD biomarkers |
+| **Motor** | 15% | Movement disorder indicators |
+| **Cardiology** | 15% | Cardiovascular-neurological link |
+| **Radiology** | 10% | Secondary pulmonary indicators |
 
-### Non-Functional Requirements
+**Total: 100%**
 
-| ID | Requirement | Priority | Target |
-|----|-------------|----------|--------|
-| NRI-NF01 | Fusion calculation < 100ms | P0 | 50ms |
-| NRI-NF02 | Intuitive gauge visualization | P1 | Circular gauge |
-| NRI-NF03 | Export combined report | P2 | PDF with all modalities |
-
----
-
-## Agent Task Breakdown
-
-### Step 1: Fix Modality Weight Calibration (2 hours)
-
-**File**: `backend/app/pipelines/nri/analyzer.py`
-
-**Tasks**:
-1. Define evidence-based weights for each modality
-2. Implement dynamic weight adjustment based on data quality
-3. Support configurable weight profiles
-4. Document weight rationale in comments
-
-**Weight Configuration**:
+### Weight Adjustment by Confidence
 ```python
-# Evidence-based modality weights
-# References: 
-# - Speech: JAMA Neurology 2020, voice biomarkers in Parkinson's
-# - Retinal: Alzheimer's & Dementia 2021, retinal imaging review
-# - Motor: Movement Disorders 2019, finger tapping meta-analysis
-# - Cognitive: Neurology 2022, cognitive screening tools comparison
-
-MODALITY_WEIGHTS = {
-    "speech": {
-        "base_weight": 0.25,
-        "reliability": 0.92,
-        "evidence_level": "high"
-    },
-    "retinal": {
-        "base_weight": 0.25,
-        "reliability": 0.89,
-        "evidence_level": "moderate-high"
-    },
-    "motor": {
-        "base_weight": 0.30,
-        "reliability": 0.88,
-        "evidence_level": "high"
-    },
-    "cognitive": {
-        "base_weight": 0.20,
-        "reliability": 0.91,
-        "evidence_level": "high"
-    }
-}
-
-def get_adjusted_weights(available_modalities: list[str]) -> dict[str, float]:
-    """Adjust weights when some modalities are missing"""
-    total_weight = sum(
-        MODALITY_WEIGHTS[m]["base_weight"] 
-        for m in available_modalities
-    )
-    
-    return {
-        m: MODALITY_WEIGHTS[m]["base_weight"] / total_weight
-        for m in available_modalities
-    }
-```
-
-### Step 2: Handle Missing Modalities (1.5 hours)
-
-**File**: `backend/app/pipelines/nri/analyzer.py`
-
-**Tasks**:
-1. Accept partial modality data (1-4 modalities)
-2. Recalculate weights for available modalities
-3. Apply confidence penalty for missing data
-4. Return which modalities were used in calculation
-
-**Pattern**:
-```python
-def calculate_nri_score(modality_results: dict) -> dict:
-    """Calculate NRI with handling for missing modalities"""
-    
-    available = [m for m in modality_results if modality_results[m] is not None]
-    
-    if len(available) == 0:
-        raise ValueError("At least one modality result required")
-    
-    # Adjust weights for available modalities
-    weights = get_adjusted_weights(available)
-    
-    # Calculate weighted score
-    weighted_sum = sum(
-        modality_results[m]["risk_score"] * weights[m]
-        for m in available
-    )
-    
-    # Confidence penalty for missing modalities
-    # Full confidence at 4 modalities, -5% per missing modality
-    missing_count = 4 - len(available)
-    confidence_penalty = missing_count * 0.05
-    
-    # Combine modality confidences
-    avg_confidence = sum(
-        modality_results[m]["confidence"]
-        for m in available
-    ) / len(available)
-    
-    final_confidence = max(0.5, avg_confidence - confidence_penalty)
-    
-    return {
-        "nri_score": round(weighted_sum, 1),
-        "confidence": round(final_confidence, 2),
-        "modalities_used": available,
-        "modalities_missing": [m for m in ["speech", "retinal", "motor", "cognitive"] if m not in available],
-        "weights_applied": weights
-    }
-```
-
-### Step 3: Add Confidence Intervals (1 hour)
-
-**File**: `backend/app/pipelines/nri/analyzer.py`
-
-**Tasks**:
-1. Calculate 95% confidence interval for NRI score
-2. Account for individual modality uncertainties
-3. Display as range (e.g., "28.5 [24.2 - 32.8]")
-
-**Pattern**:
-```python
-def calculate_confidence_interval(nri_score: float, modality_results: dict) -> tuple:
-    """Calculate 95% CI based on modality uncertainties"""
-    
-    # Collect uncertainties
-    uncertainties = [
-        modality_results[m].get("uncertainty", 0.1)
-        for m in modality_results
-        if modality_results[m] is not None
-    ]
-    
-    # Propagate uncertainty (simplified)
-    combined_uncertainty = (sum(u**2 for u in uncertainties) ** 0.5) / len(uncertainties)
-    
-    # 95% CI = +/- 1.96 * uncertainty
-    margin = 1.96 * combined_uncertainty * 100  # Scale to 0-100
-    
-    lower = max(0, nri_score - margin)
-    upper = min(100, nri_score + margin)
-    
-    return (round(lower, 1), round(upper, 1))
-```
-
-### Step 4: Fix Risk Categorization (1 hour)
-
-**File**: `backend/app/pipelines/nri/analyzer.py`
-
-**Tasks**:
-1. Define clear threshold boundaries
-2. Add category descriptions
-3. Include clinical recommendations per category
-
-**Risk Categories**:
-```python
-RISK_CATEGORIES = {
-    "low": {
-        "range": (0, 25),
-        "label": "Low Risk",
-        "color": "#10B981",  # Green
-        "description": "Minimal neurological risk indicators detected.",
-        "recommendations": [
-            "Continue regular health monitoring",
-            "Maintain healthy lifestyle habits",
-            "Annual follow-up assessment recommended"
-        ]
-    },
-    "moderate": {
-        "range": (25, 50),
-        "label": "Moderate Risk", 
-        "color": "#F59E0B",  # Amber
-        "description": "Some risk factors present. Monitoring recommended.",
-        "recommendations": [
-            "Consult with primary care physician",
-            "Consider specialist referral for detailed evaluation",
-            "Repeat assessment in 6 months"
-        ]
-    },
-    "high": {
-        "range": (50, 75),
-        "label": "High Risk",
-        "color": "#EF4444",  # Red
-        "description": "Elevated risk indicators. Clinical evaluation recommended.",
-        "recommendations": [
-            "Schedule appointment with neurologist",
-            "Consider comprehensive neurological workup",
-            "Discuss with healthcare provider promptly"
-        ]
-    },
-    "very_high": {
-        "range": (75, 100),
-        "label": "Very High Risk",
-        "color": "#7F1D1D",  # Dark red
-        "description": "Significant risk indicators. Urgent evaluation needed.",
-        "recommendations": [
-            "Seek urgent neurological consultation",
-            "Consider immediate clinical evaluation",
-            "Discuss results with healthcare provider today"
-        ]
-    }
-}
-```
-
-### Step 5: Fix Frontend Visualization (2 hours)
-
-**File**: `frontend/src/app/dashboard/nri-fusion/page.tsx`
-
-**Tasks**:
-1. Add circular gauge for NRI score
-2. Show modality contribution stacked bar
-3. Display confidence interval
-4. Animate score reveal
-
-**Gauge Component**:
-```tsx
-interface NRIGaugeProps {
-  score: number;
-  category: string;
-  confidence: number;
-  confidenceInterval: [number, number];
-}
-
-function NRIGauge({ score, category, confidence, confidenceInterval }: NRIGaugeProps) {
-  return (
-    <div className="relative w-64 h-64">
-      {/* Circular gauge SVG */}
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        {/* Background arc */}
-        <circle
-          cx="50" cy="50" r="45"
-          fill="none" stroke="#e5e7eb" strokeWidth="8"
-          strokeDasharray="212" strokeDashoffset="53"
-          transform="rotate(135 50 50)"
-        />
-        {/* Filled arc based on score */}
-        <circle
-          cx="50" cy="50" r="45"
-          fill="none" stroke={getCategoryColor(category)} strokeWidth="8"
-          strokeDasharray={`${score * 2.12} 212`}
-          strokeDashoffset="53"
-          transform="rotate(135 50 50)"
-          className="transition-all duration-1000"
-        />
-      </svg>
-      {/* Center score */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-bold">{score.toFixed(1)}</span>
-        <span className="text-sm text-gray-500">
-          [{confidenceInterval[0]} - {confidenceInterval[1]}]
-        </span>
-        <span className="text-lg font-medium" style={{ color: getCategoryColor(category) }}>
-          {category.replace('_', ' ').toUpperCase()}
-        </span>
-      </div>
-    </div>
-  );
-}
+adjusted_weight = base_weight * modality_confidence
 ```
 
 ---
 
-## API Contract
+## 4. API Specification
 
-### POST /api/v1/nri/calculate
+### Endpoint
+```
+POST /api/nri/calculate
+Content-Type: application/json
+```
 
-**Request**:
+### Request
 ```json
 {
-  "session_id": "uuid",
-  "modality_results": {
+  "session_id": "combined_session_123",
+  "patient_info": {
+    "age": 65,
+    "sex": "male",
+    "medical_history": ["hypertension", "type2_diabetes"]
+  },
+  "modalities": ["speech", "retinal", "cognitive", "motor"],
+  "modality_scores": {
+    "speech": 28.5,
+    "retinal": 22.0,
+    "cognitive": 18.5,
+    "motor": 24.0
+  },
+  "modality_confidences": {
+    "speech": 0.87,
+    "retinal": 0.91,
+    "cognitive": 0.88,
+    "motor": 0.85
+  },
+  "modality_details": {
     "speech": {
-      "risk_score": 25.0,
-      "confidence": 0.92,
-      "biomarkers": { "jitter": 0.8, "shimmer": 4.2 }
+      "jitter": 0.025,
+      "voice_tremor": 0.08
     },
     "retinal": {
-      "risk_score": 32.5,
-      "confidence": 0.89,
-      "biomarkers": { "cup_disc_ratio": 0.42 }
-    },
-    "motor": null,
-    "cognitive": {
-      "risk_score": 22.0,
-      "confidence": 0.91,
-      "biomarkers": { "memory_score": 0.85 }
+      "cup_disc_ratio": 0.28,
+      "av_ratio": 0.68
     }
   }
 }
 ```
 
-**Success Response** (200):
+### Response
 ```json
 {
   "success": true,
-  "data": {
-    "nri_score": 26.8,
-    "risk_category": "moderate",
-    "confidence": 0.87,
-    "confidence_interval": [22.5, 31.2],
-    "modalities_used": ["speech", "retinal", "cognitive"],
-    "modalities_missing": ["motor"],
-    "modality_contributions": {
-      "speech": 8.3,
-      "retinal": 10.8,
-      "cognitive": 7.7
+  "session_id": "combined_session_123",
+  "timestamp": "2026-01-17T14:15:00Z",
+  "processing_time_ms": 45,
+  
+  "nri_assessment": {
+    "score": 23.4,
+    "category": "low",
+    "confidence": 0.88,
+    "percentile": 35
+  },
+  
+  "modality_contributions": [
+    {
+      "modality": "retinal",
+      "raw_score": 22.0,
+      "confidence": 0.91,
+      "base_weight": 0.22,
+      "adjusted_weight": 0.200,
+      "contribution": 4.40,
+      "status": "normal"
     },
-    "weights_applied": {
-      "speech": 0.33,
-      "retinal": 0.33,
-      "cognitive": 0.34
+    {
+      "modality": "cognitive",
+      "raw_score": 18.5,
+      "confidence": 0.88,
+      "base_weight": 0.20,
+      "adjusted_weight": 0.176,
+      "contribution": 3.26,
+      "status": "normal"
     },
-    "interpretation": "Moderate neurological risk. Some indicators present across speech and retinal modalities.",
-    "recommendations": [
-      "Consider follow-up with neurologist",
-      "Complete motor assessment for comprehensive evaluation",
-      "Repeat assessment in 6 months"
-    ],
-    "processing_time_ms": 45
-  }
+    {
+      "modality": "speech",
+      "raw_score": 28.5,
+      "confidence": 0.87,
+      "base_weight": 0.18,
+      "adjusted_weight": 0.157,
+      "contribution": 4.47,
+      "status": "low_risk"
+    },
+    {
+      "modality": "motor",
+      "raw_score": 24.0,
+      "confidence": 0.85,
+      "base_weight": 0.15,
+      "adjusted_weight": 0.128,
+      "contribution": 3.07,
+      "status": "normal"
+    }
+  ],
+  
+  "missing_modalities": ["cardiology", "radiology"],
+  "coverage": 0.75,
+  
+  "trend": {
+    "direction": "stable",
+    "change_from_last": 0.0,
+    "historical_scores": []
+  },
+  
+  "risk_factors": [
+    {
+      "factor": "Speech biomarkers slightly elevated",
+      "modality": "speech",
+      "severity": "mild",
+      "recommendation": "Monitor voice changes over time"
+    }
+  ],
+  
+  "recommendations": [
+    "Overall neurological risk is low",
+    "All assessed modalities within acceptable ranges",
+    "Continue routine health monitoring",
+    "Consider completing cardiology and radiology assessments for comprehensive evaluation",
+    "Schedule follow-up NRI assessment in 12 months"
+  ],
+  
+  "clinical_summary": "Multi-modal assessment using 4 of 6 modalities indicates low overall neurological risk. Speech biomarkers show minimal elevation within acceptable range. No urgent clinical action required."
 }
 ```
 
 ---
 
-## Fusion Algorithm Explanation
-
-### Weighted Linear Fusion (Current)
-
-```
-NRI = Σ (weight_i × score_i) for all available modalities
-```
-
-### Bayesian Fusion (Enhanced - P2)
-
-```
-P(disease | all_modalities) = 
-    P(d | speech) × P(d | retinal) × P(d | motor) × P(d | cognitive) × P(d)
-    / P(all_evidence)
-```
-
-For hackathon, **weighted linear fusion is sufficient**. Bayesian can be mentioned as future work.
-
----
-
-## Test Cases
-
-### Backend Unit Tests
+## 5. Fusion Algorithm
 
 ```python
-# tests/test_nri_fusion.py
+import numpy as np
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
 
-def test_nri_all_modalities():
-    """Should calculate NRI with all 4 modalities"""
-    pass
+@dataclass
+class ModalityContribution:
+    modality: str
+    raw_score: float
+    confidence: float
+    base_weight: float
+    adjusted_weight: float
+    contribution: float
 
-def test_nri_partial_modalities():
-    """Should calculate NRI with 2-3 modalities"""
-    pass
-
-def test_nri_single_modality():
-    """Should calculate NRI with 1 modality only"""
-    pass
-
-def test_nri_weight_adjustment():
-    """Should adjust weights for missing modalities"""
-    pass
-
-def test_nri_confidence_penalty():
-    """Should penalize confidence for missing modalities"""
-    pass
-
-def test_nri_risk_categorization():
-    """Should assign correct risk category"""
-    pass
-
-def test_nri_confidence_interval():
-    """Should calculate valid confidence interval"""
-    pass
+class NRICalculator:
+    """Multi-modal Neurological Risk Index Calculator"""
+    
+    BASE_WEIGHTS = {
+        'retinal': 0.22,
+        'cognitive': 0.20,
+        'speech': 0.18,
+        'motor': 0.15,
+        'cardiology': 0.15,
+        'radiology': 0.10
+    }
+    
+    def calculate(
+        self,
+        modality_scores: Dict[str, float],
+        modality_confidences: Dict[str, float]
+    ) -> Tuple[float, float, List[ModalityContribution]]:
+        """
+        Calculate NRI score with confidence-weighted fusion
+        
+        Args:
+            modality_scores: Dict of modality -> risk score (0-100)
+            modality_confidences: Dict of modality -> confidence (0-1)
+        
+        Returns:
+            Tuple of (nri_score, overall_confidence, contributions)
+        """
+        
+        contributions = []
+        weighted_sum = 0.0
+        total_weight = 0.0
+        
+        for modality, score in modality_scores.items():
+            if modality not in self.BASE_WEIGHTS:
+                continue
+            
+            base_weight = self.BASE_WEIGHTS[modality]
+            confidence = modality_confidences.get(modality, 0.8)
+            
+            # Adjust weight by confidence
+            adjusted_weight = base_weight * confidence
+            contribution = score * adjusted_weight
+            
+            weighted_sum += contribution
+            total_weight += adjusted_weight
+            
+            contributions.append(ModalityContribution(
+                modality=modality,
+                raw_score=score,
+                confidence=confidence,
+                base_weight=base_weight,
+                adjusted_weight=adjusted_weight,
+                contribution=contribution / 100 * adjusted_weight * 100
+            ))
+        
+        # Calculate NRI
+        if total_weight > 0:
+            nri_score = weighted_sum / total_weight
+        else:
+            nri_score = 50.0  # Default if no valid modalities
+        
+        # Calculate overall confidence
+        coverage = len(modality_scores) / len(self.BASE_WEIGHTS)
+        avg_confidence = np.mean(list(modality_confidences.values()))
+        overall_confidence = avg_confidence * (0.7 + 0.3 * coverage)
+        
+        return nri_score, overall_confidence, contributions
+    
+    def categorize_risk(self, score: float) -> str:
+        """Categorize NRI score into risk level"""
+        if score < 25:
+            return "low"
+        elif score < 50:
+            return "moderate"
+        elif score < 75:
+            return "high"
+        else:
+            return "critical"
 ```
 
 ---
 
-## Verification Checklist
+## 6. Frontend Integration
 
-When this pipeline is complete, verify:
+### Required UI Components
 
-- [ ] Can calculate NRI with all 4 modalities
-- [ ] Can calculate NRI with 1-3 modalities (partial)
-- [ ] Missing modality handling works
-- [ ] Weight adjustment is correct
-- [ ] Risk category thresholds work
-- [ ] Confidence interval displays
-- [ ] Frontend gauge animates smoothly
-- [ ] Modality contribution breakdown shows
-- [ ] Recommendations are relevant
-- [ ] Processing time < 100ms
+#### 1. NRI Score Display
+- Large central gauge (0-100)
+- Color-coded zones (green/yellow/orange/red)
+- Confidence indicator
+- Category badge
+
+#### 2. Radar Chart
+- 6 axes (one per modality)
+- Filled area showing risk profile
+- Normal range overlay
+- Interactive hover details
+
+#### 3. Contribution Breakdown
+- Horizontal bar chart
+- Sorted by contribution
+- Weight annotation
+- Status indicators
+
+#### 4. Recommendations Panel
+- Priority-sorted list
+- Actionable items
+- Urgency indicators
+
+### Visual Design
+```
++--------------------------------------------------+
+|                    NRI SCORE                      |
+|                                                   |
+|         [===========O=============]               |
+|               23.4 / 100                          |
+|              [LOW RISK]                           |
+|           Confidence: 88%                         |
++--------------------------------------------------+
+|                                                   |
+|              [RADAR CHART]                        |
+|                                                   |
+|          Speech     Retinal                       |
+|              \       /                            |
+|               \     /                             |
+|        Motor---[*]---Cognitive                    |
+|               /     \                             |
+|              /       \                            |
+|        Cardio     Radiology                       |
+|            (missing) (missing)                    |
+|                                                   |
++--------------------------------------------------+
+|  MODALITY CONTRIBUTIONS                           |
+|  Speech     [===========] 4.47  (18%)            |
+|  Retinal    [==========]  4.40  (22%)            |
+|  Cognitive  [========]    3.26  (20%)            |
+|  Motor      [=======]     3.07  (15%)            |
++--------------------------------------------------+
+|  RECOMMENDATIONS                                  |
+|  [i] Overall neurological risk is low            |
+|  [!] Consider cardiology assessment              |
+|  [i] Schedule follow-up in 12 months             |
++--------------------------------------------------+
+```
 
 ---
 
-## Demo Script
+## 7. Risk Categories
 
-For the hackathon video, demonstrate:
-
-1. "Now let's see the power of multi-modal fusion"
-2. Show completed assessments: Speech, Retinal, Cognitive
-3. "Our NRI algorithm combines these into a unified risk score"
-4. Show the circular gauge animating to final score
-5. "Notice how each modality contributes to the overall risk"
-6. Point to contribution breakdown chart
-7. "Even with motor assessment pending, we can provide an initial risk assessment"
-8. Show recommendations section
-9. "This unified view is what makes NeuraLens unique"
+| Score | Category | Color | Action | Timeline |
+|-------|----------|-------|--------|----------|
+| 0-25 | Low | Green | Routine monitoring | 12 months |
+| 25-50 | Moderate | Yellow | Enhanced surveillance | 6 months |
+| 50-75 | High | Orange | Specialist referral | 1 month |
+| 75-100 | Critical | Red | Urgent intervention | Immediate |
 
 ---
 
-## Estimated Time
+## 8. Implementation Checklist
 
-| Task | Hours |
-|------|-------|
-| Weight calibration | 2.0 |
-| Missing modality handling | 1.5 |
-| Confidence intervals | 1.0 |
-| Risk categorization | 1.0 |
-| Frontend visualization | 2.0 |
-| Testing | 1.0 |
-| **Total** | **8.5 hours** |
+### Backend
+- [ ] Input validation (scores 0-100, confidence 0-1)
+- [ ] Weighted fusion calculation
+- [ ] Confidence estimation
+- [ ] Risk categorization
+- [ ] Contribution breakdown
+- [ ] Missing modality handling
+- [ ] Trend analysis (if historical data)
+- [ ] Recommendation generation
+- [ ] Clinical summary generation
+
+### Frontend
+- [ ] NRI gauge component
+- [ ] Radar chart (Recharts or Chart.js)
+- [ ] Contribution bar chart
+- [ ] Risk category badge
+- [ ] Missing modality indicators
+- [ ] Trend line chart (if historical)
+- [ ] Recommendations list
+- [ ] Export/share functionality
+
+---
+
+## 9. Clinical References
+
+1. Van Horn et al. (2014) - "Multimodal neuroimaging markers of cognitive decline"
+2. Jiang et al. (2021) - "Multi-modal machine learning for early detection of cognitive impairment"
+3. Weiner et al. (2013) - "The Alzheimer's Disease Neuroimaging Initiative"
+
+---
+
+## 10. Files
+
+```
+app/pipelines/nri/
+├── __init__.py
+├── router.py           # FastAPI endpoints
+├── analyzer.py         # NRICalculator implementation
+└── recommendations.py  # Recommendation generation
+```
