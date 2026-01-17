@@ -1,186 +1,232 @@
 """
-Pydantic schemas for assessment requests and responses
-Type-safe API contracts for multi-modal assessment
+MediLens Speech Analysis Response Schemas
+Defines Pydantic models for speech analysis API responses
 """
 
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List, Dict, Any, Union
+from pydantic import BaseModel, Field
+from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
-import uuid
 
 
-# Base schemas
-class BaseAssessmentRequest(BaseModel):
-    """Base class for all assessment requests"""
-    session_id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    user_id: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = {}
+class BiomarkerResult(BaseModel):
+    """Individual biomarker result with clinical metadata"""
+    value: float = Field(..., description="Biomarker value")
+    unit: str = Field(..., description="Unit of measurement")
+    normal_range: Tuple[float, float] = Field(..., description="Normal range [min, max]")
+    is_estimated: bool = Field(False, description="Whether the value is estimated")
+    confidence: Optional[float] = Field(None, description="Confidence in the measurement")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "value": 0.025,
+                "unit": "ratio",
+                "normal_range": [0.01, 0.04],
+                "is_estimated": False,
+                "confidence": 0.95
+            }
+        }
 
 
-class BaseAssessmentResponse(BaseModel):
-    """Base class for all assessment responses"""
+class EnhancedBiomarkers(BaseModel):
+    """All 9 clinically-validated voice biomarkers"""
+    jitter: BiomarkerResult = Field(..., description="Fundamental frequency variation")
+    shimmer: BiomarkerResult = Field(..., description="Amplitude variation")
+    hnr: BiomarkerResult = Field(..., description="Harmonics-to-Noise Ratio")
+    speech_rate: BiomarkerResult = Field(..., description="Syllables per second")
+    pause_ratio: BiomarkerResult = Field(..., description="Proportion of silence")
+    fluency_score: BiomarkerResult = Field(..., description="Speech fluency measure")
+    voice_tremor: BiomarkerResult = Field(..., description="Tremor intensity")
+    articulation_clarity: BiomarkerResult = Field(..., description="Articulation clarity")
+    prosody_variation: BiomarkerResult = Field(..., description="Prosodic richness")
+
+
+class FileInfo(BaseModel):
+    """Audio file information"""
+    filename: Optional[str] = None
+    size: Optional[int] = None
+    content_type: Optional[str] = None
+    duration: Optional[float] = None
+    sample_rate: Optional[int] = None
+    resampled: bool = False
+
+
+class BaselineComparison(BaseModel):
+    """Baseline comparison for tracking changes"""
+    biomarker_name: str
+    current_value: float
+    baseline_value: float
+    delta: float
+    delta_percent: float
+    direction: str = Field(..., pattern="^(improved|worsened|stable)$")
+
+
+class EnhancedSpeechAnalysisResponse(BaseModel):
+    """Complete speech analysis response matching frontend expectations"""
+    session_id: str = Field(..., description="Unique session identifier")
+    processing_time: float = Field(..., description="Processing time in seconds")
+    timestamp: str = Field(..., description="ISO timestamp")
+    confidence: float = Field(..., ge=0, le=1, description="Overall confidence")
+    risk_score: float = Field(..., ge=0, le=1, description="Risk score 0-1")
+    quality_score: float = Field(..., ge=0, le=1, description="Audio quality score")
+    biomarkers: EnhancedBiomarkers = Field(..., description="9 voice biomarkers")
+    file_info: Optional[FileInfo] = None
+    recommendations: List[str] = Field(default_factory=list)
+    baseline_comparisons: Optional[List[BaselineComparison]] = None
+    status: str = Field("completed", pattern="^(completed|partial|error)$")
+    error_message: Optional[str] = None
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "session_id": "speech_1705500000000",
+                "processing_time": 2.34,
+                "timestamp": "2026-01-17T15:00:00Z",
+                "confidence": 0.87,
+                "risk_score": 0.28,
+                "quality_score": 0.92,
+                "status": "completed"
+            }
+        }
+
+
+# Legacy compatibility aliases
+class SpeechBiomarkers(BaseModel):
+    """Legacy biomarkers model for analyzer compatibility"""
+    fluency_score: float = Field(0.7, ge=0, le=1)
+    pause_pattern: float = Field(0.3, ge=0, le=1)
+    voice_tremor: float = Field(0.1, ge=0, le=1)
+    articulation_clarity: float = Field(0.7, ge=0, le=1)
+    prosody_variation: float = Field(0.5, ge=0, le=1)
+    speaking_rate: float = Field(4.5, ge=0.5, le=10)
+    pause_frequency: float = Field(0.3, ge=0, le=1)
+
+    def to_enhanced(self) -> EnhancedBiomarkers:
+        """Convert legacy biomarkers to enhanced format with normal ranges"""
+        return EnhancedBiomarkers(
+            jitter=BiomarkerResult(
+                value=0.02, unit="ratio", normal_range=(0.01, 0.04),
+                is_estimated=True, confidence=None
+            ),
+            shimmer=BiomarkerResult(
+                value=0.04, unit="ratio", normal_range=(0.02, 0.06),
+                is_estimated=True, confidence=None
+            ),
+            hnr=BiomarkerResult(
+                value=18.0, unit="dB", normal_range=(15.0, 25.0),
+                is_estimated=True, confidence=None
+            ),
+            speech_rate=BiomarkerResult(
+                value=self.speaking_rate, unit="syll/s", normal_range=(3.5, 5.5),
+                is_estimated=False, confidence=0.85
+            ),
+            pause_ratio=BiomarkerResult(
+                value=self.pause_pattern, unit="ratio", normal_range=(0.10, 0.25),
+                is_estimated=False, confidence=0.85
+            ),
+            fluency_score=BiomarkerResult(
+                value=self.fluency_score, unit="score", normal_range=(0.75, 1.0),
+                is_estimated=False, confidence=0.9
+            ),
+            voice_tremor=BiomarkerResult(
+                value=self.voice_tremor, unit="score", normal_range=(0.0, 0.10),
+                is_estimated=False, confidence=0.85
+            ),
+            articulation_clarity=BiomarkerResult(
+                value=self.articulation_clarity, unit="score", normal_range=(0.80, 1.0),
+                is_estimated=False, confidence=0.85
+            ),
+            prosody_variation=BiomarkerResult(
+                value=self.prosody_variation, unit="score", normal_range=(0.40, 0.70),
+                is_estimated=False, confidence=0.85
+            )
+        )
+
+
+class SpeechAnalysisResponse(BaseModel):
+    """Legacy response model for analyzer compatibility"""
     session_id: str
     processing_time: float
     timestamp: datetime
-    confidence: float = Field(ge=0.0, le=1.0)
-    status: str = "completed"
-    error_message: Optional[str] = None
-
-
-# Speech Analysis Schemas
-class SpeechAnalysisRequest(BaseAssessmentRequest):
-    """Request schema for speech analysis"""
-    audio_format: Optional[str] = None
-    duration: Optional[float] = None
-    sample_rate: Optional[int] = None
-    language: str = "en"
-
-    @validator('language')
-    def validate_language(cls, v):
-        supported_languages = ['en', 'es', 'fr', 'de']
-        if v not in supported_languages:
-            raise ValueError(f'Language must be one of {supported_languages}')
-        return v
-
-
-class SpeechBiomarkers(BaseModel):
-    """Speech biomarker measurements"""
-    fluency_score: float = Field(ge=0.0, le=1.0, description="Speech fluency and rhythm")
-    pause_pattern: float = Field(ge=0.0, le=1.0, description="Pause frequency and duration")
-    voice_tremor: float = Field(ge=0.0, le=1.0, description="Voice tremor detection")
-    articulation_clarity: float = Field(ge=0.0, le=1.0, description="Speech clarity")
-    prosody_variation: float = Field(ge=0.0, le=1.0, description="Prosodic variation")
-    speaking_rate: float = Field(gt=0.0, description="Words per minute")
-    pause_frequency: float = Field(ge=0.0, description="Pauses per minute")
-
-
-class SpeechAnalysisResponse(BaseAssessmentResponse):
-    """Response schema for speech analysis"""
+    confidence: float
     biomarkers: SpeechBiomarkers
-    risk_score: float = Field(ge=0.0, le=1.0)
-    quality_score: float = Field(ge=0.0, le=1.0, description="Audio quality assessment")
-    file_info: Optional[Dict[str, Any]] = None
-    recommendations: List[str] = []
+    risk_score: float
+    quality_score: float
+    recommendations: List[str] = Field(default_factory=list)
+
+    def to_enhanced(
+        self,
+        file_info: Optional[FileInfo] = None
+    ) -> EnhancedSpeechAnalysisResponse:
+        """Convert legacy response to enhanced format"""
+        return EnhancedSpeechAnalysisResponse(
+            session_id=self.session_id,
+            processing_time=self.processing_time,
+            timestamp=self.timestamp.isoformat(),
+            confidence=self.confidence,
+            risk_score=self.risk_score,
+            quality_score=self.quality_score,
+            biomarkers=self.biomarkers.to_enhanced(),
+            file_info=file_info,
+            recommendations=self.recommendations,
+            status="completed"
+        )
 
 
-# Retinal Analysis Schemas
-class RetinalAnalysisRequest(BaseAssessmentRequest):
-    """Request schema for retinal analysis"""
-    image_format: Optional[str] = None
-    image_size: Optional[tuple] = None
-    eye: str = Field(default="unknown", pattern="^(left|right|unknown)$")
-
-    @validator('eye')
-    def validate_eye(cls, v):
-        if v not in ['left', 'right', 'unknown']:
-            raise ValueError('Eye must be left, right, or unknown')
-        return v
-
-
-class RetinalBiomarkers(BaseModel):
-    """Retinal biomarker measurements"""
-    vessel_tortuosity: float = Field(ge=0.0, le=1.0, description="Vessel tortuosity index")
-    av_ratio: float = Field(gt=0.0, description="Arteriovenous ratio")
-    cup_disc_ratio: float = Field(ge=0.0, le=1.0, description="Cup-to-disc ratio")
-    vessel_density: float = Field(ge=0.0, le=1.0, description="Vessel density")
-
-
-class RetinalAnalysisResponse(BaseAssessmentResponse):
-    """Response schema for retinal analysis"""
-    biomarkers: RetinalBiomarkers
-    risk_score: float = Field(ge=0.0, le=1.0)
-    quality_score: float = Field(ge=0.0, le=1.0, description="Image quality assessment")
-    image_info: Optional[Dict[str, Any]] = None
-    detected_conditions: List[str] = []
-    recommendations: List[str] = []
-
-
-# Motor Assessment Schemas
-class MotorAssessmentRequest(BaseAssessmentRequest):
-    """Request schema for motor assessment"""
-    assessment_type: str = Field(pattern="^(finger_tapping|hand_movement|tremor|gait)$")
-    sensor_data: Dict[str, Any] = Field(description="Sensor data from accelerometer and gyroscope")
-    duration: Optional[float] = None
-    device_info: Optional[Dict[str, Any]] = None
-
-
-class MotorBiomarkers(BaseModel):
-    """Motor biomarker measurements"""
-    movement_frequency: float = Field(ge=0.0, description="Movement frequency (Hz)")
-    amplitude_variation: float = Field(ge=0.0, le=1.0, description="Amplitude variation")
-    coordination_index: float = Field(ge=0.0, le=1.0, description="Motor coordination index")
-    tremor_severity: float = Field(ge=0.0, le=1.0, description="Tremor severity")
-    fatigue_index: float = Field(ge=0.0, le=1.0, description="Motor fatigue index")
-    asymmetry_score: float = Field(ge=0.0, le=1.0, description="Movement asymmetry")
-
-
-class MotorAssessmentResponse(BaseAssessmentResponse):
-    """Response schema for motor assessment"""
-    biomarkers: MotorBiomarkers
-    risk_score: float = Field(ge=0.0, le=1.0)
-    assessment_type: str
-    movement_quality: str = Field(pattern="^(excellent|good|fair|poor)$")
-    recommendations: List[str] = []
-
-
-# Cognitive Assessment Schemas
-class CognitiveAssessmentRequest(BaseAssessmentRequest):
-    """Request schema for cognitive assessment"""
-    test_battery: List[str] = ["memory", "attention", "executive", "language"]
-    test_results: Dict[str, Any] = Field(description="Test results for each cognitive domain")
-    difficulty_level: str = Field(default="standard", pattern="^(easy|standard|hard)$")
-
-
-class CognitiveBiomarkers(BaseModel):
-    """Cognitive biomarker measurements"""
-    memory_score: float = Field(ge=0.0, le=1.0, description="Memory performance")
-    attention_score: float = Field(ge=0.0, le=1.0, description="Attention performance")
-    executive_score: float = Field(ge=0.0, le=1.0, description="Executive function")
-    language_score: float = Field(ge=0.0, le=1.0, description="Language abilities")
-    processing_speed: float = Field(ge=0.0, le=1.0, description="Processing speed index")
-    cognitive_flexibility: float = Field(ge=0.0, le=1.0, description="Cognitive flexibility")
-
-
-class CognitiveAssessmentResponse(BaseAssessmentResponse):
-    """Response schema for cognitive assessment"""
-    biomarkers: CognitiveBiomarkers
-    risk_score: float = Field(ge=0.0, le=1.0)
-    overall_score: float = Field(ge=0.0, le=1.0)
-    cognitive_age: Optional[float] = None
-    recommendations: List[str] = []
-
-
-# NRI Fusion Schemas
+# Additional schemas for other pipelines (stubs for import compatibility)
 class NRIFusionRequest(BaseModel):
-    """Request schema for NRI fusion"""
-    session_id: str
-    modalities: List[str] = Field(min_items=1)
-    modality_scores: Dict[str, float] = Field(description="Risk scores from each modality (0.0-1.0)")
-    modality_confidences: Optional[Dict[str, float]] = Field(default=None, description="Confidence scores for each modality")
-    user_profile: Optional[Dict[str, Any]] = {}
-    fusion_method: str = Field(default="bayesian", pattern="^(bayesian|weighted|ensemble)$")
-
-
-class ModalityContribution(BaseModel):
-    """Individual modality contribution to NRI"""
-    modality: str
-    risk_score: float = Field(ge=0.0, le=1.0)
-    confidence: float = Field(ge=0.0, le=1.0)
-    weight: float = Field(ge=0.0, le=1.0)
-    contribution: float = Field(ge=0.0, le=1.0, description="Relative contribution to final NRI")
+    """NRI Fusion request"""
+    session_id: Optional[str] = None
+    modalities: List[str] = []
 
 
 class NRIFusionResponse(BaseModel):
-    """Response schema for NRI fusion"""
+    """NRI Fusion response"""
     session_id: str
-    nri_score: float = Field(ge=0.0, le=100.0, description="Neurological Risk Index (0-100)")
-    confidence: float = Field(ge=0.0, le=1.0)
-    risk_category: str = Field(pattern="^(low|moderate|high|very_high)$")
-    modality_contributions: List[ModalityContribution]
-    consistency_score: float = Field(ge=0.0, le=1.0, description="Cross-modal consistency")
-    uncertainty: float = Field(ge=0.0, le=1.0, description="Prediction uncertainty")
-    processing_time: float
-    timestamp: datetime
-    recommendations: List[str] = []
-    follow_up_actions: List[str] = []
+    risk_score: float
+    confidence: float
+
+
+class ModalityContribution(BaseModel):
+    """Modality contribution to NRI"""
+    modality: str
+    weight: float
+    score: float
+
+
+class MotorAssessmentRequest(BaseModel):
+    """Motor assessment request"""
+    session_id: Optional[str] = None
+
+
+class MotorAssessmentResponse(BaseModel):
+    """Motor assessment response"""
+    session_id: str
+    risk_score: float
+    confidence: float
+
+
+class MotorBiomarkers(BaseModel):
+    """Motor biomarkers"""
+    tremor: float = 0.0
+    bradykinesia: float = 0.0
+    rigidity: float = 0.0
+
+
+class CognitiveAssessmentRequest(BaseModel):
+    """Cognitive assessment request"""
+    session_id: Optional[str] = None
+
+
+class CognitiveAssessmentResponse(BaseModel):
+    """Cognitive assessment response"""
+    session_id: str
+    risk_score: float
+    confidence: float
+
+
+class CognitiveBiomarkers(BaseModel):
+    """Cognitive biomarkers"""
+    attention: float = 0.0
+    memory: float = 0.0
+    executive_function: float = 0.0

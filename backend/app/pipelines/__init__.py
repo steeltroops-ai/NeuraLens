@@ -1,9 +1,4 @@
 """
-MediLens Diagnostic Pipelines
-Exports routers for all diagnostic modules
+MediLens Pipelines
+Each pipeline is independent and self-contained
 """
-
-from app.api.v1.endpoints import speech
-
-# Export routers for API integration
-__all__ = ['speech']

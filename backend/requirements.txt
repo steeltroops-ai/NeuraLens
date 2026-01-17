@@ -1,46 +1,63 @@
-# Core FastAPI Dependencies
-fastapi>=0.116.1
-uvicorn>=0.35.0
-pydantic>=2.10.0
-pydantic-settings>=2.7.0
+# =============================================
+# MediLens Backend - Core Dependencies
+# =============================================
 
-# Database - Neon PostgreSQL
-sqlalchemy>=2.0.43
-alembic>=1.14.0
-asyncpg>=0.30.0
-psycopg2-binary>=2.9.9
+# FastAPI Framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+
+# Database
+sqlalchemy>=2.0.0
 aiosqlite>=0.19.0
+asyncpg>=0.29.0
 
-# Essential ML Libraries
-numpy>=2.3.2
-pillow>=11.0.0
-scikit-learn>=1.6.0
+# =============================================
+# ML Core (Required for all pipelines)
+# =============================================
+numpy>=1.24.0
+scipy>=1.11.0
+pillow>=10.0.0
 
-# Deep Learning (for retinal analysis with EfficientNet)
+# =============================================
+# Pipeline-Specific Dependencies
+# =============================================
+
+# Speech Pipeline
+parselmouth>=0.4.3
+librosa>=0.10.2
+soundfile>=0.12.1
+
+# Cardiology Pipeline
+heartpy>=1.2.7
+neurokit2>=0.2.0
+
+# Retinal/Radiology Pipeline
 torch>=2.0.0
 torchvision>=0.15.0
 timm>=0.9.0
+torchxrayvision>=1.0.0
+pytorch-grad-cam>=1.4.0
+opencv-python>=4.8.0
 
-# Audio Processing (for speech analysis) - Python 3.13 compatible
-librosa>=0.10.2
-soundfile>=0.12.1
-numba>=0.60.0
-scipy>=1.11.0
-webrtcvad>=2.0.10
+# Voice Output
+elevenlabs>=0.2.0
+gtts>=2.4.0
 
-# NLP and Speech Models
-transformers>=4.35.0
-torchaudio>=2.0.0
+# AI Explanation (Cerebras Llama 3.3 70B)
+cerebras-cloud-sdk>=0.1.0
 
-# Additional ML utilities
-python-multipart>=0.0.6
+# =============================================
+# Optional (Install if needed)
+# =============================================
+# openai-whisper>=20231117   # Speech-to-text (large download)
+# transformers>=4.35.0       # HuggingFace models
+# openai>=1.0.0              # OpenAI TTS fallback
 
-# Computer Vision (for retinal analysis)
-opencv-python>=4.8.1.78
-scikit-image>=0.21.0
-
-# Testing
+# =============================================
+# Dev/Testing
+# =============================================
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
-hypothesis>=6.100.0
-reportlab>=4.0.0

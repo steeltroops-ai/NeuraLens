@@ -1,4 +1,4 @@
-from
-.router
-import
-router
+"""MediLens Motor Pipeline"""
+from .router import router
+
+__all__ = ["router"]
