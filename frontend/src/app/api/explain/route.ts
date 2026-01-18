@@ -22,11 +22,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Forward to FastAPI backend with timeout
-        const backendUrl = `${BACKEND_URL}/api/explain`;
-        console.log('[API] Forwarding to backend:', backendUrl);
+        // Using /sync endpoint because Cerebras streaming returns 503 errors
+        const backendUrl = `${BACKEND_URL}/api/explain/sync`;
+        console.log('[API] Forwarding to backend (sync):', backendUrl);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for sync
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -62,30 +63,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Stream the response back
-        const reader = response.body?.getReader();
-        if (!reader) {
-            throw new Error('No response body from backend');
+        // Parse sync response and convert to streaming format for frontend compatibility
+        const data = await response.json();
+        const explanation = data.explanation || generateMockExplanation(pipeline, results);
+        const audioBase64 = data.audio_base64;
+
+        // Build streaming response from sync data
+        let streamData = `data: ${JSON.stringify({ text: explanation })}\n\n`;
+        if (audioBase64) {
+            streamData += `data: ${JSON.stringify({ audio_base64: audioBase64 })}\n\n`;
         }
+        streamData += `data: ${JSON.stringify({ done: true, total_length: explanation.length })}\n\n`;
 
-        const stream = new ReadableStream({
-            async start(controller) {
-                const encoder = new TextEncoder();
-                try {
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        controller.enqueue(value);
-                    }
-                } catch (error) {
-                    console.error('Stream error:', error);
-                } finally {
-                    controller.close();
-                }
-            }
-        });
-
-        return new Response(stream, {
+        return new Response(streamData, {
             headers: {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
