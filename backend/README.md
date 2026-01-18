@@ -1,5 +1,5 @@
 ---
-title: MediLens Backend API
+title: medilens
 emoji: "\U0001FA7A"
 colorFrom: indigo
 colorTo: purple
