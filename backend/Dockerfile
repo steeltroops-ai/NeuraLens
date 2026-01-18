@@ -22,9 +22,11 @@ COPY requirements.txt .
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install dependencies with pip
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Upgrade pip, setuptools, wheel first (fixes use_2to3 errors)
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Production stage
 FROM python:3.11-slim as production
