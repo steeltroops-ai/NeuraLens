@@ -328,7 +328,7 @@ export default function RetinalAnalysisPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const addLog = useCallback((message: string) => {
-        const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+        const timestamp = new Date().toISOString().split('T')[1]?.split('.')[0] ?? '';
         const logEntry = `[${timestamp}] ${message}`;
         console.log(`[RETINAL] ${message}`);
         setLogs(prev => [...prev.slice(-20), logEntry]);
@@ -651,15 +651,14 @@ export default function RetinalAnalysisPage() {
 
                                 {/* AI Explanation */}
                                 <ExplanationPanel
-                                    data={{
+                                    pipeline="retinal"
+                                    results={{
                                         diabetic_retinopathy: results.diabetic_retinopathy,
                                         risk_assessment: results.risk_assessment,
                                         biomarkers: results.biomarkers,
                                         findings: results.findings,
                                         recommendations: results.recommendations,
                                     }}
-                                    pipelineType="retinal"
-                                    autoTrigger={false}
                                 />
                             </div>
                         </div>
