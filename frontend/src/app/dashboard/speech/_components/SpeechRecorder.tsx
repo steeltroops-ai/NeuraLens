@@ -126,7 +126,8 @@ export const SpeechRecorder: React.FC<SpeechRecorderProps> = ({
         // Convert Float32 samples to Int16
         let offset = 44;
         for (let i = 0; i < samples.length; i++) {
-            const s = Math.max(-1, Math.min(1, samples[i]));
+            const sample = samples[i] ?? 0;
+            const s = Math.max(-1, Math.min(1, sample));
             const val = s < 0 ? s * 0x8000 : s * 0x7fff;
             view.setInt16(offset, val, true);
             offset += 2;
@@ -151,7 +152,7 @@ export const SpeechRecorder: React.FC<SpeechRecorderProps> = ({
             const srcIndexCeil = Math.min(srcIndexFloor + 1, buffer.length - 1);
             const t = srcIndex - srcIndexFloor;
             
-            result[i] = buffer[srcIndexFloor] * (1 - t) + buffer[srcIndexCeil] * t;
+            result[i] = (buffer[srcIndexFloor] ?? 0) * (1 - t) + (buffer[srcIndexCeil] ?? 0) * t;
         }
         
         return result;
@@ -322,7 +323,7 @@ export const SpeechRecorder: React.FC<SpeechRecorderProps> = ({
         const validTypes = ['audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a', 'audio/ogg', 'audio/webm'];
         const validExtensions = ['.wav', '.mp3', '.m4a', '.ogg', '.webm'];
         
-        const hasValidType = validTypes.some(t => file.type.includes(t.split('/')[1]));
+        const hasValidType = validTypes.some(t => file.type.includes(t.split('/')[1] ?? ''));
         const hasValidExt = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
         
         if (hasValidType || hasValidExt || file.type.startsWith('audio/')) {
