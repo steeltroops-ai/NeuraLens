@@ -87,6 +87,11 @@ jobs:
           find . -type f -name "*.pyc" -delete 2>/dev/null || true
           rm -rf tests/ test_*.py
           
+          # Remove binary files (HF rejects these)
+          rm -rf data/
+          rm -f *.mp3 *.wav *.bin *.pt *.pth *.onnx
+          find . -type f \( -name "*.wav" -o -name "*.mp3" -o -name "*.bin" \) -delete 2>/dev/null || true
+          
           echo "=== Deployment files ==="
           ls -la
 
