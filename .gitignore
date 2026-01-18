@@ -80,3 +80,20 @@ pnpm-lock.yaml
 # ===================
 backend/demo_data/
 backend/data/samples/
+backend/assets/test_data/
+backend/assets/models/
+
+# ===================
+# Binary Files (Large)
+# ===================
+*.wav
+*.mp3
+*.mp4
+*.avi
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+*.h5
+*.pkl
