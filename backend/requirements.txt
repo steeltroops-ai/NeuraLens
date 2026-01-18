@@ -44,7 +44,6 @@ opencv-python-headless>=4.8.0
 
 # Voice Output
 elevenlabs>=0.2.0
-gtts>=2.4.0
 
 # AI Explanation (Cerebras Llama 3.3 70B)
 cerebras-cloud-sdk>=0.1.0
