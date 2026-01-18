@@ -73,6 +73,13 @@ try:
 except Exception as e:
     print(f"[SKIP] Explain: {e}")
 
+try:
+    from app.pipelines.chatbot.router import router as chatbot
+    router.include_router(chatbot, prefix="/chatbot", tags=["Medical Chatbot"])
+    pipelines["chatbot"] = True
+except Exception as e:
+    print(f"[SKIP] Chatbot: {e}")
+
 
 @router.get("/")
 async def api_info():

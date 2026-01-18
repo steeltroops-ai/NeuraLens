@@ -238,22 +238,43 @@ Explain this multi-modal assessment."""
 
 
 async def generate_voice(text: str, provider: str = "elevenlabs") -> Optional[str]:
-    """Generate voice audio from text"""
+    """Generate voice audio from text using ElevenLabs or fallback providers"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Clean text for TTS (remove markdown)
+    clean_text = text.replace('**', '').replace('##', '').replace('###', '').replace('*', '')
+    clean_text = clean_text[:3000]  # Limit text length
     
     if provider == "elevenlabs":
         try:
-            from elevenlabs import generate, set_api_key
+            from elevenlabs import ElevenLabs
+            
             api_key = os.environ.get("ELEVENLABS_API_KEY")
-            if api_key:
-                set_api_key(api_key)
-                audio = generate(
-                    text=text[:2500],  # Limit text length
-                    voice="Rachel",
-                    model="eleven_multilingual_v2"
-                )
-                return base64.b64encode(audio).decode()
+            if not api_key:
+                logger.warning("ELEVENLABS_API_KEY not set")
+                raise Exception("API key not configured")
+            
+            client = ElevenLabs(api_key=api_key)
+            
+            # Generate audio using the new API
+            audio_generator = client.text_to_speech.convert(
+                voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice
+                text=clean_text,
+                model_id="eleven_multilingual_v2",
+                output_format="mp3_44100_128"
+            )
+            
+            # Convert generator to bytes
+            audio_bytes = b"".join(audio_generator)
+            
+            logger.info(f"ElevenLabs TTS generated {len(audio_bytes)} bytes")
+            return base64.b64encode(audio_bytes).decode()
+            
+        except ImportError as e:
+            logger.error(f"ElevenLabs import failed: {e}")
         except Exception as e:
-            print(f"ElevenLabs failed: {e}")
+            logger.error(f"ElevenLabs TTS failed: {e}")
     
     elif provider == "openai":
         try:
@@ -262,25 +283,28 @@ async def generate_voice(text: str, provider: str = "elevenlabs") -> Optional[st
             response = client.audio.speech.create(
                 model="tts-1",
                 voice="nova",
-                input=text[:4000]
+                input=clean_text[:4000]
             )
             return base64.b64encode(response.content).decode()
         except Exception as e:
-            print(f"OpenAI TTS failed: {e}")
+            logger.error(f"OpenAI TTS failed: {e}")
     
-    # Fallback to gTTS
+    # Fallback to gTTS (free, slower)
     try:
         from gtts import gTTS
         import io
-        tts = gTTS(text=text[:3000], lang='en')
+        logger.info("Falling back to gTTS")
+        tts = gTTS(text=clean_text[:3000], lang='en')
         buffer = io.BytesIO()
         tts.write_to_fp(buffer)
         buffer.seek(0)
         return base64.b64encode(buffer.read()).decode()
     except Exception as e:
-        print(f"gTTS failed: {e}")
+        logger.error(f"gTTS fallback failed: {e}")
     
     return None
+
+
 
 
 @router.post("")

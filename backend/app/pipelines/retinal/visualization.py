@@ -18,14 +18,23 @@ Author: NeuraLens Team
 import io
 import logging
 import numpy as np
-import cv2
 from PIL import Image, ImageDraw, ImageFont
 from typing import Tuple, Optional, List, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
 import base64
 
+# Graceful cv2 import with fallback
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    cv2 = None
+
 logger = logging.getLogger(__name__)
+
+
 
 
 class ColorPalette:
@@ -159,7 +168,7 @@ class RetinalVisualizationService:
         self,
         original_image: np.ndarray,
         attention_map: np.ndarray,
-        colormap: int = cv2.COLORMAP_JET
+        colormap: Optional[int] = None
     ) -> np.ndarray:
         """
         Generate attention heatmap overlay.
@@ -168,18 +177,22 @@ class RetinalVisualizationService:
         Requirement 6.3: Use blue-to-red gradient
         
         Args:
-            original_image: Original fundus image (BGR)
+            original_image: Original fundus image (RGB or BGR)
             attention_map: Attention/activation map (0-1 float or 0-255 uint8)
-            colormap: OpenCV colormap to use
+            colormap: OpenCV colormap to use (ignored if cv2 not available)
             
         Returns:
-            Image with heatmap overlay (BGR)
+            Image with heatmap overlay
         """
         # Normalize attention map
         if attention_map.dtype != np.uint8:
             attention_normalized = (attention_map * 255).astype(np.uint8)
         else:
             attention_normalized = attention_map
+        
+        # Use PIL-based fallback if cv2 not available
+        if not CV2_AVAILABLE:
+            return self._generate_heatmap_pil(original_image, attention_normalized)
         
         # Resize if needed
         if attention_normalized.shape[:2] != original_image.shape[:2]:
@@ -189,7 +202,7 @@ class RetinalVisualizationService:
             )
         
         # Apply colormap (blue to red gradient)
-        heatmap_colored = cv2.applyColorMap(attention_normalized, colormap)
+        heatmap_colored = cv2.applyColorMap(attention_normalized, cv2.COLORMAP_JET)
         
         # Blend with original
         result = cv2.addWeighted(
@@ -201,6 +214,42 @@ class RetinalVisualizationService:
         )
         
         return result
+    
+    def _generate_heatmap_pil(
+        self,
+        original_image: np.ndarray,
+        attention_normalized: np.ndarray
+    ) -> np.ndarray:
+        """PIL-based heatmap generation fallback"""
+        h, w = original_image.shape[:2]
+        
+        # Resize attention map if needed
+        if attention_normalized.shape[:2] != (h, w):
+            att_img = Image.fromarray(attention_normalized)
+            att_img = att_img.resize((w, h), Image.BILINEAR)
+            attention_normalized = np.array(att_img)
+        
+        # Create JET colormap manually
+        heatmap = np.zeros((h, w, 3), dtype=np.uint8)
+        for i in range(h):
+            for j in range(w):
+                v = attention_normalized[i, j] / 255.0
+                if v < 0.25:
+                    r, g, b = 0, int(4 * v * 255), 255
+                elif v < 0.5:
+                    r, g, b = 0, 255, int((1 - 4 * (v - 0.25)) * 255)
+                elif v < 0.75:
+                    r, g, b = int(4 * (v - 0.5) * 255), 255, 0
+                else:
+                    r, g, b = 255, int((1 - 4 * (v - 0.75)) * 255), 0
+                heatmap[i, j] = [r, g, b]
+        
+        # Blend with original
+        alpha = self.config.heatmap_opacity
+        result = ((1 - alpha) * original_image + alpha * heatmap).astype(np.uint8)
+        
+        return result
+    
     
     def generate_measurement_overlay(
         self,
@@ -559,14 +608,18 @@ class RetinalVisualizationService:
         return img
     
     def image_to_base64(self, image: np.ndarray, format: str = "PNG") -> str:
-        """Convert OpenCV image to base64 string for embedding in responses."""
-        # Convert BGR to RGB for PIL
+        """Convert image to base64 string for embedding in responses."""
+        # Convert BGR to RGB for PIL (if using cv2 arrays)
         if len(image.shape) == 3:
-            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            if CV2_AVAILABLE:
+                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            else:
+                # Assume already RGB or just use as-is
+                image_rgb = image
         else:
             image_rgb = image
         
-        pil_image = Image.fromarray(image_rgb)
+        pil_image = Image.fromarray(image_rgb.astype(np.uint8))
         
         buffer = io.BytesIO()
         pil_image.save(buffer, format=format)
@@ -575,10 +628,18 @@ class RetinalVisualizationService:
         return base64.b64encode(buffer.getvalue()).decode('utf-8')
     
     def image_to_bytes(self, image: np.ndarray, format: str = ".png") -> bytes:
-        """Convert OpenCV image to bytes."""
-        _, buffer = cv2.imencode(format, image)
-        return buffer.tobytes()
+        """Convert image to bytes."""
+        if CV2_AVAILABLE:
+            _, buffer = cv2.imencode(format, image)
+            return buffer.tobytes()
+        else:
+            # PIL fallback
+            pil_image = Image.fromarray(image.astype(np.uint8))
+            buffer = io.BytesIO()
+            pil_image.save(buffer, format="PNG")
+            return buffer.getvalue()
 
 
 # Singleton instance
 visualization_service = RetinalVisualizationService()
+

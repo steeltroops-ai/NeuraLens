@@ -5,7 +5,7 @@ Validates retinal fundus images for:
 - Format validation (JPEG, PNG, DICOM) - Requirement 1.1
 - Resolution validation (min 1024x1024) - Requirement 1.2
 - File size validation (100KB-50MB) - Requirement 1.4
-- SNR calculation and threshold (≥15dB) - Requirements 2.1, 2.2
+- SNR calculation and threshold (>=15dB) - Requirements 2.1, 2.2
 - Focus quality detection - Requirements 2.3, 2.4
 - Optic disc detection - Requirements 2.5, 2.6
 - Macula detection - Requirements 2.7, 2.8
@@ -19,14 +19,28 @@ import logging
 import io
 import numpy as np
 from PIL import Image
-import cv2
 from fastapi import UploadFile
 from typing import List, Tuple, Optional
 from dataclasses import dataclass, field
 
-from .schemas import ImageValidationResponse
+# Graceful cv2 import
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    cv2 = None
+
+# Import from schemas - using try/except for flexibility
+try:
+    from .schemas import ImageValidationResponse
+except ImportError:
+    # Fallback if schemas not available
+    ImageValidationResponse = None
 
 logger = logging.getLogger(__name__)
+
+
 
 
 @dataclass

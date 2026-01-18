@@ -1,529 +1,385 @@
 """
-Pydantic Schemas for Retinal Analysis Pipeline
+Pydantic Schemas for Retinal Analysis Pipeline v4.0
 
-Request and Response schemas for the retinal analysis API.
-Implements validation rules per Requirements 1.1-1.10, 3.1-3.12, 5.1-5.12
+Medical-Grade Data Structures with Scientific Accuracy.
+Implements: ETDRS standards, ICDR classification, peer-reviewed biomarker definitions.
 
-Author: NeuraLens Team
+Author: NeuraLens Medical AI Team
+Version: 4.0.0
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any, Literal
+from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
-
-# ============================================================================
-# Enums and Constants
-# ============================================================================
-
-class RiskCategory(str, Enum):
-    """Risk category enumeration per Requirements 5.2-5.7"""
-    MINIMAL = "minimal"      # 0-25, green
-    LOW = "low"              # 26-40, lime
-    MODERATE = "moderate"    # 41-55, yellow
-    ELEVATED = "elevated"    # 56-70, orange
-    HIGH = "high"            # 71-85, red
-    CRITICAL = "critical"    # 86-100, dark red
-
-
-class ImageFormat(str, Enum):
-    """Allowed image formats per Requirement 1.1"""
-    JPEG = "image/jpeg"
-    PNG = "image/png"
-    DICOM = "application/dicom"
-
-
-class AmyloidDistributionPattern(str, Enum):
-    """Amyloid-beta distribution patterns"""
-    NORMAL = "normal"
-    DIFFUSE = "diffuse"
-    FOCAL = "focal"
-    PERIVASCULAR = "perivascular"
-    MIXED = "mixed"
+from .constants import (
+    ClinicalConstants as CC,
+    DRGrade,
+    RiskCategory,
+    ICD10_CODES,
+    BIOMARKER_REFERENCES,
+)
 
 
 # ============================================================================
-# Request Schemas
+# PIPELINE STATE TRACKING
 # ============================================================================
 
-class RetinalAnalysisRequest(BaseModel):
+class PipelineStage(str, Enum):
+    """Pipeline execution stages"""
+    PENDING = "pending"
+    INPUT_VALIDATION = "input_validation"
+    IMAGE_PREPROCESSING = "image_preprocessing"
+    QUALITY_ASSESSMENT = "quality_assessment"
+    VESSEL_ANALYSIS = "vessel_analysis"
+    OPTIC_DISC_ANALYSIS = "optic_disc_analysis"
+    MACULAR_ANALYSIS = "macular_analysis"
+    LESION_DETECTION = "lesion_detection"
+    DR_GRADING = "dr_grading"
+    RISK_CALCULATION = "risk_calculation"
+    HEATMAP_GENERATION = "heatmap_generation"
+    CLINICAL_ASSESSMENT = "clinical_assessment"
+    OUTPUT_FORMATTING = "output_formatting"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class PipelineError(BaseModel):
+    """Structured error information"""
+    stage: str
+    error_type: str
+    message: str
+    details: Optional[Dict[str, Any]] = None
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+
+
+class PipelineState(BaseModel):
+    """Pipeline execution state tracking"""
+    session_id: str
+    current_stage: str = PipelineStage.PENDING
+    stages_completed: List[str] = Field(default_factory=list)
+    stages_timing_ms: Dict[str, float] = Field(default_factory=dict)
+    errors: List[PipelineError] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    started_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    completed_at: Optional[str] = None
+
+
+# ============================================================================
+# BIOMARKER SCHEMAS
+# ============================================================================
+
+class BiomarkerValue(BaseModel):
     """
-    Request schema for retinal image analysis.
+    Individual biomarker measurement with clinical context.
     
-    Requirements: 1.1, 1.2, 1.4
+    Includes:
+    - Measured value
+    - Reference range from literature
+    - Clinical status (normal/borderline/abnormal)
+    - Measurement confidence
+    - Scientific source citation
     """
-    patient_id: str = Field(
-        ...,
-        min_length=1,
-        max_length=255,
-        description="Unique patient identifier"
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Optional metadata for the analysis request"
-    )
-    
-    @field_validator('patient_id')
-    @classmethod
-    def validate_patient_id(cls, v: str) -> str:
-        """Ensure patient ID is properly formatted"""
-        if not v or not v.strip():
-            raise ValueError("Patient ID cannot be empty")
-        return v.strip()
+    value: float
+    normal_range: List[float] = Field(default_factory=list)
+    threshold: Optional[float] = None
+    status: str = "normal"  # normal, borderline, abnormal
+    measurement_confidence: float = Field(default=0.85, ge=0, le=1)
+    percentile: Optional[float] = None  # Population percentile
+    clinical_significance: Optional[str] = None
+    source: Optional[str] = None  # Literature citation
 
-
-class ImageValidationRequest(BaseModel):
-    """
-    Request schema for image validation without full analysis.
-    
-    Note: Image file is handled via UploadFile in FastAPI endpoints.
-    This schema is for metadata that may accompany validation requests.
-    """
-    check_anatomical_features: bool = Field(
-        default=True,
-        description="Whether to check for optic disc and macula visibility"
-    )
-    check_quality_metrics: bool = Field(
-        default=True,
-        description="Whether to calculate SNR and focus quality"
-    )
-
-
-# ============================================================================
-# Biomarker Response Schemas (Requirements 3.1-3.12)
-# ============================================================================
 
 class VesselBiomarkers(BaseModel):
     """
-    Vessel biomarker measurements.
+    Retinal Vessel Biomarkers
     
-    Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+    Sources:
+    - Wong et al. (2004) ARIC Study - AVR
+    - Grisan et al. (2008) - Tortuosity
+    - Liew et al. (2011) - Fractal dimension
     """
-    density_percentage: float = Field(
-        ...,
-        ge=0,
-        le=100,
-        description="Vessel density as percentage of retinal area (Req 3.2)"
-    )
-    tortuosity_index: float = Field(
-        ...,
-        ge=0,
-        le=10,
-        description="Vessel tortuosity index - deviation from straight paths (Req 3.3)"
-    )
-    avr_ratio: float = Field(
-        ...,
-        ge=0,
-        le=5,
-        description="Arteriovenous ratio (Req 3.5)"
-    )
-    branching_coefficient: float = Field(
-        ...,
-        ge=0,
-        le=5,
-        description="Vascular branching pattern coefficient (Req 3.9)"
-    )
-    confidence: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Confidence score for vessel measurements (Req 3.12)"
-    )
-    
-    # Reference ranges for healthy adults
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "density_percentage": 5.2,
-                "tortuosity_index": 1.1,
-                "avr_ratio": 0.65,
-                "branching_coefficient": 1.5,
-                "confidence": 0.92
-            }
-        }
+    tortuosity_index: BiomarkerValue
+    av_ratio: BiomarkerValue
+    vessel_density: BiomarkerValue
+    fractal_dimension: BiomarkerValue
+    branching_coefficient: BiomarkerValue
+    artery_caliber: Optional[BiomarkerValue] = None  # CRAE
+    vein_caliber: Optional[BiomarkerValue] = None    # CRVE
 
 
 class OpticDiscBiomarkers(BaseModel):
     """
-    Optic disc measurements.
+    Optic Disc Biomarkers
     
-    Requirements: 3.6, 3.7
+    Sources:
+    - Varma et al. (2012) - CDR
+    - Jonas et al. (2003) - Disc area
+    - Budenz et al. (2007) - RNFL
     """
-    cup_to_disc_ratio: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Cup-to-disc ratio (Req 3.6)"
-    )
-    disc_area_mm2: float = Field(
-        ...,
-        ge=0,
-        le=10,
-        description="Disc area in square millimeters (Req 3.7)"
-    )
-    rim_area_mm2: float = Field(
-        ...,
-        ge=0,
-        le=10,
-        description="Neuroretinal rim area in square millimeters"
-    )
-    confidence: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Confidence score for optic disc measurements (Req 3.12)"
-    )
-    
-    @model_validator(mode='after')
-    def validate_rim_less_than_disc(self):
-        """Rim area should not exceed disc area"""
-        if self.rim_area_mm2 > self.disc_area_mm2:
-            raise ValueError("Rim area cannot exceed disc area")
-        return self
+    cup_disc_ratio: BiomarkerValue
+    disc_area_mm2: BiomarkerValue
+    rim_area_mm2: BiomarkerValue
+    rnfl_thickness: BiomarkerValue
+    notching_detected: bool = False  # Focal rim thinning
 
 
 class MacularBiomarkers(BaseModel):
     """
-    Macular measurements.
+    Macular Biomarkers
     
-    Requirement: 3.8
+    Source: Macular Photocoagulation Study Group
     """
-    thickness_um: float = Field(
-        ...,
-        ge=0,
-        le=1000,
-        description="Macular thickness in micrometers (Req 3.8)"
-    )
-    volume_mm3: float = Field(
-        ...,
-        ge=0,
-        le=20,
-        description="Macular volume in cubic millimeters"
-    )
-    confidence: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Confidence score for macular measurements (Req 3.12)"
-    )
+    thickness: BiomarkerValue  # Central macular thickness
+    volume: BiomarkerValue     # Macular volume
+    foveal_avascular_zone: Optional[BiomarkerValue] = None  # FAZ area
 
 
-class AmyloidBetaIndicators(BaseModel):
+class LesionBiomarkers(BaseModel):
     """
-    Amyloid-beta indicator measurements.
+    Diabetic Retinopathy Lesion Counts
     
-    Requirement: 3.10
+    Source: ETDRS Research Group (1991)
     """
-    presence_score: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Amyloid-beta presence score (0=absent, 1=strong presence) (Req 3.10)"
-    )
-    distribution_pattern: str = Field(
-        ...,
-        description="Distribution pattern of amyloid-beta indicators"
-    )
-    confidence: float = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Confidence score for amyloid-beta detection (Req 3.12)"
-    )
-    
-    @field_validator('distribution_pattern')
-    @classmethod
-    def validate_distribution_pattern(cls, v: str) -> str:
-        """Validate distribution pattern is a known type"""
-        valid_patterns = {p.value for p in AmyloidDistributionPattern}
-        if v.lower() not in valid_patterns:
-            # Allow but normalize unknown patterns
-            return v.lower()
-        return v.lower()
+    hemorrhage_count: BiomarkerValue
+    microaneurysm_count: BiomarkerValue
+    exudate_area_percent: BiomarkerValue
+    cotton_wool_spots: int = 0
+    neovascularization_detected: bool = False
+    venous_beading_detected: bool = False
+    irma_detected: bool = False  # Intraretinal microvascular abnormalities
 
 
-class RetinalBiomarkers(BaseModel):
+class AmyloidBiomarkers(BaseModel):
     """
-    Composite biomarker container.
+    Amyloid-Beta Indicators (Experimental)
     
-    Requirements: 3.1-3.12
+    Source: Koronyo et al. (2017) JCI Insight
+    Note: Not FDA approved for clinical diagnosis
     """
+    presence_score: BiomarkerValue
+    distribution_pattern: str = "normal"  # normal, diffuse, focal, perivascular
+    affected_regions: List[str] = Field(default_factory=list)
+
+
+class CompleteBiomarkers(BaseModel):
+    """All biomarker categories"""
     vessels: VesselBiomarkers
     optic_disc: OpticDiscBiomarkers
     macula: MacularBiomarkers
-    amyloid_beta: AmyloidBetaIndicators
+    lesions: LesionBiomarkers
+    amyloid: Optional[AmyloidBiomarkers] = None
 
 
 # ============================================================================
-# Risk Assessment Schemas (Requirements 5.1-5.12)
+# DIABETIC RETINOPATHY GRADING
+# ============================================================================
+
+class FourTwoOneRule(BaseModel):
+    """
+    4-2-1 Rule for Severe NPDR
+    
+    Source: ETDRS Research Group
+    Severe NPDR if ANY ONE of:
+    - Hemorrhages in all 4 quadrants
+    - Venous beading in 2+ quadrants
+    - IRMA in 1+ quadrant
+    """
+    hemorrhages_4_quadrants: bool = False
+    venous_beading_2_quadrants: bool = False
+    irma_1_quadrant: bool = False
+    
+    @property
+    def severe_npdr_criteria_met(self) -> bool:
+        return self.hemorrhages_4_quadrants or self.venous_beading_2_quadrants or self.irma_1_quadrant
+
+
+class DiabeticRetinopathyResult(BaseModel):
+    """
+    DR Grading Result per ICDR Scale
+    
+    Reference: Wilkinson et al. (2003) Ophthalmology
+    """
+    grade: int = Field(..., ge=0, le=4)
+    grade_name: str
+    probability: float = Field(..., ge=0, le=1)
+    probabilities_all_grades: Dict[str, float]
+    referral_urgency: str
+    clinical_action: str
+    four_two_one_rule: Optional[FourTwoOneRule] = None
+    macular_edema_present: bool = False
+    clinically_significant_macular_edema: bool = False  # CSME
+
+
+class DiabeticMacularEdema(BaseModel):
+    """
+    Diabetic Macular Edema Assessment
+    
+    CSME Criteria (ETDRS):
+    - Retinal thickening at/within 500μm of fovea
+    - Hard exudates at/within 500μm of fovea with adjacent thickening
+    - Retinal thickening ≥1 disc area, any part within 1 disc diameter of fovea
+    """
+    present: bool = False
+    csme: bool = False
+    central_involvement: bool = False  # Center-involving DME
+    severity: str = "none"  # none, mild, moderate, severe
+
+
+# ============================================================================
+# RISK ASSESSMENT
 # ============================================================================
 
 class RiskAssessment(BaseModel):
     """
-    Risk score and category assessment.
+    Multi-factorial Risk Assessment
     
-    Requirements: 5.1-5.12
+    Weighted algorithm based on meta-analysis of retinal biomarker studies.
     """
-    risk_score: float = Field(
-        ...,
-        ge=0,
-        le=100,
-        description="Composite risk score 0-100 (Req 5.1)"
-    )
-    risk_category: str = Field(
-        ...,
-        description="Risk category based on score (Req 5.2-5.7)"
-    )
-    confidence_interval: Tuple[float, float] = Field(
-        ...,
-        description="95% confidence interval for risk score (Req 5.12)"
-    )
-    contributing_factors: Dict[str, float] = Field(
-        ...,
-        description="Individual factor contributions (vessel 30%, tortuosity 25%, optic disc 20%, amyloid 25%)"
-    )
-    
-    @field_validator('risk_category')
-    @classmethod
-    def validate_risk_category(cls, v: str) -> str:
-        """Ensure risk category is valid"""
-        valid_categories = {cat.value for cat in RiskCategory}
-        if v.lower() not in valid_categories:
-            raise ValueError(f"Invalid risk category. Must be one of: {valid_categories}")
-        return v.lower()
-    
-    @model_validator(mode='after')
-    def validate_confidence_interval(self):
-        """Ensure confidence interval is valid"""
-        lower, upper = self.confidence_interval
-        if lower > upper:
-            raise ValueError("Lower bound cannot exceed upper bound in confidence interval")
-        if lower < 0 or upper > 100:
-            raise ValueError("Confidence interval must be within 0-100 range")
-        return self
+    overall_score: float = Field(..., ge=0, le=100)
+    category: str
+    confidence: float = Field(..., ge=0, le=1)
+    confidence_interval_95: Tuple[float, float]
+    primary_finding: str
+    contributing_factors: Dict[str, float]  # Factor -> contribution %
+    systemic_risk_indicators: Dict[str, str] = Field(default_factory=dict)
     
     @staticmethod
-    def calculate_category(risk_score: float) -> str:
-        """Calculate risk category from score per Requirements 5.2-5.7"""
-        if risk_score <= 25:
+    def score_to_category(score: float) -> str:
+        """Convert numeric score to risk category"""
+        if score < 15:
             return RiskCategory.MINIMAL.value
-        elif risk_score <= 40:
+        elif score < 30:
             return RiskCategory.LOW.value
-        elif risk_score <= 55:
+        elif score < 50:
             return RiskCategory.MODERATE.value
-        elif risk_score <= 70:
+        elif score < 70:
             return RiskCategory.ELEVATED.value
-        elif risk_score <= 85:
+        elif score < 85:
             return RiskCategory.HIGH.value
         else:
             return RiskCategory.CRITICAL.value
-    
-    @staticmethod
-    def get_category_color(category: str) -> str:
-        """Get color indicator for risk category"""
-        colors = {
-            RiskCategory.MINIMAL.value: "#22c55e",    # green
-            RiskCategory.LOW.value: "#84cc16",        # lime
-            RiskCategory.MODERATE.value: "#eab308",   # yellow
-            RiskCategory.ELEVATED.value: "#f97316",   # orange
-            RiskCategory.HIGH.value: "#ef4444",       # red
-            RiskCategory.CRITICAL.value: "#991b1b",   # dark red
-        }
-        return colors.get(category, "#6b7280")
 
 
 # ============================================================================
-# Analysis Response Schemas
+# CLINICAL FINDINGS
+# ============================================================================
+
+class ClinicalFinding(BaseModel):
+    """Individual clinical finding with ICD-10 coding"""
+    finding_type: str
+    anatomical_location: str
+    severity: str  # normal, mild, moderate, severe, critical
+    description: str
+    clinical_relevance: str
+    icd10_code: Optional[str] = None
+    requires_referral: bool = False
+    confidence: float = Field(default=0.85, ge=0, le=1)
+
+
+class DifferentialDiagnosis(BaseModel):
+    """Differential diagnosis with probability"""
+    diagnosis: str
+    probability: float = Field(..., ge=0, le=1)
+    supporting_evidence: List[str]
+    icd10_code: str
+    ruling_out_criteria: List[str] = Field(default_factory=list)
+
+
+# ============================================================================
+# IMAGE QUALITY
+# ============================================================================
+
+class ImageQuality(BaseModel):
+    """
+    Image Quality Assessment per ETDRS Standards
+    
+    Grading:
+    - Excellent: ≥90%
+    - Good: 75-89%
+    - Fair: 60-74%
+    - Poor: 40-59%
+    - Ungradable: <40%
+    """
+    overall_score: float = Field(..., ge=0, le=1)
+    gradability: str  # excellent, good, fair, poor, ungradable
+    is_gradable: bool
+    issues: List[str] = Field(default_factory=list)
+    
+    # Component scores
+    snr_db: float  # Signal-to-noise ratio
+    focus_score: float
+    illumination_score: float
+    contrast_score: float
+    
+    # Anatomical visibility
+    optic_disc_visible: bool
+    macula_visible: bool
+    vessel_arcades_visible: bool
+    
+    # Technical parameters
+    resolution: Tuple[int, int]
+    file_size_mb: float
+    field_of_view: str  # standard, wide, ultra-wide
+
+
+# ============================================================================
+# COMPLETE RESPONSE
 # ============================================================================
 
 class RetinalAnalysisResponse(BaseModel):
     """
-    Complete response for retinal image analysis.
+    Complete Retinal Analysis Response
     
-    Requirements: 1.1-1.10, 3.1-3.12, 5.1-5.12
+    Includes:
+    - Pipeline state tracking
+    - All biomarkers
+    - DR grading
+    - Risk assessment
+    - Clinical findings
+    - Visualizations
     """
-    assessment_id: str = Field(
-        ...,
-        description="Unique assessment ID in UUID format (Req 8.3)"
-    )
-    patient_id: str = Field(
-        ...,
-        description="Patient identifier"
-    )
-    biomarkers: RetinalBiomarkers = Field(
-        ...,
-        description="All extracted biomarkers"
-    )
-    risk_assessment: RiskAssessment = Field(
-        ...,
-        description="Risk score and category"
-    )
-    quality_score: float = Field(
-        ...,
-        ge=0,
-        le=100,
-        description="Image quality score 0-100 (Req 2.11)"
-    )
-    heatmap_url: str = Field(
-        ...,
-        description="URL to attention heatmap visualization (Req 6.2)"
-    )
-    segmentation_url: str = Field(
-        ...,
-        description="URL to vessel segmentation visualization (Req 6.1)"
-    )
-    created_at: datetime = Field(
-        ...,
-        description="Timestamp of analysis (Req 8.6)"
-    )
-    model_version: str = Field(
-        ...,
-        description="ML model version used (Req 8.7)"
-    )
-    processing_time_ms: int = Field(
-        ...,
-        ge=0,
-        description="Processing time in milliseconds (Req 4.4 - must be <500ms)"
-    )
+    # Status
+    success: bool
+    session_id: str
+    patient_id: str
+    pipeline_state: PipelineState
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "assessment_id": "550e8400-e29b-41d4-a716-446655440000",
-                "patient_id": "PATIENT-001",
-                "biomarkers": {
-                    "vessels": {
-                        "density_percentage": 5.2,
-                        "tortuosity_index": 1.1,
-                        "avr_ratio": 0.65,
-                        "branching_coefficient": 1.5,
-                        "confidence": 0.92
-                    },
-                    "optic_disc": {
-                        "cup_to_disc_ratio": 0.45,
-                        "disc_area_mm2": 2.8,
-                        "rim_area_mm2": 1.8,
-                        "confidence": 0.95
-                    },
-                    "macula": {
-                        "thickness_um": 280,
-                        "volume_mm3": 0.25,
-                        "confidence": 0.89
-                    },
-                    "amyloid_beta": {
-                        "presence_score": 0.2,
-                        "distribution_pattern": "diffuse",
-                        "confidence": 0.78
-                    }
-                },
-                "risk_assessment": {
-                    "risk_score": 35.0,
-                    "risk_category": "low",
-                    "confidence_interval": [30.0, 40.0],
-                    "contributing_factors": {
-                        "vessel_density": 25.0,
-                        "tortuosity": 30.0,
-                        "optic_disc": 45.0,
-                        "amyloid_beta": 20.0
-                    }
-                },
-                "quality_score": 95.0,
-                "heatmap_url": "https://storage.example.com/heatmaps/abc123.png",
-                "segmentation_url": "https://storage.example.com/segmentations/abc123.png",
-                "created_at": "2026-01-15T22:30:00Z",
-                "model_version": "1.0.0",
-                "processing_time_ms": 450
-            }
-        }
+    # Timing
+    timestamp: str
+    total_processing_time_ms: int
+    model_version: str = "4.0.0"
+    
+    # Quality
+    image_quality: ImageQuality
+    
+    # Core Results
+    biomarkers: Optional[CompleteBiomarkers] = None
+    diabetic_retinopathy: Optional[DiabeticRetinopathyResult] = None
+    diabetic_macular_edema: Optional[DiabeticMacularEdema] = None
+    risk_assessment: Optional[RiskAssessment] = None
+    
+    # Clinical Assessment
+    findings: List[ClinicalFinding] = Field(default_factory=list)
+    differential_diagnoses: List[DifferentialDiagnosis] = Field(default_factory=list)
+    recommendations: List[str] = Field(default_factory=list)
+    clinical_summary: Optional[str] = None
+    
+    # Visualizations
+    heatmap_base64: Optional[str] = None
+    segmentation_base64: Optional[str] = None
+    
+    # Metadata
+    eye: str = "unknown"  # OD, OS, unknown
+    analysis_type: str = "screening"  # screening, diagnostic, follow_up
 
 
 class ImageValidationResponse(BaseModel):
-    """
-    Response for image quality validation.
-    
-    Requirements: 2.1-2.12
-    """
-    is_valid: bool = Field(
-        ...,
-        description="Whether image passes all quality checks"
-    )
-    quality_score: float = Field(
-        ...,
-        ge=0,
-        le=100,
-        description="Overall quality score 0-100 (Req 2.11)"
-    )
-    issues: List[str] = Field(
-        default_factory=list,
-        description="List of validation issues found"
-    )
-    recommendations: List[str] = Field(
-        default_factory=list,
-        description="Recommendations for improving image quality (Req 2.12)"
-    )
-    snr_db: float = Field(
-        ...,
-        description="Signal-to-Noise Ratio in decibels (Req 2.1, 2.2)"
-    )
-    has_optic_disc: bool = Field(
-        ...,
-        description="Whether optic disc is visible (Req 2.5)"
-    )
-    has_macula: bool = Field(
-        ...,
-        description="Whether macula is visible (Req 2.7)"
-    )
-    focus_score: Optional[float] = Field(
-        default=None,
-        description="Focus quality score (Req 2.3)"
-    )
-    glare_percentage: Optional[float] = Field(
-        default=None,
-        ge=0,
-        le=100,
-        description="Percentage of image affected by glare (Req 2.9)"
-    )
-    resolution: Optional[Tuple[int, int]] = Field(
-        default=None,
-        description="Image resolution (width, height)"
-    )
-
-
-# ============================================================================
-# Additional Response Schemas
-# ============================================================================
-
-class PatientHistoryItem(BaseModel):
-    """Single item in patient assessment history (Req 8.9)"""
-    assessment_id: str
-    created_at: datetime
-    risk_score: float
-    risk_category: str
-    quality_score: float
-
-
-class PatientHistoryResponse(BaseModel):
-    """Response for patient assessment history (Req 8.9)"""
-    patient_id: str
-    assessments: List[PatientHistoryItem]
-    total_count: int
-    has_more: bool
-
-
-class TrendDataPoint(BaseModel):
-    """Single data point for trend analysis (Req 8.10)"""
-    date: datetime
-    risk_score: float
-    vessel_density: float
-    tortuosity_index: float
-    cup_to_disc_ratio: float
-
-
-class TrendAnalysisResponse(BaseModel):
-    """Response for biomarker trend analysis (Req 8.10)"""
-    patient_id: str
-    data_points: List[TrendDataPoint]
-    trend_direction: Literal["improving", "stable", "declining"]
-    average_risk_score: float
-    risk_change_percentage: float
+    """Response for image validation endpoint"""
+    is_valid: bool
+    quality: ImageQuality
+    can_proceed: bool
+    blocking_issues: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    recommendations: List[str] = Field(default_factory=list)
