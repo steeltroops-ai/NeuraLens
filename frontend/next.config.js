@@ -53,6 +53,26 @@ const nextConfig = {
             destination: '/dashboard',
             permanent: false,
           },
+          {
+            source: '/assessment',
+            destination: '/dashboard',
+            permanent: false,
+          },
+          {
+            source: '/readme',
+            destination: '/dashboard',
+            permanent: false,
+          },
+          {
+            source: '/results',
+            destination: '/dashboard',
+            permanent: false,
+          },
+          {
+            source: '/help',
+            destination: '/dashboard',
+            permanent: false,
+          },
         ]
         : []),
     ];

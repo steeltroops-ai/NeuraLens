@@ -14,7 +14,7 @@ export function useSafeNavigation() {
 
   // Prefetch critical routes on mount for instant navigation
   useEffect(() => {
-    const criticalRoutes = ['/dashboard', '/assessment', '/readme', '/about'];
+    const criticalRoutes = ['/dashboard', '/about'];
 
     // Prefetch critical routes with a small delay to avoid blocking initial render
     const prefetchTimer = setTimeout(() => {

@@ -225,16 +225,7 @@ export class KeyboardNavigation {
       'Go to home page',
     );
 
-    this.registerShortcut(
-      'alt+a',
-      () => {
-        if (typeof window !== 'undefined' && window.history) {
-          window.history.pushState(null, '', '/assessment');
-          window.dispatchEvent(new PopStateEvent('popstate'));
-        }
-      },
-      'Start assessment',
-    );
+
   }
 
   /**
@@ -289,19 +280,10 @@ export class VoiceNavigation {
           window.location.href = '/';
         }
       });
-      this.registerCommand('start assessment', () => {
+
+      this.registerCommand('go to dashboard', () => {
         if (typeof window !== 'undefined') {
-          window.location.href = '/assessment';
-        }
-      });
-      this.registerCommand('show results', () => {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/results';
-        }
-      });
-      this.registerCommand('help', () => {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/help';
+          window.location.href = '/dashboard';
         }
       });
 
