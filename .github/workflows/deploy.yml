@@ -53,10 +53,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.event_name != 'schedule'
-    
-    environment:
-      name: production
-      url: https://${{ secrets.HF_USERNAME }}-${{ secrets.HF_SPACE_NAME }}.hf.space
 
     steps:
       - name: Checkout repository
