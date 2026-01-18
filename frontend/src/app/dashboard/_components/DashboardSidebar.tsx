@@ -27,6 +27,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/nextjs';
+import { Logo } from '@/components/common/Logo';
 
 // Sidebar item interface
 interface SidebarItem {
@@ -302,12 +303,11 @@ export function DashboardSidebar({ className = '', mobileOpen, setMobileOpen }: 
                 aria-label="Dashboard navigation"
             >
                 {/* Header - Logo area */}
-                <div className={`flex items-center h-14 border-b border-[#27272a] ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+                <div className={`flex items-center h-14 border-b border-[#27272a] ${collapsed ? 'justify-center' : 'justify-between px-3'}`}>
                     {!collapsed ? (
                         <>
-                            <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="MediLens Home">
-                                <span className="text-[15px] font-semibold text-white">M</span>
-                                <span className="text-[14px] font-medium text-zinc-100">MediLens</span>
+                            <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2" aria-label="MediLens Home">
+                                <Logo showText={true} size="md" />
                             </Link>
                             <button
                                 onClick={toggleCollapse}
@@ -320,10 +320,10 @@ export function DashboardSidebar({ className = '', mobileOpen, setMobileOpen }: 
                     ) : (
                         <button
                             onClick={toggleCollapse}
-                            className="flex items-center justify-center"
+                            className="flex items-center justify-center w-10 h-10"
                             aria-label="Expand sidebar"
                         >
-                            <span className="text-[15px] font-semibold text-white">M</span>
+                            <Logo showText={false} size="md" />
                         </button>
                     )}
                 </div>

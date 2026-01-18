@@ -10,10 +10,10 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs';
-import { Activity } from 'lucide-react';
 
 import { cn } from '@/components/ui';
 import { useSafeNavigation } from '@/components/common/SafeNavigation';
+import { Logo } from '@/components/common/Logo';
 
 interface NavigationItem {
   id: string;
@@ -93,15 +93,7 @@ export const Header: React.FC = () => {
             className="flex items-center gap-2.5 transition-colors duration-200"
             aria-label="MediLens Home"
           >
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800">
-              <Activity className="h-4.5 w-4.5 text-red-500" strokeWidth={2} />
-            </div>
-            <span className={cn(
-              'text-[15px] font-semibold tracking-tight transition-colors duration-200',
-              isTransparent ? 'text-white' : 'text-white'
-            )}>
-              MediLens
-            </span>
+            <Logo showText={true} size="md" />
           </Link>
 
           {/* Desktop Navigation */}
