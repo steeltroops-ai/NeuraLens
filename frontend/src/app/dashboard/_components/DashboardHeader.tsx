@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, X, ChevronRight, Search } from 'lucide-react';
+import { Bell, X, ChevronRight, Search, Menu } from 'lucide-react';
 import { sidebarItems, sidebarGroups, SIDEBAR_COLLAPSED_KEY } from './DashboardSidebar';
 import dynamic from 'next/dynamic';
 
@@ -29,6 +29,7 @@ export interface DashboardHeaderProps {
     title?: string;
     showSearch?: boolean;
     onSearchClick?: () => void;
+    onMenuClick?: () => void;
 }
 
 /**
@@ -42,7 +43,8 @@ export interface DashboardHeaderProps {
 export function DashboardHeader({
     title,
     showSearch = true,
-    onSearchClick
+    onSearchClick,
+    onMenuClick
 }: DashboardHeaderProps) {
     const pathname = usePathname();
     const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -166,7 +168,17 @@ export function DashboardHeader({
             data-testid="dashboard-header"
         >
             {/* Left Section: Breadcrumbs */}
-            <div className="flex items-center min-w-0 pl-12 lg:pl-0">
+            <div className="flex items-center min-w-0 pl-0">
+                {/* Mobile Menu Button - Integrated */}
+                <button
+                    onClick={onMenuClick}
+                    className="mr-2 lg:hidden flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                    aria-label="Open menu"
+                    aria-controls="main-navigation"
+                >
+                    <Menu className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+
                 {/* Breadcrumb Navigation */}
                 <nav className="flex items-center" aria-label="Breadcrumb">
                     <ol className="flex items-center">

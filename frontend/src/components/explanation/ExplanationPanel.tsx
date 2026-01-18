@@ -26,19 +26,23 @@ export function ExplanationPanel({
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const [audioData, setAudioData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const isDark = theme === 'dark';
 
-  const generateExplanation = async () => {
+  // Generate explanation WITHOUT voice first (faster loading)
+  const generateExplanation = async (withVoice: boolean = false) => {
     if (!results) return;
     
     setIsLoading(true);
     setExplanation('');
     setError(null);
+    // Always clear audio when regenerating explanation
     setAudioData(null);
+    stopAudio();
 
     try {
       const response = await fetch('/api/explain', {
@@ -48,7 +52,7 @@ export function ExplanationPanel({
           pipeline,
           results,
           patient_context: patientContext,
-          voice_output: true,
+          voice_output: withVoice,  // Only generate voice if explicitly requested
           voice_provider: 'elevenlabs'
         })
       });
@@ -124,6 +128,55 @@ export function ExplanationPanel({
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
+    }
+  };
+
+  // Generate voice for existing explanation
+  const generateVoice = async () => {
+    console.log('[Voice] generateVoice called, explanation length:', explanation?.length);
+    
+    if (!explanation || explanation.trim().length === 0) {
+      setError('No explanation text to speak');
+      return;
+    }
+    
+    setIsGeneratingVoice(true);
+    setError(null);
+    
+    try {
+      const textToSpeak = explanation.trim().slice(0, 5000); // Limit to 5000 chars
+      console.log('[Voice] Sending text:', textToSpeak.slice(0, 100) + '...');
+      
+      const response = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: textToSpeak,
+          voice_provider: 'elevenlabs'
+        })
+      });
+
+      console.log('[Voice] Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('[Voice] Error response:', errorData);
+        throw new Error(`Voice generation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[Voice] Success, audio length:', data.audio_base64?.length);
+      
+      if (data.audio_base64) {
+        setAudioData(data.audio_base64);
+      } else {
+        throw new Error('No audio data received');
+      }
+    } catch (err) {
+      console.error('[Voice] Error:', err);
+      setError(err instanceof Error ? err.message : 'Voice generation failed');
+    } finally {
+      setIsGeneratingVoice(false);
     }
   };
 
@@ -211,7 +264,7 @@ export function ExplanationPanel({
         <div className="flex items-center gap-2">
           {/* Regenerate button */}
           <button
-            onClick={generateExplanation}
+            onClick={() => generateExplanation(false)}
             disabled={isLoading}
             className={cn(
               'p-2 rounded-lg transition-colors disabled:opacity-50',
@@ -222,25 +275,34 @@ export function ExplanationPanel({
             <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
           </button>
           
-          {/* Voice button */}
-          {audioData && (
+          {/* Voice Controls - Clean single button */}
+          {explanation && (
             <button
-              onClick={isPlaying ? stopAudio : playAudio}
+              onClick={() => {
+                if (isPlaying) {
+                  stopAudio();
+                } else if (audioData) {
+                  playAudio();
+                } else {
+                  generateVoice();
+                }
+              }}
+              disabled={isGeneratingVoice || isLoading}
               className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
-                accentButtonStyles
+                'p-2 rounded-lg transition-all duration-200',
+                isPlaying 
+                  ? (isDark ? 'bg-purple-500 text-white' : 'bg-blue-600 text-white')
+                  : buttonStyles,
+                (isGeneratingVoice || isLoading) && 'opacity-50 cursor-not-allowed'
               )}
+              title={isPlaying ? 'Stop speaking' : audioData ? 'Play audio' : 'Generate voice'}
             >
-              {isPlaying ? (
-                <>
-                  <VolumeX className="w-4 h-4" />
-                  Stop
-                </>
+              {isGeneratingVoice ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isPlaying ? (
+                <VolumeX className="w-4 h-4" />
               ) : (
-                <>
-                  <Volume2 className="w-4 h-4" />
-                  Listen
-                </>
+                <Volume2 className={cn('w-4 h-4', audioData && (isDark ? 'text-purple-400' : 'text-blue-600'))} />
               )}
             </button>
           )}

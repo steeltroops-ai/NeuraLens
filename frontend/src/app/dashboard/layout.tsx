@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { DashboardSidebar, SIDEBAR_COLLAPSED_KEY } from './_components/DashboardSidebar';
 import { DashboardHeader } from './_components/DashboardHeader';
 import { CommandPalette } from './_components/CommandPalette';
+import { MedicalChatbot } from '@/components/chatbot';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,10 +22,23 @@ interface DashboardLayoutProps {
  * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 7.6
  */
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Get chatbot context from current route
+  const getChatbotContext = (): string => {
+    if (pathname.includes('/retinal')) return 'retinal';
+    if (pathname.includes('/cardiology')) return 'cardiology';
+    if (pathname.includes('/radiology')) return 'radiology';
+    if (pathname.includes('/speech')) return 'speech';
+    if (pathname.includes('/motor')) return 'motor';
+    if (pathname.includes('/cognitive')) return 'cognitive';
+    return 'dashboard';
+  };
 
   // Initialize client-side state after hydration
   useEffect(() => {
@@ -99,7 +114,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       {/* Sidebar Navigation - Fixed position (Requirements 1.1, 1.3) */}
-      <DashboardSidebar />
+      <DashboardSidebar 
+        mobileOpen={mobileOpen} 
+        setMobileOpen={setMobileOpen} 
+      />
 
       {/* Main Content Area - Offset by sidebar width on desktop */}
       <div
@@ -110,10 +128,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }}
       >
         {/* Dashboard Header - Fixed at top, 56px height (Requirements 3.1, 3.6) */}
-        <DashboardHeader
-          showSearch={true}
-          onSearchClick={handleSearchClick}
-        />
+          <DashboardHeader
+            showSearch={true}
+            onSearchClick={handleSearchClick}
+            onMenuClick={() => setMobileOpen(true)}
+          />
 
         {/* Main Content Area - Offset by header height (Requirements 1.4, 7.6) */}
         <main
@@ -133,6 +152,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
       />
+
+      {/* Medical Chatbot - Floating assistant */}
+      <MedicalChatbot context={getChatbotContext()} />
     </div>
   );
 }

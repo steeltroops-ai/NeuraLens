@@ -99,6 +99,8 @@ const SIDEBAR_COLLAPSED_KEY = 'medilens-sidebar-collapsed';
 
 export interface DashboardSidebarProps {
     className?: string;
+    mobileOpen: boolean;
+    setMobileOpen: (open: boolean) => void;
 }
 
 // Minimal tooltip for collapsed state
@@ -209,13 +211,13 @@ function SidebarGroupComponent({
     );
 }
 
-export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
+export function DashboardSidebar({ className = '', mobileOpen, setMobileOpen }: DashboardSidebarProps) {
     const pathname = usePathname();
     const { user } = useUser();
 
     // Sidebar collapse state with localStorage persistence
     const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
+    // mobileOpen state is now controlled by parent
     const [isClient, setIsClient] = useState(false);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [hoveredBottomItem, setHoveredBottomItem] = useState<string | null>(null);
@@ -242,8 +244,8 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
 
     // Toggle mobile menu
     const toggleMobileMenu = useCallback(() => {
-        setMobileOpen(prev => !prev);
-    }, []);
+        setMobileOpen(!mobileOpen);
+    }, [mobileOpen, setMobileOpen]);
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -273,20 +275,7 @@ export function DashboardSidebar({ className = '' }: DashboardSidebarProps) {
 
     return (
         <>
-            {/* Mobile Menu Button - positioned to avoid header overlap */}
-            <button
-                onClick={toggleMobileMenu}
-                className="fixed left-4 top-4 z-[60] flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-[#e5e7eb] shadow-sm lg:hidden hover:bg-[#f9fafb] transition-colors"
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={mobileOpen}
-                aria-controls="main-navigation"
-            >
-                {mobileOpen ? (
-                    <X size={18} className="text-[#374151]" aria-hidden="true" />
-                ) : (
-                    <Menu size={18} className="text-[#374151]" aria-hidden="true" />
-                )}
-            </button>
+            {/* Mobile Menu Button - Removed (Integrated in Header) */}
 
             {/* Mobile Overlay */}
             {mobileOpen && (

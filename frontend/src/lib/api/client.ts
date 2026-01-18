@@ -258,11 +258,26 @@ export const API_ENDPOINTS = {
   STATUS: '/status',
   SPEECH: {
     ANALYZE: '/speech/analyze',
+    FEATURES: '/speech/features',
+    HEALTH: '/speech/health',
     INFO: '/speech/info',
   },
   RETINAL: {
     ANALYZE: '/retinal/analyze',
     INFO: '/retinal/info',
+  },
+  RADIOLOGY: {
+    ANALYZE: '/radiology/analyze',
+    DEMO: '/radiology/demo',
+    CONDITIONS: '/radiology/conditions',
+    HEALTH: '/radiology/health',
+    INFO: '/radiology/info',
+  },
+  CARDIOLOGY: {
+    ANALYZE: '/cardiology/analyze',
+    DEMO: '/cardiology/demo',
+    HEALTH: '/cardiology/health',
+    INFO: '/cardiology/info',
   },
   MOTOR: {
     ANALYZE: '/motor/analyze',
@@ -276,8 +291,25 @@ export const API_ENDPOINTS = {
     FUSION: '/nri/fusion',
     INFO: '/nri/info',
   },
+  VOICE: {
+    SPEAK: '/voice/speak',
+    SPEAK_AUDIO: '/voice/speak/audio',
+    SPEAK_STREAM: '/voice/speak/stream',
+    EXPLAIN_TERM: '/voice/explain/term',
+    EXPLAIN_RESULT: '/voice/explain/result',
+    VOICES: '/voice/voices',
+    HEALTH: '/voice/health',
+    USAGE: '/voice/usage',
+  },
   VALIDATION: {
     METRICS: '/validation/metrics',
     INFO: '/validation/info',
+  },
+  CHATBOT: {
+    CHAT: '/chatbot/chat',
+    SUGGESTIONS: '/chatbot/suggestions',
+    INFO: '/chatbot/info',
+    HISTORY: '/chatbot/history',
+    HEALTH: '/chatbot/health',
   },
 } as const;
