@@ -6,6 +6,7 @@ import { DashboardSidebar, SIDEBAR_COLLAPSED_KEY } from './_components/Dashboard
 import { DashboardHeader } from './_components/DashboardHeader';
 import { CommandPalette } from './_components/CommandPalette';
 import { MedicalChatbot } from '@/components/chatbot';
+import { PipelineStatusBar, PipelineStatusProvider } from '@/components/pipeline';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -112,49 +113,55 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const mainMarginLeft = isDesktop ? sidebarWidth : 0;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* Sidebar Navigation - Fixed position (Requirements 1.1, 1.3) */}
-      <DashboardSidebar 
-        mobileOpen={mobileOpen} 
-        setMobileOpen={setMobileOpen} 
-      />
+    <PipelineStatusProvider>
+      <div className="min-h-screen bg-[#f8fafc]">
+        {/* Sidebar Navigation - Fixed position (Requirements 1.1, 1.3) */}
+        <DashboardSidebar 
+          mobileOpen={mobileOpen} 
+          setMobileOpen={setMobileOpen} 
+        />
 
-      {/* Main Content Area - Offset by sidebar width on desktop */}
-      <div
-        className="flex flex-col min-h-screen transition-[margin-left] duration-200"
-        style={{
-          marginLeft: `${mainMarginLeft}px`,
-          transitionTimingFunction: 'ease-out',
-        }}
-      >
-        {/* Dashboard Header - Fixed at top, 56px height (Requirements 3.1, 3.6) */}
-          <DashboardHeader
-            showSearch={true}
-            onSearchClick={handleSearchClick}
-            onMenuClick={() => setMobileOpen(true)}
-          />
-
-        {/* Main Content Area - Offset by header height (Requirements 1.4, 7.6) */}
-        <main
-          id="main-content"
-          className="flex-1 bg-[#f8fafc] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide pt-14"
-          role="main"
-          aria-labelledby="page-title"
+        {/* Main Content Area - Offset by sidebar width on desktop */}
+        <div
+          className="flex flex-col min-h-screen"
+          style={{
+            marginLeft: `${mainMarginLeft}px`,
+            transition: 'margin-left 350ms cubic-bezier(0.32, 0.72, 0, 1)',
+          }}
         >
-          <div className="p-4 lg:p-6 w-full max-w-full overflow-x-hidden">
-            {children}
-          </div>
-        </main>
+          {/* Dashboard Header - Fixed at top, 56px height (Requirements 3.1, 3.6) */}
+            <DashboardHeader
+              showSearch={true}
+              onSearchClick={handleSearchClick}
+              onMenuClick={() => setMobileOpen(true)}
+            />
+
+          {/* Main Content Area - Offset by header height, leave room for status bar */}
+          <main
+            id="main-content"
+            className="flex-1 bg-[#f8fafc] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide pt-14 pb-8"
+            role="main"
+            aria-labelledby="page-title"
+          >
+            <div className="p-4 lg:p-6 w-full max-w-full overflow-x-hidden">
+              {children}
+            </div>
+          </main>
+        </div>
+
+        {/* Command Palette - Requirements 3.4 */}
+        <CommandPalette
+          isOpen={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+        />
+
+        {/* Medical Chatbot - Floating assistant */}
+        <MedicalChatbot context={getChatbotContext()} />
+
+        {/* Pipeline Status Bar - VS Code style status bar at bottom */}
+        <PipelineStatusBar />
       </div>
-
-      {/* Command Palette - Requirements 3.4 */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-      />
-
-      {/* Medical Chatbot - Floating assistant */}
-      <MedicalChatbot context={getChatbotContext()} />
-    </div>
+    </PipelineStatusProvider>
   );
 }
+

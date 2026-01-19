@@ -1,6 +1,6 @@
 """
 Voice Pipeline - Pydantic Models
-Request/Response schemas for Voice API
+Request/Response schemas for Voice API (Amazon Polly)
 """
 
 from pydantic import BaseModel, Field
@@ -12,14 +12,8 @@ class SpeakRequest(BaseModel):
     """Request to convert text to speech"""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to speak")
     voice_id: Optional[str] = Field(
-        "21m00Tcm4TlvDq8ikWAM",  # Rachel - default
-        description="ElevenLabs voice ID or style name"
-    )
-    speed: Optional[float] = Field(
-        1.0,
-        ge=0.5,
-        le=2.0,
-        description="Speaking speed multiplier"
+        "joanna",  # Joanna - default Polly voice
+        description="Amazon Polly voice name (joanna, matthew, amy, brian, ruth)"
     )
     format: Optional[str] = Field("mp3", pattern="^(mp3|wav)$")
     
@@ -27,8 +21,7 @@ class SpeakRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "text": "Your neurological risk score is 23.4, classified as low risk.",
-                "voice_id": "rachel",
-                "speed": 1.0,
+                "voice_id": "joanna",
                 "format": "mp3"
             }
         }
@@ -42,7 +35,6 @@ class SpeakResponse(BaseModel):
     duration_seconds: Optional[float] = Field(None, description="Estimated duration")
     voice_used: str
     characters_used: int
-    fallback_used: bool = False
     processing_time_ms: Optional[int] = None
     cached: bool = False
     
@@ -53,9 +45,8 @@ class SpeakResponse(BaseModel):
                 "audio_base64": "//uQxAAAAAANIAAAAAExBT...",
                 "format": "mp3",
                 "duration_seconds": 4.2,
-                "voice_used": "rachel",
+                "voice_used": "joanna",
                 "characters_used": 62,
-                "fallback_used": False,
                 "processing_time_ms": 850,
                 "cached": False
             }
@@ -105,14 +96,14 @@ class ExplainResultRequest(BaseModel):
         pattern="^(retinal|cardiology|radiology|speech|cognitive|motor|nri)$"
     )
     result: dict = Field(..., description="Pipeline result to explain")
-    voice_id: Optional[str] = Field("rachel")
+    voice_id: Optional[str] = Field("joanna")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "pipeline": "speech",
                 "result": {"risk_score": 0.28, "biomarkers": {}},
-                "voice_id": "rachel"
+                "voice_id": "joanna"
             }
         }
 
@@ -128,10 +119,10 @@ class VoiceInfo(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": "21m00Tcm4TlvDq8ikWAM",
-                "name": "Rachel",
-                "description": "Professional female, clear articulation",
-                "provider": "elevenlabs",
+                "id": "joanna",
+                "name": "Joanna",
+                "description": "Professional female, American English",
+                "provider": "polly",
                 "recommended": True
             }
         }
@@ -147,14 +138,14 @@ class VoiceListResponse(BaseModel):
             "example": {
                 "voices": [
                     {
-                        "id": "rachel",
-                        "name": "Rachel",
+                        "id": "joanna",
+                        "name": "Joanna",
                         "description": "Professional female voice",
-                        "provider": "elevenlabs",
+                        "provider": "polly",
                         "recommended": True
                     }
                 ],
-                "provider": "elevenlabs"
+                "provider": "polly"
             }
         }
 
@@ -164,14 +155,12 @@ class HealthResponse(BaseModel):
     status: str
     module: str = "voice"
     provider: Optional[str] = None
-    elevenlabs_available: bool = False
-    gtts_available: bool = False
+    polly_available: bool = False
     cache_stats: Optional[dict] = None
 
 
 class UsageResponse(BaseModel):
     """Usage statistics response"""
-    elevenlabs: dict
-    gtts: dict
+    polly: dict
     cache: dict
     reset_date: str

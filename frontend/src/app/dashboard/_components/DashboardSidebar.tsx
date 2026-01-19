@@ -294,11 +294,13 @@ export function DashboardSidebar({ className = '', mobileOpen, setMobileOpen }: 
                 data-collapsed={collapsed}
                 className={`
                     fixed inset-y-0 left-0 z-50 flex flex-col bg-black border-r border-[#27272a]
-                    transition-all duration-200 ease-out
                     ${collapsed ? 'w-[60px]' : 'w-[240px]'}
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     ${className}
                 `}
+                style={{
+                    transition: 'width 350ms cubic-bezier(0.32, 0.72, 0, 1), transform 350ms cubic-bezier(0.32, 0.72, 0, 1)',
+                }}
                 role="navigation"
                 aria-label="Dashboard navigation"
             >

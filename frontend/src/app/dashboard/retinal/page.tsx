@@ -11,7 +11,7 @@
  * - Console logging for debugging
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Eye,
@@ -40,6 +40,7 @@ import {
     HeartPulse,
 } from 'lucide-react';
 import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
+import { usePipelineStatus } from '@/components/pipeline';
 
 // ============================================================================
 // Types matching backend v4.0 structure
@@ -326,6 +327,9 @@ export default function RetinalAnalysisPage() {
     const [showHeatmap, setShowHeatmap] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Pipeline status bar integration
+    const { startPipeline, updatePipeline, completePipeline } = usePipelineStatus();
 
     const addLog = useCallback((message: string) => {
         const timestamp = new Date().toISOString().split('T')[1]?.split('.')[0] ?? '';
@@ -338,6 +342,10 @@ export default function RetinalAnalysisPage() {
         setState('processing');
         setError(null);
         addLog(`Starting analysis for: ${imageFile.name} (${(imageFile.size / 1024 / 1024).toFixed(2)}MB)`);
+        
+        // Start pipeline in status bar
+        startPipeline('retinal', ['input', 'quality', 'vessels', 'disc', 'lesions', 'dr_grade', 'risk', 'output']);
+        updatePipeline('retinal', { currentStage: 'Uploading...' });
 
         try {
             const formData = new FormData();
@@ -345,6 +353,8 @@ export default function RetinalAnalysisPage() {
             formData.append('patient_id', 'ANONYMOUS');
 
             addLog('Sending to backend API...');
+            updatePipeline('retinal', { currentStage: 'Analyzing...' });
+            
             const response = await fetch('/api/retinal/analyze', {
                 method: 'POST',
                 body: formData,
@@ -376,6 +386,13 @@ export default function RetinalAnalysisPage() {
 
             setResults(data);
             setState(data.success ? 'complete' : 'error');
+            
+            // Update status bar with completion
+            if (data.success) {
+                completePipeline('retinal', true, data.diabetic_retinopathy?.grade_name || 'Complete');
+            } else {
+                completePipeline('retinal', false, 'Analysis failed');
+            }
 
             if (!data.success) {
                 setError('Analysis failed - check pipeline errors');
@@ -385,8 +402,9 @@ export default function RetinalAnalysisPage() {
             addLog(`ERROR: ${msg}`);
             setError(msg);
             setState('error');
+            completePipeline('retinal', false, 'Error');
         }
-    }, [addLog]);
+    }, [addLog, startPipeline, updatePipeline, completePipeline]);
 
     const handleFileSelect = useCallback((file: File) => {
         addLog(`File selected: ${file.name}`);

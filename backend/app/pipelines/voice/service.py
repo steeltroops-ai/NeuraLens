@@ -1,5 +1,5 @@
 """
-Voice Assistant Service - ElevenLabs TTS Integration
+Voice Assistant Service - Amazon Polly TTS Integration
 Designed for integration with ALL pipelines to speak LLM-generated explanations
 
 Usage from any pipeline:
@@ -14,11 +14,9 @@ Usage from any pipeline:
 
 import os
 import base64
-import time
 import logging
 from typing import Optional, AsyncGenerator
 from dataclasses import dataclass
-from io import BytesIO
 
 from dotenv import load_dotenv
 
@@ -30,24 +28,17 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Try importing ElevenLabs (new SDK)
-ELEVENLABS_AVAILABLE = False
-elevenlabs_client = None
+# Amazon Polly via boto3
+POLLY_AVAILABLE = False
+polly_client = None
 
 try:
-    from elevenlabs.client import ElevenLabs
-    ELEVENLABS_AVAILABLE = True
-    logger.info("ElevenLabs SDK loaded successfully")
+    import boto3
+    from botocore.exceptions import NoCredentialsError, ClientError
+    POLLY_AVAILABLE = True
+    logger.info("boto3 SDK loaded successfully for Amazon Polly")
 except ImportError:
-    logger.warning("elevenlabs not installed. Run: pip install elevenlabs")
-
-# Backup: Google TTS
-GTTS_AVAILABLE = False
-try:
-    from gtts import gTTS
-    GTTS_AVAILABLE = True
-except ImportError:
-    logger.warning("gtts not installed. Run: pip install gtts")
+    logger.warning("boto3 not installed. Run: pip install boto3")
 
 
 @dataclass
@@ -62,50 +53,53 @@ class VoiceResult:
     cached: bool = False
 
 
-# ElevenLabs Voice IDs (from their voice library)
-ELEVENLABS_VOICES = {
-    # Professional voices for medical content
-    "rachel": {
-        "voice_id": "21m00Tcm4TlvDq8ikWAM",
-        "name": "Rachel",
-        "description": "Professional female, clear articulation",
+# Amazon Polly Voice Options
+POLLY_VOICES = {
+    # Neural voices (high quality)
+    "joanna": {
+        "voice_id": "Joanna",
+        "name": "Joanna",
+        "description": "Professional female, American English",
+        "engine": "neural",
         "use_case": "Medical reports (default)"
     },
-    "george": {
-        "voice_id": "JBFqnCBsd6RMkjVDRZzb",
-        "name": "George",
-        "description": "Warm male, British accent",
+    "matthew": {
+        "voice_id": "Matthew",
+        "name": "Matthew", 
+        "description": "Professional male, American English",
+        "engine": "neural",
+        "use_case": "Technical explanations"
+    },
+    "amy": {
+        "voice_id": "Amy",
+        "name": "Amy",
+        "description": "Professional female, British English",
+        "engine": "neural",
         "use_case": "Calm explanations"
     },
-    "josh": {
-        "voice_id": "TxGEqnHWrfWFTfGW9XjX",
-        "name": "Josh",
-        "description": "Professional male, American",
-        "use_case": "Technical details"
+    "brian": {
+        "voice_id": "Brian",
+        "name": "Brian",
+        "description": "Professional male, British English",
+        "engine": "neural",
+        "use_case": "Formal reports"
     },
-    "bella": {
-        "voice_id": "EXAVITQu4vr4xnSDxMaL",
-        "name": "Bella",
-        "description": "Warm female, approachable",
+    "ruth": {
+        "voice_id": "Ruth",
+        "name": "Ruth",
+        "description": "Warm female, American English",
+        "engine": "neural",
         "use_case": "Patient-facing"
-    },
-    "adam": {
-        "voice_id": "pNInz6obpgDQGcFmaJgB",
-        "name": "Adam",
-        "description": "Clear male, neutral accent",
-        "use_case": "Technical explanations"
     },
 }
 
-# Default voice for all pipelines
-DEFAULT_VOICE = "rachel"
-DEFAULT_MODEL = "eleven_multilingual_v2"
-DEFAULT_OUTPUT_FORMAT = "mp3_44100_128"
+# Default voice
+DEFAULT_VOICE = "joanna"
 
 
 class VoiceService:
     """
-    ElevenLabs Text-to-Speech Service for MediLens
+    Amazon Polly Text-to-Speech Service for MediLens
     
     Integration with all pipelines:
     - Speech Analysis -> Speak biomarker explanations
@@ -119,62 +113,65 @@ class VoiceService:
     """
     
     def __init__(self):
-        self.elevenlabs_client = None
+        self.polly_client = None
         self.provider = None
         
+        # Initialize Amazon Polly client
+        if not POLLY_AVAILABLE:
+            logger.error("boto3 not installed! Run: pip install boto3")
+            return
         
-        # Initialize ElevenLabs client (REQUIRED - no fallback)
-        # Force reload .env to ensure fresh key
-        from dotenv import load_dotenv
+        # Load AWS credentials from environment
         load_dotenv(override=True)
         
-        api_key = os.getenv("ELEVENLABS_API_KEY")
+        aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+        aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        aws_region = os.getenv("AWS_REGION", "ap-south-1")
         
-        if not api_key:
-            logger.error("ELEVENLABS_API_KEY not found in environment!")
-            logger.error("Voice TTS requires a valid ElevenLabs API key")
-            return
-            
-        # Clean key
-        api_key = api_key.strip()
-        logger.info(f"ElevenLabs Key Loaded: {api_key[:5]}...{api_key[-5:]}")
-        
-        if not ELEVENLABS_AVAILABLE:
-            logger.error("ElevenLabs SDK not installed! Run: pip install elevenlabs")
+        if not aws_access_key or not aws_secret_key:
+            logger.error("AWS credentials not found in environment!")
+            logger.error("Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in .env")
             return
         
         try:
-            self.elevenlabs_client = ElevenLabs(api_key=api_key)
-            self.provider = "elevenlabs"
-            # verify client
-            logger.info("ElevenLabs client initialized successfully")
+            self.polly_client = boto3.client(
+                'polly',
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key,
+                region_name=aws_region
+            )
+            self.provider = "polly"
+            logger.info(f"Amazon Polly client initialized (region: {aws_region})")
         except Exception as e:
-            logger.error(f"ElevenLabs initialization failed: {e}")
-            logger.error("Voice TTS will not be available")
-
+            logger.error(f"Amazon Polly initialization failed: {e}")
     
     def get_voice_id(self, voice: str) -> str:
-        """Get ElevenLabs voice ID from name"""
+        """Get Polly voice ID from name"""
         voice = voice.lower()
-        if voice in ELEVENLABS_VOICES:
-            return ELEVENLABS_VOICES[voice]["voice_id"]
-        # Assume it's already a voice ID
-        return voice
+        if voice in POLLY_VOICES:
+            return POLLY_VOICES[voice]["voice_id"]
+        # Default to Joanna if not found
+        return "Joanna"
+    
+    def get_voice_engine(self, voice: str) -> str:
+        """Get engine type for voice (neural or standard)"""
+        voice = voice.lower()
+        if voice in POLLY_VOICES:
+            return POLLY_VOICES[voice].get("engine", "neural")
+        return "neural"
     
     async def speak(
         self,
         text: str,
         voice: str = DEFAULT_VOICE,
-        model: str = DEFAULT_MODEL,
         use_cache: bool = True
     ) -> Optional[VoiceResult]:
         """
-        Convert text to speech using ElevenLabs or gTTS fallback
+        Convert text to speech using Amazon Polly
         
         Args:
-            text: Text to speak (max 5000 chars)
-            voice: Voice name or ElevenLabs voice ID
-            model: ElevenLabs model (eleven_multilingual_v2, eleven_turbo_v2_5)
+            text: Text to speak (max 3000 chars per request)
+            voice: Voice name (joanna, matthew, amy, brian, ruth)
             use_cache: Use audio caching
             
         Returns:
@@ -183,14 +180,19 @@ class VoiceService:
         if not text:
             return None
         
-        # Truncate if too long
+        if not self.polly_client:
+            logger.error("Polly client not initialized")
+            return None
+        
+        # Truncate if too long (Polly limit is 3000 chars)
         original_text = text
-        if len(text) > 5000:
-            text = text[:5000]
+        if len(text) > 3000:
+            text = text[:3000]
         
         # Preprocess for better pronunciation
         processed_text = preprocess_for_speech(text)
         voice_id = self.get_voice_id(voice)
+        engine = self.get_voice_engine(voice)
         
         # Check cache first
         if use_cache:
@@ -207,122 +209,53 @@ class VoiceService:
                     cached=True
                 )
         
-        # Try ElevenLabs first, fallback to gTTS if quota exceeded
-        result = None
+        # Generate with Amazon Polly
         try:
-            if self.provider == "elevenlabs":
-                result = await self._elevenlabs_speak(processed_text, voice_id, model)
-        except Exception as e:
-            error_msg = str(e)
-            logger.warning(f"ElevenLabs failed: {error_msg}")
+            response = self.polly_client.synthesize_speech(
+                Engine=engine,
+                LanguageCode='en-US',
+                OutputFormat='mp3',
+                SampleRate='24000',
+                Text=processed_text,
+                TextType='text',
+                VoiceId=voice_id
+            )
             
-            # Fallback to gTTS if ElevenLabs quota exceeded
-            if "quota" in error_msg.lower() or "credits" in error_msg.lower():
-                logger.info("Falling back to gTTS due to ElevenLabs quota limit")
-                result = await self._gtts_speak(processed_text)
-            else:
-                raise
-        
-        # If no result from ElevenLabs (not configured), use gTTS
-        if result is None and GTTS_AVAILABLE:
-            result = await self._gtts_speak(processed_text)
-
-        
-        if result:
-            # Track usage
-            usage_tracker.track_usage(len(original_text), result.provider)
-            
-            # Cache result
-            if use_cache:
-                audio_cache.set(
-                    processed_text, voice_id, 1.0,
-                    result.audio_bytes, result.provider
+            if 'AudioStream' in response:
+                audio_bytes = response['AudioStream'].read()
+                
+                if len(audio_bytes) < 100:
+                    logger.error("Amazon Polly returned empty audio")
+                    return None
+                
+                logger.info(f"Amazon Polly TTS generated {len(audio_bytes)} bytes")
+                
+                result = VoiceResult(
+                    audio_base64=base64.b64encode(audio_bytes).decode(),
+                    audio_bytes=audio_bytes,
+                    format="mp3",
+                    duration_estimate_seconds=len(text) / 15,
+                    provider="polly",
+                    characters_used=len(original_text)
                 )
-        
-        return result
-    
-    async def _elevenlabs_speak(
-        self,
-        text: str,
-        voice_id: str,
-        model: str = DEFAULT_MODEL
-    ) -> Optional[VoiceResult]:
-        """
-        Generate speech using ElevenLabs API
-        
-        Uses the official ElevenLabs SDK pattern:
-        audio = client.text_to_speech.convert(...)
-        """
-        if not self.elevenlabs_client:
-            raise Exception("ElevenLabs client not initialized. Check ELEVENLABS_API_KEY in .env")
-        
-        try:
-            # Use ElevenLabs SDK (per quickstart)
-            audio_generator = self.elevenlabs_client.text_to_speech.convert(
-                text=text,
-                voice_id=voice_id,
-                model_id=model,
-                output_format=DEFAULT_OUTPUT_FORMAT,
-            )
-            
-            # Collect audio chunks from generator
-            audio_bytes = b""
-            for chunk in audio_generator:
-                audio_bytes += chunk
-            
-            if len(audio_bytes) < 100:
-                raise Exception("ElevenLabs returned empty audio")
-            
-            logger.info(f"ElevenLabs TTS generated {len(audio_bytes)} bytes")
-            
-            return VoiceResult(
-                audio_base64=base64.b64encode(audio_bytes).decode(),
-                audio_bytes=audio_bytes,
-                format="mp3",
-                duration_estimate_seconds=len(text) / 15,
-                provider="elevenlabs",
-                characters_used=len(text)
-            )
-            
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"ElevenLabs TTS failed: {error_msg}")
-            
-            # Check for quota exceeded
-            if "quota" in error_msg.lower() or "credits" in error_msg.lower():
-                raise Exception("ElevenLabs quota exceeded - credits remaining insufficient")
-            elif "Paid Subscription" in error_msg or "abuse" in error_msg.lower():
-                raise Exception("ElevenLabs quota exceeded - free tier exhausted")
-            elif "invalid" in error_msg.lower() or "unauthorized" in error_msg.lower():
-                raise Exception("ElevenLabs API key is invalid. Please check ELEVENLABS_API_KEY in .env")
+                
+                # Track usage
+                usage_tracker.track_usage(len(original_text), "polly")
+                
+                # Cache result
+                if use_cache:
+                    audio_cache.set(
+                        processed_text, voice_id, 1.0,
+                        result.audio_bytes, result.provider
+                    )
+                
+                return result
             else:
-                raise Exception(f"ElevenLabs TTS error: {error_msg[:200]}")
-
-    
-    async def _gtts_speak(self, text: str) -> Optional[VoiceResult]:
-        """Fallback: Generate speech using Google TTS (free)"""
-        if not GTTS_AVAILABLE:
-            return None
-        
-        try:
-            tts = gTTS(text=text, lang='en', slow=False)
-            
-            audio_buffer = BytesIO()
-            tts.write_to_fp(audio_buffer)
-            audio_buffer.seek(0)
-            audio_bytes = audio_buffer.read()
-            
-            return VoiceResult(
-                audio_base64=base64.b64encode(audio_bytes).decode(),
-                audio_bytes=audio_bytes,
-                format="mp3",
-                duration_estimate_seconds=len(text) / 12,
-                provider="gtts",
-                characters_used=len(text)
-            )
-            
+                logger.error("Amazon Polly returned no audio stream")
+                return None
+                
         except Exception as e:
-            logger.error(f"gTTS failed: {e}")
+            logger.error(f"Amazon Polly TTS failed: {e}")
             return None
     
     async def speak_streaming(
@@ -331,37 +264,18 @@ class VoiceService:
         voice_id: str = None
     ) -> AsyncGenerator[bytes, None]:
         """
-        Stream audio chunks for faster playback start
+        Generate audio (Polly doesn't support true streaming, returns all at once)
         
-        Yields audio chunks as they're generated
+        Yields audio bytes
         """
         if voice_id is None:
             voice_id = self.get_voice_id(DEFAULT_VOICE)
         
         processed_text = preprocess_for_speech(text)
         
-        if not self.elevenlabs_client:
-            # gTTS doesn't stream - return all at once
-            result = await self._gtts_speak(processed_text)
-            if result:
-                yield result.audio_bytes
-            return
-        
-        try:
-            audio_stream = self.elevenlabs_client.text_to_speech.convert_as_stream(
-                text=processed_text,
-                voice_id=voice_id,
-                model_id=DEFAULT_MODEL,
-            )
-            
-            for chunk in audio_stream:
-                yield chunk
-                
-        except Exception as e:
-            logger.error(f"Streaming failed: {e}")
-            result = await self._gtts_speak(processed_text)
-            if result:
-                yield result.audio_bytes
+        result = await self.speak(processed_text)
+        if result:
+            yield result.audio_bytes
     
     async def speak_explanation(
         self,
@@ -513,7 +427,7 @@ class VoiceService:
         )
     
     def get_available_voices(self) -> list:
-        """Get list of available ElevenLabs voices"""
+        """Get list of available Polly voices"""
         return [
             {
                 "id": key,
@@ -521,9 +435,9 @@ class VoiceService:
                 "name": info["name"],
                 "description": info["description"],
                 "use_case": info["use_case"],
-                "provider": self.provider or "none"
+                "provider": "polly"
             }
-            for key, info in ELEVENLABS_VOICES.items()
+            for key, info in POLLY_VOICES.items()
         ]
 
 
@@ -548,7 +462,7 @@ async def speak_text(
     
     Args:
         text: Text to speak
-        voice: Voice name (rachel, josh, bella, adam, george)
+        voice: Voice name (joanna, matthew, amy, brian, ruth)
         
     Returns:
         Base64 encoded MP3 audio or None

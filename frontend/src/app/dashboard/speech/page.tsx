@@ -26,6 +26,7 @@ import {
 import { SpeechRecorder } from './_components/SpeechRecorder';
 import { SpeechResultsPanel } from './_components/SpeechResultsPanel';
 import { ExplanationPanel } from '@/components/explanation/ExplanationPanel';
+import { usePipelineStatus } from '@/components/pipeline';
 import type { EnhancedSpeechAnalysisResponse } from '@/types/speech-enhanced';
 
 type AnalysisState = 'idle' | 'recording' | 'uploading' | 'processing' | 'complete' | 'error';
@@ -35,16 +36,25 @@ export default function SpeechAnalysisPage() {
     const [results, setResults] = useState<EnhancedSpeechAnalysisResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
+    
+    // Pipeline status bar integration
+    const { startPipeline, updatePipeline, completePipeline } = usePipelineStatus();
 
     const analyzeAudio = useCallback(async (audioData: Blob | File) => {
         setState('processing');
         setError(null);
         setUploadProgress(0);
+        
+        // Start pipeline in status bar
+        startPipeline('speech', ['upload', 'extract', 'analyze', 'score', 'output']);
+        updatePipeline('speech', { currentStage: 'Uploading...' });
 
         try {
             const formData = new FormData();
             formData.append('audio', audioData); // Match what usage in route.ts expects
             formData.append('session_id', `speech_${Date.now()}`);
+
+            updatePipeline('speech', { currentStage: 'Analyzing...' });
 
             // Use the Next.js API route as a proxy
             const response = await fetch('/api/speech/analyze', {
@@ -65,12 +75,17 @@ export default function SpeechAnalysisPage() {
 
             setResults(data);
             setState('complete');
+            
+            // Update status bar with completion
+            const riskScore = data.risk_score?.toFixed(0) || 'N/A';
+            completePipeline('speech', true, `Risk: ${riskScore}`);
         } catch (err) {
             console.error('Speech analysis error:', err);
             setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.');
             setState('error');
+            completePipeline('speech', false, 'Error');
         }
-    }, []);
+    }, [startPipeline, updatePipeline, completePipeline]);
 
     const handleRecordingComplete = useCallback((audioBlob: Blob) => {
         analyzeAudio(audioBlob);

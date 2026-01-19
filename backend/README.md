@@ -81,6 +81,9 @@ The following environment variables can be configured:
 |----------|-------------|----------|
 | `ELEVENLABS_API_KEY` | ElevenLabs API key for voice synthesis | Optional |
 | `CEREBRAS_API_KEY` | Cerebras API key for AI explanations | Optional |
+| `AWS_ACCESS_KEY_ID` | AWS access key for Amazon Polly fallback TTS | Optional |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key for Amazon Polly | Optional |
+| `AWS_REGION` | AWS region for Polly (default: us-east-1) | Optional |
 | `DATABASE_URL` | Database connection string | Optional |
 | `ORIGINS` | CORS allowed origins | Optional |
 
@@ -92,7 +95,7 @@ The following environment variables can be configured:
 - **Audio Processing**: Librosa, Parselmouth, SoundFile
 - **Cardiology**: HeartPy, NeuroKit2
 - **AI/LLM**: Cerebras Cloud SDK
-- **Voice**: ElevenLabs, gTTS
+- **Voice**: ElevenLabs, Amazon Polly (fallback)
 
 ## Local Development
 

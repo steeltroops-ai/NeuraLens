@@ -159,9 +159,10 @@ export function DashboardHeader({
 
     return (
         <header
-            className="fixed top-0 right-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-black border-b border-[#27272a] h-14 transition-[left] duration-200 ease-out"
+            className="fixed top-0 right-0 z-40 flex items-center justify-between px-4 lg:px-6 bg-black border-b border-[#27272a] h-14"
             style={{
-                left: `${headerLeftOffset}px`
+                left: `${headerLeftOffset}px`,
+                transition: 'left 350ms cubic-bezier(0.32, 0.72, 0, 1)',
             }}
             role="banner"
             aria-label="Dashboard header"

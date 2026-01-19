@@ -1,0 +1,28 @@
+{
+  "name": "medilens",
+  "version": "1.0.0",
+  "description": "MediLens - AI-Powered Medical Analysis Platform",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n \"API,WEB\" -c \"green.bold,blue.bold\" \"bun run backend\" \"bun run frontend\"",
+    "backend": "cd backend && .venv/Scripts/python.exe -m uvicorn app.main:app --reload --port 8000",
+    "frontend": "cd frontend && bun run dev",
+    "install:backend": "cd backend && python -m venv .venv && .venv/Scripts/pip.exe install -r requirements.txt",
+    "install:frontend": "cd frontend && bun install",
+    "install:all": "bun run install:frontend && bun run install:backend",
+    "build": "cd frontend && bun run build",
+    "start": "bun run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steeltroops-ai/MediLens"
+  },
+  "author": "SteelTroops AI",
+  "license": "MIT"
+}

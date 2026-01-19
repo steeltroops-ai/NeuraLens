@@ -204,13 +204,13 @@ class UsageTracker:
     """
     Track TTS API usage for cost management
     
-    ElevenLabs pricing:
-    - Free tier: 10,000 characters/month
-    - After: ~$0.30 per 1,000 characters
+    Amazon Polly pricing (neural voices):
+    - $16.00 per 1 million characters
+    - First 1 million chars free for 12 months
     """
     
-    ELEVENLABS_FREE_CHARS = 10000  # per month
-    ELEVENLABS_COST_PER_1K = 0.30  # USD after free tier
+    POLLY_FREE_CHARS = 1000000  # per month (first year)
+    POLLY_COST_PER_1M = 16.00  # USD per million chars
     
     def __init__(self):
         self.monthly_chars: Dict[str, int] = {}  # provider -> chars
@@ -230,34 +230,24 @@ class UsageTracker:
         self.monthly_chars[provider] += char_count
         
         # Log warning if approaching limits
-        if provider == "elevenlabs":
+        if provider == "polly":
             used = self.monthly_chars[provider]
-            if used > self.ELEVENLABS_FREE_CHARS * 0.8:
+            if used > self.POLLY_FREE_CHARS * 0.8:
                 logger.warning(
-                    f"Approaching ElevenLabs free tier limit: "
-                    f"{used}/{self.ELEVENLABS_FREE_CHARS} chars"
+                    f"Approaching Polly free tier limit: "
+                    f"{used}/{self.POLLY_FREE_CHARS} chars"
                 )
-    
-    def should_use_fallback(self) -> bool:
-        """Determine if should use gTTS to save costs"""
-        elevenlabs_usage = self.monthly_chars.get("elevenlabs", 0)
-        return elevenlabs_usage > self.ELEVENLABS_FREE_CHARS * 0.9
     
     def get_usage(self) -> Dict:
         """Get current usage stats"""
-        elevenlabs_chars = self.monthly_chars.get("elevenlabs", 0)
-        gtts_chars = self.monthly_chars.get("gtts", 0)
+        polly_chars = self.monthly_chars.get("polly", 0)
         
         return {
-            "elevenlabs": {
-                "chars_used": elevenlabs_chars,
-                "free_tier_limit": self.ELEVENLABS_FREE_CHARS,
-                "free_tier_remaining": max(0, self.ELEVENLABS_FREE_CHARS - elevenlabs_chars),
-                "estimated_cost_usd": max(0, (elevenlabs_chars - self.ELEVENLABS_FREE_CHARS) / 1000 * self.ELEVENLABS_COST_PER_1K)
-            },
-            "gtts": {
-                "chars_used": gtts_chars,
-                "cost": 0  # Free
+            "polly": {
+                "chars_used": polly_chars,
+                "free_tier_limit": self.POLLY_FREE_CHARS,
+                "free_tier_remaining": max(0, self.POLLY_FREE_CHARS - polly_chars),
+                "estimated_cost_usd": max(0, (polly_chars - self.POLLY_FREE_CHARS) / 1000000 * self.POLLY_COST_PER_1M)
             },
             "reset_date": self.monthly_reset.isoformat()
         }
@@ -266,3 +256,4 @@ class UsageTracker:
 # Global instances
 audio_cache = AudioCache()
 usage_tracker = UsageTracker()
+

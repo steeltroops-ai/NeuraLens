@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Loader2, Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Volume2, Pause, Play, Loader2, Sparkles, RefreshCw, Bot } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface ExplanationPanelProps {
@@ -26,23 +26,143 @@ export function ExplanationPanel({
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const [audioData, setAudioData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const explanationCompleteRef = useRef(false);
 
   const isDark = theme === 'dark';
 
-  // Generate explanation WITHOUT voice first (faster loading)
-  const generateExplanation = async (withVoice: boolean = false) => {
+  // Play audio
+  const playAudio = useCallback(() => {
+    if (audioData && audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+      setIsPaused(false);
+    } else if (audioData) {
+      const audio = new Audio(`data:audio/mp3;base64,${audioData}`);
+      audioRef.current = audio;
+      audio.onplay = () => {
+        setIsPlaying(true);
+        setIsPaused(false);
+      };
+      audio.onended = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+      };
+      audio.onerror = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+      };
+      audio.onpause = () => {
+        if (audio.currentTime < audio.duration) {
+          setIsPaused(true);
+          setIsPlaying(false);
+        }
+      };
+      audio.play();
+    }
+  }, [audioData]);
+
+  // Pause audio
+  const pauseAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      setIsPaused(true);
+    }
+  }, []);
+
+  // Stop and reset audio
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+      setIsPaused(false);
+    }
+  }, []);
+
+  // Generate voice for existing explanation
+  const generateVoice = useCallback(async (autoPlay: boolean = false) => {
+    if (!explanation || explanation.trim().length === 0) {
+      return;
+    }
+    
+    setIsGeneratingVoice(true);
+    setError(null);
+    
+    try {
+      const textToSpeak = explanation.trim().slice(0, 5000);
+      
+      const response = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: textToSpeak,
+          voice_provider: 'elevenlabs'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Voice generation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.audio_base64) {
+        setAudioData(data.audio_base64);
+        
+        // Auto-play if requested
+        if (autoPlay) {
+          const audio = new Audio(`data:audio/mp3;base64,${data.audio_base64}`);
+          audioRef.current = audio;
+          audio.onplay = () => {
+            setIsPlaying(true);
+            setIsPaused(false);
+          };
+          audio.onended = () => {
+            setIsPlaying(false);
+            setIsPaused(false);
+          };
+          audio.onerror = () => {
+            setIsPlaying(false);
+            setIsPaused(false);
+          };
+          audio.onpause = () => {
+            if (audio.currentTime < audio.duration) {
+              setIsPaused(true);
+              setIsPlaying(false);
+            }
+          };
+          audio.play().catch(() => {
+            // Autoplay blocked by browser, user needs to click
+            console.log('[Voice] Autoplay blocked, waiting for user interaction');
+          });
+        }
+      } else {
+        throw new Error('No audio data received');
+      }
+    } catch (err) {
+      console.error('[Voice] Error:', err);
+      setError(err instanceof Error ? err.message : 'Voice generation failed');
+    } finally {
+      setIsGeneratingVoice(false);
+    }
+  }, [explanation]);
+
+  // Generate explanation
+  const generateExplanation = async (withAutoVoice: boolean = true) => {
     if (!results) return;
     
     setIsLoading(true);
     setExplanation('');
     setError(null);
-    // Always clear audio when regenerating explanation
     setAudioData(null);
     stopAudio();
+    explanationCompleteRef.current = false;
 
     try {
       const response = await fetch('/api/explain', {
@@ -52,7 +172,7 @@ export function ExplanationPanel({
           pipeline,
           results,
           patient_context: patientContext,
-          voice_output: withVoice,  // Only generate voice if explicitly requested
+          voice_output: false,
           voice_provider: 'elevenlabs'
         })
       });
@@ -68,6 +188,8 @@ export function ExplanationPanel({
         throw new Error('No response body');
       }
 
+      let fullExplanation = '';
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -81,7 +203,8 @@ export function ExplanationPanel({
               const data = JSON.parse(line.slice(6));
               
               if (data.text) {
-                setExplanation(prev => prev + data.text);
+                fullExplanation += data.text;
+                setExplanation(fullExplanation);
               }
               if (data.audio_base64) {
                 setAudioData(data.audio_base64);
@@ -91,6 +214,7 @@ export function ExplanationPanel({
               }
               if (data.done) {
                 setIsLoading(false);
+                explanationCompleteRef.current = true;
               }
             } catch {
               // Ignore parsing errors for incomplete JSON
@@ -98,85 +222,62 @@ export function ExplanationPanel({
           }
         }
       }
+      
+      // Auto-generate voice after explanation is complete
+      if (withAutoVoice && fullExplanation.length > 0) {
+        setIsLoading(false);
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          generateVoice(true);
+        }, 100);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setIsLoading(false);
     }
   };
 
-  // Generate explanation when results change
+  // Track previous results to detect new analysis vs page reload
+  const prevResultsRef = useRef<unknown>(null);
+  const isInitialMount = useRef(true);
+
+  // Generate explanation when results change (only for NEW results)
   useEffect(() => {
-    if (results) {
-      generateExplanation();
+    if (!results) return;
+    
+    // Skip auto-voice on initial mount (page reload with existing results)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Still generate explanation but WITHOUT auto-voice
+      generateExplanation(false);
+      return;
+    }
+    
+    // Check if results actually changed (new analysis)
+    const resultsChanged = JSON.stringify(results) !== JSON.stringify(prevResultsRef.current);
+    
+    if (resultsChanged) {
+      prevResultsRef.current = results;
+      // New analysis - generate explanation WITH auto-voice
+      generateExplanation(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results, pipeline]);
 
-  const playAudio = () => {
-    if (audioData) {
-      const audio = new Audio(`data:audio/mp3;base64,${audioData}`);
-      audioRef.current = audio;
-      audio.onplay = () => setIsPlaying(true);
-      audio.onended = () => setIsPlaying(false);
-      audio.onerror = () => setIsPlaying(false);
-      audio.play();
-    }
-  };
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-    }
-  };
-
-  // Generate voice for existing explanation
-  const generateVoice = async () => {
-    console.log('[Voice] generateVoice called, explanation length:', explanation?.length);
-    
-    if (!explanation || explanation.trim().length === 0) {
-      setError('No explanation text to speak');
-      return;
-    }
-    
-    setIsGeneratingVoice(true);
-    setError(null);
-    
-    try {
-      const textToSpeak = explanation.trim().slice(0, 5000); // Limit to 5000 chars
-      console.log('[Voice] Sending text:', textToSpeak.slice(0, 100) + '...');
-      
-      const response = await fetch('/api/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: textToSpeak,
-          voice_provider: 'elevenlabs'
-        })
-      });
-
-      console.log('[Voice] Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('[Voice] Error response:', errorData);
-        throw new Error(`Voice generation failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('[Voice] Success, audio length:', data.audio_base64?.length);
-      
-      if (data.audio_base64) {
-        setAudioData(data.audio_base64);
-      } else {
-        throw new Error('No audio data received');
-      }
-    } catch (err) {
-      console.error('[Voice] Error:', err);
-      setError(err instanceof Error ? err.message : 'Voice generation failed');
-    } finally {
-      setIsGeneratingVoice(false);
+  // Handle voice button click
+  const handleVoiceClick = () => {
+    if (isPlaying) {
+      // Currently playing -> Pause
+      pauseAudio();
+    } else if (isPaused && audioRef.current) {
+      // Currently paused -> Resume
+      playAudio();
+    } else if (audioData) {
+      // Has audio but not playing -> Play from start
+      playAudio();
+    } else {
+      // No audio -> Generate and play
+      generateVoice(true);
     }
   };
 
@@ -197,10 +298,6 @@ export function ExplanationPanel({
     ? 'text-zinc-400 hover:text-white hover:bg-zinc-800'
     : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100';
 
-  const accentButtonStyles = isDark
-    ? 'bg-purple-600 hover:bg-purple-700 text-white'
-    : 'bg-blue-600 hover:bg-blue-700 text-white';
-
   const errorStyles = isDark
     ? 'bg-red-500/10 border-red-500/30 text-red-400'
     : 'bg-red-50 border-red-200 text-red-600';
@@ -219,6 +316,28 @@ export function ExplanationPanel({
 
   const accentColor = isDark ? 'text-purple-400' : 'text-blue-600';
   const secondaryAccent = isDark ? 'text-blue-400' : 'text-indigo-600';
+
+  // Get voice button icon and style
+  const getVoiceButtonContent = () => {
+    if (isGeneratingVoice) {
+      return <Loader2 className="w-4 h-4 animate-spin" />;
+    }
+    if (isPlaying) {
+      return <Pause className="w-4 h-4" />;
+    }
+    if (isPaused || audioData) {
+      return <Play className="w-4 h-4" />;
+    }
+    return <Volume2 className="w-4 h-4" />;
+  };
+
+  const getVoiceButtonTitle = () => {
+    if (isGeneratingVoice) return 'Generating voice...';
+    if (isPlaying) return 'Pause';
+    if (isPaused) return 'Resume';
+    if (audioData) return 'Play';
+    return 'Generate voice';
+  };
 
   if (!results) {
     return (
@@ -264,8 +383,8 @@ export function ExplanationPanel({
         <div className="flex items-center gap-2">
           {/* Regenerate button */}
           <button
-            onClick={() => generateExplanation(false)}
-            disabled={isLoading}
+            onClick={() => generateExplanation(true)}
+            disabled={isLoading || isGeneratingVoice}
             className={cn(
               'p-2 rounded-lg transition-colors disabled:opacity-50',
               buttonStyles
@@ -275,35 +394,23 @@ export function ExplanationPanel({
             <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
           </button>
           
-          {/* Voice Controls - Clean single button */}
+          {/* Voice Controls - Play/Pause button */}
           {explanation && (
             <button
-              onClick={() => {
-                if (isPlaying) {
-                  stopAudio();
-                } else if (audioData) {
-                  playAudio();
-                } else {
-                  generateVoice();
-                }
-              }}
-              disabled={isGeneratingVoice || isLoading}
+              onClick={handleVoiceClick}
+              disabled={isLoading}
               className={cn(
                 'p-2 rounded-lg transition-all duration-200',
                 isPlaying 
                   ? (isDark ? 'bg-purple-500 text-white' : 'bg-blue-600 text-white')
-                  : buttonStyles,
-                (isGeneratingVoice || isLoading) && 'opacity-50 cursor-not-allowed'
+                  : (audioData || isPaused)
+                    ? (isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-50 text-blue-600')
+                    : buttonStyles,
+                isLoading && 'opacity-50 cursor-not-allowed'
               )}
-              title={isPlaying ? 'Stop speaking' : audioData ? 'Play audio' : 'Generate voice'}
+              title={getVoiceButtonTitle()}
             >
-              {isGeneratingVoice ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : isPlaying ? (
-                <VolumeX className="w-4 h-4" />
-              ) : (
-                <Volume2 className={cn('w-4 h-4', audioData && (isDark ? 'text-purple-400' : 'text-blue-600'))} />
-              )}
+              {getVoiceButtonContent()}
             </button>
           )}
         </div>
@@ -355,10 +462,11 @@ export function ExplanationPanel({
         {audioData && (
           <>
             <span>+</span>
-            <span className={secondaryAccent}>ElevenLabs</span>
+            <span className={secondaryAccent}>Voice AI</span>
           </>
         )}
       </div>
     </div>
   );
 }
+

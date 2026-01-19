@@ -1,5 +1,5 @@
 """
-Voice Assistant Pipeline - ElevenLabs TTS Integration
+Voice Assistant Pipeline - Amazon Polly TTS Integration
 Designed for cross-pipeline integration to speak LLM-generated explanations
 
 USAGE IN OTHER PIPELINES:
@@ -23,16 +23,18 @@ USAGE IN OTHER PIPELINES:
 
 AVAILABLE VOICES:
 ================
-- rachel (default): Professional female, clear articulation
-- george: Warm male, British accent
-- josh: Professional male, American
-- bella: Warm female, approachable
-- adam: Clear male, neutral accent
+- joanna (default): Professional female, American English
+- matthew: Professional male, American English
+- amy: Professional female, British English
+- brian: Professional male, British English
+- ruth: Warm female, American English
 
 CONFIGURATION:
 =============
-Set ELEVENLABS_API_KEY in .env file
-Falls back to gTTS (free) if ElevenLabs not configured
+Set AWS credentials in .env file:
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_REGION (default: ap-south-1)
 """
 
 # Main service
@@ -46,11 +48,9 @@ from .service import (
     speak_llm_explanation,
     get_audio_bytes,
     # Constants
-    ELEVENLABS_VOICES,
+    POLLY_VOICES,
     DEFAULT_VOICE,
-    DEFAULT_MODEL,
-    ELEVENLABS_AVAILABLE,
-    GTTS_AVAILABLE,
+    POLLY_AVAILABLE,
 )
 
 # Text processing
@@ -80,11 +80,9 @@ __all__ = [
     "speak_llm_explanation",
     "get_audio_bytes",
     # Constants
-    "ELEVENLABS_VOICES",
+    "POLLY_VOICES",
     "DEFAULT_VOICE",
-    "DEFAULT_MODEL",
-    "ELEVENLABS_AVAILABLE",
-    "GTTS_AVAILABLE",
+    "POLLY_AVAILABLE",
     # Text processing
     "preprocess_for_speech",
     "get_medical_explanation",

@@ -51,9 +51,9 @@ grad-cam==1.5.5
 opencv-python-headless==4.10.0.84
 
 # =============================================
-# Voice Output
+# Voice Output (Amazon Polly)
 # =============================================
-elevenlabs==1.9.0
+boto3==1.35.0
 
 # =============================================
 # AI Explanation (Cerebras Llama)
