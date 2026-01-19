@@ -7,7 +7,7 @@ import logging
 from typing import Dict, Tuple, Optional
 from dataclasses import dataclass
 
-from .config import (
+from ..config import (
     RISK_WEIGHTS,
     BIOMARKER_NORMAL_RANGES,
     BIOMARKER_ABNORMAL_THRESHOLDS,
@@ -46,8 +46,8 @@ def get_biomarker_status(name: str, value: float) -> str:
     
     low, high = BIOMARKER_NORMAL_RANGES[name]
     
-    # Special handling for metrics where lower is worse (HNR, fluency, articulation)
-    inverted_metrics = {"hnr", "fluency_score", "articulation_clarity"}
+    # Special handling for metrics where lower is worse (HNR, fluency, articulation, cpps)
+    inverted_metrics = {"hnr", "fluency_score", "articulation_clarity", "cpps"}
     
     if name in inverted_metrics:
         threshold = BIOMARKER_ABNORMAL_THRESHOLDS.get(name, low)
@@ -85,28 +85,33 @@ def normalize_to_risk(name: str, value: float) -> float:
         Risk contribution 0-1
     """
     if name == "jitter":
-        return min(1.0, value / 0.10)
+        # Threshold around 1.04%
+        return min(1.0, value / 1.5)
     elif name == "shimmer":
-        return min(1.0, value / 0.15)
+        # Threshold around 3.81%
+        return min(1.0, value / 5.0)
     elif name == "hnr":
-        # Lower HNR = higher risk
-        return max(0.0, (25 - value) / 25)
+        # Lower HNR = higher risk (Healthy > 20dB)
+        return max(0.0, (20.0 - value) / 10.0)
+    elif name == "cpps":
+        # NEW: Lower CPPS = higher risk (Healthy > 14dB)
+        return max(0.0, (14.0 - value) / 6.0)
     elif name == "speech_rate":
         # Deviation from optimal (4.5) is risky
-        return min(1.0, abs(value - 4.5) / 3.0)
+        return min(1.0, abs(value - 4.5) / 2.5)
     elif name == "pause_ratio":
-        return min(1.0, value / 0.50)
+        return min(1.0, value / 0.40)
     elif name == "fluency_score":
         # Lower fluency = higher risk
         return max(0.0, 1.0 - value)
     elif name == "voice_tremor":
-        return min(1.0, value / 0.30)
+        return min(1.0, value / 0.15)
     elif name == "articulation_clarity":
-        # Lower clarity = higher risk
-        return max(0.0, 1.0 - value)
+        # Deviation from 1.0 (FCR ratio)
+        return min(1.0, abs(value - 1.0) / 0.2)
     elif name == "prosody_variation":
-        # Deviation from optimal (0.55) is risky
-        return min(1.0, abs(0.55 - value) / 0.35)
+        # Hz Std Dev. < 15Hz is monotone
+        return max(0.0, (20.0 - value) / 15.0) if value < 20 else 0.0
     else:
         return 0.0
 
@@ -308,3 +313,177 @@ def calculate_percentile(value: float, name: str) -> Optional[int]:
         percentile = int(25 + 50 * (value - low) / (high - low + 0.001))
     
     return max(0, min(100, percentile))
+
+
+# ============================================================================
+# Class-based API for research-grade service
+# ============================================================================
+
+from enum import Enum
+
+class RiskLevel(Enum):
+    """Risk level enumeration."""
+    low = "low"
+    moderate = "moderate"
+    high = "high"
+    critical = "critical"
+
+
+@dataclass
+class BiomarkerDeviation:
+    """Deviation details for a single biomarker."""
+    name: str
+    value: float
+    z_score: float
+    status: str  # normal, borderline, abnormal
+    risk_contribution: float
+    confidence: float = 0.9
+
+
+@dataclass 
+class ConditionRiskResult:
+    """Risk assessment for a specific condition."""
+    condition: str
+    probability: float
+    confidence: float
+    confidence_interval: Optional[Tuple[float, float]] = None
+    risk_level: str = "low"
+    contributing_factors: Optional[list] = None
+
+
+@dataclass
+class RiskAssessmentResult:
+    """Complete risk assessment result for research-grade service."""
+    overall_score: float
+    risk_level: RiskLevel
+    confidence: float
+    confidence_interval: Optional[Tuple[float, float]]
+    condition_risks: list  # List of ConditionRiskResult
+    biomarker_deviations: list  # List of BiomarkerDeviation
+    recommendations: list
+    requires_review: bool = False
+    review_reason: Optional[str] = None
+
+
+class ClinicalRiskScorer:
+    """
+    Clinical risk scoring with uncertainty estimation.
+    Compatible with ResearchGradeSpeechService.
+    """
+    
+    def __init__(self):
+        self.risk_weights = RISK_WEIGHTS
+        self.normal_ranges = BIOMARKER_NORMAL_RANGES
+    
+    def assess_risk(
+        self,
+        features: Dict[str, float],
+        signal_quality: float = 0.9,
+        patient_age: Optional[int] = None,
+        patient_sex: Optional[str] = None
+    ) -> RiskAssessmentResult:
+        """
+        Perform comprehensive risk assessment.
+        
+        Args:
+            features: Extracted feature values
+            signal_quality: Audio quality score (0-1)
+            patient_age: Optional age for normalization
+            patient_sex: Optional sex for normalization
+            
+        Returns:
+            RiskAssessmentResult with full assessment
+        """
+        # Use existing calculate_speech_risk function
+        basic_result = calculate_speech_risk(features, signal_quality)
+        
+        # Convert to RiskLevel enum
+        risk_level = RiskLevel(basic_result.category)
+        
+        # Build biomarker deviations
+        deviations = []
+        for name, contribution in basic_result.risk_contributions.items():
+            value = features.get(name, 0)
+            status = get_biomarker_status(name, value)
+            z_score = self._calculate_z_score(name, value)
+            
+            deviations.append(BiomarkerDeviation(
+                name=name,
+                value=value,
+                z_score=z_score,
+                status=status,
+                risk_contribution=contribution,
+                confidence=0.9 if status != "abnormal" else 0.85
+            ))
+        
+        # Build condition risks
+        condition_risks = []
+        for condition, prob in basic_result.condition_probabilities.items():
+            if condition == "normal":
+                continue
+            
+            condition_risks.append(ConditionRiskResult(
+                condition=condition,
+                probability=prob,
+                confidence=basic_result.confidence * 0.9,
+                confidence_interval=(max(0, prob - 0.1), min(1, prob + 0.1)),
+                risk_level=self._prob_to_level(prob),
+                contributing_factors=[d.name for d in deviations if d.risk_contribution > 0.1][:3]
+            ))
+        
+        # Calculate confidence interval
+        ci_margin = 0.1 * (1 - basic_result.confidence)
+        ci = (
+            max(0, basic_result.overall_score - ci_margin * 100),
+            min(100, basic_result.overall_score + ci_margin * 100)
+        )
+        
+        # Determine if review is needed
+        requires_review = (
+            basic_result.category in ["high", "critical"] or
+            any(d.status == "abnormal" for d in deviations)
+        )
+        review_reason = None
+        if requires_review:
+            if basic_result.category == "critical":
+                review_reason = "Critical risk score detected"
+            elif any(d.status == "abnormal" for d in deviations):
+                review_reason = "Abnormal biomarker values detected"
+        
+        return RiskAssessmentResult(
+            overall_score=basic_result.overall_score,
+            risk_level=risk_level,
+            confidence=basic_result.confidence,
+            confidence_interval=ci,
+            condition_risks=condition_risks,
+            biomarker_deviations=deviations,
+            recommendations=basic_result.recommendations,
+            requires_review=requires_review,
+            review_reason=review_reason
+        )
+    
+    def _calculate_z_score(self, name: str, value: float) -> float:
+        """Calculate approximate z-score for a biomarker."""
+        if name not in self.normal_ranges:
+            return 0.0
+        
+        low, high = self.normal_ranges[name]
+        mean = (low + high) / 2
+        std = (high - low) / 4  # Approximate std
+        
+        if std == 0:
+            return 0.0
+        
+        return (value - mean) / std
+    
+    def _prob_to_level(self, prob: float) -> str:
+        """Convert probability to risk level string."""
+        if prob < 0.2:
+            return "low"
+        elif prob < 0.4:
+            return "moderate"
+        elif prob < 0.7:
+            return "high"
+        else:
+            return "critical"
+

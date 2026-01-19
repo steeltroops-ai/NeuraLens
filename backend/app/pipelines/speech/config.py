@@ -29,42 +29,45 @@ SUPPORTED_MIME_TYPES = {
 # Clinical normal ranges based on published research
 # Reference: Tsanas et al. (2012), Konig et al. (2015)
 BIOMARKER_NORMAL_RANGES: Dict[str, Tuple[float, float]] = {
-    "jitter": (0.01, 0.04),
-    "shimmer": (0.02, 0.06),
-    "hnr": (15.0, 25.0),
-    "speech_rate": (3.5, 5.5),
+    "jitter": (0.00, 1.04), # Percent (Local)
+    "shimmer": (0.00, 3.81), # Percent (Local)
+    "hnr": (20.0, 30.0), # dB
+    "cpps": (14.0, 30.0), # dB (Smoothed) - New Gold Standard
+    "speech_rate": (3.5, 6.5),
     "pause_ratio": (0.10, 0.25),
     "fluency_score": (0.75, 1.0),
-    "voice_tremor": (0.0, 0.10),
-    "articulation_clarity": (0.80, 1.0),
-    "prosody_variation": (0.40, 0.70),
+    "voice_tremor": (0.0, 0.15),
+    "articulation_clarity": (0.9, 1.1), # FCR ratio near 1.0 is healthy
+    "prosody_variation": (20.0, 100.0), # Hz (F0 Std Dev)
 }
 
 # Abnormal thresholds that trigger clinical alerts
 BIOMARKER_ABNORMAL_THRESHOLDS: Dict[str, float] = {
-    "jitter": 0.06,          # Above this is abnormal
-    "shimmer": 0.10,         # Above this is abnormal
-    "hnr": 10.0,             # Below this is abnormal
-    "speech_rate_low": 2.5,  # Below this is abnormal
-    "speech_rate_high": 7.0, # Above this is abnormal
-    "pause_ratio": 0.40,     # Above this is abnormal
-    "fluency_score": 0.50,   # Below this is abnormal
-    "voice_tremor": 0.25,    # Above this is abnormal
-    "articulation_clarity": 0.60,  # Below this is abnormal
-    "prosody_variation": 0.20,     # Below this is abnormal
+    "jitter": 2.0,           
+    "shimmer": 5.0,         
+    "hnr": 12.0, # Below this is pathological
+    "cpps": 11.0, # Below this is Dysphonia
+    "speech_rate_low": 2.5,  
+    "speech_rate_high": 7.5, 
+    "pause_ratio": 0.40,    
+    "fluency_score": 0.50,   
+    "voice_tremor": 0.25,    
+    "articulation_clarity": 1.2,  # >1.2 implies centralized vowels (Dysarthria)
+    "prosody_variation": 10.0,    # Monotone
 }
 
 # Clinical weights for risk calculation (based on published research)
 RISK_WEIGHTS: Dict[str, float] = {
-    "jitter": 0.15,
-    "shimmer": 0.12,
-    "hnr": 0.10,
+    "jitter": 0.10,
+    "shimmer": 0.08,
+    "hnr": 0.07,
+    "cpps": 0.15, # Strong predictor of dysphonia
     "speech_rate": 0.10,
     "pause_ratio": 0.15,
-    "fluency_score": 0.10,
-    "voice_tremor": 0.18,  # Highest - strong PD indicator
+    "fluency_score": 0.05,
+    "voice_tremor": 0.15, 
     "articulation_clarity": 0.05,
-    "prosody_variation": 0.05,
+    "prosody_variation": 0.10,
 }
 
 # Risk categories
