@@ -38,7 +38,7 @@ from reportlab.graphics.shapes import Drawing, Line, Rect, Circle
 from reportlab.graphics.charts.barcharts import HorizontalBarChart
 from reportlab.graphics import renderPDF
 
-from .schemas import RetinalAnalysisResponse, RiskAssessment
+from ..schemas import RetinalAnalysisResponse, RiskAssessment
 
 
 @dataclass

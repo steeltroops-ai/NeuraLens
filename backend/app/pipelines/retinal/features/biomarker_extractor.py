@@ -20,11 +20,11 @@ from dataclasses import dataclass, field
 from PIL import Image
 import io
 
-from .constants import (
+from ..utils.constants import (
     ClinicalConstants as CC,
     BIOMARKER_REFERENCES,
 )
-from .schemas import (
+from ..schemas import (
     BiomarkerValue,
     VesselBiomarkers,
     OpticDiscBiomarkers,

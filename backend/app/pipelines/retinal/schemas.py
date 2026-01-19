@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
-from .constants import (
+from .utils.constants import (
     ClinicalConstants as CC,
     DRGrade,
     RiskCategory,

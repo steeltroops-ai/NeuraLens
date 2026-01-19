@@ -33,7 +33,7 @@ except ImportError:
 
 # Import from schemas - using try/except for flexibility
 try:
-    from .schemas import ImageValidationResponse
+    from ..schemas import ImageValidationResponse
 except ImportError:
     # Fallback if schemas not available
     ImageValidationResponse = None

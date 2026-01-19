@@ -16,14 +16,14 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 import numpy as np
 
-from .constants import (
+from ..utils.constants import (
     ClinicalConstants as CC,
     DRGrade,
     RiskCategory,
     ICD10_CODES,
     REFERRAL_URGENCY,
 )
-from .schemas import (
+from ..schemas import (
     CompleteBiomarkers,
     DiabeticRetinopathyResult,
     DiabeticMacularEdema,

@@ -19,6 +19,9 @@ Each layer uses specialized modules in this folder:
 - clinical_assessment.py: DR grading, risk, findings
 - validator.py: Image quality assessment
 - visualization.py: Heatmap generation
+- error_codes.py: Structured error handling
+- preprocessing.py: CLAHE, color normalization
+- orchestrator.py: Retry logic, state tracking
 
 Author: NeuraLens Medical AI Team
 Version: 4.0.0
@@ -35,8 +38,8 @@ from datetime import datetime
 from PIL import Image
 import numpy as np
 
-# Import from pipeline modules
-from .constants import ClinicalConstants as CC, BIOMARKER_REFERENCES, ICD10_CODES
+# Import from pipeline modules (using proper subfolder structure)
+from .utils.constants import ClinicalConstants as CC, BIOMARKER_REFERENCES, ICD10_CODES
 from .schemas import (
     PipelineStage,
     PipelineError,
@@ -45,8 +48,8 @@ from .schemas import (
     ImageQuality,
     ImageValidationResponse,
 )
-from .biomarker_extractor import biomarker_extractor
-from .clinical_assessment import (
+from .features import biomarker_extractor
+from .clinical import (
     DRGrader,
     DMEAssessor,
     RiskCalculator,
@@ -56,13 +59,25 @@ from .clinical_assessment import (
     ClinicalSummaryGenerator,
 )
 
+# Core modules
+from .errors.codes import get_error, PipelineException, ErrorSeverity
+from .preprocessing import image_preprocessor, PreprocessingResult
+from .core.orchestrator import (
+    ReceiptConfirmation,
+    ExecutionContext,
+    AuditLogger,
+    SAFETY_DISCLAIMERS,
+    create_execution_context,
+    STAGE_CONFIGS,
+)
+
 # Optional imports (may fail if dependencies not installed)
 try:
-    from .validator import image_validator
+    from .input.validator import RetinalValidator as image_validator
 except ImportError:
     image_validator = None
 
-from .visualization import visualization_service
+from .output import visualization_service
 
 
 router = APIRouter()
@@ -541,7 +556,8 @@ class RetinalPipeline:
     """
     Main Pipeline Orchestrator
     
-    Executes all layers in sequence with comprehensive error handling.
+    Executes all layers in sequence with comprehensive error handling,
+    receipt confirmation, and audit logging.
     """
     
     @staticmethod
@@ -551,20 +567,38 @@ class RetinalPipeline:
         patient_id: str = "ANONYMOUS",
         patient_age: Optional[int] = None
     ) -> RetinalAnalysisResponse:
-        """Execute complete pipeline"""
+        """Execute complete pipeline with enhanced tracking"""
         
         start_time = time.time()
         
-        # Initialize state
+        # Initialize session
         if not session_id:
             session_id = str(uuid.uuid4())
         
         state = PipelineState(session_id=session_id)
         
+        # Read image bytes first for receipt
+        image_bytes = await image.read()
+        await image.seek(0)
+        
+        # Create receipt confirmation
+        receipt = ReceiptConfirmation(
+            image_received=True,
+            image_size_bytes=len(image_bytes),
+            received_at=datetime.utcnow().isoformat(),
+            filename=image.filename,
+            content_type=image.content_type,
+        )
+        
+        # Log session start
+        AuditLogger.log_session_start(
+            create_execution_context(session_id, image_bytes, image.filename, image.content_type)
+        )
+        
         logger.info(f"[{session_id}] ========== PIPELINE START ==========")
+        logger.info(f"[{session_id}] Receipt: {receipt.image_size_bytes} bytes, {receipt.filename}")
         
         # Initialize result holders
-        image_bytes = None
         img_array = None
         image_quality = None
         biomarkers = None
@@ -576,13 +610,70 @@ class RetinalPipeline:
         recommendations = []
         summary = None
         heatmap = ""
+        preprocessing_result = None
         
         try:
-            # LAYER 1: INPUT
-            image_bytes = await InputLayer.process(image, state)
+            # LAYER 1: INPUT - Validate file
+            state.current_stage = PipelineStage.INPUT_VALIDATION
+            start = time.time()
             
-            # LAYER 2: PREPROCESSING
-            img_array, image_quality = PreprocessingLayer.process(image_bytes, state)
+            content_type = image.content_type or ""
+            if not content_type.startswith("image/"):
+                raise PipelineException("VAL_001", {"content_type": content_type})
+            
+            file_size_mb = len(image_bytes) / (1024 * 1024)
+            if file_size_mb > CC.MAX_FILE_SIZE_MB:
+                raise PipelineException("VAL_052", {"size_mb": file_size_mb, "max_mb": CC.MAX_FILE_SIZE_MB})
+            
+            if len(image_bytes) < 1000:
+                raise PipelineException("VAL_050", {"size_bytes": len(image_bytes)})
+            
+            state.stages_completed.append(PipelineStage.INPUT_VALIDATION)
+            state.stages_timing_ms[PipelineStage.INPUT_VALIDATION] = (time.time() - start) * 1000
+            logger.info(f"[{session_id}] INPUT: Validated {file_size_mb:.2f}MB")
+            
+            # LAYER 2: PREPROCESSING - Enhanced with new preprocessor
+            state.current_stage = PipelineStage.IMAGE_PREPROCESSING
+            start = time.time()
+            
+            try:
+                preprocessing_result = image_preprocessor.preprocess(image_bytes)
+                img_array = preprocessing_result.image
+                
+                # Build ImageQuality from preprocessing result
+                img = Image.open(io.BytesIO(image_bytes))
+                width, height = img.size
+                
+                image_quality = ImageQuality(
+                    overall_score=preprocessing_result.quality_score,
+                    gradability=preprocessing_result.quality_grade,
+                    is_gradable=preprocessing_result.quality_score >= 0.3,
+                    issues=preprocessing_result.warnings,
+                    snr_db=preprocessing_result.snr_db,
+                    focus_score=preprocessing_result.sharpness_score,
+                    illumination_score=preprocessing_result.illumination_score,
+                    contrast_score=preprocessing_result.contrast_score,
+                    optic_disc_visible=True,
+                    macula_visible=True,
+                    vessel_arcades_visible=True,
+                    resolution=(width, height),
+                    file_size_mb=round(file_size_mb, 2),
+                    field_of_view="standard"
+                )
+                
+                # Update receipt with dimensions
+                receipt.image_dimensions = (width, height)
+                
+            except PipelineException:
+                raise
+            except Exception as e:
+                # Fallback to basic preprocessing
+                logger.warning(f"[{session_id}] Enhanced preprocessing failed, using fallback: {e}")
+                img_array, image_quality = PreprocessingLayer.process(image_bytes, state)
+            
+            state.stages_completed.append(PipelineStage.IMAGE_PREPROCESSING)
+            state.stages_timing_ms[PipelineStage.IMAGE_PREPROCESSING] = (time.time() - start) * 1000
+            logger.info(f"[{session_id}] PREPROCESS: Quality={image_quality.overall_score:.2f} ({image_quality.gradability})")
             
             if not image_quality.is_gradable:
                 state.warnings.append("Image quality below threshold - results may be affected")
@@ -609,8 +700,21 @@ class RetinalPipeline:
             # LAYER 7: VISUALIZATION
             heatmap = VisualizationLayer.process(image_bytes, state)
             
+        except PipelineException as pe:
+            logger.error(f"[{session_id}] Pipeline failed at {state.current_stage}: {pe.code} - {pe.error['message']}")
+            state.errors.append(PipelineError(
+                stage=state.current_stage,
+                error_type=pe.code,
+                message=pe.error['message'],
+                details=pe.error
+            ))
         except Exception as e:
             logger.error(f"[{session_id}] Pipeline failed at {state.current_stage}: {e}")
+            state.errors.append(PipelineError(
+                stage=state.current_stage,
+                error_type="SYS_001",
+                message=str(e)
+            ))
         
         # LAYER 8: OUTPUT (always runs)
         total_time = int((time.time() - start_time) * 1000)
@@ -630,6 +734,10 @@ class RetinalPipeline:
             heatmap_b64=heatmap,
             total_time_ms=total_time
         )
+        
+        # Log session end
+        ctx = create_execution_context(session_id, image_bytes, image.filename, image.content_type)
+        AuditLogger.log_session_end(ctx, response.success, dr.grade if dr else None)
         
         logger.info(f"[{session_id}] ========== PIPELINE END ({total_time}ms) ==========")
         
