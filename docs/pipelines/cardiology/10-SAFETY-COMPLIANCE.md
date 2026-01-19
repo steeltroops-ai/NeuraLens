@@ -1,0 +1,313 @@
+# 10 - Performance, Safety, and Compliance
+
+## Document Info
+| Field | Value |
+|-------|-------|
+| Stage | Safety & Compliance |
+| Owner | Cardiologist + ML Architect |
+| Reviewer | All Team Members |
+
+---
+
+## 1. Clinical Safety Analysis
+
+### 1.1 False Negative Risks (CRITICAL)
+
+| Condition | Missed Detection Risk | Clinical Impact | Mitigation |
+|-----------|----------------------|-----------------|------------|
+| Atrial Fibrillation | 12% (est.) | Stroke risk if untreated | Conservative thresholds, flag borderline |
+| Reduced EF | 8% (est.) | Heart failure progression | Confidence-weighted reporting |
+| Severe Bradycardia | 5% (est.) | Syncope, cardiac arrest | Alert on HR < 45 always |
+| Long QT | 15% (est.) | Sudden cardiac death | Flag all QTc > 440ms |
+| Wall Motion Abnormality | 20% (est.) | Missed ischemia | Report view limitations |
+
+### 1.2 False Positive Considerations
+
+| Condition | Over-Detection Risk | Impact | Mitigation |
+|-----------|-------------------|--------|------------|
+| AFib | 8% (est.) | Unnecessary anticoagulation workup | Require duration criteria |
+| Cardiomyopathy | 12% (est.) | Patient anxiety, unnecessary tests | Clinical correlation note |
+| PVC | 15% (est.) | Over-investigation | Report frequency, not single beat |
+
+### 1.3 Sensitivity vs Specificity Trade-offs
+
+| Priority | Approach |
+|----------|----------|
+| Critical conditions (AFib, low EF) | Favor sensitivity (accept false positives) |
+| Benign findings (PAC, borderline) | Favor specificity (reduce alarm fatigue) |
+| Screening context | High sensitivity required |
+| Diagnostic confirmation | Balance sensitivity/specificity |
+
+---
+
+## 2. Bias Analysis
+
+### 2.1 Age-Related Bias
+| Age Group | Known Considerations |
+|-----------|---------------------|
+| Pediatric (< 18) | Different normal ranges, model may underperform |
+| Young Adult (18-40) | Athletes may have low HR, high HRV |
+| Middle Age (40-65) | Training data well-represented |
+| Elderly (65-80) | More arrhythmias, atypical presentations |
+| Very Elderly (> 80) | Limited training data, exercise caution |
+
+**Mitigation:**
+- Age-adjusted normal ranges
+- Confidence reduction for under-represented groups
+- Clear labeling of pediatric limitations
+
+### 2.2 Sex-Related Bias
+| Factor | Consideration |
+|--------|--------------|
+| Heart size | Women have smaller hearts on average |
+| HR norms | Women may have slightly higher resting HR |
+| QT interval | Women have longer QTc normally |
+| AFib detection | May present differently in women |
+
+**Mitigation:**
+- Sex-specific thresholds for QTc
+- Report sex when interpreting results
+- Monitor performance by sex in production
+
+### 2.3 Device Variability
+| Device Type | Considerations |
+|-------------|---------------|
+| Consumer ECG (Apple Watch, etc.) | Single-lead, lower fidelity |
+| Clinical 12-lead | Gold standard, full assessment |
+| Portable monitors | Variable quality |
+| Echocardiogram machines | Different vendors, image quality |
+
+**Mitigation:**
+- Validate on multi-device datasets
+- Adjust confidence by input quality
+- Report device limitations
+
+### 2.4 Hospital/Population Variability
+| Factor | Risk |
+|--------|------|
+| Geographic | Different disease prevalence |
+| Socioeconomic | Access to care differences |
+| Equipment age | Image/signal quality variation |
+| Operator skill | Echo quality varies |
+
+---
+
+## 3. Signal Quality Drift
+
+### 3.1 Input Quality Monitoring
+| Metric | Baseline | Alert Threshold |
+|--------|----------|-----------------|
+| ECG SNR (mean) | 15 dB | < 10 dB |
+| Echo quality score (mean) | 0.85 | < 0.70 |
+| R-peak detection rate | 98% | < 90% |
+| View classification confidence | 0.88 | < 0.75 |
+
+### 3.2 Model Performance Monitoring
+| Metric | Target | Alert |
+|--------|--------|-------|
+| Validation accuracy | 92% | < 88% |
+| Calibration error | < 5% | > 10% |
+| Inference latency (p95) | 3s | > 5s |
+| Error rate | < 2% | > 5% |
+
+---
+
+## 4. Triage vs Diagnostic Labeling
+
+### 4.1 Classification of Results
+| Label | Definition | Clinical Implication |
+|-------|------------|---------------------|
+| **SCREENING** | Initial risk assessment | Not a diagnosis, suggests follow-up |
+| **SUPPORTIVE** | Assists clinical decision | Requires clinical correlation |
+| **INFORMATIONAL** | Educational, wellness | Not for medical decisions |
+
+### 4.2 Current Pipeline Classification
+```
+This pipeline is classified as: SCREENING / SUPPORTIVE
+
+NOT intended for:
+- Standalone diagnosis
+- Treatment decisions without physician review
+- Emergency triage as sole input
+- Replacement of clinical ECG/Echo interpretation
+```
+
+---
+
+## 5. Clinical Disclaimer Language
+
+### 5.1 Mandatory Disclaimer
+```
+IMPORTANT MEDICAL DISCLAIMER
+
+This cardiac analysis is provided for INFORMATIONAL and SCREENING purposes only.
+
+This tool is NOT a substitute for professional medical advice, diagnosis, or 
+treatment. The analysis is generated by artificial intelligence algorithms and 
+has limitations:
+
+- Results should be reviewed by a qualified healthcare provider
+- This is not a clinical-grade ECG or echocardiogram interpretation
+- False positives and false negatives can occur
+- The system may not detect all cardiac conditions
+- Normal results do not guarantee absence of heart disease
+
+SEEK IMMEDIATE MEDICAL ATTENTION if you experience:
+- Chest pain or pressure
+- Difficulty breathing
+- Fainting or near-fainting
+- Rapid or irregular heartbeat
+- Any concerning symptoms
+
+Always consult with a cardiologist or your healthcare provider for 
+interpretation of cardiac findings and treatment decisions.
+
+This analysis should not delay seeking emergency care when warranted.
+```
+
+### 5.2 Condition-Specific Disclaimers
+```python
+CONDITION_DISCLAIMERS = {
+    "atrial_fibrillation": (
+        "AFib screening is based on rhythm irregularity analysis. "
+        "Clinical confirmation with 12-lead ECG is required. "
+        "Anticoagulation decisions require physician evaluation."
+    ),
+    "reduced_ef": (
+        "Ejection fraction estimates have +/- 5% variability. "
+        "Formal echocardiogram with sonographer interpretation recommended "
+        "for treatment decisions."
+    ),
+    "arrhythmia": (
+        "Single screening may not capture intermittent arrhythmias. "
+        "Extended monitoring may be recommended by your physician."
+    )
+}
+```
+
+---
+
+## 6. Audit Logging Requirements
+
+### 6.1 Required Log Fields
+| Field | Purpose | Retention |
+|-------|---------|-----------|
+| request_id | Traceability | 7 years |
+| timestamp | Timeline | 7 years |
+| user_id (hashed) | Usage tracking | 7 years |
+| input_hash | Input verification | 7 years |
+| model_versions | Reproducibility | 7 years |
+| results_summary | Audit | 7 years |
+| confidence_scores | Quality tracking | 7 years |
+| warnings_issued | Safety tracking | 7 years |
+
+### 6.2 Audit Log Schema
+```json
+{
+  "audit_log": {
+    "request_id": "req_abc123",
+    "timestamp": "2026-01-19T10:30:00.000Z",
+    "user_id_hash": "sha256:abc...",
+    "session_id": "sess_xyz",
+    
+    "input_summary": {
+      "modalities": ["ecg_signal", "echo_video"],
+      "ecg_duration_sec": 30,
+      "echo_frames": 450,
+      "metadata_provided": true
+    },
+    
+    "model_versions": {
+      "ecg_rhythm_classifier": "v2.1.0",
+      "echo_ef_estimator": "v1.3.2",
+      "fusion_model": "v1.0.0"
+    },
+    
+    "results_summary": {
+      "risk_category": "low",
+      "risk_score": 12.5,
+      "conditions_flagged": [],
+      "confidence_overall": 0.91
+    },
+    
+    "quality_metrics": {
+      "ecg_snr_db": 18.5,
+      "echo_quality": 0.88
+    },
+    
+    "warnings_issued": [],
+    "disclaimer_presented": true,
+    "processing_time_ms": 2450
+  }
+}
+```
+
+---
+
+## 7. Deployment Safety Checklist
+
+### 7.1 Pre-Deployment
+- [ ] Model validated on held-out test set (N > 1000)
+- [ ] Bias analysis completed for age/sex/device
+- [ ] False negative rate < acceptable threshold per condition
+- [ ] Confidence calibration verified
+- [ ] Disclaimer language approved by legal/medical
+- [ ] Audit logging implemented and tested
+- [ ] Error handling covers all edge cases
+- [ ] Fallback behavior defined for model failures
+
+### 7.2 Monitoring in Production
+- [ ] Real-time error rate monitoring
+- [ ] Quality score drift detection
+- [ ] User feedback collection mechanism
+- [ ] Adverse event reporting pathway
+- [ ] Model performance dashboard
+- [ ] Weekly bias metric review
+
+### 7.3 Incident Response
+| Severity | Definition | Response Time | Action |
+|----------|------------|---------------|--------|
+| Critical | Incorrect critical finding | Immediate | Halt, notify users |
+| High | Systematic misclassification | 4 hours | Investigation, potential halt |
+| Medium | Elevated error rate | 24 hours | Investigation |
+| Low | Minor quality degradation | 1 week | Monitor, plan fix |
+
+---
+
+## 8. Regulatory Considerations
+
+### 8.1 Classification Notes
+| Jurisdiction | Potential Classification |
+|--------------|-------------------------|
+| FDA (US) | Class II Medical Device (if diagnostic claims) |
+| CE (EU) | Medical Device Regulation Class IIa |
+| TGA (AU) | Class IIa Medical Device |
+
+### 8.2 Current Positioning
+```
+This tool is positioned as:
+- WELLNESS / SCREENING application
+- NOT making diagnostic claims
+- Recommending physician follow-up
+- Educational and informational use
+
+Regulatory clearance would be required for:
+- Diagnostic claims
+- Treatment recommendations
+- Emergency department use
+- Standalone clinical decision support
+```
+
+---
+
+## 9. Summary Checklist
+
+| Category | Status | Notes |
+|----------|--------|-------|
+| False negative risk analysis | Complete | See Section 1.1 |
+| Bias assessment | Complete | Age, sex, device |
+| Quality monitoring | Defined | Thresholds set |
+| Disclaimer language | Approved | Mandatory display |
+| Audit logging | Specified | 7-year retention |
+| Deployment safety | Checklist ready | Pre/post deployment |
+| Regulatory positioning | Documented | Screening/wellness |

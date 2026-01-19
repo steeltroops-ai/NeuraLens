@@ -81,23 +81,29 @@ openai-whisper>=20231117
 
 ---
 
-## Files Structure
+## Documentation Structure
 
 ```
-docs/hackathon/
-|-- 00-PIPELINE-OVERVIEW.md      # This file
-|-- 01-SPEECH-PIPELINE-PRD.md    # Voice biomarkers
-|-- 02-RETINAL-PIPELINE-PRD.md   # Fundus imaging
-|-- 03-NRI-FUSION-PRD.md         # Multi-modal fusion
-|-- 04-COGNITIVE-PIPELINE-PRD.md # Cognitive tests
-|-- 05-MOTOR-PIPELINE-PRD.md     # Motor assessment
-|-- 06-DEPLOYMENT.md             # Deployment guide
-|-- 07-SUBMISSION-CHECKLIST.md   # Final checklist
-|-- 08-AGENT-WORKFLOWS.md        # Development workflows
-|-- 09-CARDIOLOGY-PIPELINE-PRD.md # ECG analysis
-|-- 10-RADIOLOGY-PIPELINE-PRD.md # X-ray analysis
-|-- 11-VOICE-ASSISTANT-PRD.md    # ElevenLabs TTS
-|-- 12-PREBUILT-MODELS-GUIDE.md  # Model recommendations
+docs/
+|-- README.md                         # Documentation hub
+|-- overview/
+|   |-- PIPELINE-OVERVIEW.md          # This file
+|-- pipelines/
+|   |-- speech/PRD.md                 # Voice biomarkers
+|   |-- retinal/PRD.md                # Fundus imaging
+|   |-- nri/PRD.md                    # Multi-modal fusion
+|   |-- cognitive/PRD.md              # Cognitive tests
+|   |-- motor/PRD.md                  # Motor assessment
+|   |-- cardiology/PRD.md             # ECG analysis
+|   |-- radiology/PRD.md              # X-ray analysis
+|   |-- voice/PRD.md                  # ElevenLabs TTS
+|-- infrastructure/
+|   |-- DEPLOYMENT.md                 # Deployment guide
+|-- hackathon_and_demo/
+|   |-- SUBMISSION-CHECKLIST.md       # Final checklist
+|   |-- AGENT-WORKFLOWS.md            # Development workflows
+|-- data_and_experiments/models/
+|   |-- PREBUILT-MODELS-GUIDE.md      # Model recommendations
 ```
 
 ---
