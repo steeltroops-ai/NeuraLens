@@ -4,7 +4,7 @@
   "description": "MediLens - AI-Powered Medical Analysis Platform",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -n \"API,WEB\" -c \"green.bold,blue.bold\" \"bun run backend\" \"bun run frontend\"",
+    "dev": "concurrently --kill-others-on-fail -n \"API,WEB,BROWSER\" -c \"green.bold,blue.bold,yellow\" \"bun run backend\" \"bun run frontend\" \"python -c \\\"import time, webbrowser; time.sleep(5); webbrowser.open('http://localhost:3000')\\\"\"",
     "backend": "cd backend && .venv/Scripts/python.exe -m uvicorn app.main:app --reload --port 8000",
     "frontend": "cd frontend && bun run dev",
     "install:backend": "cd backend && python -m venv .venv && .venv/Scripts/pip.exe install -r requirements.txt",

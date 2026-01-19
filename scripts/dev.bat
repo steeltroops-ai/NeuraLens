@@ -42,6 +42,10 @@ timeout /t 2 /nobreak > nul
 REM Start Frontend in new window
 start "MediLens Frontend" cmd /k "cd /d %FRONTEND_DIR% && bun run dev"
 
+REM Open Browser after a few seconds
+timeout /t 5 /nobreak > nul
+start http://localhost:3000
+
 echo.
 echo [*] Servers started in separate windows
 echo [*] Frontend: http://localhost:3000

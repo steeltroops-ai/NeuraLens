@@ -66,6 +66,11 @@ $frontendJob = Start-Job -ScriptBlock {
     bun run dev 2>&1
 } -ArgumentList $frontendDir
 
+# Launch Browser
+Start-Sleep -Seconds 5
+Write-Host "[*] Opening browser..." -ForegroundColor Cyan
+Start-Process "http://localhost:3000"
+
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor DarkGray
 Write-Host " Servers Running:" -ForegroundColor White
