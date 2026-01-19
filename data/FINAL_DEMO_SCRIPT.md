@@ -1,455 +1,407 @@
-Right now, somewhere in a rural clinic or even in a busy metropolitan hospital, a patient is waiting.
+# MediLens Video Demo Script
 
-They might be waiting for a specialist who visits once a month, or for a scan result that sits in a backlog for weeks.
+> **Total Duration:** ~10 minutes  
+> **Format:** Screen recording with voiceover  
+> **Resolution:** 1920x1080 @ 60fps
 
-We often talk about healthcare access as a policy problem, but it is fundamentally a data bottleneck.
+---
 
-The raw expertise required to analyze a retinal scan, interpret a complex ECG, or detect subtle neurological signs in a voice recording is scarce.
+## Scene Overview
 
-It is expensive.
+| Scene | Duration | Content | Screen |
+|-------|----------|---------|--------|
+| 1 | 0:00-0:45 | Opening Hook & Problem | Title Card + Stats |
+| 2 | 0:45-1:30 | Vision & Solution | Homepage |
+| 3 | 1:30-2:15 | Platform Introduction | Dashboard |
+| 4 | 2:15-3:30 | Retinal Pipeline Demo | RetinaScan Page |
+| 5 | 3:30-4:45 | Speech Pipeline Demo | SpeechMD Page |
+| 6 | 4:45-5:45 | Cardiology Pipeline Demo | CardioPredict Page |
+| 7 | 5:45-6:30 | AI Explanation + Voice | Explanation Panel |
+| 8 | 6:30-7:15 | Architecture Overview | GitHub ARCHITECTURE.md |
+| 9 | 7:15-7:45 | AI Chatbot Demo | Medical Chatbot |
+| 10 | 7:45-8:30 | Additional Features | Dashboard Tour |
+| 11 | 8:30-9:15 | Coming Soon & Roadmap | Sidebar + Vision |
+| 12 | 9:15-10:00 | Closing & Impact | Homepage + Logo |
 
-And it is geographically concentrated.
+---
 
-When diagnosis is delayed, outcomes worsen.
+## SCENE 1: Opening Hook (0:00 - 0:45)
 
-When a subtle signal is missed because a doctor is overworked, lives are impacted.
+**SCREEN:** Black background with animated text appearing
 
-We asked ourselves a simple but profound question: What if we could decouple diagnostic precision from the limitations of time and geography?
+**[0:00-0:15]** *Slow fade in*
 
-What if a primary care physician, or even a nurse in a remote outpost, had immediate access to the collective intelligence of a board of specialists, available instantly, twenty-four seven?
+> Right now, somewhere in a rural clinic, a patient is waiting.
+>
+> Waiting for a specialist who visits once a month.
+> Waiting for a scan result that sits in a backlog for weeks.
 
-Welcome to MediLens, also known as NeuraLens.
+**[0:15-0:30]** *Statistics appear on screen*
 
-This is not just another chatbot or a simple wrapper around an API.
+> Healthcare access is not just a policy problem.
+> It is a data bottleneck.
+>
+> The expertise to analyze a retinal scan, interpret an ECG, or detect neurological signs in a voice... is scarce. Expensive. Geographically concentrated.
 
-This is a production-grade, multimodal medical AI platform designed to ingest, analyze, and synthesize complex physiological data across the human body.
+**[0:30-0:45]** *MediLens logo fade in*
 
-We set out to build a system that sees the patient as a whole.
+> What if we could decouple diagnostic precision from the limitations of time and geography?
+>
+> Welcome to **MediLens**.
 
-Medicine is not unimodal.
+---
 
-A cardiologist does not just look at an ECG; they listen to the patient's breathing.
+## SCENE 2: Vision & Solution (0:45 - 1:30)
 
-A neurologist does not just look at an MRI; they listen to speech patterns.
+**SCREEN:** Homepage - localhost:3000
 
-Why should our AI be any different?
+**ACTION:** Open homepage, hover over hero section
 
-We have built a platform that integrates retinal imaging for systemic vascular health, acoustic analysis for neurological biomarkers, cardiac signal processing for arrhythmia detection, and chest X-ray analysis for pulmonary conditions, all orchestrated into a single, unified workflow.
+**[0:45-1:00]**
 
-Our mission here was not to build a toy model for a hackathon.
+> MediLens is not just another chatbot or a simple API wrapper.
+>
+> This is a production-grade, multimodal medical AI platform designed to ingest, analyze, and synthesize complex physiological data across the human body.
 
-It was to engineer a scalable, safe, and interpretable system that can actually sit in a clinical workflow today.
+**[1:00-1:15]** *Scroll to features section*
 
-Let me walk you through the architecture, because that is where the real innovation lies.
+> We built a system that sees the patient as a whole.
+>
+> A cardiologist doesn't just look at an ECG; they listen to breathing.
+> A neurologist doesn't just look at an MRI; they listen to speech patterns.
+>
+> Why should our AI be any different?
 
-MediLens is architected as a high-availability, distributed microservices system.
+**[1:15-1:30]** *Scroll to show technology logos*
 
-On the frontend, we are running Next.js version 16 with React Server Components.
+> We integrate retinal imaging, acoustic analysis, cardiac signal processing, and chest X-ray analysis... all orchestrated into a single, unified workflow.
 
-We chose this stack specifically for its superior rendering performance and SEO capabilities, ensuring that even on low-bandwidth connections in rural areas, the application remains responsive.
+---
 
-The user interface is styled with Tailwind CSS and animated with Framer Motion to ensure a sixty-frames-per-second, zero-latency experience that mimics native medical software.
+## SCENE 3: Dashboard Introduction (1:30 - 2:15)
 
-We use Bun as our JavaScript package manager and runtime for optimal build speeds and execution performance.
+**SCREEN:** Dashboard - localhost:3000/dashboard
 
-The backend is where the heavy lifting happens.
+**ACTION:** Log in with Clerk, show dashboard
 
-We are using FastAPI to orchestrate a suite of asynchronous Python microservices.
+**[1:30-1:45]** *Dashboard loads with greeting*
 
-We manage our Python dependencies with uv for strict reproducibility inside virtual environments.
+> Here is the MediLens Dashboard.
+>
+> Notice the personalized greeting. "Good afternoon, [User]."
+> We designed this for clinicians who need instant context.
 
-Crucially, we did not just dump all our code into a single monolithic file.
+**[1:45-2:00]** *Hover over diagnostic cards*
 
-We designed a standardized Pipeline Interface.
+> You can see all nine available AI diagnostic modules.
+>
+> RetinaScan AI, SpeechMD AI, CardioPredict AI, ChestXplorer AI...
+> Plus SkinSense, Motor Assessment, Cognitive Testing, Multi-Modal, and NRI Fusion.
 
-Whether we are processing an image, an audio file, or a time-series signal, every single module adheres to a strict contract.
+**[2:00-2:15]** *Show system status and user overview*
 
-That contract includes Input Validation, Preprocessing, Core Inference, Uncertainty Quantification, and Explainability.
+> On the right, we have your personal health overview.
+> Total assessments, health score, last test date, and current risk level.
+>
+> Below that, recent activity shows your assessment history with risk indicators.
 
-This modularity is what allows MediLens to be scalable from Day One.
+---
 
-It allows us to hot-swap models, update pipeline logic, or add entirely new modalities like dermatology or MRI without bringing down the system.
+## SCENE 4: Retinal Pipeline Demo (2:15 - 3:30)
 
-Now let me show you the platform itself.
+**SCREEN:** RetinaScan AI - localhost:3000/dashboard/retinal
 
-Here is the MediLens Dashboard.
+**ACTION:** Click RetinaScan, upload fundus image, run analysis
 
-Medical software is notorious for being clunky and difficult to navigate.
+**[2:15-2:30]** *Navigate to RetinaScan page*
 
-We flipped that script.
+> Let's dive into our flagship imaging pipeline: **RetinaScan AI**.
+>
+> Vascular health is systemic. Changes in the eye often reflect changes in the heart and brain.
 
-We designed this with a Control Center aesthetic, utilizing a dark mode interface specifically to reduce eye strain in dimly lit radiology reading rooms.
+**[2:30-2:45]** *Upload a fundus image*
 
-We prioritized information density without cognitive overload.
+> When a clinician uploads a fundus image, the system kicks off a multi-step process.
+>
+> First, the image hits our **Quality Gate**. We detect blur, uneven illumination, and artifacts.
+> If quality drops below threshold, we reject it instantly.
 
-At a glance, clinicians can see platform statistics.
+**[2:45-3:00]** *Show analysis running with pipeline status bar*
 
-They see that processing time is under two seconds.
+> Watch the status bar at the bottom.
+> You can see each stage: Uploading, Preprocessing, Segmenting Vessels, Extracting Biomarkers, Generating Heatmap.
+>
+> This is real-time pipeline observability.
 
-They see that we operate four active pipelines today.
+**[3:00-3:15]** *Results appear with heatmap*
 
-They see that our accuracy target is ninety-five percent and above.
+> Look at the result.
+> We don't just output "Disease Detected."
+>
+> We generate a biological heatmap, a Grad-CAM visualization showing exactly which micro-aneurysms, exudates, or hemorrhages triggered the risk score.
 
-And they see that we are HIPAA compliant.
+**[3:15-3:30]** *Hover over biomarker cards*
 
-On the right side of the screen, you will see our System Status panel.
+> We extract 12 distinct biomarkers: Vessel Density, Cup-to-Disc Ratio, Hemorrhage Count, Exudates, and more.
+>
+> Each with a value, a status, and a clinical explanation.
 
-This is not a static mockup.
+---
 
-This is a live feed connected via WebSockets to our backend health endpoints.
+## SCENE 5: Speech Pipeline Demo (3:30 - 4:45)
 
-It is actively monitoring the latency, error rates, and throughput of our Retinal, Speech, Cardiology, and Radiology pipelines in real-time.
+**SCREEN:** SpeechMD AI - localhost:3000/dashboard/speech
 
-In a clinical setting, you cannot afford downtime.
+**ACTION:** Navigate to Speech page, record or upload audio, run analysis
 
-If a model fails to load or latency spikes, the clinician needs to know immediately.
+**[3:30-3:45]** *Navigate to Speech Analysis*
 
-This level of observability is standard in DevOps but rare in MedTech, and we felt it was essential to bring it here.
+> Now something arguably more innovative: our **Speech Analysis Pipeline**.
+>
+> The human voice is a rich, underutilized biomarker.
+> Early stages of Parkinson's or Alzheimer's often manifest in vocal patterns years before physical tremors appear.
 
-Below the status panel, we display all available diagnostic modules.
+**[3:45-4:00]** *Click record or upload audio*
 
-Currently, we have four modules that are fully implemented and available now.
+> You can either record directly using your microphone, or upload an existing audio file.
+>
+> We support WAV, MP3, M4A, WebM, and OGG formats.
 
-These are RetinaScan AI for retinal fundus analysis, ChestXplorer AI for chest X-ray analysis, CardioPredict AI for ECG signal analysis, and SpeechMD AI for voice biomarker analysis.
+**[4:00-4:15]** *Show analysis running*
 
-Beyond these, we have designed and roadmapped eight additional modules that are Coming Soon.
+> We're not doing simple speech-to-text.
+> We're analyzing the physics of the sound wave itself.
+>
+> Watch the pipeline: Uploading, Preprocessing, Extracting Biomarkers, Generating Assessment.
 
-These include SkinSense AI for dermatology and melanoma detection, Motor Assessment for movement pattern and tremor detection, Cognitive Testing for memory and executive function assessment, HistoVision AI for tissue sample and blood smear pathology, NeuroScan AI for brain MRI and CT scan analysis, RespiRate AI for respiratory sound and spirometry analysis, FootCare AI for diabetic foot ulcer assessment, and BoneScan AI for bone fracture and arthritis detection.
+**[4:15-4:30]** *Results appear with biomarker cards*
 
-This roadmap illustrates our vision of becoming a comprehensive, multi-specialty diagnostic platform.
+> We extract 9 distinct biomarkers:
+> Jitter, Shimmer, Harmonics-to-Noise Ratio, CPPS, Fundamental Frequency, Speech Rate, Formants, MFCCs, and Pause Patterns.
+>
+> Each compared against clinical baselines.
 
-Let us dive into our flagship imaging pipeline: the Retinal Assessment Engine, which we call RetinaScan AI.
+**[4:30-4:45]** *Show radar chart and risk score*
 
-Vascular health is systemic.
+> The radar chart visualizes all biomarkers at once.
+> And we generate a neurological risk score from 0 to 100.
+>
+> This transforms a smartphone microphone into a diagnostic medical device.
 
-Changes in the eye often reflect changes in the heart and brain.
+---
 
-This module is labeled as version 4.0 Modular, reflecting the maturity of our architecture.
+## SCENE 6: Cardiology Pipeline Demo (4:45 - 5:45)
 
-When a clinician uploads a fundus image, the Research Grade Retinal Service kicks off a multi-step process.
+**SCREEN:** CardioPredict AI - localhost:3000/dashboard/cardiology
 
-It does not just blindly feed the image to a neural network.
+**ACTION:** Navigate to Cardiology page, upload ECG, run analysis
 
-First, the image hits our Quality Gate.
+**[4:45-5:00]** *Navigate to Cardiology page*
 
-We trained a lightweight classifier to detect blur, uneven illumination, and artifacts.
+> Our third pillar: **CardioPredict AI**.
+>
+> Signal processing at its finest. We're dealing with high-frequency time-series data from Electrocardiograms.
 
-If the image quality score drops below our strict threshold of zero point three, we reject it instantly and prompt the user to retake the photo.
+**[5:00-5:15]** *Upload ECG file or use demo*
 
-We do not allow the model to guess on bad data.
+> You can upload raw ECG data or use our demo mode for instant results.
+>
+> The system handles 12-lead signal arrays with aggressive noise filtering.
 
-This safeguards against the classic garbage in, garbage out problem that plagues many AI deployments.
+**[5:15-5:30]** *Show analysis running*
 
-Once validated, the image goes through our Preprocessing Layer.
+> We filter power-line interference, remove baseline wander, and run specialized R-peak detection.
+>
+> By measuring distances between R-peaks, we calculate Heart Rate Variability, a powerful proxy for autonomic nervous system health.
 
-We have a Color Normalizer that uses LAB color space standardization to normalize fundus appearances from different camera hardware.
+**[5:30-5:45]** *Show results with rhythm classification*
 
-We have an Illumination Corrector that uses Multi-Scale Retinex with Color Restoration, known as MSRCR, to handle uneven lighting conditions.
+> The output isn't just "Normal" or "Abnormal."
+> We classify the specific rhythm type: Sinus Rhythm, Atrial Fibrillation, Bradycardia, Tachycardia.
+>
+> We extract 15+ biomarkers and return the exact time intervals that triggered any alerts.
 
-Most importantly, we apply CLAHE, or Contrast Limited Adaptive Histogram Equalization, with a clip limit of 2.0 and tile size of eight by eight pixels.
+---
 
-This mathematically enhances the contrast of the micro-vessels without introducing digital noise, effectively normalizing images taken from different hardware.
+## SCENE 7: AI Explanation + Voice (5:45 - 6:30)
 
-We also have a Fundus Detector module that verifies the uploaded image is actually a retinal fundus photograph by checking for red channel dominance, circular field of view, and vessel-like edge patterns.
+**SCREEN:** Any pipeline results page - focus on ExplanationPanel
 
-We even have an Artifact Remover to clean up dust spots and reflections.
+**ACTION:** Show AI explanation generating, then click voice button
 
-Only then does the inference engine run.
+**[5:45-6:00]** *Point to AI Explanation panel*
 
-It detects anatomical landmarks, specifically the optic disc and the macula, and segments the vascular tree to identify lesions, hemorrhages, or signs of Diabetic Retinopathy.
+> Now watch this. After every analysis, our AI Explanation panel automatically generates.
+>
+> This is powered by **Cerebras Cloud** running **Llama 3.3 70B**, one of the fastest LLM inference engines available.
 
-The header on this page tells you the key statistics.
+**[6:00-6:15]** *Show streaming text*
 
-We achieve ninety-three percent accuracy for Diabetic Retinopathy grading.
+> The explanation streams in real-time, token by token.
+> It synthesizes the biomarker results into plain English clinical context.
+>
+> "Based on the analysis, the patient shows elevated jitter values suggesting potential vocal instability..."
 
-Processing time is under two seconds.
+**[6:15-6:30]** *Click voice button, show audio playing*
 
-We extract twelve distinct biomarkers.
+> And here's the magic. Click this speaker icon.
+>
+> We integrated **AWS Polly** for text-to-speech. The AI explanation is now being read aloud.
+>
+> This is perfect for busy clinicians who want to listen while reviewing other data.
 
-And we adhere to ETDRS grading standards.
+---
 
-But look at the result on the screen.
+## SCENE 8: Architecture Overview (6:30 - 7:15)
 
-We do not just output a black-box label saying Disease Detected.
+**SCREEN:** GitHub - ARCHITECTURE.md file
 
-We generate a biological Heatmap.
+**ACTION:** Open GitHub repo, navigate to ARCHITECTURE.md, scroll through diagrams
 
-This is a Grad-CAM visualization that overlays the model's attention onto the original image.
+**[6:30-6:45]** *Open GitHub ARCHITECTURE.md*
 
-It shows the doctor exactly which micro-aneurysms, soft exudates, or hemorrhages triggered the risk score.
+> Let me show you the architecture, because that's where the real innovation lies.
+>
+> We've documented everything in this ARCHITECTURE.md file on GitHub.
 
-We also provide a numerical Confidence Score.
+**[6:45-7:00]** *Scroll to System Overview diagram*
 
-If the model is uncertain, it flags the case for human review.
+> At the top level: Next.js frontend on Vercel, FastAPI backend on HuggingFace Spaces, connected to Cerebras Cloud and AWS Polly.
+>
+> Every component is decoupled and scalable.
 
-This architecture prioritizes safety over raw automation, ensuring that the AI acts as a partner to the clinician, not a replacement.
+**[7:00-7:15]** *Scroll through pipeline diagrams*
 
-Now, I want to show you something arguably more innovative and harder to see: our Speech Analysis Pipeline, which we call SpeechMD AI.
+> Each pipeline follows a standardized layered architecture:
+> Input validation, preprocessing, feature extraction, analysis, clinical assessment, and explainability.
+>
+> This modularity is what allows us to add new modalities without breaking existing ones.
 
-The human voice is a rich, underutilized biomarker.
+---
 
-Early stages of neurodegenerative diseases like Parkinson's or Alzheimer's often manifest in vocal patterns years before physical tremors appear.
+## SCENE 9: AI Chatbot Demo (7:15 - 7:45)
 
-This module analyzes voice biomarkers associated with neurological conditions including Parkinson's disease, early dementia, aphasia, and even depression or anxiety.
+**SCREEN:** Dashboard with Medical Chatbot open
 
-The header shows that we achieve ninety-five point two percent accuracy, with processing time under three seconds.
+**ACTION:** Click chatbot button, ask a medical question
 
-We are HIPAA compliant.
+**[7:15-7:30]** *Click chatbot icon in bottom right*
 
-And we extract nine distinct biomarkers.
+> We also built a context-aware Medical Chatbot.
+>
+> This isn't just GPT in a box. It has access to your assessment history and can synthesize across modalities.
 
-When we process an audio file here, we are not just performing simple speech-to-text transcription.
+**[7:30-7:45]** *Type a question like "What's my overall health profile?"*
 
-We are analyzing the physics of the sound wave itself.
+> When you ask "What's my overall risk profile?", the chatbot pulls structured results from all your previous assessments.
+>
+> It connects the dots: vascular risk from the eye, neurological risk from voice, cardiac risk from ECG.
+>
+> This is true multimodal AI integration.
 
-Our backend Speech Service, version 3.0, integrates sophisticated signal processing algorithms using Parselmouth and Praat.
+---
 
-Before any analysis happens, we perform Input Validation.
+## SCENE 10: Additional Features (7:45 - 8:30)
 
-We check the audio format, including support for WAV, MP3, M4A, WebM, and OGG.
+**SCREEN:** Dashboard - tour various features
 
-We validate the sample rate, targeting sixteen kHz.
+**ACTION:** Show sidebar, analytics, settings
 
-We ensure the audio duration is between zero point five and sixty seconds.
+**[7:45-8:00]** *Show sidebar navigation*
 
-We then run a Preprocessing step that includes resampling and normalization.
+> Let me give you a quick tour of additional features.
+>
+> The sidebar shows all diagnostic modules, coming soon features, and quick access to Analytics and Reports.
 
-The system extracts Jitter, which measures micro-fluctuations in the pitch period of the voice.
+**[8:00-8:15]** *Navigate to Analytics page*
 
-It extracts Shimmer, which measures amplitude perturbation, indicating instability in vocal fold vibration.
+> The Analytics page shows assessment trends, risk score distribution, and key metrics over time.
+>
+> This gives clinicians a longitudinal view of patient health.
 
-It calculates the Harmonic-to-Noise Ratio, or HNR, which quantifies signal purity.
+**[8:15-8:30]** *Show responsive design, mobile preview*
 
-It calculates Cepstral Peak Prominence Smoothed, or CPPS, which evaluates breathiness and dysphonia.
+> Everything is fully responsive. Whether you're on a desktop in a hospital, a tablet in a clinic, or a phone in the field... MediLens adapts.
+>
+> We also have HIPAA compliant indicators everywhere, real-time system status, and processed via Cerebras badges for transparency.
 
-We also extract speech rate, the number of pauses, and formant frequencies.
+---
 
-These are subtle acoustic features that the human ear cannot quantify physically.
+## SCENE 11: Coming Soon & Roadmap (8:30 - 9:15)
 
-Our pipeline computes these raw values, compares them against normative clinical baselines, and generates a neurological efficiency score.
+**SCREEN:** Dashboard sidebar showing Coming Soon section
 
-You can see the waveform visualization rendering in real-time on the frontend using the HTML5 Audio API.
+**ACTION:** Scroll sidebar, show coming soon modules, navigate to Vision page
 
-This gives the clinician immediate visual feedback on the recording quality.
+**[8:30-8:45]** *Show Coming Soon section in sidebar*
 
-Again, we have quality checks in place.
+> Beyond our 9 live modules, we've roadmapped 5 additional Coming Soon modules:
+>
+> HistoVision AI for pathology, NeuroScan AI for brain imaging, RespiRate AI for respiratory analysis, FootCare AI for diabetic foot, and BoneScan AI for orthopedics.
 
-If the Signal-to-Noise Ratio is too low, say due to a noisy hospital ward, we flag the recording before analysis begins to ensure the integrity of the results.
+**[8:45-9:00]** *Navigate to About or Vision page*
 
-This pipeline effectively transforms a smartphone microphone into a diagnostic medical device.
+> Our vision? Democratizing AI-Powered Healthcare.
+>
+> We want advanced diagnostics accessible to every provider, regardless of resources or location.
 
-Moving on to the third pillar of our currently available pipelines: Cardiology, which we call CardioPredict AI.
+**[9:00-9:15]** *Show roadmap section*
 
-Here, signal processing takes center stage as we deal with high-frequency time-series data from Electrocardiograms.
+> By 2027, we aim to reach 1 million patients, deploy to 50+ countries, and partner with 100+ hospitals.
+>
+> This isn't a hackathon prototype. It's a roadmap to global health equity.
 
-The header shows remarkable accuracy: ninety-nine point eight percent.
+---
 
-Processing is under two seconds.
+## SCENE 12: Closing & Impact (9:15 - 10:00)
 
-We are HIPAA compliant.
+**SCREEN:** Homepage hero, then fade to logo
 
-And we extract fifteen or more distinct biomarkers.
+**ACTION:** Return to homepage, slow scroll, fade to logo
 
-The Cardiology Analysis Service handles raw 12-lead signal arrays.
+**[9:15-9:30]** *Return to homepage*
 
-The first step in this pipeline is aggressive noise filtering.
+> Imagine a nurse in a remote village in India. A mobile health van in rural America. A community clinic in sub-Saharan Africa.
+>
+> They don't have a retinologist. They don't have a neurologist. They don't have a cardiologist.
 
-We use digital signal processing techniques to remove power-line interference, typically at fifty or sixty Hertz, and baseline wander, which are slow drifts in the signal that can obscure critical features.
+**[9:30-9:45]** *Slow zoom on logo*
 
-We then run a specialized R-peak detection algorithm.
+> But armed with a smartphone and MediLens, they have the diagnostic power of a research hospital in their pocket.
+>
+> MediLens is not replacing doctors. We're supercharging triage so the sickest patients see specialists faster.
 
-By precisely measuring the distance between R-peaks, which are the highest points in each heartbeat waveform, we calculate Heart Rate Variability, or HRV.
+**[9:45-10:00]** *Fade to black with logo centered*
 
-HRV is a powerful proxy for the autonomic nervous system's balance and overall cardiac health.
+> We believe high-quality diagnostics should be a fundamental right, not a geographic privilege.
+>
+> This is **MediLens**.
+> Production-ready. Scientifically grounded. Designed to scale to millions.
+>
+> Thank you.
 
-The output here is not just a binary Normal or Abnormal.
+---
 
-We classify the specific rhythm type, differentiating between Sinus Rhythm, Atrial Fibrillation, Bradycardia, Tachycardia, or other complex arrhythmias.
+## Recording Notes
 
-And just like the other pipelines, we return the specific time intervals that triggered the alert, allowing the cardiologist to zoom in on exactly the beats that matter.
+### Browser Setup
+- Chrome or Firefox in full-screen mode
+- Resolution: 1920x1080
+- Clear browser history/cache
+- Log in to Clerk before recording
+- Preload sample images/audio
 
-This module can detect conditions like Arrhythmia, Atrial Fibrillation, Myocardial Infarction indicators, and Heart murmur patterns.
+### Sample Data Required
+1. Fundus image (high quality, diabetic retinopathy example)
+2. Audio file (30 second voice sample)
+3. ECG data (demo mode sufficient)
 
-Our fourth available pipeline is Radiology, specifically the ChestXplorer AI module for chest X-ray analysis.
+### Post-Production
+- Add subtle background music (ambient, medical tech feel)
+- Add lower-third text for key features
+- Add transition effects between scenes
+- Color grade for consistency
 
-This module utilizes deep convolutional neural networks to detect abnormalities in chest X-rays.
+---
 
-The header shows we achieve ninety-seven point eight percent accuracy.
-
-Processing is under two point five seconds.
-
-We are HIPAA compliant.
-
-And we screen for eight or more distinct conditions simultaneously.
-
-This includes detection for Pneumonia, COVID-19 patterns, Tuberculosis, Lung cancer nodules, and Pleural effusion.
-
-The pipeline requires radiologist validation but provides a powerful first-pass screening tool that can prioritize urgent cases.
-
-Now, individual pipelines are powerful, but the real magic of MediLens happens in the synthesis.
-
-This is where our AI Orchestrator comes in.
-
-We realized that in medicine, the whole is often greater than the sum of its parts.
-
-A patient is not just an eye, or a heart, or a voice.
-
-They are a complex, interconnected system.
-
-We built a context-aware chat interface powered by a secure Large Language Model.
-
-But it does not just chat.
-
-When a clinician asks, "What is the overall risk profile for this patient?", the Orchestrator pulls the structured JSON results from the Retinal, Speech, Cardiology, and Radiology pipelines simultaneously.
-
-It injects these disparate data points, the vascular risk seen in the eye, the neurological risk heard in the voice, the arrhythmia risk detected in the heart, and the pulmonary findings from the chest, into a unified context window.
-
-It then synthesizes a holistic clinical summary.
-
-It might say, "This patient shows signs of hypertensive retinopathy and reduced heart rate variability, suggesting a systemic cardiovascular risk that requires immediate attention. Additionally, voice biomarkers suggest early neurological decline warranting further evaluation."
-
-This connects the dots in a way that tired human specialists might miss during a rushed ten-minute consultation.
-
-Let me now talk about our product philosophy and the pages that convey our mission.
-
-Our About page provides a comprehensive technical architecture overview.
-
-We describe MediLens as having eleven AI diagnostic modules, a modern microservices architecture, ML pipelines, and enterprise-grade security.
-
-Built with Next.js, PyTorch, and cloud-native infrastructure.
-
-Our Vision page presents our mission of Democratizing AI-Powered Healthcare.
-
-We envision a future where advanced AI diagnostics are accessible to every healthcare provider, regardless of resources or location.
-
-MediLens bridges the gap between cutting-edge technology and everyday clinical practice.
-
-We articulate a Patient-First Approach, ensuring every feature is designed with patients in mind for accurate, timely, and compassionate care.
-
-We emphasize Clinical Accuracy with AI models achieving ninety-five percent or higher accuracy through rigorous validation.
-
-And we commit to Global Accessibility, breaking barriers to advanced diagnostics and making AI healthcare tools available across borders and resource constraints.
-
-Our core values are Innovation, Collaboration, Trust, and Excellence.
-
-We have set ambitious Impact Goals: reaching over one million patients by 2027, deploying to over fifty countries, partnering with over one hundred hospitals, and achieving ninety-nine percent provider satisfaction.
-
-Our Roadmap outlines our journey.
-
-In 2024, we laid the Foundation by launching the core platform with four modules, achieving HIPAA compliance certification, and establishing initial clinical partnerships.
-
-In 2025, we are in the Expansion phase, growing to eleven diagnostic modules, adding multi-language support, and launching mobile applications.
-
-In 2026, we Scale with enterprise EMR integrations, real-time collaboration features, and advanced analytics dashboards.
-
-By 2027, we go Global with deployment across fifty-plus countries, AI-powered treatment recommendations, and a research partnership program.
-
-Now let me talk about Safety, Scalability, and Real-World Impact.
-
-We built this system to be robust from the ground up.
-
-Our pipelines are stateless, meaning we can horizontally scale them to handle thousands of concurrent requests without session management overhead.
-
-We can spin up additional containers during peak load and scale down at night to save costs.
-
-This system is cloud-native ready.
-
-We implemented a comprehensive Audit Logger that cryptographically records every prediction, every session ID, and every quality score with timestamps.
-
-In a regulated medical environment, traceability is not just a nice-to-have feature; it is the law.
-
-Every inference is logged for compliance and retrospective analysis.
-
-We also designed the system to handle failure gracefully.
-
-If the Cardiology service goes down, the Retinal service keeps running.
-
-If a model fails to load, the user gets a specific error code, not a blank white screen.
-
-This isolation is critical for clinical reliability.
-
-This is the difference between a hackathon project and production-ready software.
-
-But beyond the technology, let me speak to the real-world impact.
-
-Ultimately, MediLens is not just code.
-
-It is a lifeline.
-
-Imagine a nurse practitioner in a remote village in India, or a mobile health van in rural America, or a community clinic in sub-Saharan Africa.
-
-They do not have a retinologist on staff.
-
-They do not have a neurologist.
-
-They do not have a cardiologist.
-
-But armed with nothing but a smartphone and a handheld fundus camera, and connected to MediLens, they have the diagnostic power of a research hospital in their pocket.
-
-They can triage patients instantly, identifying the silent killers, glaucoma, Parkinson's, atrial fibrillation, pneumonia, before they become emergencies.
-
-They can catch disease when it is still treatable.
-
-MediLens acts as an intelligent triage officer.
-
-It says, "This patient's cardiac rhythm is normal, but their voice biomarkers suggest early neurological decline, and their retinal scan shows Grade 1 hypertensive changes."
-
-Suddenly, that general practitioner knows exactly who to refer this patient to.
-
-We are not replacing doctors.
-
-We are supercharging the triage process to ensure the sickest patients see the specialists they need, faster.
-
-Let me conclude by talking about what differentiates MediLens from other projects.
-
-There are many medical AI projects out there.
-
-Most focus on a single slice, just X-rays, or just chatbots.
-
-MediLens differs because of our Systems Thinking.
-
-We did not just build a model; we built a Clinical Workflow.
-
-We focused on Safety Features like uncertainty estimation, quality gating, and input validation just as much as accuracy.
-
-We understand that a tool that cannot tell you when it is confused is a dangerous tool.
-
-We prioritized Explainability.
-
-Every pipeline generates human-readable outputs, attention heatmaps, and biomarker breakdowns that clinicians can verify.
-
-We prioritized Integration.
-
-Our multimodal architecture acknowledges that human health is interconnected.
-
-You cannot treat the heart without understanding the systemic vascular changes visible in the eye.
-
-We did not just build a hackathon project.
-
-We engineered a scalable, safe, and interpretable platform that respects the gravity of medical data.
-
-We believe that high-quality diagnostics should be a fundamental right, not a geographic privilege.
-
-And with MediLens, we are making that reality possible.
-
-We are bringing the expertise of a world-class diagnostic center to the edge of the network, where patients need it most.
-
-This is the future of digital biology.
-
-We are living through a renaissance in computational medicine.
-
-The tools we build today will define the next decade of global health.
-
-MediLens is our contribution to that future.
-
-It is robust.
-
-It is scientifically grounded.
-
-It is production-ready.
-
-And it is designed to scale to millions of patients worldwide.
-
-Thank you for your time and attention.
-
-We are proud to present MediLens.
+*Script Version: 2.0 | Last Updated: January 2026*
