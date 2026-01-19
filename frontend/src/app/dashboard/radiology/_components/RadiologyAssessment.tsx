@@ -263,7 +263,7 @@ export function RadiologyAssessment() {
                   patientContext={{
                     age: 45,
                     sex: "male",
-                    symptoms: ["Cough", "Fever"],
+                    history: ["Cough", "Fever"],
                   }}
                 />
 
