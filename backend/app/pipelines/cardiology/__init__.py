@@ -1,49 +1,82 @@
 """
-Cardiology/ECG Pipeline
-AI-powered ECG analysis using HeartPy and NeuroKit2
+Cardiology Pipeline
+===================
+Complete cardiac analysis for ECG signals and echocardiography.
 
-Detects:
-- Normal Sinus Rhythm (98% accuracy)
-- Sinus Bradycardia/Tachycardia (95% accuracy)
-- Atrial Fibrillation screening (88% accuracy)
-- HRV abnormalities
+Architecture Guide Compliant Structure:
+---------------------------------------
+Root files (max 4):
+- __init__.py   : Package exports
+- config.py     : Configuration values
+- schemas.py    : Pydantic models
+- router.py     : FastAPI endpoints
 
-Libraries: HeartPy, NeuroKit2
+Subfolders:
+- core/         : Orchestration (service.py)
+- input/        : Validation, parsing
+- preprocessing/: Signal processing
+- features/     : ECG feature extraction
+- analysis/     : Rhythm, arrhythmia detection
+- clinical/     : Risk scoring, recommendations
+- output/       : Visualization, formatting
+- monitoring/   : Audit logging
+- errors/       : Error codes
+- explanation/  : AI explanation rules
+- utils/        : Helpers, constants
+
+Usage:
+------
+    from app.pipelines.cardiology import router
+    app.include_router(router)
 """
 
-from .analyzer import ECGAnalyzer, parse_ecg_file, HEARTPY_AVAILABLE, NEUROKIT_AVAILABLE
-from .processor import ECGProcessor, preprocess_ecg
-from .demo import generate_demo_ecg, generate_afib_ecg
-from .models import (
+# Core exports - following architecture guide
+from .router import router
+from .core.service import CardiologyAnalysisService
+
+# Schema exports
+from .schemas import (
     CardiologyAnalysisResponse,
+    CardiologyErrorResponse,
     RhythmAnalysis,
     HRVMetrics,
-    HRVTimeDomain,
-    ECGIntervals,
-    Finding,
-    SignalQuality,
+    ECGAnalysisResult,
+    RiskAssessment,
+    QualityAssessment,
+    ClinicalFinding,
+    HealthResponse,
+)
+
+# Configuration exports
+from .config import (
+    INPUT_CONSTRAINTS,
+    QUALITY_THRESHOLDS,
+    HRV_NORMAL_RANGES,
     DETECTABLE_CONDITIONS,
 )
 
 __all__ = [
-    # Analyzer
-    "ECGAnalyzer",
-    "parse_ecg_file",
-    "HEARTPY_AVAILABLE",
-    "NEUROKIT_AVAILABLE",
-    # Processor
-    "ECGProcessor",
-    "preprocess_ecg",
-    # Demo
-    "generate_demo_ecg",
-    "generate_afib_ecg",
-    # Models
+    # Core
+    "router",
+    "CardiologyAnalysisService",
+    
+    # Schemas
     "CardiologyAnalysisResponse",
+    "CardiologyErrorResponse",
     "RhythmAnalysis",
     "HRVMetrics",
-    "HRVTimeDomain",
-    "ECGIntervals",
-    "Finding",
-    "SignalQuality",
+    "ECGAnalysisResult",
+    "RiskAssessment",
+    "QualityAssessment",
+    "ClinicalFinding",
+    "HealthResponse",
+    
+    # Configuration
+    "INPUT_CONSTRAINTS",
+    "QUALITY_THRESHOLDS",
+    "HRV_NORMAL_RANGES",
     "DETECTABLE_CONDITIONS",
 ]
+
+__version__ = "3.1.0"
+__author__ = "MediLens Team"

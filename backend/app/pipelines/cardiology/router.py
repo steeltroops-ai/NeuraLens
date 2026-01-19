@@ -1,42 +1,95 @@
 """
-Cardiology ECG Router - FastAPI Endpoints
-ECG analysis using HeartPy and NeuroKit2
+Cardiology Pipeline - FastAPI Router
+=====================================
+Main entry point for cardiology API endpoints.
+
+This router integrates the modular pipeline components and provides
+a clean API for the frontend.
+
+Architecture Guide: Root file - only router.py, schemas.py, config.py, __init__.py in root.
 """
 
 import time
 import logging
+import numpy as np
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from typing import List, Optional
 
-from .analyzer import ECGAnalyzer, parse_ecg_file, HEARTPY_AVAILABLE, NEUROKIT_AVAILABLE
-from .demo import generate_demo_ecg, generate_afib_ecg
-from .processor import preprocess_ecg
-from .models import (
+# Import from core (following architecture guide)
+from .core.service import CardiologyAnalysisService
+from .schemas import (
     CardiologyAnalysisResponse,
     RhythmAnalysis,
     HRVMetrics,
     HRVTimeDomain,
     AutonomicInterpretation,
     ECGIntervals,
-    Finding,
-    SignalQuality,
-    DemoRequest,
+    ECGAnalysisResult,
+    RiskAssessment as RiskAssessmentSchema,
+    QualityAssessment,
+    ECGQuality,
+    ClinicalFinding,
+    StageStatus,
+    ReceiptConfirmation,
+    ArrhythmiaDetection,
     HealthResponse,
-    DETECTABLE_CONDITIONS,
+    DemoRequest,
+    Visualizations,
+    ECGVisualization,
+    ECGAnnotation,
 )
+from .input.ecg_parser import ECGParser
+from .output.visualization import ECGVisualizer
+
+# Demo generation utilities
+try:
+    from .utils.demo import generate_demo_ecg, generate_afib_ecg
+    DEMO_AVAILABLE = True
+except ImportError:
+    DEMO_AVAILABLE = False
+
+try:
+    import heartpy as hp
+    HEARTPY_AVAILABLE = True
+except ImportError:
+    HEARTPY_AVAILABLE = False
+
+try:
+    import neurokit2 as nk
+    NEUROKIT_AVAILABLE = True
+except ImportError:
+    NEUROKIT_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/cardiology", tags=["Cardiology"])
 
+# Initialize service
+analysis_service = CardiologyAnalysisService(sample_rate=500)
+ecg_parser = ECGParser()
+ecg_visualizer = ECGVisualizer()
+
+# Detectable conditions
+DETECTABLE_CONDITIONS = [
+    "Normal Sinus Rhythm",
+    "Sinus Bradycardia",
+    "Sinus Tachycardia",
+    "Atrial Fibrillation",
+    "Premature Ventricular Contractions (PVC)",
+    "Premature Atrial Contractions (PAC)",
+    "1st Degree AV Block",
+    "Long QT Syndrome",
+]
+
 
 @router.post("/analyze", response_model=CardiologyAnalysisResponse)
 async def analyze_ecg(
-    file: UploadFile = File(..., description="ECG file (CSV/TXT)"),
-    sample_rate: int = Query(500, ge=100, le=1000, description="Sample rate in Hz")
+    file: UploadFile = File(..., description="ECG file (CSV/JSON/TXT)"),
+    sample_rate: int = Query(500, ge=100, le=1000, description="Sample rate in Hz"),
+    include_waveform: bool = Query(False, description="Include waveform data for visualization")
 ):
     """
-    Analyze uploaded ECG file for cardiac abnormalities
+    Analyze uploaded ECG file for cardiac abnormalities.
     
     Detects:
     - Normal Sinus Rhythm
@@ -54,8 +107,9 @@ async def analyze_ecg(
     
     # Validate file type
     filename = file.filename or "data.csv"
-    if not filename.endswith(('.csv', '.txt')):
-        raise HTTPException(400, "File must be CSV or TXT format")
+    valid_extensions = ('.csv', '.txt', '.json')
+    if not filename.lower().endswith(valid_extensions):
+        raise HTTPException(400, f"File must be {', '.join(valid_extensions)} format")
     
     try:
         # Read file
@@ -65,25 +119,47 @@ async def analyze_ecg(
         if len(content) > 5 * 1024 * 1024:
             raise HTTPException(400, "File too large. Maximum 5MB.")
         
-        # Parse ECG data
-        ecg_signal = parse_ecg_file(content, filename, sample_rate)
+        # Analyze using the service
+        response = analysis_service.analyze(
+            ecg_file_content=content,
+            ecg_filename=filename,
+            ecg_sample_rate=sample_rate,
+        )
         
-        # Preprocess
-        processed, quality = preprocess_ecg(ecg_signal, sample_rate)
+        # Add waveform if requested
+        if include_waveform and response.success and response.ecg_analysis:
+            signal, _, _ = ecg_parser.parse(content, filename, sample_rate)
+            r_peaks = []
+            
+            # Get R-peaks if available
+            if response.ecg_analysis.rhythm_analysis:
+                # Extract R-peak indices from the analysis
+                pass  # R-peaks are within the analysis but need to be exposed
+            
+            plot_data = ecg_visualizer.create_plot_data(
+                signal,
+                r_peaks=r_peaks,
+                max_samples=3000,
+            )
+            
+            response.visualizations = Visualizations(
+                ecg=ECGVisualization(
+                    available=True,
+                    waveform_data=plot_data.waveform[:2000] if len(plot_data.waveform) > 2000 else plot_data.waveform,
+                    sample_rate=plot_data.sample_rate,
+                    annotations=[
+                        ECGAnnotation(
+                            type=a.type,
+                            sample_index=a.sample_index,
+                            time_sec=a.time_sec,
+                            label=a.label,
+                        )
+                        for a in plot_data.annotations
+                    ],
+                ),
+            )
         
-        # Validate duration
-        duration = len(processed) / sample_rate
-        if duration < 5:
-            raise HTTPException(400, "ECG duration too short. Minimum 5 seconds.")
-        
-        # Analyze
-        analyzer = ECGAnalyzer(sample_rate=sample_rate)
-        result = analyzer.analyze(processed)
-        
-        processing_time = int((time.time() - start_time) * 1000)
-        
-        # Build PRD-compliant response
-        return _build_response(result, processing_time, quality, processed, sample_rate)
+        return response
         
     except HTTPException:
         raise
@@ -99,40 +175,61 @@ async def demo_analysis(
     add_arrhythmia: bool = Query(False, description="Add simulated arrhythmia")
 ):
     """
-    Generate demo ECG analysis with synthetic signal
+    Generate demo ECG analysis with synthetic signal.
     
     Use this for testing without real ECG data.
     """
-    start_time = time.time()
     sample_rate = 500
     
     try:
         # Generate synthetic ECG
-        if add_arrhythmia:
-            ecg_signal = generate_afib_ecg(
-                sample_rate=sample_rate,
-                duration=duration,
-                heart_rate=heart_rate
-            )
+        if DEMO_AVAILABLE:
+            if add_arrhythmia:
+                ecg_signal = generate_afib_ecg(
+                    sample_rate=sample_rate,
+                    duration=duration,
+                    heart_rate=heart_rate
+                )
+            else:
+                ecg_signal = generate_demo_ecg(
+                    sample_rate=sample_rate,
+                    duration=duration,
+                    heart_rate=heart_rate,
+                    add_arrhythmia=False
+                )
         else:
-            ecg_signal = generate_demo_ecg(
-                sample_rate=sample_rate,
-                duration=duration,
-                heart_rate=heart_rate,
-                add_arrhythmia=False
-            )
+            # Simple synthetic signal
+            ecg_signal = _generate_simple_ecg(sample_rate, duration, heart_rate)
         
-        # Analyze
-        analyzer = ECGAnalyzer(sample_rate=sample_rate)
-        result = analyzer.analyze(ecg_signal)
-        
-        processing_time = int((time.time() - start_time) * 1000)
-        
-        # Build response with waveform for visualization
-        response = _build_response(
-            result, processing_time, 0.95, ecg_signal, sample_rate,
-            include_waveform=True
+        # Analyze using service
+        response = analysis_service.analyze(
+            ecg_signal=ecg_signal,
+            ecg_sample_rate=sample_rate,
         )
+        
+        # Add waveform for demo
+        if response.success:
+            plot_data = ecg_visualizer.create_plot_data(
+                ecg_signal,
+                max_samples=2000,
+            )
+            
+            response.visualizations = Visualizations(
+                ecg=ECGVisualization(
+                    available=True,
+                    waveform_data=plot_data.waveform,
+                    sample_rate=plot_data.sample_rate,
+                    annotations=[
+                        ECGAnnotation(
+                            type=a.type,
+                            sample_index=a.sample_index,
+                            time_sec=a.time_sec,
+                            label=a.label,
+                        )
+                        for a in plot_data.annotations
+                    ],
+                ),
+            )
         
         return response
         
@@ -146,9 +243,11 @@ async def health_check():
     """Health check for cardiology module"""
     return HealthResponse(
         status="healthy" if (HEARTPY_AVAILABLE or NEUROKIT_AVAILABLE) else "degraded",
+        module="cardiology",
         heartpy_available=HEARTPY_AVAILABLE,
         neurokit2_available=NEUROKIT_AVAILABLE,
-        conditions_detected=DETECTABLE_CONDITIONS
+        conditions_detected=DETECTABLE_CONDITIONS,
+        version="3.0.0",
     )
 
 
@@ -157,19 +256,44 @@ async def module_info():
     """Get information about cardiology module"""
     return {
         "name": "CardioPredict AI",
+        "version": "3.0.0",
         "description": "AI-powered ECG analysis for cardiac conditions",
         "supported_conditions": DETECTABLE_CONDITIONS,
-        "hrv_metrics": [
-            "Heart Rate (bpm)",
-            "RMSSD (ms) - Vagal tone",
-            "SDNN (ms) - Overall HRV",
-            "pNN50 (%) - High-frequency HRV",
-            "Mean RR (ms) - Average interval"
-        ],
-        "intervals": ["PR", "QRS", "QT", "QTc"],
-        "input_formats": ["CSV", "TXT"],
+        "biomarkers": {
+            "heart_rate": {
+                "name": "Heart Rate",
+                "unit": "bpm",
+                "normal_range": [60, 100],
+                "description": "Beats per minute",
+            },
+            "rmssd": {
+                "name": "RMSSD",
+                "unit": "ms",
+                "normal_range": [25, 60],
+                "description": "Root mean square of successive differences - vagal tone indicator",
+            },
+            "sdnn": {
+                "name": "SDNN",
+                "unit": "ms",
+                "normal_range": [50, 120],
+                "description": "Standard deviation of NN intervals - overall HRV",
+            },
+            "pnn50": {
+                "name": "pNN50",
+                "unit": "%",
+                "normal_range": [10, 30],
+                "description": "Percentage of successive RR intervals > 50ms",
+            },
+            "mean_rr": {
+                "name": "Mean RR Interval",
+                "unit": "ms",
+                "normal_range": [600, 1000],
+                "description": "Average RR interval duration",
+            },
+        },
+        "input_formats": ["CSV", "TXT", "JSON"],
         "sample_rate_range": "100-1000 Hz",
-        "libraries_used": ["HeartPy", "NeuroKit2"]
+        "libraries_used": ["HeartPy", "NeuroKit2"],
     }
 
 
@@ -191,180 +315,112 @@ async def list_conditions():
     }
 
 
-def _build_response(
-    result,
-    processing_time: int,
-    quality_score: float,
-    ecg_signal=None,
-    sample_rate: int = 500,
-    include_waveform: bool = False
-) -> CardiologyAnalysisResponse:
-    """Build PRD-compliant response from analyzer result"""
-    
-    # Extract parameters
-    params = result.parameters or {}
-    
-    # Rhythm analysis
-    rhythm_analysis = RhythmAnalysis(
-        classification=result.rhythm,
-        heart_rate_bpm=result.heart_rate,
-        confidence=result.confidence,
-        regularity="regular" if "Normal" in result.rhythm else "irregular",
-        r_peaks_detected=params.get("r_peaks_count", 0)
-    )
-    
-    # HRV time domain
-    hrv_time = HRVTimeDomain(
-        rmssd_ms=params.get("rmssd_ms"),
-        sdnn_ms=params.get("sdnn_ms"),
-        pnn50_percent=params.get("pnn50"),
-        mean_rr_ms=params.get("mean_rr_ms") or params.get("ibi_ms"),
-        sdsd_ms=params.get("sdsd_ms"),
-        cv_rr_percent=None
-    )
-    
-    # Autonomic interpretation
-    rmssd = params.get("rmssd_ms", 40)
-    if rmssd and rmssd > 50:
-        parasympathetic = "high"
-        balance = "normal"
-    elif rmssd and rmssd > 25:
-        parasympathetic = "adequate"
-        balance = "normal"
-    else:
-        parasympathetic = "low"
-        balance = "sympathetic dominant"
-    
-    interpretation = AutonomicInterpretation(
-        autonomic_balance=balance,
-        parasympathetic=parasympathetic,
-        sympathetic="normal" if rmssd and rmssd > 25 else "elevated"
-    )
-    
-    hrv_metrics = HRVMetrics(
-        time_domain=hrv_time,
-        interpretation=interpretation
-    )
-    
-    # Intervals (if available)
-    intervals = ECGIntervals(
-        pr_interval_ms=params.get("pr_interval_ms"),
-        qrs_duration_ms=params.get("qrs_duration_ms"),
-        qt_interval_ms=params.get("qt_interval_ms"),
-        qtc_ms=params.get("qtc_ms"),
-        all_normal=True  # Default
-    )
-    
-    # Findings
-    findings = [
-        Finding(type=f["type"], severity=f["severity"], description=f["description"])
-        for f in result.findings
-    ]
-    
-    # Signal quality
-    quality = SignalQuality(
-        signal_quality_score=quality_score,
-        noise_level_db=-35 if quality_score > 0.8 else -25,
-        usable_segments_percent=quality_score * 100
-    )
-    
-    # Risk score calculation
-    risk_score = _calculate_risk_score(result.risk_level, result.heart_rate, params)
-    
-    # Recommendations
-    recommendations = _generate_recommendations(result.rhythm, result.risk_level, params)
-    
-    # Waveform data (downsampled for response size)
-    waveform_data = None
-    r_peaks = None
-    
-    if include_waveform and ecg_signal is not None:
-        # Downsample for response (max 2000 points)
-        if len(ecg_signal) > 2000:
-            step = len(ecg_signal) // 2000
-            waveform_data = ecg_signal[::step].tolist()
-        else:
-            waveform_data = ecg_signal.tolist()
-        
-        # Get R-peak indices if available
-        r_peaks = params.get("r_peaks", [])
-    
-    return CardiologyAnalysisResponse(
-        success=True,
-        timestamp=datetime.utcnow().isoformat() + "Z",
-        processing_time_ms=processing_time,
-        rhythm_analysis=rhythm_analysis,
-        hrv_metrics=hrv_metrics,
-        intervals=intervals,
-        findings=findings,
-        risk_level=result.risk_level,
-        risk_score=risk_score,
-        quality=quality,
-        recommendations=recommendations,
-        ecg_waveform=waveform_data,
-        r_peak_indices=r_peaks,
-        sample_rate=sample_rate
-    )
-
-
-def _calculate_risk_score(risk_level: str, heart_rate: int, params: dict) -> float:
-    """Calculate numeric risk score"""
-    base_scores = {
-        "normal": 5,
-        "low": 15,
-        "moderate": 40,
-        "high": 65,
-        "critical": 85
+@router.get("/biomarkers")
+async def list_biomarkers():
+    """List all available biomarkers for frontend display"""
+    return {
+        "ecg_biomarkers": [
+            {
+                "id": "heart_rate",
+                "name": "Heart Rate",
+                "unit": "bpm",
+                "icon": "heart",
+                "color": "#ef4444",
+                "normal_range": {"min": 60, "max": 100},
+                "description": "Resting heart rate",
+            },
+            {
+                "id": "rmssd",
+                "name": "RMSSD",
+                "unit": "ms",
+                "icon": "activity",
+                "color": "#8b5cf6",
+                "normal_range": {"min": 25, "max": 60},
+                "description": "Parasympathetic (vagal) activity",
+            },
+            {
+                "id": "sdnn",
+                "name": "SDNN",
+                "unit": "ms",
+                "icon": "trending-up",
+                "color": "#3b82f6",
+                "normal_range": {"min": 50, "max": 120},
+                "description": "Overall heart rate variability",
+            },
+            {
+                "id": "pnn50",
+                "name": "pNN50",
+                "unit": "%",
+                "icon": "percent",
+                "color": "#10b981",
+                "normal_range": {"min": 10, "max": 30},
+                "description": "High-frequency HRV component",
+            },
+            {
+                "id": "mean_rr",
+                "name": "Mean RR",
+                "unit": "ms",
+                "icon": "clock",
+                "color": "#f59e0b",
+                "normal_range": {"min": 600, "max": 1000},
+                "description": "Average interval between heartbeats",
+            },
+        ],
+        "rhythm_indicators": [
+            {
+                "id": "rhythm",
+                "name": "Rhythm Classification",
+                "icon": "heart-pulse",
+                "values": ["Normal Sinus", "Bradycardia", "Tachycardia", "AFib"],
+            },
+            {
+                "id": "regularity",
+                "name": "Regularity",
+                "icon": "equal",
+                "values": ["Regular", "Slightly Irregular", "Irregular"],
+            },
+        ],
+        "risk_indicators": [
+            {
+                "id": "risk_score",
+                "name": "Cardiac Risk Score",
+                "unit": "",
+                "icon": "shield",
+                "range": {"min": 0, "max": 100},
+                "thresholds": {
+                    "low": 20,
+                    "moderate": 45,
+                    "high": 70,
+                },
+            },
+        ],
     }
-    
-    score = base_scores.get(risk_level, 20)
-    
-    # Adjust based on HR
-    if heart_rate < 50 or heart_rate > 120:
-        score += 10
-    elif heart_rate < 60 or heart_rate > 100:
-        score += 5
-    
-    # Adjust based on HRV
-    rmssd = params.get("rmssd_ms")
-    if rmssd and rmssd < 20:
-        score += 10
-    
-    return min(100, score)
 
 
-def _generate_recommendations(rhythm: str, risk_level: str, params: dict) -> List[str]:
-    """Generate clinical recommendations"""
-    recommendations = []
+def _generate_simple_ecg(sample_rate: int, duration: float, heart_rate: int) -> np.ndarray:
+    """Generate simple synthetic ECG signal."""
+    num_samples = int(sample_rate * duration)
+    t = np.linspace(0, duration, num_samples)
     
-    if "Normal" in rhythm:
-        recommendations.append("ECG shows normal sinus rhythm")
-        recommendations.append("Heart rate and rhythm within normal limits")
-    elif "Bradycardia" in rhythm:
-        recommendations.append("Heart rate below normal range detected")
-        recommendations.append("Consider evaluation if symptomatic (dizziness, fatigue)")
-    elif "Tachycardia" in rhythm:
-        recommendations.append("Elevated heart rate detected")
-        recommendations.append("Consider stress reduction and hydration")
-    elif "AFib" in rhythm or "Irregular" in rhythm:
-        recommendations.append("Irregular rhythm pattern detected")
-        recommendations.append("Recommend 12-lead ECG for confirmation")
-        recommendations.append("Consult cardiologist for evaluation")
+    # Generate QRS-like spikes
+    beat_interval = 60 / heart_rate
+    num_beats = int(duration / beat_interval)
     
-    # HRV recommendations
-    rmssd = params.get("rmssd_ms")
-    if rmssd:
-        if rmssd > 50:
-            recommendations.append("Heart rate variability indicates healthy autonomic function")
-        elif rmssd < 20:
-            recommendations.append("Reduced HRV detected - consider stress management")
+    signal = np.zeros(num_samples)
     
-    # Risk-based recommendations
-    if risk_level in ["high", "critical"]:
-        recommendations.append("Urgent cardiology consultation recommended")
-    elif risk_level == "moderate":
-        recommendations.append("Follow-up ECG recommended within 2 weeks")
-    else:
-        recommendations.append("Continue routine monitoring as indicated")
+    for i in range(num_beats):
+        beat_time = i * beat_interval
+        beat_sample = int(beat_time * sample_rate)
+        
+        if beat_sample < num_samples:
+            # Simple triangular pulse for R wave
+            width = int(0.08 * sample_rate)  # 80ms QRS
+            for j in range(-width, width + 1):
+                if 0 <= beat_sample + j < num_samples:
+                    amplitude = 1.0 - abs(j) / width
+                    signal[beat_sample + j] = amplitude
     
-    return recommendations[:5]  # Limit to 5
+    # Add some baseline noise
+    signal += np.random.normal(0, 0.05, num_samples)
+    
+    return signal
