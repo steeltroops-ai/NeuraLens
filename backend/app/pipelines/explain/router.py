@@ -164,8 +164,17 @@ def format_results_prompt(
     results: Dict[str, Any],
     patient_context: Optional[Dict[str, Any]] = None
 ) -> str:
-    """Format results into prompt for LLM"""
+    """Format results into prompt for LLM using pipeline-specific builders."""
     
+    # Try to use the new prompt builder
+    try:
+        from .prompt_builder import PromptBuilder
+        builder = PromptBuilder(pipeline)
+        return builder.build_user_prompt(results, patient_context)
+    except ImportError:
+        pass  # Fall back to legacy formatting
+    
+    # Legacy formatting (kept for compatibility)
     context = ""
     if patient_context:
         context = f"""
@@ -177,22 +186,46 @@ Patient Context:
     # Format based on pipeline
     if pipeline == "speech":
         biomarkers = results.get('biomarkers', {})
+        condition_risks = results.get('condition_risks', [])
+        extended = results.get('extended_biomarkers', {})
+        
+        # Build biomarker section with full details
+        bio_lines = []
+        for key, bio in biomarkers.items():
+            if isinstance(bio, dict):
+                value = bio.get('value', 0)
+                unit = bio.get('unit', '')
+                normal = bio.get('normal_range', [0, 1])
+                status = "NORMAL" if normal[0] <= value <= normal[1] else "ABNORMAL"
+                bio_lines.append(f"- {key}: {value:.2f} {unit} (range: {normal[0]}-{normal[1]}) [{status}]")
+            else:
+                bio_lines.append(f"- {key}: {bio}")
+        
+        # Build condition risks
+        cond_lines = []
+        for cond in condition_risks:
+            if isinstance(cond, dict) and cond.get('probability', 0) > 0.1:
+                cond_lines.append(
+                    f"- {cond['condition']}: {cond['probability']*100:.0f}% probability "
+                    f"({cond.get('risk_level', 'unknown')} risk)"
+                )
+        
         return f"""{context}
 
 Speech Analysis Results:
-- Risk Score: {results.get('risk_score', 'N/A')}/100
+- Overall Risk Score: {results.get('risk_score', 0)*100:.0f}/100
 - Confidence: {results.get('confidence', 0)*100:.0f}%
+- Quality Score: {results.get('quality_score', 0)*100:.0f}%
 
-Biomarkers:
-- Jitter: {biomarkers.get('jitter', 'N/A')} (normal: 0.01-0.04)
-- Shimmer: {biomarkers.get('shimmer', 'N/A')} (normal: 0.02-0.06)
-- HNR: {biomarkers.get('hnr', 'N/A')} dB (normal: 15-25)
-- Speech Rate: {biomarkers.get('speech_rate', 'N/A')} syll/sec
-- Voice Tremor: {biomarkers.get('voice_tremor', 'N/A')}
+Biomarkers Analyzed:
+{chr(10).join(bio_lines)}
 
+{f"Condition Risk Assessment:{chr(10)}{chr(10).join(cond_lines)}" if cond_lines else ""}
+
+Clinical Notes: {results.get('clinical_notes', 'None')}
 Recommendations: {results.get('recommendations', [])}
 
-Explain these results in a clear, supportive way."""
+Explain these results clearly and supportively."""
 
     elif pipeline == "retinal":
         biomarkers = results.get('biomarkers', {})
@@ -206,8 +239,10 @@ Biomarkers:
 - Vessel Tortuosity: {biomarkers.get('vessel_tortuosity', 'N/A')}
 - AV Ratio: {biomarkers.get('av_ratio', 'N/A')}
 - Cup-to-Disc Ratio: {biomarkers.get('cup_disc_ratio', 'N/A')}
+- RNFL Thickness: {biomarkers.get('rnfl_thickness', 'N/A')}
 
 Findings: {results.get('findings', [])}
+DR Grade: {results.get('dr_grade', 'None')}
 
 Explain these retinal findings clearly."""
 
@@ -237,72 +272,34 @@ Explain this multi-modal assessment."""
         return f"{context}\n\n{pipeline.title()} Results:\n{json.dumps(results, indent=2)}\n\nExplain these results."
 
 
-async def generate_voice(text: str, provider: str = "elevenlabs") -> Optional[str]:
-    """Generate voice audio from text using ElevenLabs or fallback providers"""
-    import logging
-    logger = logging.getLogger(__name__)
-    
+def get_system_prompt(pipeline: str) -> str:
+    """Get system prompt for a pipeline, using new prompt builder if available."""
+    try:
+        from .prompt_builder import PromptBuilder
+        builder = PromptBuilder(pipeline)
+        return builder.build_system_prompt()
+    except ImportError:
+        return SYSTEM_PROMPTS.get(
+            pipeline,
+            "You are a medical AI assistant explaining health assessment results clearly and supportively."
+        )
+
+
+
+async def generate_voice(text: str, provider: str = "polly") -> Optional[str]:
+    """Generate voice audio from text using the unified Voice Service"""
     # Clean text for TTS (remove markdown)
     clean_text = text.replace('**', '').replace('##', '').replace('###', '').replace('*', '')
-    clean_text = clean_text[:3000]  # Limit text length
     
-    if provider == "elevenlabs":
-        try:
-            from elevenlabs import ElevenLabs
-            
-            api_key = os.environ.get("ELEVENLABS_API_KEY")
-            if not api_key:
-                logger.warning("ELEVENLABS_API_KEY not set")
-                raise Exception("API key not configured")
-            
-            client = ElevenLabs(api_key=api_key)
-            
-            # Generate audio using the new API
-            audio_generator = client.text_to_speech.convert(
-                voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice
-                text=clean_text,
-                model_id="eleven_multilingual_v2",
-                output_format="mp3_44100_128"
-            )
-            
-            # Convert generator to bytes
-            audio_bytes = b"".join(audio_generator)
-            
-            logger.info(f"ElevenLabs TTS generated {len(audio_bytes)} bytes")
-            return base64.b64encode(audio_bytes).decode()
-            
-        except ImportError as e:
-            logger.error(f"ElevenLabs import failed: {e}")
-        except Exception as e:
-            logger.error(f"ElevenLabs TTS failed: {e}")
-    
-    elif provider == "openai":
-        try:
-            from openai import OpenAI
-            client = OpenAI()
-            response = client.audio.speech.create(
-                model="tts-1",
-                voice="nova",
-                input=clean_text[:4000]
-            )
-            return base64.b64encode(response.content).decode()
-        except Exception as e:
-            logger.error(f"OpenAI TTS failed: {e}")
-    
-    # Fallback to gTTS (free, slower)
+    # Use the unified service wrapper which handles Polly and caching
     try:
-        from gtts import gTTS
-        import io
-        logger.info("Falling back to gTTS")
-        tts = gTTS(text=clean_text[:3000], lang='en')
-        buffer = io.BytesIO()
-        tts.write_to_fp(buffer)
-        buffer.seek(0)
-        return base64.b64encode(buffer.read()).decode()
+        from app.pipelines.voice.service import speak_llm_explanation
+        return await speak_llm_explanation(clean_text)
     except Exception as e:
-        logger.error(f"gTTS fallback failed: {e}")
-    
-    return None
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unified voice service failed: {e}")
+        return None
 
 
 
@@ -317,16 +314,15 @@ async def explain_results_streaming(request: ExplanationRequest):
             detail="Cerebras SDK not available. Install with: pip install cerebras-cloud-sdk"
         )
     
-    system_prompt = SYSTEM_PROMPTS.get(
-        request.pipeline,
-        "You are a medical AI assistant explaining health assessment results clearly and supportively."
-    )
+    # Use enhanced prompt builder
+    system_prompt = get_system_prompt(request.pipeline)
     
     user_prompt = format_results_prompt(
         request.pipeline,
         request.results,
         request.patient_context
     )
+
     
     async def generate():
         try:
@@ -375,12 +371,14 @@ async def explain_results_sync(request: ExplanationRequest):
         # Fallback to mock explanation
         explanation = generate_mock_explanation(request.pipeline, request.results)
     else:
-        system_prompt = SYSTEM_PROMPTS.get(request.pipeline, "...")
+        # Use enhanced prompt builder
+        system_prompt = get_system_prompt(request.pipeline)
         user_prompt = format_results_prompt(
             request.pipeline,
             request.results,
             request.patient_context
         )
+
         
         try:
             response = cerebras_client.chat.completions.create(
