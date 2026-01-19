@@ -318,10 +318,20 @@ async def generate_voice(request: GenerateVoiceRequest):
         # Preprocess text
         clean_text = preprocess_for_speech(request.text)
         
+        # Handle empty or whitespace-only text after preprocessing
+        if not clean_text or len(clean_text.strip()) == 0:
+            logger.warning("Text empty after preprocessing")
+            raise HTTPException(400, "Text contains no speakable content")
+        
+        # Remove any non-printable characters that might cause issues
+        clean_text = ''.join(c for c in clean_text if c.isprintable() or c in '\n\t ')
+        
         # Polly has 3000 char limit per request
         if len(clean_text) > 3000:
             clean_text = clean_text[:3000]
             logger.info(f"Truncated text to 3000 chars for Polly")
+        
+        logger.info(f"Generating voice for {len(clean_text)} chars")
         
         result = await voice_service.speak(
             text=clean_text,
@@ -329,7 +339,8 @@ async def generate_voice(request: GenerateVoiceRequest):
         )
         
         if result is None:
-            raise HTTPException(503, "Voice service unavailable")
+            logger.error("Voice service returned None - check AWS credentials")
+            raise HTTPException(503, "Voice service unavailable - AWS Polly may not be configured")
         
         processing_time = int((time.time() - start_time) * 1000)
         
@@ -346,5 +357,5 @@ async def generate_voice(request: GenerateVoiceRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Voice generation failed: {e}")
+        logger.error(f"Voice generation failed: {e}", exc_info=True)
         raise HTTPException(500, f"Voice generation failed: {str(e)}")

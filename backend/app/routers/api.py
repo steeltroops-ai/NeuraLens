@@ -25,7 +25,7 @@ except Exception as e:
     print(f"[SKIP] Retinal: {e}")
 
 try:
-    from app.pipelines.cardiology.router import router as cardio
+    from app.pipelines.cardiology import router as cardio
     router.include_router(cardio, tags=["Cardiology"])
     pipelines["cardiology"] = True
 except Exception as e:

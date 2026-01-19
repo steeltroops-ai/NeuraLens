@@ -33,6 +33,8 @@ pillow==10.4.0
 praat-parselmouth==0.4.7
 librosa==0.10.2
 soundfile==0.12.1
+pydub==0.25.1
+transformers==4.44.0
 
 # =============================================
 # Cardiology Pipeline

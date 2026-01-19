@@ -29,7 +29,7 @@ class BiomarkerResult(BaseModel):
 
 
 class EnhancedBiomarkers(BaseModel):
-    """All 9 clinically-validated voice biomarkers"""
+    """All 10 clinically-validated voice biomarkers"""
     jitter: BiomarkerResult = Field(..., description="Fundamental frequency variation")
     shimmer: BiomarkerResult = Field(..., description="Amplitude variation")
     hnr: BiomarkerResult = Field(..., description="Harmonics-to-Noise Ratio")
@@ -39,6 +39,27 @@ class EnhancedBiomarkers(BaseModel):
     voice_tremor: BiomarkerResult = Field(..., description="Tremor intensity")
     articulation_clarity: BiomarkerResult = Field(..., description="Articulation clarity")
     prosody_variation: BiomarkerResult = Field(..., description="Prosodic richness")
+    cpps: Optional[BiomarkerResult] = Field(None, description="Cepstral Peak Prominence Smoothed (dB)")
+
+
+class ExtendedBiomarkers(BaseModel):
+    """Research-grade extended biomarkers (optional)"""
+    mean_f0: Optional[BiomarkerResult] = Field(None, description="Mean fundamental frequency (Hz)")
+    f0_range: Optional[BiomarkerResult] = Field(None, description="Pitch range (Hz)")
+    nii: Optional[BiomarkerResult] = Field(None, description="Neuromotor Instability Index")
+    vfmt: Optional[BiomarkerResult] = Field(None, description="Vocal Fold Micro-Tremor")
+    ace: Optional[BiomarkerResult] = Field(None, description="Articulatory Coordination Entropy")
+    rpcs: Optional[BiomarkerResult] = Field(None, description="Respiratory-Phonatory Coupling Score")
+
+
+class ConditionRisk(BaseModel):
+    """Risk assessment for a specific condition"""
+    condition: str = Field(..., description="Condition name (e.g., parkinsons, cognitive_decline)")
+    probability: float = Field(..., ge=0, le=1, description="Probability estimate 0-1")
+    confidence: float = Field(..., ge=0, le=1, description="Model confidence")
+    confidence_interval: Tuple[float, float] = Field(..., description="95% confidence interval")
+    risk_level: str = Field(..., pattern="^(low|moderate|high|critical)$")
+    contributing_factors: List[str] = Field(default_factory=list)
 
 
 class FileInfo(BaseModel):
@@ -69,12 +90,20 @@ class EnhancedSpeechAnalysisResponse(BaseModel):
     confidence: float = Field(..., ge=0, le=1, description="Overall confidence")
     risk_score: float = Field(..., ge=0, le=1, description="Risk score 0-1")
     quality_score: float = Field(..., ge=0, le=1, description="Audio quality score")
-    biomarkers: EnhancedBiomarkers = Field(..., description="9 voice biomarkers")
+    biomarkers: EnhancedBiomarkers = Field(..., description="10 voice biomarkers")
     file_info: Optional[FileInfo] = None
     recommendations: List[str] = Field(default_factory=list)
     baseline_comparisons: Optional[List[BaselineComparison]] = None
     status: str = Field("completed", pattern="^(completed|partial|error)$")
     error_message: Optional[str] = None
+    
+    # Research-grade extensions
+    extended_biomarkers: Optional[ExtendedBiomarkers] = Field(None, description="Research-grade biomarkers")
+    condition_risks: Optional[List[ConditionRisk]] = Field(None, description="Condition-specific risk assessments")
+    confidence_interval: Optional[Tuple[float, float]] = Field(None, description="95% CI for risk score")
+    clinical_notes: Optional[str] = Field(None, description="Clinical interpretation notes")
+    requires_review: bool = Field(False, description="Whether human review is recommended")
+    review_reason: Optional[str] = Field(None, description="Reason for review requirement")
 
     class Config:
         json_schema_extra = {
