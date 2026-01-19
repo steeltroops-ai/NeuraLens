@@ -8,27 +8,27 @@
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
-        Browser[Web Browser]
-        Mobile[Mobile Device]
+    subgraph Client["Client Layer"]
+        Browser["Web Browser"]
+        Mobile["Mobile Device"]
     end
     
-    subgraph "Frontend - Vercel"
-        Next[Next.js 16 App]
-        UI[React Components]
-        API_Routes[API Routes /api/*]
+    subgraph Frontend["Frontend - Vercel"]
+        Next["Next.js 16 App"]
+        UI["React Components"]
+        API_Routes["API Routes"]
     end
     
-    subgraph "Backend - HuggingFace Spaces"
-        FastAPI[FastAPI Server]
-        Pipelines[AI Pipelines]
-        Models[ML Models]
+    subgraph Backend["Backend - HuggingFace"]
+        FastAPI["FastAPI Server"]
+        Pipelines["AI Pipelines"]
+        Models["ML Models"]
     end
     
-    subgraph "External Services"
-        Cerebras[Cerebras Cloud<br/>Llama 3.3 70B]
-        AWS[AWS Polly<br/>Text-to-Speech]
-        Clerk[Clerk Auth]
+    subgraph External["External Services"]
+        Cerebras["Cerebras Cloud"]
+        AWS["AWS Polly TTS"]
+        Clerk["Clerk Auth"]
     end
     
     Browser --> Next
@@ -48,19 +48,19 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Development"
-        Code[Source Code]
-        Git[Git Repository]
+    subgraph Dev["Development"]
+        Code["Source Code"]
+        Git["Git Repository"]
     end
     
-    subgraph "CI/CD"
-        GH[GitHub Actions]
-        Build[Build & Test]
+    subgraph CICD["CI/CD"]
+        GH["GitHub Actions"]
+        Build["Build & Test"]
     end
     
-    subgraph "Production"
-        Vercel[Vercel<br/>Frontend]
-        HF[HuggingFace Spaces<br/>Backend Docker]
+    subgraph Prod["Production"]
+        Vercel["Vercel Frontend"]
+        HF["HuggingFace Backend"]
     end
     
     Code --> Git
@@ -68,8 +68,7 @@ graph LR
     GH --> Build
     Build --> Vercel
     Build --> HF
-    
-    Vercel -.->|HTTPS| HF
+    Vercel -.-> HF
 ```
 
 **Deployment Flow:**
@@ -83,37 +82,37 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Next.js App Router"
-        Layout[Root Layout]
-        Dashboard[Dashboard Layout]
-        Pages[Page Components]
+    subgraph AppRouter["Next.js App Router"]
+        Layout["Root Layout"]
+        Dashboard["Dashboard Layout"]
+        Pages["Page Components"]
     end
     
-    subgraph "Dashboard Pages"
-        Retinal[/retinal]
-        Speech[/speech]
-        Cardio[/cardiology]
-        Radio[/radiology]
-        Derm[/dermatology]
-        Motor[/motor]
-        Cognitive[/cognitive]
-        Multi[/multimodal]
-        NRI[/nri-fusion]
+    subgraph DashPages["Dashboard Pages"]
+        Retinal["Retinal Page"]
+        Speech["Speech Page"]
+        Cardio["Cardiology Page"]
+        Radio["Radiology Page"]
+        Derm["Dermatology Page"]
+        Motor["Motor Page"]
+        Cognitive["Cognitive Page"]
+        Multi["MultiModal Page"]
+        NRI["NRI Fusion Page"]
     end
     
-    subgraph "Shared Components"
-        Sidebar[DashboardSidebar]
-        Header[DashboardHeader]
-        StatusBar[PipelineStatusBar]
-        Chatbot[MedicalChatbot]
-        Explain[ExplanationPanel]
+    subgraph Components["Shared Components"]
+        Sidebar["DashboardSidebar"]
+        Header["DashboardHeader"]
+        StatusBar["PipelineStatusBar"]
+        Chatbot["MedicalChatbot"]
+        Explain["ExplanationPanel"]
     end
     
-    subgraph "API Routes"
-        Health[/api/health]
-        Analyze[/api/*/analyze]
-        ExplainAPI[/api/explain]
-        Voice[/api/voice]
+    subgraph Routes["API Routes"]
+        Health["Health Check"]
+        Analyze["Analyze Endpoints"]
+        ExplainAPI["Explain API"]
+        Voice["Voice API"]
     end
     
     Layout --> Dashboard
@@ -127,11 +126,6 @@ graph TB
     Pages --> Speech
     Pages --> Cardio
     Pages --> Radio
-    Pages --> Derm
-    Pages --> Motor
-    Pages --> Cognitive
-    Pages --> Multi
-    Pages --> NRI
     
     Pages --> Explain
     Pages --> Analyze
@@ -152,50 +146,50 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "FastAPI Application"
-        Main[main.py<br/>CORS, Routes]
-        Router[API Router]
+    subgraph FastAPIApp["FastAPI Application"]
+        Main["main.py Entry"]
+        Router["API Router"]
     end
     
-    subgraph "Pipeline Layer"
-        Retinal[Retinal Pipeline]
-        Speech[Speech Pipeline]
-        Cardio[Cardiology Pipeline]
-        Radio[Radiology Pipeline]
-        Explain[Explain Pipeline]
-        Voice[Voice Pipeline]
+    subgraph PipelineLayer["Pipeline Layer"]
+        RetinalP["Retinal Pipeline"]
+        SpeechP["Speech Pipeline"]
+        CardioP["Cardiology Pipeline"]
+        RadioP["Radiology Pipeline"]
+        ExplainP["Explain Pipeline"]
+        VoiceP["Voice Pipeline"]
     end
     
-    subgraph "Core Services"
-        Orchestrator[Pipeline Orchestrator]
-        Service[Core Service]
-        Validator[Input Validator]
+    subgraph CoreServices["Core Services"]
+        Orchestrator["Pipeline Orchestrator"]
+        Service["Core Service"]
+        Validator["Input Validator"]
     end
     
-    subgraph "ML Layer"
-        Preprocessing[Preprocessing]
-        Features[Feature Extraction]
-        Analysis[Analysis Engine]
-        Clinical[Clinical Assessment]
+    subgraph MLLayer["ML Layer"]
+        Preprocessing["Preprocessing"]
+        Features["Feature Extraction"]
+        Analysis["Analysis Engine"]
+        Clinical["Clinical Assessment"]
     end
     
-    subgraph "Output Layer"
-        Formatter[Response Formatter]
-        Visualization[Visualization]
-        Report[Report Generator]
+    subgraph OutputLayer["Output Layer"]
+        Formatter["Response Formatter"]
+        Visualization["Visualization"]
+        Report["Report Generator"]
     end
     
     Main --> Router
-    Router --> Retinal
-    Router --> Speech
-    Router --> Cardio
-    Router --> Radio
-    Router --> Explain
-    Router --> Voice
+    Router --> RetinalP
+    Router --> SpeechP
+    Router --> CardioP
+    Router --> RadioP
+    Router --> ExplainP
+    Router --> VoiceP
     
-    Retinal --> Orchestrator
-    Speech --> Orchestrator
-    Cardio --> Orchestrator
+    RetinalP --> Orchestrator
+    SpeechP --> Orchestrator
+    CardioP --> Orchestrator
     
     Orchestrator --> Validator
     Orchestrator --> Preprocessing
@@ -220,58 +214,58 @@ Each pipeline follows this layered structure:
 
 ```mermaid
 graph TB
-    subgraph "Router Layer"
-        Router[router.py<br/>/api/{pipeline}/*]
+    subgraph RouterLayer["Router Layer"]
+        RouterFile["router.py"]
     end
     
-    subgraph "Core Layer"
-        Orchestrator[orchestrator.py]
-        Service[service.py]
+    subgraph CoreLayer["Core Layer"]
+        OrchestratorFile["orchestrator.py"]
+        ServiceFile["service.py"]
     end
     
-    subgraph "Input Layer"
-        Validator[validator.py]
-        Parser[parser.py]
+    subgraph InputLayer["Input Layer"]
+        ValidatorFile["validator.py"]
+        ParserFile["parser.py"]
     end
     
-    subgraph "Preprocessing Layer"
-        Normalizer[normalizer.py]
-        QualityGate[quality_gate.py]
+    subgraph PreprocessLayer["Preprocessing Layer"]
+        Normalizer["normalizer.py"]
+        QualityGate["quality_gate.py"]
     end
     
-    subgraph "Features Layer"
-        Extractor[extractor.py]
-        Biomarkers[biomarkers.py]
+    subgraph FeaturesLayer["Features Layer"]
+        Extractor["extractor.py"]
+        Biomarkers["biomarkers.py"]
     end
     
-    subgraph "Analysis Layer"
-        Analyzer[analyzer.py]
-        Classifier[classifier.py]
+    subgraph AnalysisLayer["Analysis Layer"]
+        Analyzer["analyzer.py"]
+        Classifier["classifier.py"]
     end
     
-    subgraph "Clinical Layer"
-        RiskScorer[risk_scorer.py]
-        Recommendations[recommendations.py]
+    subgraph ClinicalLayer["Clinical Layer"]
+        RiskScorer["risk_scorer.py"]
+        Recommendations["recommendations.py"]
     end
     
-    subgraph "Explanation Layer"
-        Rules[rules.py]
-        Templates[templates.py]
+    subgraph ExplanationLayer["Explanation Layer"]
+        Rules["rules.py"]
+        Templates["templates.py"]
     end
     
-    subgraph "Output Layer"
-        Formatter[formatter.py]
-        Visualization[visualization.py]
+    subgraph OutputLayerP["Output Layer"]
+        FormatterFile["formatter.py"]
+        VisualizationFile["visualization.py"]
     end
     
-    Router --> Orchestrator
-    Orchestrator --> Validator
-    Validator --> Normalizer
+    RouterFile --> OrchestratorFile
+    OrchestratorFile --> ValidatorFile
+    ValidatorFile --> Normalizer
     Normalizer --> Extractor
     Extractor --> Analyzer
     Analyzer --> RiskScorer
     RiskScorer --> Rules
-    Rules --> Formatter
+    Rules --> FormatterFile
 ```
 
 ---
@@ -280,39 +274,46 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Input"
-        Upload[Fundus Image<br/>JPEG/PNG]
+    subgraph Input1["Input"]
+        Upload["Fundus Image"]
     end
     
-    subgraph "Preprocessing"
-        Resize[Resize 512x512]
-        Normalize[Normalize RGB]
-        Enhance[CLAHE Enhancement]
+    subgraph Preprocess1["Preprocessing"]
+        Resize["Resize 512x512"]
+        Normalize["Normalize RGB"]
+        Enhance["CLAHE Enhancement"]
     end
     
-    subgraph "Analysis"
-        Segment[Vessel Segmentation]
-        Detect[Lesion Detection]
-        Grade[DR Grading 0-4]
+    subgraph Analysis1["Analysis"]
+        Segment["Vessel Segmentation"]
+        Detect["Lesion Detection"]
+        Grade["DR Grading 0-4"]
     end
     
-    subgraph "Biomarkers"
-        VD[Vessel Density]
-        Hemorrhage[Hemorrhages]
-        Exudates[Exudates]
-        MA[Microaneurysms]
+    subgraph Biomarkers1["Biomarkers"]
+        VD["Vessel Density"]
+        Hemorrhage["Hemorrhages"]
+        Exudates["Exudates"]
+        MA["Microaneurysms"]
     end
     
-    subgraph "Output"
-        Risk[Risk Score 0-100]
-        Heatmap[Attention Heatmap]
-        Report[Clinical Report]
+    subgraph Output1["Output"]
+        Risk["Risk Score 0-100"]
+        Heatmap["Attention Heatmap"]
+        ReportR["Clinical Report"]
     end
     
     Upload --> Resize --> Normalize --> Enhance
     Enhance --> Segment --> Detect --> Grade
-    Grade --> VD & Hemorrhage & Exudates & MA
-    VD & Hemorrhage & Exudates & MA --> Risk --> Heatmap --> Report
+    Grade --> VD
+    Grade --> Hemorrhage
+    Grade --> Exudates
+    Grade --> MA
+    VD --> Risk
+    Hemorrhage --> Risk
+    Exudates --> Risk
+    MA --> Risk
+    Risk --> Heatmap --> ReportR
 ```
 
 ---
@@ -321,46 +322,49 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph "Input"
-        Audio[Audio File<br/>WAV/MP3/WebM]
+    subgraph Input2["Input"]
+        Audio["Audio File"]
     end
     
-    subgraph "Preprocessing"
-        Convert[Convert to WAV]
-        Denoise[Noise Reduction]
-        VAD[Voice Activity Detection]
+    subgraph Preprocess2["Preprocessing"]
+        Convert["Convert to WAV"]
+        Denoise["Noise Reduction"]
+        VAD["Voice Detection"]
     end
     
-    subgraph "Feature Extraction"
-        F0[Fundamental Frequency]
-        Jitter[Jitter %]
-        Shimmer[Shimmer %]
-        HNR[Harmonics-to-Noise]
-        Formants[Formants F1-F3]
-        MFCC[MFCCs]
-        CPPS[Cepstral Peak]
-        Speech[Speech Rate]
-        Pause[Pause Patterns]
+    subgraph Features2["Feature Extraction"]
+        F0["Fundamental Frequency"]
+        Jitter["Jitter"]
+        Shimmer["Shimmer"]
+        HNR["Harmonics Noise"]
+        Formants["Formants"]
+        MFCC["MFCCs"]
     end
     
-    subgraph "Analysis"
-        Biomarker[Biomarker Scoring]
-        Clinical[Clinical Assessment]
-        Risk[Risk Classification]
+    subgraph Analysis2["Analysis"]
+        Biomarker["Biomarker Scoring"]
+        ClinicalS["Clinical Assessment"]
+        RiskS["Risk Classification"]
     end
     
-    subgraph "Output"
-        Score[Risk Score 0-100]
-        Radar[Radar Chart]
-        Trends[Trend Analysis]
+    subgraph Output2["Output"]
+        Score["Risk Score 0-100"]
+        Radar["Radar Chart"]
+        Trends["Trend Analysis"]
     end
     
     Audio --> Convert --> Denoise --> VAD
-    VAD --> F0 & Jitter & Shimmer & HNR & Formants & MFCC & CPPS & Speech & Pause
-    F0 & Jitter & Shimmer & HNR --> Biomarker
-    Formants & MFCC & CPPS --> Biomarker
-    Speech & Pause --> Biomarker
-    Biomarker --> Clinical --> Risk --> Score --> Radar --> Trends
+    VAD --> F0
+    VAD --> Jitter
+    VAD --> Shimmer
+    VAD --> HNR
+    VAD --> Formants
+    VAD --> MFCC
+    F0 --> Biomarker
+    Jitter --> Biomarker
+    Shimmer --> Biomarker
+    HNR --> Biomarker
+    Biomarker --> ClinicalS --> RiskS --> Score --> Radar --> Trends
 ```
 
 ---
@@ -369,38 +373,43 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph "Input"
-        ECG[ECG Signal<br/>CSV/EDF]
+    subgraph Input3["Input"]
+        ECG["ECG Signal"]
     end
     
-    subgraph "Preprocessing"
-        Filter[Bandpass Filter]
-        Baseline[Baseline Correction]
-        QRS[QRS Detection]
+    subgraph Preprocess3["Preprocessing"]
+        Filter["Bandpass Filter"]
+        Baseline["Baseline Correction"]
+        QRS["QRS Detection"]
     end
     
-    subgraph "Features"
-        Intervals[PR/QT/QRS Intervals]
-        HRV[Heart Rate Variability]
-        Morphology[Wave Morphology]
+    subgraph Features3["Features"]
+        Intervals["PR QT QRS Intervals"]
+        HRV["Heart Rate Variability"]
+        Morphology["Wave Morphology"]
     end
     
-    subgraph "Analysis"
-        Rhythm[Rhythm Classification]
-        Arrhythmia[Arrhythmia Detection]
-        Ischemia[Ischemia Detection]
+    subgraph Analysis3["Analysis"]
+        Rhythm["Rhythm Classification"]
+        Arrhythmia["Arrhythmia Detection"]
+        Ischemia["Ischemia Detection"]
     end
     
-    subgraph "Output"
-        Risk[Cardiac Risk Score]
-        ECGPlot[ECG Visualization]
-        Report[Clinical Report]
+    subgraph Output3["Output"]
+        RiskC["Cardiac Risk Score"]
+        ECGPlot["ECG Visualization"]
+        ReportC["Clinical Report"]
     end
     
     ECG --> Filter --> Baseline --> QRS
-    QRS --> Intervals & HRV & Morphology
-    Intervals & HRV & Morphology --> Rhythm --> Arrhythmia --> Ischemia
-    Ischemia --> Risk --> ECGPlot --> Report
+    QRS --> Intervals
+    QRS --> HRV
+    QRS --> Morphology
+    Intervals --> Rhythm
+    HRV --> Rhythm
+    Morphology --> Rhythm
+    Rhythm --> Arrhythmia --> Ischemia
+    Ischemia --> RiskC --> ECGPlot --> ReportC
 ```
 
 ---
@@ -409,45 +418,48 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Input"
-        Results[Pipeline Results]
-        Context[Patient Context]
+    subgraph Input4["Input"]
+        Results["Pipeline Results"]
+        Context["Patient Context"]
     end
     
-    subgraph "Rule Loading"
-        RuleLoader[rule_loader.py]
-        PipelineRules[Pipeline-Specific Rules]
+    subgraph RuleLoading["Rule Loading"]
+        RuleLoader["rule_loader.py"]
+        PipelineRules["Pipeline Rules"]
     end
     
-    subgraph "Prompt Building"
-        PromptBuilder[prompt_builder.py]
-        SystemPrompt[System Prompt]
-        UserPrompt[User Prompt + Results]
+    subgraph PromptBuild["Prompt Building"]
+        PromptBuilder["prompt_builder.py"]
+        SystemPrompt["System Prompt"]
+        UserPrompt["User Prompt"]
     end
     
-    subgraph "LLM Generation"
-        Cerebras[Cerebras Cloud]
-        Llama[Llama 3.3 70B]
-        Stream[Streaming Response]
+    subgraph LLMGen["LLM Generation"]
+        CerebrasLLM["Cerebras Cloud"]
+        Llama["Llama 3.3 70B"]
+        Stream["Streaming Response"]
     end
     
-    subgraph "Voice Synthesis"
-        Polly[AWS Polly]
-        Audio[MP3 Audio]
+    subgraph VoiceSynth["Voice Synthesis"]
+        Polly["AWS Polly"]
+        AudioOut["MP3 Audio"]
     end
     
-    subgraph "Output"
-        Text[Explanation Text]
-        Voice[Voice Audio]
+    subgraph Output4["Output"]
+        Text["Explanation Text"]
+        VoiceOut["Voice Audio"]
     end
     
     Results --> RuleLoader
     Context --> RuleLoader
     RuleLoader --> PipelineRules --> PromptBuilder
-    PromptBuilder --> SystemPrompt & UserPrompt
-    SystemPrompt & UserPrompt --> Cerebras --> Llama --> Stream
+    PromptBuilder --> SystemPrompt
+    PromptBuilder --> UserPrompt
+    SystemPrompt --> CerebrasLLM
+    UserPrompt --> CerebrasLLM
+    CerebrasLLM --> Llama --> Stream
     Stream --> Text
-    Text --> Polly --> Audio --> Voice
+    Text --> Polly --> AudioOut --> VoiceOut
 ```
 
 ---
@@ -457,30 +469,30 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant F as Frontend (Vercel)
+    participant F as Frontend
     participant A as API Routes
-    participant B as Backend (HF)
+    participant B as Backend
     participant P as Pipeline
-    participant L as LLM (Cerebras)
-    participant V as Voice (Polly)
-    
+    participant L as LLM
+    participant V as Voice
+
     U->>F: Upload Medical Image
-    F->>A: POST /api/{pipeline}/analyze
+    F->>A: POST analyze
     A->>B: Forward to FastAPI
     B->>P: Process Pipeline
-    P->>P: Preprocess → Features → Analysis
-    P-->>B: Results + Biomarkers
+    P->>P: Preprocess Features Analysis
+    P-->>B: Results Biomarkers
     B-->>A: JSON Response
     A-->>F: Display Results
     
-    F->>A: POST /api/explain
+    F->>A: POST explain
     A->>B: Request Explanation
     B->>L: Stream LLM Request
     L-->>B: Streaming Text
     B-->>A: SSE Stream
     A-->>F: Display Explanation
     
-    F->>A: POST /api/voice
+    F->>A: POST voice
     A->>B: TTS Request
     B->>V: Text to Speech
     V-->>B: MP3 Audio
@@ -494,31 +506,31 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph "Authentication"
-        Clerk[Clerk Auth]
-        JWT[JWT Tokens]
-        Session[Session Management]
+    subgraph Auth["Authentication"]
+        ClerkAuth["Clerk Auth"]
+        JWT["JWT Tokens"]
+        Session["Session Mgmt"]
     end
     
-    subgraph "API Security"
-        CORS[CORS Policy]
-        RateLimit[Rate Limiting]
-        Validation[Input Validation]
+    subgraph APISec["API Security"]
+        CORS["CORS Policy"]
+        RateLimit["Rate Limiting"]
+        Validation["Input Validation"]
     end
     
-    subgraph "Data Security"
-        HTTPS[HTTPS/TLS]
-        NoStore[No PHI Storage]
-        Ephemeral[Ephemeral Processing]
+    subgraph DataSec["Data Security"]
+        HTTPS["HTTPS TLS"]
+        NoStore["No PHI Storage"]
+        Ephemeral["Ephemeral Processing"]
     end
     
-    subgraph "Compliance"
-        HIPAA[HIPAA Guidelines]
-        Privacy[Privacy First]
-        Audit[Audit Logging]
+    subgraph Compliance["Compliance"]
+        HIPAA["HIPAA Guidelines"]
+        Privacy["Privacy First"]
+        Audit["Audit Logging"]
     end
     
-    Clerk --> JWT --> Session
+    ClerkAuth --> JWT --> Session
     CORS --> RateLimit --> Validation
     HTTPS --> NoStore --> Ephemeral
     HIPAA --> Privacy --> Audit
