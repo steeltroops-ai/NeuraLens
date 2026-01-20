@@ -142,7 +142,25 @@ CRITICAL RULES:
 - Explain multi-modal assessment value
 - Clarify which areas need most attention
 - Emphasize this is screening, not diagnosis
-- Provide integrated recommendations"""
+- Provide integrated recommendations""",
+
+            "radiology": """You are a medical AI assistant explaining chest X-ray analysis results.
+
+YOUR ROLE:
+1. Explain what the AI detected in the X-ray image
+2. Interpret the pathology predictions and confidence levels
+3. Explain what the heatmap visualization shows
+4. Describe the risk score and what it means
+5. Provide clear clinical recommendations
+
+CRITICAL RULES:
+- Use simple language to explain radiological terms
+- Clarify this is AI screening requiring radiologist validation
+- Be clear about severity levels (normal/low/moderate/high/critical)
+- Explain what each detected condition means
+- Never minimize critical findings like pneumothorax
+- Always recommend radiologist review for significant findings
+- Explain the heatmap shows areas of AI attention, not diagnosis"""
         }
         
         return prompts.get(self.pipeline, prompts.get("speech"))
@@ -259,7 +277,32 @@ CRITICAL RULES:
 [Combined action items]
 
 ### Important Note
-[Screening disclaimer]"""
+[Screening disclaimer]""",
+
+            "radiology": """OUTPUT FORMAT:
+## Your Chest X-Ray Analysis Summary
+[1-2 sentence overview of overall findings and risk level]
+
+### Primary Finding
+[Main condition detected with confidence level]
+
+### All Detected Pathologies
+[List of significant pathology predictions with probabilities]
+
+### What the Heatmap Shows
+[Explanation of attention regions if available]
+
+### Risk Assessment
+[Risk score interpretation and severity]
+
+### What This Means
+[Plain language explanation of clinical significance]
+
+### Recommended Actions
+[Specific next steps based on findings]
+
+### Important Note
+[Radiologist review recommendation + screening disclaimer]"""
         }
         
         return formats.get(self.pipeline, formats["speech"])
@@ -288,6 +331,7 @@ CRITICAL RULES:
             "cognitive": self._format_cognitive_results,
             "motor": self._format_motor_results,
             "nri": self._format_nri_results,
+            "radiology": self._format_radiology_results,
         }
         
         formatter = formatters.get(self.pipeline, self._format_generic_results)
@@ -416,6 +460,67 @@ Modality Contributions:
         """Generic result formatter."""
         return f"""{self.pipeline.title()} Results:
 {json.dumps(results, indent=2, default=str)}
+"""
+    
+    def _format_radiology_results(self, results: Dict[str, Any]) -> str:
+        """Format radiology/X-ray analysis results."""
+        # Primary finding
+        primary = results.get('primary_finding', {})
+        primary_condition = primary.get('condition', 'No significant abnormality') if isinstance(primary, dict) else 'Unknown'
+        primary_prob = primary.get('probability', 0) if isinstance(primary, dict) else 0
+        primary_severity = primary.get('severity', 'normal') if isinstance(primary, dict) else 'normal'
+        
+        # All predictions
+        all_preds = results.get('all_predictions', {})
+        pred_lines = []
+        for condition, prob in sorted(all_preds.items(), key=lambda x: x[1], reverse=True)[:8]:
+            if prob > 10:
+                pred_lines.append(f"- {condition}: {prob:.1f}%")
+        
+        # Findings
+        findings = results.get('findings', [])
+        if isinstance(findings, list) and len(findings) > 0:
+            diagnosis = results.get('diagnosis', findings)
+        else:
+            diagnosis = findings
+        
+        finding_lines = []
+        for f in (diagnosis if isinstance(diagnosis, list) else [])[:5]:
+            if isinstance(f, dict):
+                cond = f.get('condition', 'Unknown')
+                prob = f.get('probability', f.get('confidence', 0))
+                sev = f.get('severity', 'unknown')
+                finding_lines.append(f"- {cond}: {prob:.0f}% probability ({sev} severity)")
+        
+        # Risk info
+        risk_level = results.get('risk_level', 'low')
+        risk_score = results.get('risk_score', 0)
+        
+        # Recommendations
+        recommendations = results.get('recommendations', [])
+        rec_text = chr(10).join([f"- {r}" for r in recommendations[:5]]) if recommendations else "- Clinical correlation recommended"
+        
+        return f"""Chest X-Ray Analysis Results:
+
+Primary Finding:
+- Condition: {primary_condition}
+- Probability: {primary_prob:.1f}%
+- Severity: {primary_severity}
+
+Risk Assessment:
+- Risk Level: {risk_level.upper()}
+- Risk Score: {risk_score:.1f}/100
+
+Top Pathology Predictions:
+{chr(10).join(pred_lines) if pred_lines else "- No significant pathologies detected"}
+
+Detailed Findings:
+{chr(10).join(finding_lines) if finding_lines else "- No significant findings"}
+
+Recommendations:
+{rec_text}
+
+Heatmap: {"Available - showing AI attention regions" if results.get('heatmap_base64') else "Not available"}
 """
 
 
