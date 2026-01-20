@@ -99,8 +99,6 @@ interface CardiologyAnalysisResult {
   };
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export function CardiologyAssessment() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -144,8 +142,9 @@ export function CardiologyAssessment() {
 
       updatePipeline("cardiology", { currentStage: "Processing Signal..." });
 
+      // Use frontend API proxy instead of direct backend call
       const response = await fetch(
-        `${API_BASE}/api/cardiology/analyze?include_waveform=true`,
+        `/api/cardiology/analyze?include_waveform=true`,
         {
           method: "POST",
           body: formData,
@@ -154,7 +153,9 @@ export function CardiologyAssessment() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Analysis failed");
+        throw new Error(
+          errorData.detail || errorData.error || "Analysis failed",
+        );
       }
 
       updatePipeline("cardiology", { currentStage: "Analyzing Rhythm..." });
@@ -193,8 +194,9 @@ export function CardiologyAssessment() {
     });
 
     try {
+      // Use frontend API proxy instead of direct backend call
       const response = await fetch(
-        `${API_BASE}/api/cardiology/demo?heart_rate=72&duration=10`,
+        `/api/cardiology/demo?heart_rate=72&duration=10`,
         {
           method: "POST",
         },
@@ -202,7 +204,7 @@ export function CardiologyAssessment() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Demo failed");
+        throw new Error(errorData.detail || errorData.error || "Demo failed");
       }
 
       updatePipeline("cardiology", { currentStage: "Analyzing Demo Data..." });

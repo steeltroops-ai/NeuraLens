@@ -59,8 +59,7 @@ except ImportError:
 
 @router.post("/analyze", response_model=EnhancedSpeechAnalysisResponse)
 async def analyze_speech(
-    audio_file: UploadFile = File(None, alias="audio"),
-    audio: UploadFile = File(None),
+    audio: UploadFile = File(..., description="Audio file for analysis"),
     session_id: Optional[str] = Form(None)
 ) -> EnhancedSpeechAnalysisResponse:
     """
@@ -68,8 +67,7 @@ async def analyze_speech(
     Uses 'Medical Grade' pipeline (Parselmouth/Praat) with strict validation.
     """
     
-    file_obj = audio_file or audio
-    if not file_obj:
+    if not audio:
         raise HTTPException(status_code=400, detail="No audio file uploaded")
         
     s_id = session_id or str(uuid.uuid4())
@@ -77,14 +75,14 @@ async def analyze_speech(
     logger.info(f"Received speech analysis request for session {s_id}")
     
     try:
-        content = await file_obj.read()
+        content = await audio.read()
         
         # Validate input first
         validator = AudioValidator()
         validation = validator.validate(
             audio_bytes=content,
-            filename=file_obj.filename,
-            content_type=file_obj.content_type
+            filename=audio.filename,
+            content_type=audio.content_type
         )
         
         if not validation.is_valid:
@@ -95,8 +93,8 @@ async def analyze_speech(
         result = await service.analyze(
             audio_bytes=content,
             session_id=s_id,
-            filename=file_obj.filename,
-            content_type=file_obj.content_type
+            filename=audio.filename,
+            content_type=audio.content_type
         )
         
         return result
