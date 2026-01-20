@@ -3,7 +3,6 @@
 /**
  * Retinal Analysis Page
  *
- * Verified: 2026-01-19
  * Architecture: Client-side Page + Client-side Logic Component
  */
 

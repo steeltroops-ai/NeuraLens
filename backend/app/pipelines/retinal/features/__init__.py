@@ -57,6 +57,19 @@ from .composite import (
 # Biomarker extraction (main extractor - local module)
 from .biomarker_extractor import biomarker_extractor, BiomarkerExtractor
 
+# v5.0 Deep vessel analysis
+from .vessel_deep import (
+    DeepVesselAnalyzer,
+    DeepVesselMetrics,
+    VesselSegment,
+    BranchingPoint,
+    AVClassifier,
+    KnudtsonCalculator,
+    TortuosityCalculator,
+    RetinalZones,
+    deep_vessel_analyzer,
+)
+
 __all__ = [
     # Preprocessing
     "ImagePreprocessor",
@@ -93,4 +106,15 @@ __all__ = [
     # Main extractor
     "biomarker_extractor",
     "BiomarkerExtractor",
+    
+    # v5.0 Deep Vessel Analysis
+    "DeepVesselAnalyzer",
+    "DeepVesselMetrics",
+    "VesselSegment",
+    "BranchingPoint",
+    "AVClassifier",
+    "KnudtsonCalculator",
+    "TortuosityCalculator",
+    "RetinalZones",
+    "deep_vessel_analyzer",
 ]

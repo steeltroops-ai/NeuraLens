@@ -56,6 +56,35 @@ from .clinical_assessment import (
     summary_generator,
 )
 
+# v5.0 Bayesian uncertainty (research-grade)
+from .bayesian_uncertainty import (
+    BayesianUncertaintyEstimator,
+    BayesianUncertaintyResult,
+    MCDropoutEstimator,
+    ConformalPredictor,
+    TemperatureScaler,
+    CalibrationMetrics,
+    bayesian_estimator,
+    calibration_metrics,
+)
+
+# v5.0 Clinical safety gates
+from .safety_gates import (
+    ClinicalSafetyChecker,
+    SafetyCheckResult,
+    SafetyGateResult,
+    GateStatus,
+    ClinicalAction,
+    ReferralUrgency,
+    SafetyThresholds,
+    QualityGate,
+    UncertaintyGate,
+    ReferralGate,
+    ConsistencyGate,
+    CriticalBiomarkerGate,
+    clinical_safety_checker,
+)
+
 __all__ = [
     # Risk scoring
     "RetinalRiskScorer",
@@ -93,4 +122,29 @@ __all__ = [
     "differential_generator",
     "recommendation_generator",
     "summary_generator",
+    
+    # v5.0 Bayesian Uncertainty
+    "BayesianUncertaintyEstimator",
+    "BayesianUncertaintyResult",
+    "MCDropoutEstimator",
+    "ConformalPredictor",
+    "TemperatureScaler",
+    "CalibrationMetrics",
+    "bayesian_estimator",
+    "calibration_metrics",
+    
+    # v5.0 Safety Gates
+    "ClinicalSafetyChecker",
+    "SafetyCheckResult",
+    "SafetyGateResult",
+    "GateStatus",
+    "ClinicalAction",
+    "ReferralUrgency",
+    "SafetyThresholds",
+    "QualityGate",
+    "UncertaintyGate",
+    "ReferralGate",
+    "ConsistencyGate",
+    "CriticalBiomarkerGate",
+    "clinical_safety_checker",
 ]
