@@ -674,7 +674,13 @@ function ContributingFactorsPanel({
 // Main Component
 // ============================================================================
 
-export default function RetinalAssessment() {
+interface RetinalAssessmentProps {
+  onProcessingChange?: (isProcessing: boolean) => void;
+}
+
+export default function RetinalAssessment({
+  onProcessingChange,
+}: RetinalAssessmentProps) {
   const [state, setState] = useState<AnalysisState>("idle");
   const [results, setResults] = useState<RetinalAnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -701,6 +707,7 @@ export default function RetinalAssessment() {
     async (imageFile: File) => {
       setState("processing");
       setError(null);
+      onProcessingChange?.(true);
       addLog(
         `Starting analysis for: ${imageFile.name} (${(imageFile.size / 1024 / 1024).toFixed(2)}MB)`,
       );
@@ -786,9 +793,17 @@ export default function RetinalAssessment() {
         setError(msg);
         setState("error");
         completePipeline("retinal", false, "Error");
+      } finally {
+        onProcessingChange?.(false);
       }
     },
-    [addLog, startPipeline, updatePipeline, completePipeline],
+    [
+      addLog,
+      startPipeline,
+      updatePipeline,
+      completePipeline,
+      onProcessingChange,
+    ],
   );
 
   const handleFileSelect = useCallback(
@@ -1326,26 +1341,26 @@ export default function RetinalAssessment() {
             className="max-w-2xl mx-auto"
           >
             {/* Left: Input Card */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-6 flex flex-col h-full">
-              <h2 className="text-[14px] font-semibold text-zinc-900 mb-4">
+            <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col h-full">
+              <h2 className="text-[14px] font-semibold text-zinc-100 mb-4">
                 Upload Fundus Image
               </h2>
 
               <div className="mb-6 space-y-3">
-                <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
                     1
                   </span>
                   <p>Use a fundus camera to capture a clear retinal image.</p>
                 </div>
-                <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
                     2
                   </span>
                   <p>Ensure macular and optic disc are visible.</p>
                 </div>
-                <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
                     3
                   </span>
                   <p>Supported formats: JPEG, PNG, TIFF (Max 15MB).</p>
@@ -1356,10 +1371,10 @@ export default function RetinalAssessment() {
               <div
                 className={`flex-1 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                   isDragging
-                    ? "border-cyan-500 bg-cyan-50"
+                    ? "border-cyan-500 bg-cyan-500/10"
                     : error
-                      ? "border-red-300 bg-red-50"
-                      : "border-zinc-200 hover:border-cyan-400 hover:bg-zinc-50"
+                      ? "border-red-500/50 bg-red-500/10"
+                      : "border-zinc-700 hover:border-cyan-500/50 hover:bg-zinc-800/50"
                 }`}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -1381,18 +1396,18 @@ export default function RetinalAssessment() {
 
                 {isProcessing ? (
                   <div className="py-4">
-                    <Loader2 className="h-10 w-10 text-cyan-600 mx-auto animate-spin mb-3" />
-                    <div className="text-[14px] font-medium text-zinc-900">
+                    <Loader2 className="h-10 w-10 text-cyan-400 mx-auto animate-spin mb-3" />
+                    <div className="text-[14px] font-medium text-zinc-100">
                       Processing Image...
                     </div>
-                    <div className="text-[12px] text-zinc-500 mt-1 max-w-[200px] mx-auto">
+                    <div className="text-[12px] text-zinc-400 mt-1 max-w-[200px] mx-auto">
                       Running multi-layer neural network analysis
                     </div>
                   </div>
                 ) : error ? (
                   <div className="py-4">
-                    <XCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
-                    <div className="text-[13px] font-medium text-red-700">
+                    <XCircle className="h-10 w-10 text-red-400 mx-auto mb-3" />
+                    <div className="text-[13px] font-medium text-red-400">
                       {error}
                     </div>
                     <button
@@ -1400,20 +1415,20 @@ export default function RetinalAssessment() {
                         e.stopPropagation();
                         handleReset();
                       }}
-                      className="mt-2 text-[11px] font-medium text-red-600 hover:underline"
+                      className="mt-2 text-[11px] font-medium text-red-400 hover:text-red-300"
                     >
                       Try again
                     </button>
                   </div>
                 ) : (
                   <div className="py-4">
-                    <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Upload className="h-6 w-6 text-zinc-400" />
                     </div>
-                    <div className="text-[14px] font-medium text-zinc-700">
+                    <div className="text-[14px] font-medium text-zinc-200">
                       Click to Browse or Drag File
                     </div>
-                    <div className="text-[11px] text-zinc-400 mt-2">
+                    <div className="text-[11px] text-zinc-500 mt-2">
                       Secure HIPAA-Compliant Upload
                     </div>
                   </div>

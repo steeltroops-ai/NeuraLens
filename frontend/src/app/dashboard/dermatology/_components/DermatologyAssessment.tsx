@@ -102,7 +102,14 @@ interface DermatologyResult {
   recoverable?: boolean;
 }
 
-export function DermatologyAssessment() {
+// Component props
+interface DermatologyAssessmentProps {
+  onProcessingChange?: (isProcessing: boolean) => void;
+}
+
+export function DermatologyAssessment({
+  onProcessingChange,
+}: DermatologyAssessmentProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -128,6 +135,7 @@ export function DermatologyAssessment() {
 
     setIsAnalyzing(true);
     setError(null);
+    onProcessingChange?.(true);
     startPipeline("dermatology", [
       "upload",
       "validate",
@@ -167,6 +175,7 @@ export function DermatologyAssessment() {
       completePipeline("dermatology", false, "Error");
     } finally {
       setIsAnalyzing(false);
+      onProcessingChange?.(false);
     }
   };
 
@@ -207,9 +216,9 @@ export function DermatologyAssessment() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Section */}
         <div className="space-y-4">
-          <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-medium text-zinc-900 mb-4 flex items-center gap-2">
-              <Camera size={20} className="text-purple-600" />
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm">
+            <h2 className="text-lg font-medium text-zinc-100 mb-4 flex items-center gap-2">
+              <Camera size={20} className="text-fuchsia-400" />
               Capture or Upload Image
             </h2>
 
@@ -225,10 +234,10 @@ export function DermatologyAssessment() {
               />
               <label
                 htmlFor="skin-upload"
-                className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 rounded-lg p-8 hover:border-purple-500 hover:bg-purple-50 transition-all cursor-pointer bg-zinc-50"
+                className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-lg p-8 hover:border-fuchsia-500/50 hover:bg-zinc-800/50 transition-all cursor-pointer bg-zinc-800/30"
               >
-                <Sparkles size={48} className="text-zinc-400 mb-4" />
-                <p className="text-sm font-medium text-zinc-900 mb-1">
+                <Sparkles size={48} className="text-zinc-500 mb-4" />
+                <p className="text-sm font-medium text-zinc-200 mb-1">
                   Take photo or upload image
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -244,7 +253,7 @@ export function DermatologyAssessment() {
                   <img
                     src={previewUrl}
                     alt="Skin lesion preview"
-                    className="w-full rounded-lg border border-zinc-200"
+                    className="w-full rounded-lg border border-zinc-700"
                   />
                   {result?.visualizations?.segmentation_overlay_base64 && (
                     <img
@@ -255,13 +264,13 @@ export function DermatologyAssessment() {
                   )}
                 </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-400">
                     {selectedFile?.name}
                   </span>
                   <button
                     onClick={handleAnalyze}
                     disabled={isAnalyzing}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                    className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-sm font-medium hover:bg-fuchsia-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                   >
                     {isAnalyzing ? (
                       <>
@@ -281,14 +290,17 @@ export function DermatologyAssessment() {
           </div>
 
           {/* Photography Tips */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <Info size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
+              <Info
+                size={20}
+                className="text-fuchsia-400 mt-0.5 flex-shrink-0"
+              />
               <div>
-                <h3 className="text-sm font-medium text-blue-900 mb-2">
+                <h3 className="text-sm font-medium text-fuchsia-300 mb-2">
                   Photography Tips
                 </h3>
-                <ul className="text-xs text-blue-700 space-y-1">
+                <ul className="text-xs text-fuchsia-400/80 space-y-1">
                   <li>Use good lighting (natural light preferred)</li>
                   <li>Keep camera 6-12 inches from lesion</li>
                   <li>Center the lesion in the frame</li>
@@ -301,19 +313,19 @@ export function DermatologyAssessment() {
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle
                   size={20}
-                  className="text-red-600 mt-0.5 flex-shrink-0"
+                  className="text-red-400 mt-0.5 flex-shrink-0"
                 />
                 <div>
-                  <h3 className="text-sm font-medium text-red-900 mb-1">
+                  <h3 className="text-sm font-medium text-red-400 mb-1">
                     Analysis Error
                   </h3>
-                  <p className="text-xs text-red-700">{error}</p>
+                  <p className="text-xs text-red-400/80">{error}</p>
                   {result?.tips && result.tips.length > 0 && (
-                    <ul className="text-xs text-red-700 mt-2 space-y-1">
+                    <ul className="text-xs text-red-400/80 mt-2 space-y-1">
                       {result.tips.map((tip, i) => (
                         <li key={i}>{tip}</li>
                       ))}
@@ -327,16 +339,16 @@ export function DermatologyAssessment() {
 
         {/* Results Section */}
         <div className="space-y-4">
-          <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-medium text-zinc-900 mb-4 flex items-center gap-2">
-              <Shield size={20} className="text-purple-500" />
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm">
+            <h2 className="text-lg font-medium text-zinc-100 mb-4 flex items-center gap-2">
+              <Shield size={20} className="text-fuchsia-400" />
               Analysis Results
             </h2>
 
             {!result && !isAnalyzing && (
               <div className="text-center py-12">
-                <Sparkles size={48} className="text-zinc-300 mx-auto mb-4" />
-                <p className="text-sm text-zinc-500">
+                <Sparkles size={48} className="text-zinc-600 mx-auto mb-4" />
+                <p className="text-sm text-zinc-400">
                   Upload a skin lesion image to begin analysis
                 </p>
               </div>
@@ -346,12 +358,12 @@ export function DermatologyAssessment() {
               <div className="text-center py-12">
                 <Loader2
                   size={48}
-                  className="text-purple-500 mx-auto mb-4 animate-spin"
+                  className="text-fuchsia-400 mx-auto mb-4 animate-spin"
                 />
-                <p className="text-sm text-zinc-900 mb-2">
+                <p className="text-sm text-zinc-200 mb-2">
                   Analyzing skin lesion...
                 </p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-400">
                   Running ABCDE criteria and classification
                 </p>
               </div>

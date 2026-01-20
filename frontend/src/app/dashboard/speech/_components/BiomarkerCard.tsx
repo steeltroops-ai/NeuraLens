@@ -89,35 +89,35 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
   const normalStart = ((min - extendedMin) / totalSpan) * 100;
   const normalEnd = ((max - extendedMin) / totalSpan) * 100;
 
-  // Status styling
+  // Status styling - Dark theme colors
   const getStatusColor = () => {
-    if (isNormal) return "text-[#22c55e]";
+    if (isNormal) return "text-emerald-400";
     const deviation =
       biomarker.value < min
         ? (min - biomarker.value) / min
         : (biomarker.value - max) / max;
-    if (deviation > 0.3) return "text-[#ef4444]";
-    return "text-[#f59e0b]";
+    if (deviation > 0.3) return "text-red-400";
+    return "text-amber-400";
   };
 
   const getStatusBg = () => {
-    if (isNormal) return "bg-[#dcfce7]";
+    if (isNormal) return "bg-emerald-500/15";
     const deviation =
       biomarker.value < min
         ? (min - biomarker.value) / min
         : (biomarker.value - max) / max;
-    if (deviation > 0.3) return "bg-[#fee2e2]";
-    return "bg-[#fef3c7]";
+    if (deviation > 0.3) return "bg-red-500/15";
+    return "bg-amber-500/15";
   };
 
   if (compact) {
     return (
-      <div className="flex items-center justify-between py-2 border-b border-[#f0f0f0] last:border-0">
+      <div className="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
         <div className="flex items-center gap-2">
-          <Icon size={14} className="text-[#64748b]" strokeWidth={1.5} />
-          <span className="text-[13px] text-[#334155]">{label}</span>
+          <Icon size={14} className="text-zinc-500" strokeWidth={1.5} />
+          <span className="text-[13px] text-zinc-300">{label}</span>
           {biomarker.is_estimated && (
-            <span className="text-[10px] text-[#94a3b8] bg-[#f1f5f9] px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">
               Est.
             </span>
           )}
@@ -127,7 +127,7 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
             {formatValue(biomarker.value, biomarker.unit)}
           </span>
           {isNormal ? (
-            <CheckCircle size={14} className="text-[#22c55e]" />
+            <CheckCircle size={14} className="text-emerald-400" />
           ) : (
             <AlertCircle size={14} className={getStatusColor()} />
           )}
@@ -139,8 +139,8 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-lg border p-4",
-        isResearch ? "border-[#d8b4fe]" : "border-[#e2e8f0]",
+        "bg-zinc-800/50 rounded-lg border p-4",
+        isResearch ? "border-violet-500/30" : "border-zinc-700",
       )}
     >
       {/* Header */}
@@ -149,27 +149,25 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
           <div
             className={cn(
               "p-1.5 rounded-md",
-              isResearch ? "bg-[#f3e8ff]" : getStatusBg(),
+              isResearch ? "bg-violet-500/15" : getStatusBg(),
             )}
           >
             <Icon
               size={16}
-              className={isResearch ? "text-[#8b5cf6]" : getStatusColor()}
+              className={isResearch ? "text-violet-400" : getStatusColor()}
               strokeWidth={1.5}
             />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="text-[13px] font-medium text-[#0f172a]">
-                {label}
-              </h4>
-              {isResearch && <Sparkles size={10} className="text-[#8b5cf6]" />}
+              <h4 className="text-[13px] font-medium text-zinc-200">{label}</h4>
+              {isResearch && <Sparkles size={10} className="text-violet-400" />}
             </div>
-            <p className="text-[11px] text-[#64748b]">{description}</p>
+            <p className="text-[11px] text-zinc-500">{description}</p>
           </div>
         </div>
         {biomarker.is_estimated && (
-          <span className="text-[10px] text-[#94a3b8] bg-[#f1f5f9] px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">
             Estimated
           </span>
         )}
@@ -181,17 +179,17 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
           {formatValue(biomarker.value, biomarker.unit)}
         </span>
         {biomarker.confidence !== null && (
-          <span className="text-[11px] text-[#94a3b8] ml-2">
+          <span className="text-[11px] text-zinc-500 ml-2">
             {(biomarker.confidence * 100).toFixed(0)}% conf.
           </span>
         )}
       </div>
 
       {/* Range visualization */}
-      <div className="relative h-2 bg-[#f1f5f9] rounded-full mb-2">
+      <div className="relative h-2 bg-zinc-700 rounded-full mb-2">
         {/* Normal range indicator */}
         <div
-          className="absolute h-full bg-[#dcfce7] rounded-full"
+          className="absolute h-full bg-emerald-500/30 rounded-full"
           style={{
             left: `${normalStart}%`,
             width: `${normalEnd - normalStart}%`,
@@ -200,50 +198,50 @@ export const BiomarkerCard: React.FC<BiomarkerCardProps> = ({
         {/* Current value marker */}
         <div
           className={cn(
-            "absolute w-3 h-3 rounded-full -top-0.5 transform -translate-x-1/2 border-2 border-white shadow-sm",
+            "absolute w-3 h-3 rounded-full -top-0.5 transform -translate-x-1/2 border-2 border-zinc-900 shadow-sm",
             isNormal
-              ? "bg-[#22c55e]"
+              ? "bg-emerald-400"
               : biomarker.value < min
-                ? "bg-[#f59e0b]"
-                : "bg-[#ef4444]",
+                ? "bg-amber-400"
+                : "bg-red-400",
           )}
           style={{ left: `${position}%` }}
         />
       </div>
 
       {/* Range labels */}
-      <div className="flex justify-between text-[10px] text-[#94a3b8]">
+      <div className="flex justify-between text-[10px] text-zinc-500">
         <span>{min.toFixed(2)}</span>
-        <span className="text-[#64748b]">Normal Range</span>
+        <span className="text-zinc-400">Normal Range</span>
         <span>{max.toFixed(2)}</span>
       </div>
 
       {/* Baseline comparison */}
       {baseline && (
-        <div className="mt-3 pt-3 border-t border-[#f0f0f0]">
+        <div className="mt-3 pt-3 border-t border-zinc-700">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[#64748b]">vs Baseline</span>
+            <span className="text-zinc-500">vs Baseline</span>
             <div className="flex items-center gap-1">
               {baseline.direction === "improved" && (
                 <>
-                  <TrendingUp size={12} className="text-[#22c55e]" />
-                  <span className="text-[#22c55e]">
+                  <TrendingUp size={12} className="text-emerald-400" />
+                  <span className="text-emerald-400">
                     +{baseline.delta_percent.toFixed(1)}%
                   </span>
                 </>
               )}
               {baseline.direction === "worsened" && (
                 <>
-                  <TrendingDown size={12} className="text-[#ef4444]" />
-                  <span className="text-[#ef4444]">
+                  <TrendingDown size={12} className="text-red-400" />
+                  <span className="text-red-400">
                     {baseline.delta_percent.toFixed(1)}%
                   </span>
                 </>
               )}
               {baseline.direction === "stable" && (
                 <>
-                  <Minus size={12} className="text-[#64748b]" />
-                  <span className="text-[#64748b]">Stable</span>
+                  <Minus size={12} className="text-zinc-500" />
+                  <span className="text-zinc-500">Stable</span>
                 </>
               )}
             </div>

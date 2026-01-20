@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Mic, FileAudio } from "lucide-react";
 import { SpeechRecorder } from "./SpeechRecorder";
 import { SpeechResultsPanel } from "./SpeechResultsPanel";
 import { ExplanationPanel } from "@/components/explanation/ExplanationPanel";
@@ -133,7 +133,7 @@ export default function SpeechAssessment({
   return (
     <AnimatePresence mode="wait">
       {state === "complete" && results ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
             <SpeechResultsPanel
               key="results"
@@ -145,7 +145,7 @@ export default function SpeechAssessment({
             <ExplanationPanel
               pipeline="speech"
               results={results}
-              patientContext={undefined} // You might want to get this from a store or context
+              patientContext={undefined}
             />
           </div>
         </div>
@@ -155,24 +155,29 @@ export default function SpeechAssessment({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="bg-white rounded-xl border border-zinc-200 p-6"
+          className="bg-zinc-900 rounded-xl border border-zinc-800 p-6"
         >
           {/* Instructions */}
           <div className="mb-6">
-            <h2 className="text-[14px] font-semibold text-zinc-900 mb-2">
-              Recording Instructions
-            </h2>
-            <ul className="space-y-1.5 text-[13px] text-zinc-500">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded bg-violet-500/15">
+                <Mic size={14} className="text-violet-400" />
+              </div>
+              <h2 className="text-[14px] font-semibold text-zinc-100">
+                Recording Instructions
+              </h2>
+            </div>
+            <ul className="space-y-2 text-[13px] text-zinc-400">
               <li className="flex items-start gap-2">
-                <span className="text-blue-600">1.</span>
+                <span className="text-violet-400 font-medium">1.</span>
                 Find a quiet environment with minimal background noise
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600">2.</span>
+                <span className="text-violet-400 font-medium">2.</span>
                 Speak naturally for 10-30 seconds (reading or conversation)
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600">3.</span>
+                <span className="text-violet-400 font-medium">3.</span>
                 Maintain consistent distance from microphone
               </li>
             </ul>
@@ -191,17 +196,17 @@ export default function SpeechAssessment({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+              className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg"
             >
               <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                <Loader2 className="h-5 w-5 text-blue-400 animate-spin" />
                 <div>
-                  <div className="text-[13px] font-medium text-blue-800">
+                  <div className="text-[13px] font-medium text-blue-300">
                     {state === "uploading"
                       ? "Uploading audio..."
                       : "Analyzing speech patterns..."}
                   </div>
-                  <div className="text-[12px] text-blue-600">
+                  <div className="text-[12px] text-blue-400/70">
                     Extracting biomarkers and calculating risk score
                   </div>
                 </div>
@@ -214,18 +219,20 @@ export default function SpeechAssessment({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+              className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
             >
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <div className="text-[13px] font-medium text-red-800">
+                  <div className="text-[13px] font-medium text-red-300">
                     Analysis Failed
                   </div>
-                  <div className="text-[12px] text-red-700 mt-1">{error}</div>
+                  <div className="text-[12px] text-red-400/80 mt-1">
+                    {error}
+                  </div>
                   <button
                     onClick={handleReset}
-                    className="mt-3 text-[12px] font-medium text-red-500 hover:text-red-700"
+                    className="mt-3 text-[12px] font-medium text-red-400 hover:text-red-300 transition-colors"
                   >
                     Try Again
                   </button>

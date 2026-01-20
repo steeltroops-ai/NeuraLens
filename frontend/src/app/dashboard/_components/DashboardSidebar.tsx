@@ -242,9 +242,9 @@ function SidebarGroupComponent({
 }: SidebarGroupComponentProps) {
   return (
     <div className={collapsed ? "mb-3" : "mb-4"}>
-      {/* Group Label - Matches homepage card secondary text - Robotic/Technical */}
+      {/* Group Label - Clean sans-serif design */}
       {!collapsed && (
-        <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 font-mono">
+        <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {group.label}
         </div>
       )}
@@ -262,19 +262,19 @@ function SidebarGroupComponent({
                 <Link
                   href={item.route}
                   className={`
-                                            flex items-center w-full rounded-md transition-all duration-200 group
-                                            focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500
-                                            ${
-                                              collapsed
-                                                ? "justify-center px-0 py-2.5 mx-auto w-10 h-10"
-                                                : "gap-3 px-3 py-2"
-                                            }
-                                            ${
-                                              isActive
-                                                ? "bg-[#18181b] text-white shadow-sm ring-1 ring-[#27272a]"
-                                                : "text-zinc-400 hover:bg-white/10 hover:text-white"
-                                            }
-                                        `}
+                    flex items-center w-full rounded-lg transition-all duration-200 group
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50
+                    ${
+                      collapsed
+                        ? "justify-center px-0 py-2.5 mx-auto w-10 h-10"
+                        : "gap-3 px-3 py-2.5"
+                    }
+                    ${
+                      isActive
+                        ? "bg-[#18181b] text-white shadow-sm ring-1 ring-[#27272a]"
+                        : "text-zinc-400 hover:bg-white/10 hover:text-white"
+                    }
+                  `}
                   aria-current={isActive ? "page" : undefined}
                   aria-label={collapsed ? item.label : undefined}
                   onMouseEnter={() => setHoveredItem(item.id)}
@@ -283,11 +283,11 @@ function SidebarGroupComponent({
                   data-active={isActive}
                 >
                   <Icon
-                    size={16}
+                    size={18}
                     strokeWidth={1.5}
                     className={
                       isActive
-                        ? "text-white"
+                        ? "text-zinc-100"
                         : "text-zinc-500 group-hover:text-zinc-300"
                     }
                     aria-hidden="true"
@@ -295,7 +295,7 @@ function SidebarGroupComponent({
                   {!collapsed && (
                     <>
                       <span
-                        className={`text-[13px] font-mono tracking-tight flex-1 ${isActive ? "font-medium" : "font-normal"}`}
+                        className={`text-[13px] tracking-tight flex-1 ${isActive ? "font-medium" : "font-normal"}`}
                       >
                         {item.label}
                       </span>
@@ -386,8 +386,6 @@ export function DashboardSidebar({
 
   return (
     <>
-      {/* Mobile Menu Button - Removed (Integrated in Header) */}
-
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
@@ -403,11 +401,11 @@ export function DashboardSidebar({
         data-sidebar
         data-collapsed={collapsed}
         className={`
-                    fixed inset-y-0 left-0 z-50 flex flex-col bg-black border-r border-[#27272a]
-                    ${collapsed ? "w-[60px]" : "w-[240px]"}
-                    ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-                    ${className}
-                `}
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-black border-r border-[#27272a]
+          ${collapsed ? "w-[60px]" : "w-[240px]"}
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          ${className}
+        `}
         style={{
           transition:
             "width 350ms cubic-bezier(0.32, 0.72, 0, 1), transform 350ms cubic-bezier(0.32, 0.72, 0, 1)",
@@ -489,10 +487,10 @@ export function DashboardSidebar({
 
             {!collapsed && user && (
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-medium text-zinc-200 truncate">
+                <span className="text-[13px] font-medium text-zinc-200 truncate">
                   {user.fullName || user.username || "User"}
                 </span>
-                <span className="text-xs text-zinc-500 truncate">
+                <span className="text-[11px] text-zinc-500 truncate">
                   {user.primaryEmailAddress?.emailAddress}
                 </span>
               </div>
@@ -500,7 +498,9 @@ export function DashboardSidebar({
 
             {!collapsed && !user && (
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-zinc-200">Guest</span>
+                <span className="text-[13px] font-medium text-zinc-200">
+                  Guest
+                </span>
               </div>
             )}
           </div>

@@ -506,27 +506,27 @@ export function RadiologyAssessment({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Upload Card */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6">
-        <h2 className="text-[14px] font-semibold text-zinc-900 mb-4">
+      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+        <h2 className="text-[14px] font-semibold text-zinc-100 mb-4">
           Upload Chest X-Ray
         </h2>
 
         {/* Instructions */}
         <div className="mb-6 space-y-3">
-          <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+          <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center text-[10px] font-bold">
               1
             </span>
             <p>Ensure patient ID is redacted (HIPAA compliant)</p>
           </div>
-          <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+          <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center text-[10px] font-bold">
               2
             </span>
             <p>Standard PA or AP view preferred</p>
           </div>
-          <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+          <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/15 text-amber-400 flex items-center justify-center text-[10px] font-bold">
               3
             </span>
             <p>Supported: JPEG, PNG (Max 10MB)</p>
@@ -545,19 +545,19 @@ export function RadiologyAssessment({
           />
 
           {isProcessing ? (
-            <div className="h-full border-2 border-dashed border-blue-200 bg-blue-50 rounded-xl flex flex-col items-center justify-center p-6 min-h-[280px]">
-              <Loader2 className="h-12 w-12 text-blue-600 animate-spin mb-4" />
-              <div className="text-[14px] font-medium text-blue-900">
+            <div className="h-full border-2 border-dashed border-amber-500/30 bg-amber-500/10 rounded-xl flex flex-col items-center justify-center p-6 min-h-[280px]">
+              <Loader2 className="h-12 w-12 text-amber-400 animate-spin mb-4" />
+              <div className="text-[14px] font-medium text-zinc-100">
                 Analyzing X-Ray...
               </div>
-              <div className="text-[12px] text-blue-600 mt-1">
+              <div className="text-[12px] text-amber-400 mt-1">
                 Detecting abnormalities using AI
               </div>
               <div className="mt-4 flex gap-2">
                 {["Preprocessing", "Detecting", "Scoring"].map((step, i) => (
                   <span
                     key={step}
-                    className="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-medium rounded-full animate-pulse"
+                    className="px-2 py-1 bg-amber-500/20 text-amber-400 text-[10px] font-medium rounded-full animate-pulse"
                     style={{ animationDelay: `${i * 200}ms` }}
                   >
                     {step}
@@ -566,7 +566,7 @@ export function RadiologyAssessment({
               </div>
             </div>
           ) : previewUrl ? (
-            <div className="h-full border border-zinc-200 rounded-xl overflow-hidden relative group min-h-[280px]">
+            <div className="h-full border border-zinc-700 rounded-xl overflow-hidden relative group min-h-[280px]">
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -579,7 +579,7 @@ export function RadiologyAssessment({
                 <div className="flex gap-3">
                   <button
                     onClick={handleAnalyze}
-                    className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-lg flex items-center gap-2"
+                    className="px-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 shadow-lg flex items-center gap-2"
                   >
                     <Zap className="h-4 w-4" />
                     Run Analysis
@@ -601,25 +601,25 @@ export function RadiologyAssessment({
               onDrop={handleDrop}
               className={`h-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer transition-all text-center min-h-[280px] ${
                 isDragging
-                  ? "border-blue-400 bg-blue-50"
-                  : "border-zinc-200 hover:border-blue-400 hover:bg-zinc-50"
+                  ? "border-amber-500 bg-amber-500/10"
+                  : "border-zinc-700 hover:border-amber-500/50 hover:bg-zinc-800/50"
               }`}
             >
               <div
                 className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${
-                  isDragging ? "bg-blue-100" : "bg-zinc-100"
+                  isDragging ? "bg-amber-500/20" : "bg-zinc-800"
                 }`}
               >
                 <Upload
-                  className={`h-7 w-7 ${isDragging ? "text-blue-500" : "text-zinc-400"}`}
+                  className={`h-7 w-7 ${isDragging ? "text-amber-400" : "text-zinc-400"}`}
                 />
               </div>
-              <div className="text-[14px] font-medium text-zinc-700">
+              <div className="text-[14px] font-medium text-zinc-200">
                 {isDragging
                   ? "Drop your X-Ray here"
                   : "Click to Browse or Drag File"}
               </div>
-              <div className="text-[11px] text-zinc-400 mt-2">
+              <div className="text-[11px] text-zinc-500 mt-2">
                 High-resolution JPEG/PNG supported
               </div>
             </label>
@@ -631,18 +631,18 @@ export function RadiologyAssessment({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg"
+            className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
           >
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="text-[13px] font-medium text-red-800">
+                <div className="text-[13px] font-medium text-red-400">
                   Analysis Failed
                 </div>
-                <div className="text-[12px] text-red-700 mt-1">{error}</div>
+                <div className="text-[12px] text-red-400/80 mt-1">{error}</div>
                 <button
                   onClick={handleReset}
-                  className="mt-3 text-[12px] font-medium text-red-500 hover:text-red-700"
+                  className="mt-3 text-[12px] font-medium text-red-400 hover:text-red-300"
                 >
                   Try Again
                 </button>
@@ -653,9 +653,9 @@ export function RadiologyAssessment({
       </div>
 
       {/* Info Card */}
-      <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-6">
-        <h3 className="text-[13px] font-semibold text-zinc-800 mb-4 flex items-center gap-2">
-          <Scan className="h-4 w-4 text-blue-600" />
+      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+        <h3 className="text-[13px] font-semibold text-zinc-200 mb-4 flex items-center gap-2">
+          <Scan className="h-4 w-4 text-amber-400" />
           Model Capabilities
         </h3>
 
@@ -683,11 +683,11 @@ export function RadiologyAssessment({
         </div>
 
         {/* Model Info */}
-        <div className="p-4 bg-white rounded-lg border border-zinc-200">
-          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2">
+        <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+          <div className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">
             AI Model
           </div>
-          <div className="text-[13px] font-semibold text-zinc-800">
+          <div className="text-[13px] font-semibold text-zinc-200">
             TorchXRayVision DenseNet121
           </div>
           <div className="text-[11px] text-zinc-500 mt-1">
@@ -695,12 +695,12 @@ export function RadiologyAssessment({
           </div>
           <div className="flex items-center gap-4 mt-3">
             <div className="text-[10px]">
-              <span className="text-zinc-400">Accuracy: </span>
-              <span className="font-medium text-green-600">92%</span>
+              <span className="text-zinc-500">Accuracy: </span>
+              <span className="font-medium text-green-400">92%</span>
             </div>
             <div className="text-[10px]">
-              <span className="text-zinc-400">Processing: </span>
-              <span className="font-medium text-blue-600">&lt;3s</span>
+              <span className="text-zinc-500">Processing: </span>
+              <span className="font-medium text-amber-400">&lt;3s</span>
             </div>
           </div>
         </div>
@@ -886,11 +886,11 @@ function CapabilityItem({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-zinc-500">
+      <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400">
         <Icon className="h-4 w-4" />
       </div>
       <div>
-        <div className="text-[12px] font-medium text-zinc-900">{title}</div>
+        <div className="text-[12px] font-medium text-zinc-200">{title}</div>
         <div className="text-[10px] text-zinc-500">{description}</div>
       </div>
     </div>

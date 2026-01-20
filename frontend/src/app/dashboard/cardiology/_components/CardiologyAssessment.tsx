@@ -99,7 +99,14 @@ interface CardiologyAnalysisResult {
   };
 }
 
-export function CardiologyAssessment() {
+// Component props
+interface CardiologyAssessmentProps {
+  onProcessingChange?: (isProcessing: boolean) => void;
+}
+
+export function CardiologyAssessment({
+  onProcessingChange,
+}: CardiologyAssessmentProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<CardiologyAnalysisResult | null>(null);
@@ -125,6 +132,7 @@ export function CardiologyAssessment() {
 
     setIsAnalyzing(true);
     setError(null);
+    onProcessingChange?.(true);
 
     startPipeline("cardiology", [
       "upload",
@@ -174,6 +182,7 @@ export function CardiologyAssessment() {
       completePipeline("cardiology", false, "Failed");
     } finally {
       setIsAnalyzing(false);
+      onProcessingChange?.(false);
     }
   };
 
@@ -181,6 +190,7 @@ export function CardiologyAssessment() {
     setIsAnalyzing(true);
     setError(null);
     setSelectedFile(null);
+    onProcessingChange?.(true);
 
     startPipeline("cardiology", [
       "generate",
@@ -218,6 +228,7 @@ export function CardiologyAssessment() {
       completePipeline("cardiology", false, "Demo Failed");
     } finally {
       setIsAnalyzing(false);
+      onProcessingChange?.(false);
     }
   };
 
@@ -606,20 +617,20 @@ export function CardiologyAssessment() {
         /* Input State - Clean 2-Column Card Style */
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input Card */}
-          <div className="bg-white rounded-xl border border-zinc-200 p-6 flex flex-col h-full">
-            <h2 className="text-[14px] font-semibold text-zinc-900 mb-4 flex justify-between items-center">
+          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col h-full">
+            <h2 className="text-[14px] font-semibold text-zinc-100 mb-4 flex justify-between items-center">
               <span>Cardiology Assessment</span>
               {/* Mode Toggle inside header */}
-              <div className="flex bg-zinc-100 rounded-lg p-0.5">
+              <div className="flex bg-zinc-800 rounded-lg p-0.5">
                 <button
                   onClick={() => setRecordingMode("upload")}
-                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "upload" ? "bg-white shadow-sm text-zinc-900" : "text-zinc-500 hover:text-zinc-700"}`}
+                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "upload" ? "bg-zinc-700 shadow-sm text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
                 >
                   Upload
                 </button>
                 <button
                   onClick={() => setRecordingMode("demo")}
-                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "demo" ? "bg-white shadow-sm text-zinc-900" : "text-zinc-500 hover:text-zinc-700"}`}
+                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "demo" ? "bg-zinc-700 shadow-sm text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
                 >
                   Demo
                 </button>
@@ -627,20 +638,20 @@ export function CardiologyAssessment() {
             </h2>
 
             <div className="mb-6 space-y-3">
-              <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">
+              <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center text-[10px] font-bold">
                   1
                 </span>
                 <p>Minimum 10s lead-II recording required.</p>
               </div>
-              <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">
+              <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center text-[10px] font-bold">
                   2
                 </span>
                 <p>Supported formats: CSV, JSON, TXT (MIT-BIH).</p>
               </div>
-              <div className="flex items-start gap-3 text-[13px] text-zinc-600">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">
+              <div className="flex items-start gap-3 text-[13px] text-zinc-400">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center text-[10px] font-bold">
                   3
                 </span>
                 <p>Ensure signal is free from major motion artifacts.</p>
@@ -659,34 +670,34 @@ export function CardiologyAssessment() {
                     id="ecg-upload"
                   />
                   {isAnalyzing ? (
-                    <div className="h-full border-2 border-dashed border-red-200 bg-red-50 rounded-xl flex flex-col items-center justify-center p-6 transition-all">
-                      <Loader2 className="h-10 w-10 text-red-600 animate-spin mb-3" />
-                      <div className="text-[14px] font-medium text-red-900">
+                    <div className="h-full border-2 border-dashed border-rose-500/30 bg-rose-500/10 rounded-xl flex flex-col items-center justify-center p-6 transition-all">
+                      <Loader2 className="h-10 w-10 text-rose-400 animate-spin mb-3" />
+                      <div className="text-[14px] font-medium text-zinc-100">
                         Analyzing ECG Signal...
                       </div>
-                      <div className="text-[12px] text-red-600 mt-1">
+                      <div className="text-[12px] text-rose-400 mt-1">
                         Detecting arrhythmias
                       </div>
                     </div>
                   ) : selectedFile ? (
-                    <div className="h-full border border-zinc-200 rounded-xl bg-zinc-50 flex flex-col items-center justify-center p-6">
-                      <Activity className="h-10 w-10 text-red-500 mb-3" />
-                      <p className="text-sm font-medium text-zinc-900 mb-1">
+                    <div className="h-full border border-zinc-700 rounded-xl bg-zinc-800/50 flex flex-col items-center justify-center p-6">
+                      <Activity className="h-10 w-10 text-rose-400 mb-3" />
+                      <p className="text-sm font-medium text-zinc-100 mb-1">
                         {selectedFile.name}
                       </p>
-                      <p className="text-xs text-zinc-500 mb-4">
+                      <p className="text-xs text-zinc-400 mb-4">
                         {(selectedFile.size / 1024).toFixed(1)} KB
                       </p>
                       <div className="flex gap-2">
                         <button
                           onClick={handleAnalyze}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 shadow-lg"
+                          className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-medium hover:bg-rose-700 shadow-lg"
                         >
                           Start Analysis
                         </button>
                         <button
                           onClick={() => setSelectedFile(null)}
-                          className="px-4 py-2 bg-white border border-zinc-200 text-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-50"
+                          className="px-4 py-2 bg-zinc-700 border border-zinc-600 text-zinc-200 rounded-lg text-sm font-medium hover:bg-zinc-600"
                         >
                           Clear
                         </button>
@@ -695,34 +706,34 @@ export function CardiologyAssessment() {
                   ) : (
                     <label
                       htmlFor="ecg-upload"
-                      className="h-full border-2 border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-red-400 hover:bg-zinc-50 transition-all text-center"
+                      className="h-full border-2 border-dashed border-zinc-700 rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-rose-500/50 hover:bg-zinc-800/50 transition-all text-center"
                     >
-                      <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center mb-4">
                         <Upload className="h-6 w-6 text-zinc-400" />
                       </div>
-                      <div className="text-[14px] font-medium text-zinc-700">
+                      <div className="text-[14px] font-medium text-zinc-200">
                         Upload ECG File
                       </div>
-                      <div className="text-[11px] text-zinc-400 mt-2">
+                      <div className="text-[11px] text-zinc-500 mt-2">
                         Drag & Drop or Click
                       </div>
                     </label>
                   )}
                 </>
               ) : (
-                <div className="h-full border-2 border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center p-6 bg-zinc-50/50">
-                  <PlayCircle className="h-12 w-12 text-red-400 mb-4" />
-                  <div className="text-[14px] font-medium text-zinc-700 mb-2">
+                <div className="h-full border-2 border-dashed border-zinc-700 rounded-xl flex flex-col items-center justify-center p-6 bg-zinc-800/30">
+                  <PlayCircle className="h-12 w-12 text-rose-400 mb-4" />
+                  <div className="text-[14px] font-medium text-zinc-200 mb-2">
                     Run Demo Analysis
                   </div>
-                  <p className="text-[11px] text-zinc-500 text-center max-w-[200px] mb-4">
+                  <p className="text-[11px] text-zinc-400 text-center max-w-[200px] mb-4">
                     Simulate a patient with Atrial Fibrillation or Arrhythmia
                     using synthetic data.
                   </p>
                   <button
                     onClick={handleDemo}
                     disabled={isAnalyzing}
-                    className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 shadow-md disabled:opacity-50 flex items-center gap-2"
+                    className="px-6 py-2 bg-rose-600 text-white rounded-lg text-sm font-medium hover:bg-rose-700 shadow-md disabled:opacity-50 flex items-center gap-2"
                   >
                     {isAnalyzing ? (
                       <Loader2 className="animate-spin h-4 w-4" />
@@ -737,18 +748,18 @@ export function CardiologyAssessment() {
           </div>
 
           {/* Info / Capabilities */}
-          <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-6 h-full">
-            <h3 className="text-[13px] font-semibold text-zinc-800 mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-red-500" />
+          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 h-full">
+            <h3 className="text-[13px] font-semibold text-zinc-200 mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-rose-400" />
               Pipeline Capabilities
             </h3>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-zinc-500">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400">
                   <Heart className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium text-zinc-900">
+                  <div className="text-[12px] font-medium text-zinc-200">
                     Arrhythmia Detection
                   </div>
                   <div className="text-[10px] text-zinc-500">
@@ -757,11 +768,11 @@ export function CardiologyAssessment() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-zinc-500">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400">
                   <Activity className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium text-zinc-900">
+                  <div className="text-[12px] font-medium text-zinc-200">
                     HRV Analysis
                   </div>
                   <div className="text-[10px] text-zinc-500">
@@ -770,11 +781,11 @@ export function CardiologyAssessment() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-zinc-500">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400">
                   <Zap className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium text-zinc-900">
+                  <div className="text-[12px] font-medium text-zinc-200">
                     Signal Quality
                   </div>
                   <div className="text-[10px] text-zinc-500">
@@ -785,17 +796,17 @@ export function CardiologyAssessment() {
             </div>
 
             {error && (
-              <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-red-800 font-medium text-[12px] mb-1">
+              <div className="mt-6 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-red-400 font-medium text-[12px] mb-1">
                   <AlertTriangle className="h-3 w-3" />
                   Analysis Error
                 </div>
-                <div className="text-[11px] text-red-600 leading-snug">
+                <div className="text-[11px] text-red-400/80 leading-snug">
                   {error}
                 </div>
                 <button
                   onClick={() => setError(null)}
-                  className="mt-2 text-[10px] font-medium text-red-700 underline"
+                  className="mt-2 text-[10px] font-medium text-red-400 hover:text-red-300"
                 >
                   Dismiss
                 </button>
