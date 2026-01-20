@@ -80,6 +80,13 @@ try:
 except Exception as e:
     print(f"[SKIP] Chatbot: {e}")
 
+try:
+    from app.pipelines.dermatology.router import router as dermatology
+    router.include_router(dermatology, tags=["Dermatology"])
+    pipelines["dermatology"] = True
+except Exception as e:
+    print(f"[SKIP] Dermatology: {e}")
+
 
 @router.get("/")
 async def api_info():

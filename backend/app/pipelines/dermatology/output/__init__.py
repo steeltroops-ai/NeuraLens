@@ -1,0 +1,3 @@
+"""
+Dermatology Pipeline Output Package
+"""
