@@ -235,45 +235,45 @@ export function CardiologyAssessment({
   const getRiskColor = (risk: string) => {
     switch (risk) {
       case "low":
-        return "text-green-600 bg-green-50 border-green-200";
+        return "text-emerald-400 bg-emerald-500/15 border-emerald-500/30";
       case "moderate":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return "text-amber-400 bg-amber-500/15 border-amber-500/30";
       case "high":
-        return "text-orange-600 bg-orange-50 border-orange-200";
+        return "text-orange-400 bg-orange-500/15 border-orange-500/30";
       case "critical":
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-red-400 bg-red-500/15 border-red-500/30";
       default:
-        return "text-green-600 bg-green-50 border-green-200";
+        return "text-emerald-400 bg-emerald-500/15 border-emerald-500/30";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "normal":
-        return "text-green-600";
+        return "text-emerald-400";
       case "mild":
-        return "text-yellow-600";
+        return "text-amber-400";
       case "moderate":
-        return "text-orange-600";
+        return "text-orange-400";
       case "severe":
-        return "text-red-600";
+        return "text-red-400";
       default:
-        return "text-zinc-600";
+        return "text-zinc-400";
     }
   };
 
   const getQualityColor = (quality: string) => {
     switch (quality) {
       case "excellent":
-        return "text-green-600";
+        return "text-emerald-400";
       case "good":
-        return "text-blue-600";
+        return "text-cyan-400";
       case "fair":
-        return "text-yellow-600";
+        return "text-amber-400";
       case "poor":
-        return "text-red-600";
+        return "text-red-400";
       default:
-        return "text-zinc-600";
+        return "text-zinc-400";
     }
   };
 
@@ -342,17 +342,17 @@ export function CardiologyAssessment({
               <div className="space-y-6">
                 {/* ECG Waveform Card */}
                 {result.visualizations?.ecg?.waveform_data && (
-                  <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm">
+                  <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 ">
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-[13px] font-semibold text-zinc-800 flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-red-600" />
+                      <h3 className="text-[13px] font-semibold text-zinc-200 flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-red-400" />
                         ECG Lead II Rhythm Strip
                       </h3>
                       <div className="text-[11px] font-medium text-zinc-500">
                         {result.visualizations.ecg.sample_rate} Hz | 10s Window
                       </div>
                     </div>
-                    <div className="bg-zinc-50 rounded-lg p-4 h-48 flex items-center justify-center border border-zinc-100 relative overflow-hidden">
+                    <div className="bg-zinc-50 rounded-lg p-4 h-48 flex items-center justify-center border border-zinc-700/50 relative overflow-hidden">
                       {renderWaveformSVG()}
                       {/* Grid overlay could go here */}
                     </div>
@@ -362,7 +362,7 @@ export function CardiologyAssessment({
                 {/* Diagnosis & Vitals Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Primary Diagnosis */}
-                  <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm flex flex-col justify-between">
+                  <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5  flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
@@ -374,7 +374,7 @@ export function CardiologyAssessment({
                           {result.risk_assessment.risk_category} Risk
                         </span>
                       </div>
-                      <div className="text-[18px] font-bold text-zinc-900 leading-tight mb-1">
+                      <div className="text-[18px] font-bold text-zinc-100 leading-tight mb-1">
                         {result.ecg_analysis.rhythm_analysis.classification}
                       </div>
                     </div>
@@ -400,26 +400,26 @@ export function CardiologyAssessment({
                   </div>
 
                   {/* Vitals & Metrics */}
-                  <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+                  <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 ">
                     <div className="grid grid-cols-2 gap-4 h-full">
                       <div className="flex flex-col justify-center">
                         <div className="flex items-center gap-2 text-[11px] font-medium text-zinc-500 mb-1">
                           <Heart className="h-3.5 w-3.5 text-red-500" /> Heart
                           Rate
                         </div>
-                        <div className="text-[24px] font-bold text-zinc-900">
+                        <div className="text-[24px] font-bold text-zinc-100">
                           {result.ecg_analysis.rhythm_analysis.heart_rate_bpm}
                           <span className="text-[12px] font-medium text-zinc-400 ml-1">
                             bpm
                           </span>
                         </div>
                       </div>
-                      <div className="flex flex-col justify-center pl-4 border-l border-zinc-100">
+                      <div className="flex flex-col justify-center pl-4 border-l border-zinc-700/50">
                         <div className="flex items-center gap-2 text-[11px] font-medium text-zinc-500 mb-1">
                           <TrendingUp className="h-3.5 w-3.5 text-blue-500" />{" "}
                           Regularity
                         </div>
-                        <div className="text-[16px] font-semibold text-zinc-900 capitalize">
+                        <div className="text-[16px] font-semibold text-zinc-100 capitalize">
                           {result.ecg_analysis.rhythm_analysis.regularity.replace(
                             "_",
                             " ",
@@ -432,13 +432,13 @@ export function CardiologyAssessment({
               </div>
 
               {/* HRV & Intervals */}
-              <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
-                  <h3 className="text-[13px] font-semibold text-zinc-800 flex items-center gap-2">
+              <div className="bg-zinc-900 rounded-lg border border-zinc-800  overflow-hidden">
+                <div className="px-5 py-3 border-b border-zinc-700/50 bg-zinc-800/50 flex items-center justify-between">
+                  <h3 className="text-[13px] font-semibold text-zinc-200 flex items-center gap-2">
                     <Zap className="h-4 w-4 text-purple-600" />
                     Advanced Metrics
                   </h3>
-                  <span className="text-[10px] bg-white border border-zinc-200 px-2 py-0.5 rounded text-zinc-500 shadow-sm">
+                  <span className="text-[10px] bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded text-zinc-500 ">
                     ANS:{" "}
                     {result.ecg_analysis.hrv_metrics.interpretation.autonomic_balance.replace(
                       "_",
@@ -482,8 +482,8 @@ export function CardiologyAssessment({
 
               {/* Detailed Clinical Findings */}
               {result.findings.length > 0 && (
-                <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5">
-                  <h3 className="text-[13px] font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                <div className="bg-zinc-900 rounded-lg border border-zinc-800  p-5">
+                  <h3 className="text-[13px] font-semibold text-zinc-200 mb-4 flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-zinc-500" />
                     Clinical Assessment Findings
                   </h3>
@@ -491,13 +491,13 @@ export function CardiologyAssessment({
                     {result.findings.map((finding) => (
                       <div
                         key={finding.id}
-                        className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-100"
+                        className="flex items-start gap-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
                       >
                         <CheckCircle2
                           className={`${getSeverityColor(finding.severity)} h-4 w-4 flex-shrink-0 mt-0.5`}
                         />
                         <div>
-                          <div className="text-[12px] font-semibold text-zinc-700">
+                          <div className="text-[12px] font-semibold text-zinc-300">
                             {finding.title}
                           </div>
                           <div className="text-[11px] text-zinc-500 mt-0.5 leading-relaxed">
@@ -522,18 +522,18 @@ export function CardiologyAssessment({
 
               {/* Recommendations */}
               {result.recommendations.length > 0 && (
-                <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-5">
-                  <div className="text-[12px] font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                <div className="bg-zinc-900 rounded-xl border border-cyan-500/30 p-5">
+                  <div className="text-[12px] font-semibold text-zinc-100 mb-3 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-400" />
                     Recommendations
                   </div>
                   <ul className="space-y-2.5">
                     {result.recommendations.map((rec, i) => (
                       <li
                         key={i}
-                        className="flex items-start gap-2.5 text-[12px] text-blue-800 leading-relaxed"
+                        className="flex items-start gap-2.5 text-[12px] text-zinc-400 leading-relaxed"
                       >
-                        <span className="block w-1 h-1 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
+                        <span className="block w-1 h-1 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
                         {rec}
                       </li>
                     ))}
@@ -542,9 +542,9 @@ export function CardiologyAssessment({
               )}
 
               {/* Signal Quality */}
-              <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+              <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 ">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-[12px] font-semibold text-zinc-700">
+                  <span className="text-[12px] font-semibold text-zinc-300">
                     Signal Quality
                   </span>
                   <span
@@ -570,14 +570,14 @@ export function CardiologyAssessment({
                         className={`h-full rounded-full ${
                           result.quality_assessment.overall_quality ===
                           "excellent"
-                            ? "bg-green-500"
+                            ? "bg-emerald-500/150"
                             : result.quality_assessment.overall_quality ===
                                 "good"
                               ? "bg-blue-500"
                               : result.quality_assessment.overall_quality ===
                                   "poor"
-                                ? "bg-red-500"
-                                : "bg-yellow-500"
+                                ? "bg-red-500/150"
+                                : "bg-amber-500/150"
                         }`}
                         style={{
                           width: `${result.quality_assessment.ecg_quality.signal_quality_score * 100}%`,
@@ -606,7 +606,7 @@ export function CardiologyAssessment({
                 setSelectedFile(null);
                 setRecordingMode("upload");
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition font-medium text-[13px]"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-300 rounded-lg hover:bg-zinc-200 transition font-medium text-[13px]"
             >
               <Activity className="h-4 w-4" />
               Analyze Another ECG
@@ -624,13 +624,13 @@ export function CardiologyAssessment({
               <div className="flex bg-zinc-800 rounded-lg p-0.5">
                 <button
                   onClick={() => setRecordingMode("upload")}
-                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "upload" ? "bg-zinc-700 shadow-sm text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
+                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "upload" ? "bg-zinc-700  text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
                 >
                   Upload
                 </button>
                 <button
                   onClick={() => setRecordingMode("demo")}
-                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "demo" ? "bg-zinc-700 shadow-sm text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
+                  className={`px-3 py-1 text-[11px] font-medium rounded-md transition-all ${recordingMode === "demo" ? "bg-zinc-700  text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
                 >
                   Demo
                 </button>
@@ -796,7 +796,7 @@ export function CardiologyAssessment({
             </div>
 
             {error && (
-              <div className="mt-6 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+              <div className="mt-6 bg-red-500/150/10 border border-red-500/30 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-red-400 font-medium text-[12px] mb-1">
                   <AlertTriangle className="h-3 w-3" />
                   Analysis Error
@@ -839,7 +839,7 @@ function BiomarkerCard({
   const isHigh = value !== null && value > normalRange[1];
 
   return (
-    <div className="bg-white border border-zinc-100 rounded-lg p-2">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-2">
       <p className="text-xs text-zinc-500 mb-1">{label}</p>
       <div className="flex items-baseline gap-1">
         <span
@@ -847,10 +847,10 @@ function BiomarkerCard({
             value === null
               ? "text-zinc-400"
               : isNormal
-                ? "text-green-600"
+                ? "text-emerald-400"
                 : isLow
-                  ? "text-blue-600"
-                  : "text-orange-600"
+                  ? "text-cyan-400"
+                  : "text-orange-400"
           }`}
         >
           {value !== null ? value.toFixed(1) : "N/A"}

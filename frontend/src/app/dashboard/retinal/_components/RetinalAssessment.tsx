@@ -197,7 +197,7 @@ export interface RetinalAnalysisResponse {
 type AnalysisState = "idle" | "uploading" | "processing" | "complete" | "error";
 
 // ============================================================================
-// Biomarker Display Card
+// Biomarker Display Card - Dark Theme
 // ============================================================================
 
 function BiomarkerCard({
@@ -209,30 +209,26 @@ function BiomarkerCard({
   biomarker: BiomarkerValue;
   icon: React.ElementType;
 }) {
-  const colors = {
+  const statusConfig = {
     normal: {
-      bg: "bg-green-50",
-      border: "border-green-200",
-      text: "text-green-700",
-      badge: "bg-green-100",
+      bg: "bg-emerald-500/15",
+      text: "text-emerald-400",
+      dot: "bg-emerald-500",
     },
     borderline: {
-      bg: "bg-yellow-50",
-      border: "border-yellow-200",
-      text: "text-yellow-700",
-      badge: "bg-yellow-100",
+      bg: "bg-amber-500/15",
+      text: "text-amber-400",
+      dot: "bg-amber-500",
     },
     abnormal: {
-      bg: "bg-red-50",
-      border: "border-red-200",
-      text: "text-red-700",
-      badge: "bg-red-100",
+      bg: "bg-red-500/15",
+      text: "text-red-400",
+      dot: "bg-red-500",
     },
   }[biomarker.status] || {
-    bg: "bg-zinc-50",
-    border: "border-zinc-200",
-    text: "text-zinc-700",
-    badge: "bg-zinc-100",
+    bg: "bg-zinc-500/15",
+    text: "text-zinc-400",
+    dot: "bg-zinc-500",
   };
 
   const formatValue = (v: number) => {
@@ -241,26 +237,31 @@ function BiomarkerCard({
   };
 
   return (
-    <div className={`${colors.bg} ${colors.border} border rounded-lg p-3`}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <Icon className={`h-3.5 w-3.5 ${colors.text}`} />
-        <span className="text-[12px] font-medium text-zinc-700 truncate">
+    <div className="bg-zinc-800/50 rounded-lg border border-zinc-700/50 p-3 hover:border-zinc-600 transition-colors">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`p-1.5 rounded-md ${statusConfig.bg}`}>
+          <Icon className={`h-3 w-3 ${statusConfig.text}`} />
+        </div>
+        <span className="text-[11px] font-medium text-zinc-400 truncate flex-1">
           {label}
         </span>
+        <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
       </div>
-      <div className="text-[16px] font-bold text-zinc-900 leading-tight">
+      <div className="text-[18px] font-bold text-zinc-100 leading-tight">
         {formatValue(biomarker.value)}
       </div>
-      <div className="flex items-center justify-between mt-1">
-        <span className={`text-[11px] font-semibold ${colors.text} capitalize`}>
+      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-zinc-700/50">
+        <span
+          className={`text-[10px] font-semibold ${statusConfig.text} capitalize`}
+        >
           {biomarker.status}
         </span>
-        <span className="text-[10px] text-zinc-500 font-medium">
-          {(biomarker.measurement_confidence * 100).toFixed(0)}%
+        <span className="text-[9px] text-zinc-500 font-medium">
+          {(biomarker.measurement_confidence * 100).toFixed(0)}% conf
         </span>
       </div>
       {biomarker.clinical_significance && (
-        <div className="text-[10px] text-zinc-600 mt-1.5 leading-snug line-clamp-2">
+        <div className="text-[9px] text-zinc-500 mt-1.5 leading-snug line-clamp-2">
           {biomarker.clinical_significance}
         </div>
       )}
@@ -269,18 +270,21 @@ function BiomarkerCard({
 }
 
 // ============================================================================
-// Image Quality Panel - Detailed quality breakdown
+// Image Quality Panel - Dark Theme
 // ============================================================================
 
 function ImageQualityPanel({ quality }: { quality: ImageQuality }) {
-  const gradabilityColors: Record<string, string> = {
-    excellent: "#22c55e",
-    good: "#84cc16",
-    fair: "#eab308",
-    poor: "#f97316",
-    ungradable: "#ef4444",
+  const gradabilityConfig: Record<string, { color: string; bg: string }> = {
+    excellent: { color: "text-emerald-400", bg: "bg-emerald-500" },
+    good: { color: "text-green-400", bg: "bg-green-500" },
+    fair: { color: "text-amber-400", bg: "bg-amber-500" },
+    poor: { color: "text-orange-400", bg: "bg-orange-500" },
+    ungradable: { color: "text-red-400", bg: "bg-red-500" },
   };
-  const gradabilityColor = gradabilityColors[quality.gradability] || "#6b7280";
+  const config = gradabilityConfig[quality.gradability] || {
+    color: "text-zinc-400",
+    bg: "bg-zinc-500",
+  };
 
   const metrics = [
     { label: "Focus", value: quality.focus_score, icon: Target },
@@ -296,51 +300,59 @@ function ImageQualityPanel({ quality }: { quality: ImageQuality }) {
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
+    <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-2">
-          <ImageIcon className="h-4 w-4 text-zinc-500" />
-          <span className="text-[12px] font-semibold text-zinc-800">
+          <div className="p-1.5 rounded-lg bg-cyan-500/15">
+            <ImageIcon className="h-4 w-4 text-cyan-400" />
+          </div>
+          <span className="text-[13px] font-semibold text-zinc-100">
             Image Quality
           </span>
         </div>
-        <div
-          className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-          style={{ backgroundColor: gradabilityColor }}
+        <span
+          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full text-white ${config.bg}`}
         >
-          {quality.gradability.toUpperCase()}
-        </div>
+          {quality.gradability}
+        </span>
       </div>
+
+      {/* Content */}
       <div className="p-4">
+        {/* Overall Score Bar */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1">
-            <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${quality.overall_score * 100}%`,
-                  backgroundColor: gradabilityColor,
-                }}
+                className={`h-full rounded-full transition-all ${config.bg}`}
+                style={{ width: `${quality.overall_score * 100}%` }}
               />
             </div>
           </div>
-          <span className="text-[14px] font-bold text-zinc-800">
+          <span className="text-[14px] font-bold text-zinc-100">
             {(quality.overall_score * 100).toFixed(0)}%
           </span>
         </div>
+
+        {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-2">
           {metrics.map(({ label, value, icon: Icon, unit, isRaw }) => (
             <div
               key={label}
-              className="flex items-center gap-2 p-2 bg-zinc-50 rounded-lg"
+              className="flex items-center gap-2 p-2 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
             >
-              <Icon className="h-3.5 w-3.5 text-zinc-400" />
+              <div className="p-1 bg-zinc-700/50 rounded">
+                <Icon className="h-3 w-3 text-zinc-400" />
+              </div>
               <div className="flex-1">
-                <div className="text-[10px] text-zinc-500">{label}</div>
-                <div className="text-[12px] font-semibold text-zinc-800">
+                <div className="text-[9px] text-zinc-500 uppercase tracking-wide">
+                  {label}
+                </div>
+                <div className="text-[12px] font-semibold text-zinc-200">
                   {isRaw ? value.toFixed(1) : `${(value * 100).toFixed(0)}%`}
                   {unit && (
-                    <span className="text-[10px] text-zinc-400 ml-0.5">
+                    <span className="text-[9px] text-zinc-500 ml-0.5">
                       {unit}
                     </span>
                   )}
@@ -349,38 +361,42 @@ function ImageQualityPanel({ quality }: { quality: ImageQuality }) {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100">
+
+        {/* Visibility Indicators */}
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-700/50">
           <div className="flex items-center gap-1.5">
             {quality.optic_disc_visible ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
             ) : (
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
+              <XCircle className="h-3.5 w-3.5 text-red-400" />
             )}
-            <span className="text-[10px] text-zinc-600">Disc</span>
+            <span className="text-[10px] text-zinc-400">Disc</span>
           </div>
           <div className="flex items-center gap-1.5">
             {quality.macula_visible ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
             ) : (
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
+              <XCircle className="h-3.5 w-3.5 text-red-400" />
             )}
-            <span className="text-[10px] text-zinc-600">Macula</span>
+            <span className="text-[10px] text-zinc-400">Macula</span>
           </div>
           <div className="flex items-center gap-1.5">
             {quality.vessel_arcades_visible ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
             ) : (
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
+              <XCircle className="h-3.5 w-3.5 text-red-400" />
             )}
-            <span className="text-[10px] text-zinc-600">Vessels</span>
+            <span className="text-[10px] text-zinc-400">Vessels</span>
           </div>
         </div>
+
+        {/* Issues */}
         {quality.issues.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-zinc-100">
+          <div className="mt-3 pt-3 border-t border-zinc-700/50 space-y-1">
             {quality.issues.map((issue, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded mt-1"
+                className="flex items-center gap-2 text-[10px] text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20"
               >
                 <AlertTriangle className="h-3 w-3" />
                 {issue}
@@ -388,7 +404,9 @@ function ImageQualityPanel({ quality }: { quality: ImageQuality }) {
             ))}
           </div>
         )}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-zinc-100 text-[9px] text-zinc-400">
+
+        {/* Meta Info */}
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-zinc-700/50 text-[9px] text-zinc-500">
           <span>
             {quality.resolution[0]} x {quality.resolution[1]}
           </span>
@@ -401,74 +419,73 @@ function ImageQualityPanel({ quality }: { quality: ImageQuality }) {
 }
 
 // ============================================================================
-// DME Card - Diabetic Macular Edema status
+// DME Card - Dark Theme
 // ============================================================================
 
 function DMECard({ dme }: { dme: DiabeticMacularEdema }) {
-  const severityColors = {
-    none: {
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      text: "text-emerald-700",
-    },
-    mild: {
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      text: "text-amber-700",
-    },
-    moderate: {
-      bg: "bg-orange-50",
-      border: "border-orange-200",
-      text: "text-orange-700",
-    },
-    severe: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700" },
+  const severityConfig = {
+    none: { bg: "bg-emerald-500/15", text: "text-emerald-400" },
+    mild: { bg: "bg-amber-500/15", text: "text-amber-400" },
+    moderate: { bg: "bg-orange-500/15", text: "text-orange-400" },
+    severe: { bg: "bg-red-500/15", text: "text-red-400" },
   };
-  const defaultColors = {
-    bg: "bg-zinc-50",
-    border: "border-zinc-200",
-    text: "text-zinc-700",
+  const config = severityConfig[dme.severity] || {
+    bg: "bg-zinc-500/15",
+    text: "text-zinc-400",
   };
-  const colors = severityColors[dme.severity] || defaultColors;
 
   return (
-    <div className={`${colors.bg} ${colors.border} border rounded-xl p-4`}>
-      <div className="flex items-center justify-between mb-2">
+    <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-2">
-          <Eye className="h-4 w-4 text-zinc-600" />
-          <span className="text-[12px] font-semibold text-zinc-800">
+          <div className="p-1.5 rounded-lg bg-violet-500/15">
+            <Eye className="h-4 w-4 text-violet-400" />
+          </div>
+          <span className="text-[13px] font-semibold text-zinc-100">
             Diabetic Macular Edema
           </span>
         </div>
         <span
-          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${colors.text} ${colors.bg} border ${colors.border}`}
+          className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${config.bg} ${config.text}`}
         >
-          {dme.severity.toUpperCase()}
+          {dme.severity}
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-3">
-        <div className="text-center p-2 bg-white/50 rounded-lg">
-          <div className="text-[10px] text-zinc-500 mb-1">Present</div>
-          {dme.present ? (
-            <AlertCircle className="h-4 w-4 text-amber-500 mx-auto" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 mx-auto" />
-          )}
-        </div>
-        <div className="text-center p-2 bg-white/50 rounded-lg">
-          <div className="text-[10px] text-zinc-500 mb-1">CSME</div>
-          {dme.csme ? (
-            <AlertCircle className="h-4 w-4 text-red-500 mx-auto" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 mx-auto" />
-          )}
-        </div>
-        <div className="text-center p-2 bg-white/50 rounded-lg">
-          <div className="text-[10px] text-zinc-500 mb-1">Central</div>
-          {dme.central_involvement ? (
-            <AlertCircle className="h-4 w-4 text-red-500 mx-auto" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 mx-auto" />
-          )}
+
+      {/* Content */}
+      <div className="p-4">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+            <div className="text-[9px] text-zinc-500 uppercase tracking-wide mb-1">
+              Present
+            </div>
+            {dme.present ? (
+              <AlertCircle className="h-5 w-5 text-amber-400 mx-auto" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto" />
+            )}
+          </div>
+          <div className="text-center p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+            <div className="text-[9px] text-zinc-500 uppercase tracking-wide mb-1">
+              CSME
+            </div>
+            {dme.csme ? (
+              <AlertCircle className="h-5 w-5 text-red-400 mx-auto" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto" />
+            )}
+          </div>
+          <div className="text-center p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+            <div className="text-[9px] text-zinc-500 uppercase tracking-wide mb-1">
+              Central
+            </div>
+            {dme.central_involvement ? (
+              <AlertCircle className="h-5 w-5 text-red-400 mx-auto" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto" />
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -476,7 +493,7 @@ function DMECard({ dme }: { dme: DiabeticMacularEdema }) {
 }
 
 // ============================================================================
-// 4-2-1 Rule Display - Severe NPDR criteria
+// 4-2-1 Rule Display - Dark Theme
 // ============================================================================
 
 function FourTwoOneRuleDisplay({ rule }: { rule: FourTwoOneRule }) {
@@ -495,21 +512,26 @@ function FourTwoOneRuleDisplay({ rule }: { rule: FourTwoOneRule }) {
 
   return (
     <div
-      className={`rounded-lg p-3 border ${anyMet ? "bg-red-50 border-red-200" : "bg-zinc-50 border-zinc-200"}`}
+      className={`rounded-lg p-3 border ${anyMet ? "bg-red-500/10 border-red-500/30" : "bg-zinc-800/50 border-zinc-700/50"}`}
     >
-      <div className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider mb-2">
+      <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <Shield className="h-3 w-3" />
         4-2-1 Rule (Severe NPDR)
       </div>
       <div className="space-y-1.5">
         {criteria.map(({ label, met }) => (
           <div key={label} className="flex items-center gap-2">
             {met ? (
-              <AlertCircle className="h-3.5 w-3.5 text-red-500" />
+              <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertCircle className="h-2.5 w-2.5 text-red-400" />
+              </div>
             ) : (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <CheckCircle2 className="h-2.5 w-2.5 text-emerald-400" />
+              </div>
             )}
             <span
-              className={`text-[11px] ${met ? "text-red-700 font-medium" : "text-zinc-600"}`}
+              className={`text-[10px] ${met ? "text-red-400 font-medium" : "text-zinc-500"}`}
             >
               {label}
             </span>
@@ -521,7 +543,7 @@ function FourTwoOneRuleDisplay({ rule }: { rule: FourTwoOneRule }) {
 }
 
 // ============================================================================
-// Systemic Risk Indicators Panel
+// Systemic Risk Indicators Panel - Dark Theme
 // ============================================================================
 
 function SystemicRiskPanel({
@@ -532,20 +554,28 @@ function SystemicRiskPanel({
   if (!indicators || Object.keys(indicators).length === 0) return null;
 
   return (
-    <div className="bg-amber-50/50 rounded-xl border border-amber-100 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <HeartPulse className="h-4 w-4 text-amber-600" />
-        <span className="text-[12px] font-semibold text-amber-900">
+    <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+      {/* Header */}
+      <div className="flex items-center gap-2 p-4 border-b border-zinc-800">
+        <div className="p-1.5 rounded-lg bg-amber-500/15">
+          <HeartPulse className="h-4 w-4 text-amber-400" />
+        </div>
+        <span className="text-[13px] font-semibold text-zinc-100">
           Systemic Risk Indicators
         </span>
       </div>
-      <div className="space-y-2">
+
+      {/* Content */}
+      <div className="p-4 space-y-2">
         {Object.entries(indicators).map(([key, value]) => (
-          <div key={key} className="flex items-start gap-2 text-[11px]">
-            <TrendingUp className="h-3.5 w-3.5 text-amber-500 mt-0.5" />
+          <div
+            key={key}
+            className="flex items-start gap-2 text-[11px] p-2 bg-amber-500/10 rounded-lg border border-amber-500/20"
+          >
+            <TrendingUp className="h-3.5 w-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
-              <span className="font-medium text-amber-800">{key}:</span>
-              <span className="text-amber-700 ml-1">{value}</span>
+              <span className="font-semibold text-amber-300">{key}:</span>
+              <span className="text-amber-200/80 ml-1">{value}</span>
             </div>
           </div>
         ))}
@@ -555,7 +585,7 @@ function SystemicRiskPanel({
 }
 
 // ============================================================================
-// Pipeline Progress Display
+// Pipeline Progress Display - Dark Theme
 // ============================================================================
 
 function PipelineProgress({ pipelineState }: { pipelineState: PipelineState }) {
@@ -578,58 +608,74 @@ function PipelineProgress({ pipelineState }: { pipelineState: PipelineState }) {
   );
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-cyan-600" />
-          <span className="text-[12px] font-semibold text-zinc-800">
+          <div className="p-1.5 rounded-lg bg-emerald-500/15">
+            <Activity className="h-4 w-4 text-emerald-400" />
+          </div>
+          <span className="text-[13px] font-semibold text-zinc-100">
             Pipeline Execution
           </span>
         </div>
-        <span className="text-[10px] text-zinc-500">
+        <span className="text-[10px] font-medium text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">
           {totalTime < 1000
             ? `${totalTime.toFixed(0)}ms`
             : `${(totalTime / 1000).toFixed(1)}s`}
         </span>
       </div>
-      <div className="flex gap-1">
-        {stages.map((stage) => {
-          const isComplete = completedSet.has(stage);
-          const isCurrent = pipelineState.current_stage === stage;
-          return (
-            <div
-              key={stage}
-              className={`flex-1 h-1.5 rounded-full transition-all ${
-                isComplete
-                  ? "bg-emerald-500"
-                  : isCurrent
-                    ? "bg-cyan-400 animate-pulse"
-                    : "bg-zinc-200"
-              }`}
-              title={stage.replace(/_/g, " ")}
-            />
-          );
-        })}
-      </div>
-      {pipelineState.warnings.length > 0 && (
-        <div className="mt-3 space-y-1">
-          {pipelineState.warnings.map((w, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-1.5 text-[10px] text-amber-600"
-            >
-              <AlertTriangle className="h-3 w-3" />
-              {w}
-            </div>
-          ))}
+
+      {/* Content */}
+      <div className="p-4">
+        {/* Progress Bar */}
+        <div className="flex gap-1 mb-3">
+          {stages.map((stage) => {
+            const isComplete = completedSet.has(stage);
+            const isCurrent = pipelineState.current_stage === stage;
+            return (
+              <div
+                key={stage}
+                className={`flex-1 h-1.5 rounded-full transition-all ${
+                  isComplete
+                    ? "bg-emerald-500"
+                    : isCurrent
+                      ? "bg-cyan-400 animate-pulse"
+                      : "bg-zinc-700"
+                }`}
+                title={stage.replace(/_/g, " ")}
+              />
+            );
+          })}
         </div>
-      )}
+
+        {/* Completed Count */}
+        <div className="text-[10px] text-zinc-500 text-center">
+          {pipelineState.stages_completed.length} / {stages.length} stages
+          complete
+        </div>
+
+        {/* Warnings */}
+        {pipelineState.warnings.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-zinc-700/50 space-y-1">
+            {pipelineState.warnings.map((w, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 text-[10px] text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                {w}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 // ============================================================================
-// Contributing Factors Panel
+// Contributing Factors Panel - Dark Theme
 // ============================================================================
 
 function ContributingFactorsPanel({
@@ -644,23 +690,24 @@ function ContributingFactorsPanel({
     .slice(0, 5);
 
   return (
-    <div className="mt-3 pt-3 border-t border-zinc-100">
-      <div className="text-[9px] font-medium text-zinc-400 uppercase tracking-wider mb-2">
+    <div className="mt-3 pt-3 border-t border-zinc-700/50">
+      <div className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+        <Gauge className="h-3 w-3" />
         Contributing Factors
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {sortedFactors.map(([factor, weight]) => (
           <div key={factor} className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-cyan-500 rounded-full"
+                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
                 style={{ width: `${weight}%` }}
               />
             </div>
             <span className="text-[9px] text-zinc-500 w-20 text-right truncate">
               {factor}
             </span>
-            <span className="text-[9px] font-medium text-zinc-600 w-8">
+            <span className="text-[9px] font-semibold text-zinc-300 w-8">
               {weight.toFixed(0)}%
             </span>
           </div>
@@ -863,16 +910,16 @@ export default function RetinalAssessment({
           >
             {/* Summary */}
             {results.clinical_summary && (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-5 shadow-sm">
+              <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5">
                 <div className="flex items-start gap-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="h-5 w-5 text-blue-700" />
+                  <div className="p-2 bg-cyan-500/15 rounded-lg">
+                    <FileText className="h-5 w-5 text-cyan-400" />
                   </div>
                   <div>
-                    <div className="text-[14px] font-bold text-blue-900 mb-1">
+                    <div className="text-[14px] font-bold text-zinc-100 mb-1">
                       Clinical Assessment Summary
                     </div>
-                    <div className="text-[13px] leading-relaxed text-blue-800">
+                    <div className="text-[13px] leading-relaxed text-zinc-400">
                       {results.clinical_summary}
                     </div>
                   </div>
@@ -888,14 +935,14 @@ export default function RetinalAssessment({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Fundus Image */}
                   {previewUrl && (
-                    <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-sm h-full flex flex-col">
+                    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 h-full flex flex-col">
                       <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-zinc-800">
+                          <span className="text-[13px] font-semibold text-zinc-100">
                             Fundus Examination
                           </span>
                           {results.eye && results.eye !== "unknown" && (
-                            <span className="px-1.5 py-0.5 bg-cyan-100 text-cyan-700 text-[10px] font-bold rounded">
+                            <span className="px-1.5 py-0.5 bg-cyan-500/15 text-cyan-400 text-[10px] font-bold rounded">
                               {results.eye}
                             </span>
                           )}
@@ -908,8 +955,8 @@ export default function RetinalAssessment({
                             }}
                             className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
                               showHeatmap
-                                ? "bg-cyan-100 text-cyan-700 border border-cyan-200"
-                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                                : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
                             }`}
                           >
                             Heatmap
@@ -922,8 +969,8 @@ export default function RetinalAssessment({
                               }}
                               className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
                                 showSegmentation
-                                  ? "bg-purple-100 text-purple-700 border border-purple-200"
-                                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                                  ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
+                                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
                               }`}
                             >
                               Vessels
@@ -952,30 +999,30 @@ export default function RetinalAssessment({
                     {/* DR Grade Card */}
                     {results.diabetic_retinopathy && (
                       <div
-                        className={`rounded-xl border p-5 shadow-sm ${
+                        className={`rounded-lg border-l-4 p-5 bg-zinc-900 border border-zinc-800 ${
                           results.diabetic_retinopathy.grade === 0
-                            ? "bg-green-50 border-green-200"
+                            ? "border-l-emerald-500"
                             : results.diabetic_retinopathy.grade <= 2
-                              ? "bg-yellow-50 border-yellow-200"
-                              : "bg-red-50 border-red-200"
+                              ? "border-l-amber-500"
+                              : "border-l-red-500"
                         }`}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <span className="text-[12px] font-semibold text-zinc-600 uppercase tracking-wider">
+                            <span className="text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">
                               Diagnosis
                             </span>
-                            <div className="text-[18px] font-bold text-zinc-900 mt-1 leading-tight">
+                            <div className="text-[18px] font-bold text-zinc-100 mt-1 leading-tight">
                               {results.diabetic_retinopathy.grade_name}
                             </div>
                           </div>
                           <span
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                               results.diabetic_retinopathy.grade === 0
-                                ? "bg-white border-green-100 text-green-700"
+                                ? "bg-emerald-500/15 text-emerald-400"
                                 : results.diabetic_retinopathy.grade <= 2
-                                  ? "bg-white border-yellow-100 text-yellow-700"
-                                  : "bg-white border-red-100 text-red-700"
+                                  ? "bg-amber-500/15 text-amber-400"
+                                  : "bg-red-500/15 text-red-400"
                             }`}
                           >
                             Grade {results.diabetic_retinopathy.grade}
@@ -983,13 +1030,13 @@ export default function RetinalAssessment({
                         </div>
 
                         <div className="flex items-center gap-3 mt-4">
-                          <div className="flex-1 bg-white/50 rounded-full h-2 overflow-hidden">
+                          <div className="flex-1 bg-zinc-800 rounded-full h-2 overflow-hidden">
                             <div
                               className={`h-full rounded-full ${
                                 results.diabetic_retinopathy.grade === 0
-                                  ? "bg-green-500"
+                                  ? "bg-emerald-500"
                                   : results.diabetic_retinopathy.grade <= 2
-                                    ? "bg-yellow-500"
+                                    ? "bg-amber-500"
                                     : "bg-red-500"
                               }`}
                               style={{
@@ -997,7 +1044,7 @@ export default function RetinalAssessment({
                               }}
                             />
                           </div>
-                          <span className="text-[11px] font-medium text-zinc-600">
+                          <span className="text-[11px] font-medium text-zinc-400">
                             {(
                               results.diabetic_retinopathy.probability * 100
                             ).toFixed(0)}
@@ -1005,7 +1052,7 @@ export default function RetinalAssessment({
                           </span>
                         </div>
 
-                        <div className="mt-3 text-[11px] font-medium text-zinc-700 bg-white/60 p-2 rounded-lg border border-black/5">
+                        <div className="mt-3 text-[11px] font-medium text-zinc-300 bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/50">
                           Action: {results.diabetic_retinopathy.clinical_action}
                         </div>
 
@@ -1029,7 +1076,7 @@ export default function RetinalAssessment({
 
                     {/* Risk Assessment Card */}
                     {results.risk_assessment && (
-                      <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+                      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5">
                         <div className="flex items-center justify-between gap-4">
                           <div>
                             <div className="text-[12px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
@@ -1041,23 +1088,23 @@ export default function RetinalAssessment({
                                   results.risk_assessment.category ===
                                     "minimal" ||
                                   results.risk_assessment.category === "low"
-                                    ? "text-green-600"
+                                    ? "text-emerald-400"
                                     : results.risk_assessment.category ===
                                         "moderate"
-                                      ? "text-yellow-600"
-                                      : "text-red-600"
+                                      ? "text-amber-400"
+                                      : "text-red-400"
                                 }`}
                               >
                                 {results.risk_assessment.overall_score.toFixed(
                                   0,
                                 )}
                               </span>
-                              <span className="text-[13px] font-medium text-zinc-600 capitalize">
+                              <span className="text-[13px] font-medium text-zinc-400 capitalize">
                                 {results.risk_assessment.category} Risk
                               </span>
                             </div>
                             {/* Confidence Interval */}
-                            <div className="text-[9px] text-zinc-400 mt-1">
+                            <div className="text-[9px] text-zinc-500 mt-1">
                               95% CI: [
                               {results.risk_assessment.confidence_interval_95[0].toFixed(
                                 1,
@@ -1070,10 +1117,10 @@ export default function RetinalAssessment({
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] text-zinc-400 mb-1">
+                            <div className="text-[10px] text-zinc-500 mb-1">
                               Primary Indicator
                             </div>
-                            <div className="text-[11px] font-medium text-zinc-700 max-w-[120px] leading-tight">
+                            <div className="text-[11px] font-medium text-zinc-300 max-w-[120px] leading-tight">
                               {results.risk_assessment.primary_finding}
                             </div>
                           </div>
@@ -1098,10 +1145,10 @@ export default function RetinalAssessment({
 
                 {/* Biomarkers Grid */}
                 {results.biomarkers && (
-                  <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-4 border-b border-zinc-100 flex items-center gap-2 bg-zinc-50/50">
-                      <Activity className="h-4 w-4 text-cyan-600" />
-                      <h3 className="text-[13px] font-semibold text-zinc-800">
+                  <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+                    <div className="px-5 py-4 border-b border-zinc-800 flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-cyan-400" />
+                      <h3 className="text-[13px] font-semibold text-zinc-100">
                         Quantitative Biomarkers
                       </h3>
                     </div>
@@ -1179,30 +1226,30 @@ export default function RetinalAssessment({
                       </div>
 
                       {/* Pathology Flags */}
-                      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-zinc-100">
+                      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-zinc-700/50">
                         {results.biomarkers.lesions
                           .neovascularization_detected && (
-                          <span className="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-medium rounded">
+                          <span className="px-2 py-1 bg-red-500/15 text-red-400 text-[10px] font-medium rounded">
                             Neovascularization
                           </span>
                         )}
                         {results.biomarkers.lesions.venous_beading_detected && (
-                          <span className="px-2 py-1 bg-orange-100 text-orange-700 text-[10px] font-medium rounded">
+                          <span className="px-2 py-1 bg-orange-500/15 text-orange-400 text-[10px] font-medium rounded">
                             Venous Beading
                           </span>
                         )}
                         {results.biomarkers.lesions.irma_detected && (
-                          <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-medium rounded">
+                          <span className="px-2 py-1 bg-amber-500/15 text-amber-400 text-[10px] font-medium rounded">
                             IRMA
                           </span>
                         )}
                         {results.biomarkers.optic_disc.notching_detected && (
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-[10px] font-medium rounded">
+                          <span className="px-2 py-1 bg-violet-500/15 text-violet-400 text-[10px] font-medium rounded">
                             Disc Notching
                           </span>
                         )}
                         {results.biomarkers.lesions.cotton_wool_spots > 0 && (
-                          <span className="px-2 py-1 bg-zinc-100 text-zinc-700 text-[10px] font-medium rounded">
+                          <span className="px-2 py-1 bg-zinc-700 text-zinc-300 text-[10px] font-medium rounded">
                             CWS: {results.biomarkers.lesions.cotton_wool_spots}
                           </span>
                         )}
@@ -1213,33 +1260,33 @@ export default function RetinalAssessment({
 
                 {/* Clinical Findings */}
                 {results.findings.length > 0 && (
-                  <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5">
-                    <div className="text-[13px] font-semibold text-zinc-800 mb-4 flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-zinc-500" />
+                  <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5">
+                    <div className="text-[13px] font-semibold text-zinc-100 mb-4 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-zinc-400" />
                       Clinical Findings
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {results.findings.map((f, i) => (
                         <div
                           key={i}
-                          className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-100"
+                          className="flex items-start gap-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
                         >
                           {f.severity === "normal" ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                           ) : f.severity === "mild" ? (
-                            <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+                            <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
                           ) : (
-                            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                            <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
                           )}
                           <div>
-                            <div className="text-[12px] font-semibold text-zinc-700">
+                            <div className="text-[12px] font-semibold text-zinc-200">
                               {f.finding_type}
                             </div>
                             <div className="text-[11px] text-zinc-500 mt-0.5">
                               {f.description}
                             </div>
                             {f.icd10_code && (
-                              <div className="text-[10px] font-mono text-zinc-400 mt-1">
+                              <div className="text-[10px] font-mono text-zinc-600 mt-1">
                                 ICD-10: {f.icd10_code}
                               </div>
                             )}
@@ -1273,18 +1320,18 @@ export default function RetinalAssessment({
 
                 {/* Recommendations */}
                 {results.recommendations.length > 0 && (
-                  <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-5">
-                    <div className="text-[12px] font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                  <div className="bg-zinc-900 rounded-lg border border-cyan-500/30 p-5">
+                    <div className="text-[12px] font-semibold text-zinc-100 mb-3 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400" />
                       Recommendations
                     </div>
                     <ul className="space-y-2.5">
                       {results.recommendations.map((rec, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2.5 text-[12px] text-blue-800 leading-relaxed"
+                          className="flex items-start gap-2.5 text-[12px] text-zinc-400 leading-relaxed"
                         >
-                          <span className="block w-1 h-1 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
+                          <span className="block w-1 h-1 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
                           {rec}
                         </li>
                       ))}
@@ -1295,22 +1342,22 @@ export default function RetinalAssessment({
                 {/* Differential Diagnoses */}
                 {results.differential_diagnoses &&
                   results.differential_diagnoses.length > 0 && (
-                    <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
-                      <div className="text-[12px] font-semibold text-zinc-700 mb-3">
+                    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5">
+                      <div className="text-[12px] font-semibold text-zinc-100 mb-3">
                         Differential Diagnoses
                       </div>
-                      <div className="divide-y divide-zinc-100">
+                      <div className="divide-y divide-zinc-700/50">
                         {results.differential_diagnoses.map((dx, i) => (
                           <div key={i} className="py-2 first:pt-0 last:pb-0">
                             <div className="flex justify-between items-center mb-1">
-                              <span className="text-[12px] font-medium text-zinc-800">
+                              <span className="text-[12px] font-medium text-zinc-200">
                                 {dx.diagnosis}
                               </span>
-                              <span className="text-[11px] font-bold text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
+                              <span className="text-[11px] font-bold text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
                                 {(dx.probability * 100).toFixed(0)}%
                               </span>
                             </div>
-                            <div className="text-[10px] font-mono text-zinc-400">
+                            <div className="text-[10px] font-mono text-zinc-500">
                               {dx.icd10_code}
                             </div>
                           </div>
@@ -1325,7 +1372,7 @@ export default function RetinalAssessment({
             <div className="flex justify-center mt-6">
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition font-medium text-[13px]"
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-300 rounded-lg hover:bg-zinc-700 border border-zinc-700 transition font-medium text-[13px]"
               >
                 <RefreshCw className="h-4 w-4" />
                 Analyze Another Image

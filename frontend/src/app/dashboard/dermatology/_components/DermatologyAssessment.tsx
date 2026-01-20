@@ -182,17 +182,17 @@ export function DermatologyAssessment({
   const getRiskColor = (tier: number) => {
     switch (tier) {
       case 5:
-        return "text-green-600 bg-green-50 border-green-200";
+        return "text-emerald-400 bg-emerald-500/15 border-emerald-500/30";
       case 4:
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "text-cyan-400 bg-blue-50 border-blue-200";
       case 3:
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return "text-amber-400 bg-amber-500/15 border-amber-500/30";
       case 2:
-        return "text-orange-600 bg-orange-50 border-orange-200";
+        return "text-orange-400 bg-orange-500/15 border-orange-500/30";
       case 1:
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-red-400 bg-red-500/15 border-red-500/30";
       default:
-        return "text-zinc-600 bg-zinc-50 border-zinc-200";
+        return "text-zinc-400 bg-zinc-50 border-zinc-200";
     }
   };
 
@@ -216,7 +216,7 @@ export function DermatologyAssessment({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Section */}
         <div className="space-y-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 ">
             <h2 className="text-lg font-medium text-zinc-100 mb-4 flex items-center gap-2">
               <Camera size={20} className="text-fuchsia-400" />
               Capture or Upload Image
@@ -270,7 +270,7 @@ export function DermatologyAssessment({
                   <button
                     onClick={handleAnalyze}
                     disabled={isAnalyzing}
-                    className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-sm font-medium hover:bg-fuchsia-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                    className="px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-sm font-medium hover:bg-fuchsia-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 "
                   >
                     {isAnalyzing ? (
                       <>
@@ -313,7 +313,7 @@ export function DermatologyAssessment({
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+            <div className="bg-red-500/150/10 border border-red-500/30 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle
                   size={20}
@@ -339,7 +339,7 @@ export function DermatologyAssessment({
 
         {/* Results Section */}
         <div className="space-y-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 ">
             <h2 className="text-lg font-medium text-zinc-100 mb-4 flex items-center gap-2">
               <Shield size={20} className="text-fuchsia-400" />
               Analysis Results
@@ -347,7 +347,7 @@ export function DermatologyAssessment({
 
             {!result && !isAnalyzing && (
               <div className="text-center py-12">
-                <Sparkles size={48} className="text-zinc-600 mx-auto mb-4" />
+                <Sparkles size={48} className="text-zinc-400 mx-auto mb-4" />
                 <p className="text-sm text-zinc-400">
                   Upload a skin lesion image to begin analysis
                 </p>
@@ -393,32 +393,32 @@ export function DermatologyAssessment({
 
                 {/* Classification */}
                 <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-zinc-900 mb-3">
+                  <h4 className="text-sm font-medium text-zinc-100 mb-3">
                     Classification Results
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white rounded-lg p-3 border border-zinc-100">
+                    <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
                       <span className="text-zinc-500 block mb-1">
                         Primary Type
                       </span>
-                      <span className="font-medium text-zinc-900 capitalize">
+                      <span className="font-medium text-zinc-100 capitalize">
                         {result.primary_subtype.replace(/_/g, " ")}
                       </span>
                       <span className="text-zinc-500 ml-1">
                         ({formatPercentage(result.subtype_probability)})
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-zinc-100">
+                    <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
                       <span className="text-zinc-500 block mb-1">
                         Melanoma Risk
                       </span>
                       <span
                         className={`font-medium capitalize ${
                           result.melanoma_probability > 0.5
-                            ? "text-red-600"
+                            ? "text-red-400"
                             : result.melanoma_probability > 0.25
-                              ? "text-yellow-600"
-                              : "text-green-600"
+                              ? "text-amber-400"
+                              : "text-emerald-400"
                         }`}
                       >
                         {result.melanoma_classification.replace(/_/g, " ")}
@@ -427,21 +427,21 @@ export function DermatologyAssessment({
                         ({formatPercentage(result.melanoma_probability)})
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-zinc-100">
+                    <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
                       <span className="text-zinc-500 block mb-1">Benign</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-emerald-400">
                         {formatPercentage(result.benign_probability)}
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-zinc-100">
+                    <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
                       <span className="text-zinc-500 block mb-1">
                         Malignant
                       </span>
                       <span
                         className={`font-medium ${
                           result.malignant_probability > 0.5
-                            ? "text-red-600"
-                            : "text-zinc-600"
+                            ? "text-red-400"
+                            : "text-zinc-400"
                         }`}
                       >
                         {formatPercentage(result.malignant_probability)}
@@ -453,25 +453,25 @@ export function DermatologyAssessment({
                 {/* Geometry */}
                 {result.geometry && (
                   <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-zinc-900 mb-3">
+                    <h4 className="text-sm font-medium text-zinc-100 mb-3">
                       Lesion Measurements
                     </h4>
                     <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div className="bg-white rounded-lg p-2 border border-zinc-100 text-center">
+                      <div className="bg-zinc-800/50 rounded-lg p-2 border border-zinc-700/50 text-center">
                         <span className="text-zinc-500 block">Diameter</span>
-                        <span className="font-medium text-zinc-900">
+                        <span className="font-medium text-zinc-100">
                           {result.geometry.diameter_mm.toFixed(1)} mm
                         </span>
                       </div>
-                      <div className="bg-white rounded-lg p-2 border border-zinc-100 text-center">
+                      <div className="bg-zinc-800/50 rounded-lg p-2 border border-zinc-700/50 text-center">
                         <span className="text-zinc-500 block">Area</span>
-                        <span className="font-medium text-zinc-900">
+                        <span className="font-medium text-zinc-100">
                           {result.geometry.area_mm2.toFixed(1)} mm²
                         </span>
                       </div>
-                      <div className="bg-white rounded-lg p-2 border border-zinc-100 text-center">
+                      <div className="bg-zinc-800/50 rounded-lg p-2 border border-zinc-700/50 text-center">
                         <span className="text-zinc-500 block">Circularity</span>
-                        <span className="font-medium text-zinc-900">
+                        <span className="font-medium text-zinc-100">
                           {(result.geometry.circularity * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -485,7 +485,7 @@ export function DermatologyAssessment({
                     <h4 className="text-sm font-medium text-blue-700 mb-2">
                       Summary
                     </h4>
-                    <p className="text-xs text-blue-600 mb-3">
+                    <p className="text-xs text-cyan-400 mb-3">
                       {result.explanation.summary}
                     </p>
                     {result.explanation.recommendations && (
@@ -508,7 +508,7 @@ export function DermatologyAssessment({
 
                 {/* Escalations */}
                 {result.escalations && result.escalations.length > 0 && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="bg-orange-500/15 border border-orange-500/30 rounded-lg p-4">
                     <h4 className="text-sm font-medium text-orange-700 mb-2 flex items-center gap-2">
                       <AlertTriangle size={14} />
                       Escalation Alerts
@@ -522,11 +522,11 @@ export function DermatologyAssessment({
                 )}
 
                 {/* Warning */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-amber-500/15 border border-amber-500/30 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <AlertTriangle
                       size={16}
-                      className="text-yellow-600 mt-0.5 flex-shrink-0"
+                      className="text-amber-400 mt-0.5 flex-shrink-0"
                     />
                     <p className="text-xs text-yellow-700">
                       AI analysis is for screening purposes only. Always consult
@@ -540,9 +540,9 @@ export function DermatologyAssessment({
 
           {/* ABCDE Criteria Card */}
           {result && result.success && result.abcde_details && (
-            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 ">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-zinc-900">
+                <h3 className="text-sm font-medium text-zinc-100">
                   ABCDE Criteria Assessment
                 </h3>
                 <span className="text-xs font-medium text-purple-600">
@@ -589,14 +589,14 @@ export function DermatologyAssessment({
                   return (
                     <div
                       key={criteria.letter}
-                      className="flex items-center justify-between bg-zinc-50 rounded-lg p-3 border border-zinc-100"
+                      className="flex items-center justify-between bg-zinc-50 rounded-lg p-3 border border-zinc-700/50"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-bold text-purple-600 w-6">
                           {criteria.letter}
                         </span>
                         <div>
-                          <span className="text-xs font-medium text-zinc-900">
+                          <span className="text-xs font-medium text-zinc-100">
                             {criteria.label}
                           </span>
                           <span className="text-xs text-zinc-500 ml-2 capitalize">
@@ -625,7 +625,7 @@ export function DermatologyAssessment({
                   <span className="text-xs text-zinc-500">
                     Overall ABCDE Score
                   </span>
-                  <span className="text-xs font-medium text-zinc-900">
+                  <span className="text-xs font-medium text-zinc-100">
                     {(result.abcde_score * 100).toFixed(0)}%
                   </span>
                 </div>
@@ -633,10 +633,10 @@ export function DermatologyAssessment({
                   <div
                     className={`h-full transition-all duration-500 ${
                       result.abcde_score > 0.6
-                        ? "bg-red-500"
+                        ? "bg-red-500/150"
                         : result.abcde_score > 0.4
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
+                          ? "bg-amber-500/150"
+                          : "bg-emerald-500/150"
                     }`}
                     style={{ width: `${result.abcde_score * 100}%` }}
                   />

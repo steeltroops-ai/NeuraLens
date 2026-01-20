@@ -6,11 +6,13 @@ import {
   Pause,
   Play,
   Loader2,
-  Sparkles,
   RefreshCw,
-  Bot,
+  FileText,
+  Cpu,
+  AudioLines,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import ReactMarkdown from "react-markdown";
 
 interface ExplanationPanelProps {
   pipeline: string;
@@ -21,7 +23,6 @@ interface ExplanationPanelProps {
     history?: string[];
   };
   className?: string;
-  theme?: "light" | "dark";
 }
 
 export function ExplanationPanel({
@@ -29,7 +30,6 @@ export function ExplanationPanel({
   results,
   patientContext,
   className = "",
-  theme = "light",
 }: ExplanationPanelProps) {
   const [explanation, setExplanation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -40,8 +40,6 @@ export function ExplanationPanel({
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const explanationCompleteRef = useRef(false);
-
-  const isDark = theme === "dark";
 
   // Play audio
   const playAudio = useCallback(() => {
@@ -149,7 +147,6 @@ export function ExplanationPanel({
               }
             };
             audio.play().catch(() => {
-              // Autoplay blocked by browser, user needs to click
               console.log(
                 "[Voice] Autoplay blocked, waiting for user interaction",
               );
@@ -243,7 +240,6 @@ export function ExplanationPanel({
       // Auto-generate voice after explanation is complete
       if (withAutoVoice && fullExplanation.length > 0) {
         setIsLoading(false);
-        // Small delay to ensure state is updated
         setTimeout(() => {
           generateVoice(true);
         }, 100);
@@ -262,21 +258,17 @@ export function ExplanationPanel({
   useEffect(() => {
     if (!results) return;
 
-    // Skip auto-voice on initial mount (page reload with existing results)
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      // Still generate explanation but WITHOUT auto-voice
       generateExplanation(false);
       return;
     }
 
-    // Check if results actually changed (new analysis)
     const resultsChanged =
       JSON.stringify(results) !== JSON.stringify(prevResultsRef.current);
 
     if (resultsChanged) {
       prevResultsRef.current = results;
-      // New analysis - generate explanation WITH auto-voice
       generateExplanation(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,62 +277,28 @@ export function ExplanationPanel({
   // Handle voice button click
   const handleVoiceClick = () => {
     if (isPlaying) {
-      // Currently playing -> Pause
       pauseAudio();
     } else if (isPaused && audioRef.current) {
-      // Currently paused -> Resume
       playAudio();
     } else if (audioData) {
-      // Has audio but not playing -> Play from start
       playAudio();
     } else {
-      // No audio -> Generate and play
       generateVoice(true);
     }
   };
 
-  // Light theme styles
-  const containerStyles = isDark
-    ? "bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800"
-    : "bg-white border-zinc-200 shadow-sm";
-
-  const headerTextStyles = isDark ? "text-white" : "text-zinc-900";
-
-  const badgeStyles = isDark
-    ? "text-zinc-400 bg-zinc-800"
-    : "text-zinc-500 bg-zinc-100";
-
-  const buttonStyles = isDark
-    ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
-    : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100";
-
-  const errorStyles = isDark
-    ? "bg-red-500/10 border-red-500/30 text-red-400"
-    : "bg-red-50 border-red-200 text-red-600";
-
-  const loadingTextStyles = isDark ? "text-zinc-400" : "text-zinc-500";
-
-  const contentStyles = isDark ? "text-zinc-300" : "text-zinc-700";
-
-  const footerStyles = isDark
-    ? "border-zinc-800 text-zinc-500"
-    : "border-zinc-200 text-zinc-400";
-
-  const accentColor = isDark ? "text-purple-400" : "text-blue-600";
-  const secondaryAccent = isDark ? "text-blue-400" : "text-indigo-600";
-
-  // Get voice button icon and style
+  // Get voice button icon
   const getVoiceButtonContent = () => {
     if (isGeneratingVoice) {
-      return <Loader2 className="w-4 h-4 animate-spin" />;
+      return <Loader2 className="w-3.5 h-3.5 animate-spin" />;
     }
     if (isPlaying) {
-      return <Pause className="w-4 h-4" />;
+      return <Pause className="w-3.5 h-3.5" />;
     }
     if (isPaused || audioData) {
-      return <Play className="w-4 h-4" />;
+      return <Play className="w-3.5 h-3.5" />;
     }
-    return <Volume2 className="w-4 h-4" />;
+    return <Volume2 className="w-3.5 h-3.5" />;
   };
 
   const getVoiceButtonTitle = () => {
@@ -351,131 +309,159 @@ export function ExplanationPanel({
     return "Generate voice";
   };
 
+  // No results state
   if (!results) {
     return (
-      <div className={cn("border rounded-2xl p-6", containerStyles, className)}>
-        <div className={cn("flex items-center gap-2", loadingTextStyles)}>
-          <Sparkles className="w-5 h-5" />
-          <span>AI explanation will appear after analysis</span>
+      <div
+        className={cn(
+          "bg-zinc-900 rounded-lg border border-zinc-800",
+          className,
+        )}
+      >
+        <div className="p-4 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-violet-500/15">
+            <FileText className="h-4 w-4 text-violet-400" />
+          </div>
+          <div>
+            <h3 className="text-[13px] font-medium text-zinc-300">
+              AI Clinical Explanation
+            </h3>
+            <p className="text-[11px] text-zinc-500">
+              Will appear after analysis
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("border rounded-2xl p-6", containerStyles, className)}>
+    <div
+      className={cn("bg-zinc-900 rounded-lg border border-zinc-800", className)}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              "p-1.5 rounded-lg",
-              isDark ? "bg-purple-500/20" : "bg-blue-50",
-            )}
-          >
-            <Bot className={cn("w-4 h-4", accentColor)} />
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-violet-500/15">
+            <Cpu className="h-4 w-4 text-violet-400" />
           </div>
-          <h3 className={cn("text-base font-semibold", headerTextStyles)}>
-            AI Explanation
-          </h3>
-          <span className={cn("text-xs px-2 py-0.5 rounded-full", badgeStyles)}>
-            Llama 3.3 70B
-          </span>
+          <div>
+            <h3 className="text-[14px] font-semibold text-zinc-100">
+              AI Clinical Explanation
+            </h3>
+            <p className="text-[10px] text-zinc-500">
+              Llama 3.3 70B | Cerebras Cloud
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1">
           {/* Regenerate button */}
           <button
             onClick={() => generateExplanation(true)}
             disabled={isLoading || isGeneratingVoice}
             className={cn(
-              "p-2 rounded-lg transition-colors disabled:opacity-50",
-              buttonStyles,
+              "p-2 rounded-md transition-colors",
+              "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
             )}
             title="Regenerate explanation"
           >
             <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
           </button>
 
-          {/* Voice Controls - Play/Pause button */}
+          {/* Voice Controls */}
           {explanation && (
             <button
               onClick={handleVoiceClick}
               disabled={isLoading}
               className={cn(
-                "p-2 rounded-lg transition-all duration-200",
+                "p-2 rounded-md transition-all duration-200 flex items-center gap-1",
                 isPlaying
-                  ? isDark
-                    ? "bg-purple-500 text-white"
-                    : "bg-blue-600 text-white"
+                  ? "bg-violet-500 text-white"
                   : audioData || isPaused
-                    ? isDark
-                      ? "bg-purple-500/20 text-purple-400"
-                      : "bg-blue-50 text-blue-600"
-                    : buttonStyles,
+                    ? "bg-violet-500/20 text-violet-400"
+                    : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
                 isLoading && "opacity-50 cursor-not-allowed",
               )}
               title={getVoiceButtonTitle()}
             >
               {getVoiceButtonContent()}
+              {isPlaying && <AudioLines className="w-3 h-3 animate-pulse" />}
             </button>
           )}
         </div>
       </div>
 
-      {/* Error State */}
-      {error && (
-        <div className={cn("mb-4 p-3 border rounded-lg text-sm", errorStyles)}>
-          {error}
-        </div>
-      )}
+      {/* Content Area */}
+      <div className="p-4">
+        {/* Error State */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-[12px] text-red-400">
+            {error}
+          </div>
+        )}
 
-      {/* Loading State */}
-      {isLoading && explanation === "" && (
-        <div className={cn("flex items-center gap-3 py-4", loadingTextStyles)}>
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Generating AI explanation...</span>
-        </div>
-      )}
+        {/* Loading State */}
+        {isLoading && explanation === "" && (
+          <div className="flex items-center gap-3 py-6 justify-center">
+            <Loader2 className="w-5 h-5 text-violet-400 animate-spin" />
+            <span className="text-[13px] text-zinc-400">
+              Generating clinical explanation...
+            </span>
+          </div>
+        )}
 
-      {/* Streaming Text */}
-      {explanation && (
-        <div className="prose prose-sm max-w-none">
+        {/* Markdown Content - Dark Theme Styling */}
+        {explanation && (
           <div
             className={cn(
-              "text-sm leading-relaxed whitespace-pre-wrap",
-              contentStyles,
+              "prose prose-sm prose-invert max-w-none",
+              // Headers
+              "[&_h1]:text-[14px] [&_h1]:font-bold [&_h1]:text-zinc-100 [&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:pb-2 [&_h1]:border-b [&_h1]:border-zinc-700",
+              "[&_h2]:text-[13px] [&_h2]:font-semibold [&_h2]:text-zinc-200 [&_h2]:mt-4 [&_h2]:mb-2",
+              "[&_h3]:text-[12px] [&_h3]:font-semibold [&_h3]:text-zinc-300 [&_h3]:mt-3 [&_h3]:mb-1.5",
+              "[&_h4]:text-[11px] [&_h4]:font-medium [&_h4]:text-zinc-400 [&_h4]:mt-2 [&_h4]:mb-1 [&_h4]:uppercase [&_h4]:tracking-wide",
+              // Paragraphs
+              "[&_p]:text-[12px] [&_p]:leading-relaxed [&_p]:text-zinc-400 [&_p]:mb-2",
+              // Text formatting
+              "[&_strong]:font-semibold [&_strong]:text-zinc-200",
+              "[&_em]:italic [&_em]:text-zinc-500",
+              // Lists
+              "[&_ul]:list-none [&_ul]:pl-0 [&_ul]:my-2 [&_ul]:space-y-1.5",
+              "[&_ul>li]:text-[12px] [&_ul>li]:text-zinc-400 [&_ul>li]:pl-4 [&_ul>li]:relative",
+              "[&_ul>li]:before:content-[''] [&_ul>li]:before:absolute [&_ul>li]:before:left-0 [&_ul>li]:before:top-[8px] [&_ul>li]:before:w-1.5 [&_ul>li]:before:h-1.5 [&_ul>li]:before:rounded-full [&_ul>li]:before:bg-violet-500",
+              "[&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:my-2 [&_ol]:space-y-1",
+              "[&_ol>li]:text-[12px] [&_ol>li]:text-zinc-400 [&_ol>li]:leading-relaxed",
+              // Horizontal rules
+              "[&_hr]:my-3 [&_hr]:border-zinc-700",
+              // Code
+              "[&_code]:px-1.5 [&_code]:py-0.5 [&_code]:bg-zinc-800 [&_code]:rounded [&_code]:text-[11px] [&_code]:text-violet-400 [&_code]:font-mono",
+              // Blockquotes
+              "[&_blockquote]:border-l-2 [&_blockquote]:border-violet-500/50 [&_blockquote]:pl-3 [&_blockquote]:my-2 [&_blockquote]:text-zinc-500 [&_blockquote]:italic [&_blockquote]:text-[12px]",
             )}
           >
-            {explanation}
+            <ReactMarkdown>{explanation}</ReactMarkdown>
             {isLoading && (
-              <span
-                className={cn(
-                  "inline-block w-2 h-4 ml-1 animate-pulse rounded-sm",
-                  isDark ? "bg-purple-400" : "bg-blue-500",
-                )}
-              />
+              <span className="inline-block w-1.5 h-4 ml-0.5 animate-pulse rounded-sm bg-violet-500" />
             )}
           </div>
-        </div>
-      )}
-
-      {/* Powered By */}
-      <div
-        className={cn(
-          "mt-4 pt-4 border-t flex items-center gap-2 text-xs",
-          footerStyles,
-        )}
-      >
-        <span>Powered by</span>
-        <span className={accentColor}>Cerebras Cloud</span>
-        {audioData && (
-          <>
-            <span>+</span>
-            <span className={secondaryAccent}>Voice AI</span>
-          </>
         )}
       </div>
+
+      {/* Footer */}
+      {explanation && (
+        <div className="px-4 py-2 border-t border-zinc-800 flex items-center justify-between text-[10px] text-zinc-600">
+          <span>{explanation.split(" ").length} words</span>
+          {audioData && (
+            <span className="flex items-center gap-1 text-violet-500">
+              <Volume2 className="w-3 h-3" />
+              Voice ready
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

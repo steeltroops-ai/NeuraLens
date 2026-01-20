@@ -229,11 +229,9 @@ export default function MotorAssessment({
       : 0;
   return (
     <div className="space-y-6">
-      {/* Header removed and lifted to page.tsx */}
-
       {/* Finger Tapping Test */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <h2 className="mb-4 text-[16px] font-semibold text-zinc-900">
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
+        <h2 className="mb-4 text-[16px] font-semibold text-zinc-100">
           Finger Tapping Test
         </h2>
 
@@ -248,24 +246,24 @@ export default function MotorAssessment({
               exit={{ opacity: 0, y: -20 }}
               className="text-center"
             >
-              <div className="mb-6 rounded-lg border-2 border-dashed border-purple-300 bg-purple-50 p-8">
-                <Hand className="mx-auto mb-4 h-16 w-16 text-purple-600" />
-                <h3 className="mb-2 text-xl font-semibold text-purple-900">
+              <div className="mb-6 rounded-lg border-2 border-dashed border-violet-500/50 bg-violet-500/10 p-8">
+                <Hand className="mx-auto mb-4 h-16 w-16 text-violet-400" />
+                <h3 className="mb-2 text-xl font-semibold text-zinc-100">
                   Ready to Start
                 </h3>
-                <p className="mb-4 text-purple-700">
+                <p className="mb-4 text-zinc-400">
                   Tap the button below as quickly and consistently as possible
                   for 15 seconds. This test measures your motor function and
                   rhythm consistency.
                 </p>
-                <div className="mb-4 text-sm text-purple-600">
-                  <p>• Use your index finger</p>
-                  <p>• Maintain steady rhythm</p>
-                  <p>• Tap as fast as comfortable</p>
+                <div className="mb-4 text-sm text-zinc-500">
+                  <p>* Use your index finger</p>
+                  <p>* Maintain steady rhythm</p>
+                  <p>* Tap as fast as comfortable</p>
                 </div>
                 <button
                   onClick={startTapTest}
-                  className="rounded-lg bg-purple-600 px-8 py-3 text-lg font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-purple-700"
+                  className="rounded-lg bg-violet-600 px-8 py-3 text-lg font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-violet-700 inline-flex items-center"
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Start Tapping Test
@@ -282,16 +280,16 @@ export default function MotorAssessment({
             >
               {/* Countdown Display */}
               <div className="mb-6">
-                <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-4xl font-bold text-white shadow-lg">
+                <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-violet-600 text-4xl font-bold text-white shadow-lg">
                   {tapTestState.countdown}
                 </div>
-                <div className="mb-2 h-2 rounded-full bg-slate-200">
+                <div className="mb-2 h-2 rounded-full bg-zinc-800">
                   <div
-                    className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000"
+                    className="h-2 rounded-full bg-gradient-to-r from-violet-500 to-violet-600 transition-all duration-1000"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-zinc-400">
                   {formatTime(
                     tapTestState.testDuration - tapTestState.countdown,
                   )}{" "}
@@ -303,7 +301,7 @@ export default function MotorAssessment({
               <div className="mb-6">
                 <button
                   onClick={handleTap}
-                  className="h-48 w-48 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-2xl transition-all duration-75 hover:scale-105 active:scale-95 active:shadow-lg"
+                  className="h-48 w-48 rounded-full bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-2xl transition-all duration-75 hover:scale-105 active:scale-95 active:shadow-lg"
                 >
                   <div className="text-center">
                     <Hand className="mx-auto mb-2 h-12 w-12" />
@@ -317,15 +315,15 @@ export default function MotorAssessment({
 
               {/* Current Stats */}
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="font-medium text-slate-900">Tap Count</div>
-                  <div className="text-2xl font-bold text-purple-600">
+                <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-3">
+                  <div className="font-medium text-zinc-200">Tap Count</div>
+                  <div className="text-2xl font-bold text-violet-400">
                     {tapTestState.tapCount}
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="font-medium text-slate-900">Frequency</div>
-                  <div className="text-2xl font-bold text-purple-600">
+                <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-3">
+                  <div className="font-medium text-zinc-200">Frequency</div>
+                  <div className="text-2xl font-bold text-violet-400">
                     {tapTestState.tapCount > 0
                       ? (
                           (tapTestState.tapCount /
@@ -341,7 +339,7 @@ export default function MotorAssessment({
 
               <button
                 onClick={handleStopTapTest}
-                className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                className="mt-4 rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 inline-flex items-center"
               >
                 <Square className="mr-2 h-4 w-4" />
                 Stop Test
@@ -355,28 +353,28 @@ export default function MotorAssessment({
               exit={{ opacity: 0, y: -20 }}
               className="text-center"
             >
-              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-6">
-                <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-600" />
-                <h3 className="mb-2 text-lg font-semibold text-green-900">
+              <div className="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-6">
+                <CheckCircle className="mx-auto mb-4 h-12 w-12 text-emerald-400" />
+                <h3 className="mb-2 text-lg font-semibold text-zinc-100">
                   Test Complete!
                 </h3>
-                <p className="mb-4 text-green-700">
+                <p className="mb-4 text-zinc-400">
                   You completed {tapTestState.tapCount} taps in{" "}
                   {tapTestState.testDuration} seconds
                 </p>
 
                 <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
-                  <div className="rounded-lg bg-white p-3">
-                    <div className="font-medium text-slate-900">Total Taps</div>
-                    <div className="text-xl font-bold text-green-600">
+                  <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-3">
+                    <div className="font-medium text-zinc-200">Total Taps</div>
+                    <div className="text-xl font-bold text-emerald-400">
                       {tapTestState.tapCount}
                     </div>
                   </div>
-                  <div className="rounded-lg bg-white p-3">
-                    <div className="font-medium text-slate-900">
+                  <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-3">
+                    <div className="font-medium text-zinc-200">
                       Average Rate
                     </div>
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-xl font-bold text-emerald-400">
                       {(
                         (tapTestState.tapCount / tapTestState.testDuration) *
                         60
@@ -390,7 +388,7 @@ export default function MotorAssessment({
                   <button
                     onClick={processMotorAnalysis}
                     disabled={isProcessing}
-                    className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                    className="rounded-lg bg-emerald-600 px-6 py-2 font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 inline-flex items-center"
                   >
                     {isProcessing ? (
                       <>
@@ -403,7 +401,7 @@ export default function MotorAssessment({
                   </button>
                   <button
                     onClick={resetAssessment}
-                    className="rounded-lg border border-slate-300 px-6 py-2 font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                    className="rounded-lg border border-zinc-700 px-6 py-2 font-medium text-zinc-300 transition-colors hover:bg-zinc-800 inline-flex items-center"
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Retry Test
@@ -419,13 +417,13 @@ export default function MotorAssessment({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4"
+            className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4"
           >
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-5 w-5 text-red-600" />
+              <AlertCircle className="h-5 w-5 text-red-400" />
               <div>
-                <p className="font-medium text-red-900">Error</p>
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="font-medium text-zinc-100">Error</p>
+                <p className="text-sm text-zinc-400">{error}</p>
               </div>
             </div>
           </motion.div>
@@ -437,18 +435,18 @@ export default function MotorAssessment({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="bg-zinc-900 rounded-lg border border-zinc-800 p-6"
         >
           <div className="mb-6 flex items-center space-x-3">
-            <div className="rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 p-2">
+            <div className="rounded-lg bg-gradient-to-r from-violet-500 to-violet-600 p-2">
               <CheckCircle className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-zinc-100">
                 Motor Analysis Complete
               </h2>
-              <p className="text-sm text-slate-600">
-                Processed in {analysisResult.processingTime}ms • Confidence:{" "}
+              <p className="text-sm text-zinc-400">
+                Processed in {analysisResult.processingTime}ms * Confidence:{" "}
                 {(analysisResult.confidence * 100).toFixed(1)}%
               </p>
             </div>
@@ -456,36 +454,36 @@ export default function MotorAssessment({
 
           {/* Biomarkers Grid */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h3 className="text-sm font-medium text-slate-600">
+            <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-4">
+              <h3 className="text-sm font-medium text-zinc-400">
                 Tap Frequency
               </h3>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-zinc-100">
                 {(analysisResult.biomarkers.tapFrequency * 100).toFixed(1)}%
               </p>
-              <div className="mt-2 h-2 rounded-full bg-slate-200">
+              <div className="mt-2 h-2 rounded-full bg-zinc-700">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-600"
+                  className="h-2 rounded-full bg-gradient-to-r from-violet-500 to-violet-600"
                   style={{
                     width: `${analysisResult.biomarkers.tapFrequency * 100}%`,
                   }}
                 />
               </div>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-zinc-500">
                 {tapTestState.tapCount} taps in {tapTestState.testDuration}s
               </p>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h3 className="text-sm font-medium text-slate-600">
+            <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-4">
+              <h3 className="text-sm font-medium text-zinc-400">
                 Coordination
               </h3>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-zinc-100">
                 {(analysisResult.biomarkers.coordination * 100).toFixed(1)}%
               </p>
-              <div className="mt-2 h-2 rounded-full bg-slate-200">
+              <div className="mt-2 h-2 rounded-full bg-zinc-700">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-green-500 to-green-600"
+                  className="h-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600"
                   style={{
                     width: `${analysisResult.biomarkers.coordination * 100}%`,
                   }}
@@ -493,16 +491,16 @@ export default function MotorAssessment({
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h3 className="text-sm font-medium text-slate-600">
+            <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-4">
+              <h3 className="text-sm font-medium text-zinc-400">
                 Tremor Level
               </h3>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-zinc-100">
                 {(analysisResult.biomarkers.tremor * 100).toFixed(1)}%
               </p>
-              <div className="mt-2 h-2 rounded-full bg-slate-200">
+              <div className="mt-2 h-2 rounded-full bg-zinc-700">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-yellow-500 to-red-600"
+                  className="h-2 rounded-full bg-gradient-to-r from-amber-500 to-red-600"
                   style={{
                     width: `${analysisResult.biomarkers.tremor * 100}%`,
                   }}
@@ -510,15 +508,15 @@ export default function MotorAssessment({
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-4">
-              <h3 className="text-sm font-medium text-slate-600">
+            <div className="rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-4">
+              <h3 className="text-sm font-medium text-zinc-400">
                 Rhythm Consistency
               </h3>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-zinc-100">
                 {(analysisResult.biomarkers.rhythmConsistency * 100).toFixed(1)}
                 %
               </p>
-              <div className="mt-2 h-2 rounded-full bg-slate-200">
+              <div className="mt-2 h-2 rounded-full bg-zinc-700">
                 <div
                   className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600"
                   style={{
@@ -530,25 +528,25 @@ export default function MotorAssessment({
           </div>
 
           {/* Risk Assessment */}
-          <div className="mb-6 rounded-lg border border-slate-200 p-4">
-            <h3 className="mb-3 text-sm font-medium text-slate-600">
+          <div className="mb-6 rounded-lg bg-zinc-800/50 border border-zinc-700/50 p-4">
+            <h3 className="mb-3 text-sm font-medium text-zinc-400">
               Motor Function Assessment
             </h3>
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <div className="flex justify-between text-sm">
-                  <span>Overall Risk Score</span>
-                  <span className="font-medium">
+                  <span className="text-zinc-300">Overall Risk Score</span>
+                  <span className="font-medium text-zinc-100">
                     {(analysisResult.riskScore * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-2 h-3 rounded-full bg-slate-200">
+                <div className="mt-2 h-3 rounded-full bg-zinc-700">
                   <div
                     className={`h-3 rounded-full ${
                       analysisResult.riskScore < 0.3
-                        ? "bg-gradient-to-r from-green-500 to-green-600"
+                        ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
                         : analysisResult.riskScore < 0.7
-                          ? "bg-gradient-to-r from-yellow-500 to-yellow-600"
+                          ? "bg-gradient-to-r from-amber-500 to-amber-600"
                           : "bg-gradient-to-r from-red-500 to-red-600"
                     }`}
                     style={{ width: `${analysisResult.riskScore * 100}%` }}
@@ -558,10 +556,10 @@ export default function MotorAssessment({
               <div
                 className={`rounded-full px-3 py-1 text-xs font-medium ${
                   analysisResult.riskScore < 0.3
-                    ? "bg-green-100 text-green-800"
+                    ? "bg-emerald-500/15 text-emerald-400"
                     : analysisResult.riskScore < 0.7
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-red-100 text-red-800"
+                      ? "bg-amber-500/15 text-amber-400"
+                      : "bg-red-500/15 text-red-400"
                 }`}
               >
                 {analysisResult.riskScore < 0.3
@@ -583,17 +581,17 @@ export default function MotorAssessment({
 
           {/* Recommendations */}
           {analysisResult.recommendations.length > 0 && (
-            <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-              <h3 className="mb-3 text-sm font-medium text-purple-900">
+            <div className="rounded-lg bg-zinc-900 border border-violet-500/30 p-4">
+              <h3 className="mb-3 text-sm font-medium text-zinc-200">
                 Recommendations
               </h3>
               <ul className="space-y-2">
                 {analysisResult.recommendations.map((recommendation, index) => (
                   <li
                     key={index}
-                    className="flex items-start space-x-2 text-sm text-purple-800"
+                    className="flex items-start space-x-2 text-sm text-zinc-400"
                   >
-                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-600" />
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-400" />
                     <span>{recommendation}</span>
                   </li>
                 ))}
@@ -605,16 +603,16 @@ export default function MotorAssessment({
           <div className="mt-6 flex justify-between">
             <button
               onClick={resetAssessment}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 inline-flex items-center"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               New Test
             </button>
             <div className="flex space-x-3">
-              <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">
+              <button className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800">
                 Export Results
               </button>
-              <button className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700">
+              <button className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-700">
                 Save to History
               </button>
             </div>

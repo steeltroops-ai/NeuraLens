@@ -210,10 +210,10 @@ export function RadiologyAssessment({
           {/* Main Results Panel (Left 2/3) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image + Primary Finding */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+            <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 ">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[14px] font-semibold text-zinc-800 flex items-center gap-2">
-                  <Scan className="h-4 w-4 text-blue-600" />
+                <h3 className="text-[14px] font-semibold text-zinc-200 flex items-center gap-2">
+                  <Scan className="h-4 w-4 text-cyan-400" />
                   Radiological Examination
                 </h3>
                 <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export function RadiologyAssessment({
                       className={`p-4 rounded-lg border ${getSeverityColors(results.primary_finding.severity)}`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div className="font-semibold text-[14px] text-zinc-900">
+                        <div className="font-semibold text-[14px] text-zinc-100">
                           {results.primary_finding.condition}
                         </div>
                         <span
@@ -274,7 +274,7 @@ export function RadiologyAssessment({
                           {results.primary_finding.severity}
                         </span>
                       </div>
-                      <div className="text-[12px] text-zinc-600 leading-relaxed mb-3">
+                      <div className="text-[12px] text-zinc-400 leading-relaxed mb-3">
                         {results.primary_finding.description}
                       </div>
                       <ConfidenceBar
@@ -287,12 +287,12 @@ export function RadiologyAssessment({
             </div>
 
             {/* All Predictions Grid */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+            <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 ">
               <button
                 onClick={() => setShowAllPredictions(!showAllPredictions)}
                 className="w-full flex justify-between items-center mb-4"
               >
-                <h3 className="text-[13px] font-semibold text-zinc-800 flex items-center gap-2">
+                <h3 className="text-[13px] font-semibold text-zinc-200 flex items-center gap-2">
                   <Activity className="h-4 w-4 text-zinc-500" />
                   All Pathology Predictions (18)
                 </h3>
@@ -344,8 +344,8 @@ export function RadiologyAssessment({
 
             {/* Quality Metrics */}
             {results.quality && (
-              <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
-                <h3 className="text-[13px] font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+              <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 ">
+                <h3 className="text-[13px] font-semibold text-zinc-200 mb-4 flex items-center gap-2">
                   <FileCheck className="h-4 w-4 text-zinc-500" />
                   Image Quality Assessment
                 </h3>
@@ -386,7 +386,7 @@ export function RadiologyAssessment({
                   />
                 </div>
                 {results.quality.issues.length > 0 && (
-                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="mt-4 p-3 bg-amber-500/15 rounded-lg border border-amber-500/30">
                     <div className="text-[11px] font-medium text-yellow-800 mb-1">
                       Quality Issues:
                     </div>
@@ -407,7 +407,7 @@ export function RadiologyAssessment({
             {results.stages_completed &&
               results.stages_completed.length > 0 && (
                 <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-                  <div className="text-[11px] font-medium text-zinc-600 mb-3">
+                  <div className="text-[11px] font-medium text-zinc-400 mb-3">
                     Pipeline Stages
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -452,18 +452,18 @@ export function RadiologyAssessment({
 
             {/* Recommendations */}
             {results.recommendations && results.recommendations.length > 0 && (
-              <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-5">
-                <div className="text-[12px] font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  <Stethoscope className="h-4 w-4 text-blue-600" />
+              <div className="bg-zinc-900 rounded-xl border border-cyan-500/30 p-5">
+                <div className="text-[12px] font-semibold text-zinc-100 mb-3 flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4 text-cyan-400" />
                   Clinical Recommendations
                 </div>
                 <ul className="space-y-2.5">
                   {results.recommendations.map((rec, i) => (
                     <li
                       key={i}
-                      className="flex items-start gap-2.5 text-[12px] text-blue-800 leading-relaxed"
+                      className="flex items-start gap-2.5 text-[12px] text-zinc-400 leading-relaxed"
                     >
-                      <span className="block w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0" />
+                      <span className="block w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
                       {rec}
                     </li>
                   ))}
@@ -473,8 +473,8 @@ export function RadiologyAssessment({
 
             {/* Findings Detail */}
             {results.findings && results.findings.length > 0 && (
-              <div className="bg-white rounded-xl border border-zinc-200 p-5">
-                <h3 className="text-[12px] font-semibold text-zinc-800 mb-3 flex items-center gap-2">
+              <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5">
+                <h3 className="text-[12px] font-semibold text-zinc-200 mb-3 flex items-center gap-2">
                   <Heart className="h-4 w-4 text-rose-500" />
                   Detailed Findings
                 </h3>
@@ -492,7 +492,7 @@ export function RadiologyAssessment({
         <div className="flex justify-center">
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition font-medium text-[13px]"
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-100 text-zinc-300 rounded-lg hover:bg-zinc-200 transition font-medium text-[13px]"
           >
             <RefreshCw className="h-4 w-4" />
             Analyze Another X-Ray
@@ -631,7 +631,7 @@ export function RadiologyAssessment({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
+            className="mt-4 p-4 bg-red-500/150/10 border border-red-500/30 rounded-lg"
           >
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -727,7 +727,7 @@ function RiskScoreGauge({ score, level }: { score: number; level: string }) {
   };
 
   return (
-    <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-100">
+    <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
       <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
         Risk Score
       </div>
@@ -770,8 +770,8 @@ function PredictionCard({
   probability: number;
 }) {
   return (
-    <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-100">
-      <div className="text-[11px] font-medium text-zinc-800 truncate mb-1">
+    <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+      <div className="text-[11px] font-medium text-zinc-200 truncate mb-1">
         {condition.replace(/_/g, " ")}
       </div>
       <div className="flex items-center gap-2">
@@ -779,10 +779,10 @@ function PredictionCard({
           <div
             className={`h-full rounded-full ${
               probability > 50
-                ? "bg-red-500"
+                ? "bg-red-500/150"
                 : probability > 25
-                  ? "bg-yellow-500"
-                  : "bg-green-500"
+                  ? "bg-amber-500/150"
+                  : "bg-emerald-500/150"
             }`}
             style={{ width: `${Math.min(100, probability)}%` }}
           />
@@ -803,10 +803,10 @@ function ConfidenceBar({ value }: { value: number }) {
         <div
           className={`h-full rounded-full ${
             value > 80
-              ? "bg-green-500"
+              ? "bg-emerald-500/150"
               : value > 50
-                ? "bg-yellow-500"
-                : "bg-red-500"
+                ? "bg-amber-500/150"
+                : "bg-red-500/150"
           }`}
           style={{ width: `${value}%` }}
         />
@@ -829,17 +829,17 @@ function QualityMetric({
   status: "good" | "warning" | "error";
 }) {
   return (
-    <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-100">
+    <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
       <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">
         {label}
       </div>
       <div
         className={`text-[14px] font-semibold ${
           status === "good"
-            ? "text-green-600"
+            ? "text-emerald-400"
             : status === "warning"
-              ? "text-yellow-600"
-              : "text-red-600"
+              ? "text-amber-400"
+              : "text-red-400"
         }`}
       >
         {value}
@@ -855,14 +855,14 @@ function FindingCard({ finding }: { finding: Finding }) {
       className={`p-3 rounded-lg border ${getSeverityColors(finding.severity)}`}
     >
       <div className="flex justify-between items-start mb-1">
-        <div className="text-[12px] font-semibold text-zinc-800">
+        <div className="text-[12px] font-semibold text-zinc-200">
           {finding.condition}
         </div>
         {finding.is_critical && (
           <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
         )}
       </div>
-      <div className="text-[11px] text-zinc-600 leading-relaxed">
+      <div className="text-[11px] text-zinc-400 leading-relaxed">
         {finding.description}
       </div>
       {finding.urgency && (
@@ -901,16 +901,16 @@ function CapabilityItem({
 function getSeverityColors(severity: string): string {
   switch (severity) {
     case "normal":
-      return "bg-green-50 border-green-200";
+      return "bg-emerald-500/15 border-emerald-500/30";
     case "minimal":
     case "low":
       return "bg-blue-50 border-blue-200";
     case "moderate":
     case "possible":
-      return "bg-yellow-50 border-yellow-200";
+      return "bg-amber-500/15 border-amber-500/30";
     case "high":
     case "likely":
-      return "bg-orange-50 border-orange-200";
+      return "bg-orange-500/15 border-orange-500/30";
     case "critical":
       return "bg-red-100 border-red-300";
     default:
@@ -934,6 +934,6 @@ function getSeverityBadge(severity: string): string {
     case "critical":
       return "bg-red-200 text-red-800";
     default:
-      return "bg-zinc-100 text-zinc-700";
+      return "bg-zinc-100 text-zinc-300";
   }
 }
