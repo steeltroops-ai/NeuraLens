@@ -60,7 +60,7 @@ export default function ComingSoonPage({
   const colorScheme = colors[accentColor] ?? defaultColor;
 
   return (
-    <div className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-black selection:bg-white/20">
+    <div className="relative h-[calc(100vh-112px)] flex items-center justify-center overflow-hidden bg-[#09090b] selection:bg-white/20 -m-4 lg:-m-6">
       {/* Subtle spotlight glow */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${colorScheme.glow} blur-[120px] rounded-full pointer-events-none`}
@@ -151,9 +151,6 @@ export default function ComingSoonPage({
           </Link>
         </motion.div>
       </div>
-
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none" />
     </div>
   );
 }

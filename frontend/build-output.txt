@@ -1,0 +1,59 @@
+ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Omniverse\Projects\NeuraLens\bun.lock as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Omniverse\Projects\NeuraLens\frontend\package-lock.json
+
+Γû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬╖ optimizePackageImports
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./frontend/src/components/explanation/ExplanationPanel.tsx:4:1
+Export Waveform doesn't exist in target module
+   2 |
+   3 | import { useState, useEffect, useRef, useCallback } from "react";
+>  4 | import {
+     | ^^^^^^^^
+>  5 |   Volume2,
+     | ^^^^^^^^^^
+>  6 |   Pause,
+     | ^^^^^^^^^^
+>  7 |   Play,
+     | ^^^^^^^^^^
+>  8 |   Loader2,
+     | ^^^^^^^^^^
+>  9 |   RefreshCw,
+     | ^^^^^^^^^^
+> 10 |   FileText,
+     | ^^^^^^^^^^
+> 11 |   MessageSquare,
+     | ^^^^^^^^^^
+> 12 |   Cpu,
+     | ^^^^^^^^^^
+> 13 |   Waveform,
+     | ^^^^^^^^^^
+> 14 | } from "lucide-react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+  15 | import { cn } from "@/utils/cn";
+  16 | import ReactMarkdown from "react-markdown";
+  17 |
+
+The export Waveform was not found in module [project]/frontend/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+Did you mean to import Waves?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Client Component Browser:
+    ./frontend/src/components/explanation/ExplanationPanel.tsx [Client Component Browser]
+    ./frontend/src/app/dashboard/cardiology/_components/CardiologyAssessment.tsx [Client Component Browser]
+    ./frontend/src/app/dashboard/cardiology/page.tsx [Client Component Browser]
+    ./frontend/src/app/dashboard/cardiology/page.tsx [Server Component]
+
+
+    at <unknown> (./frontend/src/components/explanation/ExplanationPanel.tsx:4:1)

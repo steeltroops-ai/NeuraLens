@@ -51,6 +51,7 @@ timm==1.0.9
 torchxrayvision==1.4.0
 grad-cam==1.5.5
 opencv-python-headless==4.10.0.84
+reportlab==4.2.0
 
 # =============================================
 # Voice Output (Amazon Polly)
