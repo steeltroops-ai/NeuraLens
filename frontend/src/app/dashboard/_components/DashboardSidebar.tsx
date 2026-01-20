@@ -8,7 +8,7 @@ import {
   Mic,
   Eye,
   Hand,
-  Brain,
+  Cpu,
   Activity,
   Zap,
   BarChart3,
@@ -24,11 +24,12 @@ import {
   Scan,
   Stethoscope,
   Heart,
-  Sparkles,
+  Fingerprint,
   Microscope,
   Wind,
   Footprints,
   Bone,
+  BrainCircuit,
 } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Logo } from "@/components/common/Logo";
@@ -91,7 +92,7 @@ const sidebarGroups: SidebarGroup[] = [
       {
         id: "dermatology",
         label: "SkinSense AI",
-        icon: Sparkles,
+        icon: Fingerprint,
         route: "/dashboard/dermatology",
       },
       {
@@ -103,7 +104,7 @@ const sidebarGroups: SidebarGroup[] = [
       {
         id: "cognitive",
         label: "Cognitive Testing",
-        icon: Brain,
+        icon: Cpu,
         route: "/dashboard/cognitive",
       },
       {
@@ -125,34 +126,34 @@ const sidebarGroups: SidebarGroup[] = [
     label: "Coming Soon",
     items: [
       {
-        id: "pathology",
+        id: "histovision",
         label: "HistoVision AI",
         icon: Microscope,
-        route: "/dashboard/pathology",
+        route: "/dashboard/histovision",
       },
       {
-        id: "neurology",
+        id: "neuroscan",
         label: "NeuroScan AI",
-        icon: Brain,
-        route: "/dashboard/neurology",
+        icon: BrainCircuit,
+        route: "/dashboard/neuroscan",
       },
       {
-        id: "pulmonology",
-        label: "RespiRate AI",
+        id: "respirate",
+        label: "Respirate AI",
         icon: Wind,
-        route: "/dashboard/pulmonology",
+        route: "/dashboard/respirate",
       },
       {
-        id: "diabetic-foot",
+        id: "footcare",
         label: "FootCare AI",
         icon: Footprints,
-        route: "/dashboard/diabetic-foot",
+        route: "/dashboard/footcare",
       },
       {
-        id: "orthopedics",
+        id: "bonescan",
         label: "BoneScan AI",
         icon: Bone,
-        route: "/dashboard/orthopedics",
+        route: "/dashboard/bonescan",
       },
     ],
   },
