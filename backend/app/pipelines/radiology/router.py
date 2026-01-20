@@ -1,17 +1,18 @@
 """
 Radiology X-Ray Router - FastAPI Endpoints
-Chest X-ray analysis using TorchXRayVision (18 pathologies)
+
+Thin layer handling HTTP endpoints for radiology analysis.
+Business logic is in core/service.py per architecture guidelines.
 """
 
 import time
 import logging
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from typing import List
+from typing import List, Optional
 
-from .analyzer import XRayAnalyzer, TORCHXRAY_AVAILABLE
-from .quality import XRayQualityAssessor, assess_xray_quality
-from .models import (
+from .config import RadiologyConfig, PATHOLOGY_INFO, TRAINING_DATASETS
+from .schemas import (
     RadiologyAnalysisResponse,
     PrimaryFinding,
     Finding,
@@ -19,19 +20,27 @@ from .models import (
     HealthResponse,
     ConditionInfo,
     ConditionsResponse,
-    PATHOLOGY_INFO,
+    RiskAssessment,
+    StageResult,
 )
+from .analysis import XRayAnalyzer, TORCHXRAY_AVAILABLE
+from .input import ImageValidator
+from .clinical import RiskScorer, RecommendationGenerator
+from .output import HeatmapGenerator
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/radiology", tags=["Radiology"])
 
-# Initialize analyzer (singleton)
+# Initialize components
 analyzer = XRayAnalyzer()
-quality_assessor = XRayQualityAssessor()
+validator = ImageValidator()
+risk_scorer = RiskScorer()
+recommendation_gen = RecommendationGenerator()
+heatmap_gen = HeatmapGenerator()
 
-# Supported file types
-SUPPORTED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+# Constants
+SUPPORTED_TYPES = list(RadiologyConfig.SUPPORTED_CONTENT_TYPES)
+MAX_FILE_SIZE = RadiologyConfig.MAX_FILE_SIZE_BYTES
 
 
 @router.post("/analyze", response_model=RadiologyAnalysisResponse)
@@ -39,7 +48,9 @@ async def analyze_xray(
     file: UploadFile = File(..., description="Chest X-ray image (JPEG/PNG)")
 ):
     """
-    Analyze chest X-ray for 18 pulmonary and cardiac conditions
+    Analyze chest X-ray for 18 pulmonary and cardiac conditions.
+    
+    Uses TorchXRayVision DenseNet121 model trained on 800,000+ images.
     
     Detects conditions including:
     - Pneumonia (92% accuracy)
@@ -57,75 +68,136 @@ async def analyze_xray(
     - Clinical recommendations
     """
     start_time = time.time()
+    stages_completed = []
+    
+    # Stage 1: Receipt
+    stage_start = time.time()
     
     # Validate file type
     if not file.content_type or file.content_type not in SUPPORTED_TYPES:
         raise HTTPException(
-            400, 
+            400,
             f"Invalid file type. Supported: JPEG, PNG. Got: {file.content_type}"
         )
     
+    stages_completed.append(StageResult(
+        stage="RECEIPT",
+        status="success",
+        time_ms=round((time.time() - stage_start) * 1000, 1)
+    ))
+    
     try:
-        # Read image
+        # Stage 2: Validation
+        stage_start = time.time()
         image_bytes = await file.read()
         
         # Validate size
         if len(image_bytes) > MAX_FILE_SIZE:
-            raise HTTPException(400, f"File too large. Maximum {MAX_FILE_SIZE // (1024*1024)}MB.")
-        
-        # Assess quality
-        quality_result = quality_assessor.assess(image_bytes)
-        
-        if not quality_result.usable:
             raise HTTPException(
-                400, 
-                f"Image quality too low for reliable analysis. Issues: {', '.join(quality_result.issues)}"
+                400,
+                f"File too large. Maximum {RadiologyConfig.MAX_FILE_SIZE_MB}MB."
             )
         
-        # Run analysis
+        # Validate content
+        validation = validator.validate(file.filename or "image.jpg", image_bytes)
+        if not validation.is_valid:
+            errors = [e.message for e in validation.errors]
+            raise HTTPException(400, f"Validation failed: {'; '.join(errors)}")
+        
+        stages_completed.append(StageResult(
+            stage="VALIDATION",
+            status="success",
+            time_ms=round((time.time() - stage_start) * 1000, 1)
+        ))
+        
+        # Stage 3: Quality Assessment
+        stage_start = time.time()
+        quality_result = validator.assess_quality(image_bytes)
+        
+        if not quality_result.get("usable", True):
+            issues = quality_result.get("issues", [])
+            raise HTTPException(
+                400,
+                f"Image quality too low for reliable analysis. Issues: {', '.join(issues)}"
+            )
+        
+        stages_completed.append(StageResult(
+            stage="PREPROCESSING",
+            status="success",
+            time_ms=round((time.time() - stage_start) * 1000, 1)
+        ))
+        
+        # Stage 4: Analysis
+        stage_start = time.time()
         result = analyzer.analyze(image_bytes)
         
+        stages_completed.append(StageResult(
+            stage="ANALYSIS",
+            status="success",
+            time_ms=round((time.time() - stage_start) * 1000, 1)
+        ))
+        
+        # Stage 5: Clinical Scoring
+        stage_start = time.time()
+        risk_result = risk_scorer.calculate(result.all_predictions)
+        recommendations = recommendation_gen.generate(
+            primary=result.primary_finding,
+            risk_level=risk_result["category"],
+            findings=result.findings
+        )
+        
+        stages_completed.append(StageResult(
+            stage="SCORING",
+            status="success",
+            time_ms=round((time.time() - stage_start) * 1000, 1)
+        ))
+        
+        # Format response
         processing_time = int((time.time() - start_time) * 1000)
         
-        # Build response matching PRD schema
         return RadiologyAnalysisResponse(
             success=True,
             timestamp=datetime.utcnow().isoformat() + "Z",
             processing_time_ms=processing_time,
+            stages_completed=stages_completed,
+            
             primary_finding=PrimaryFinding(
                 condition=result.primary_finding,
                 probability=result.confidence,
                 severity=result.risk_level,
                 description=_get_condition_description(result.primary_finding)
             ),
+            
             all_predictions=result.all_predictions,
+            
             findings=[
                 Finding(
+                    id=f"finding_{i+1:03d}",
                     condition=f["condition"],
                     probability=f["probability"],
-                    severity=f["severity"],
+                    severity=f.get("severity", "moderate"),
                     description=f["description"],
-                    urgency=PATHOLOGY_INFO.get(f["condition"], {}).get("urgency")
+                    urgency=PATHOLOGY_INFO.get(f["condition"], {}).get("urgency"),
+                    is_critical=f.get("severity") in ["critical", "high"]
                 )
-                for f in result.findings
+                for i, f in enumerate(result.findings)
             ],
-            risk_level=result.risk_level,
-            risk_score=_calculate_risk_score(result.all_predictions),
+            
+            risk_level=risk_result["category"],
+            risk_score=risk_result["risk_score"],
+            
             heatmap_base64=result.heatmap_base64,
+            
             quality=QualityMetrics(
-                image_quality=quality_result.image_quality,
-                positioning=quality_result.positioning,
-                technical_factors=quality_result.technical_factors,
-                resolution=quality_result.resolution,
-                contrast=quality_result.contrast,
-                issues=quality_result.issues,
-                usable=quality_result.usable
+                overall_quality=quality_result.get("quality", "good"),
+                quality_score=quality_result.get("quality_score", 0.8),
+                resolution=quality_result.get("resolution"),
+                contrast=quality_result.get("contrast"),
+                issues=quality_result.get("issues", []),
+                usable=quality_result.get("usable", True)
             ),
-            recommendations=_generate_recommendations(
-                result.primary_finding, 
-                result.risk_level,
-                result.findings
-            )
+            
+            recommendations=recommendations
         )
         
     except HTTPException:
@@ -138,14 +210,21 @@ async def analyze_xray(
 @router.post("/demo")
 async def demo_analysis():
     """
-    Demo analysis with synthetic data
+    Demo analysis with synthetic data.
     
-    Returns sample analysis result for testing frontend integration
+    Returns sample analysis result for testing frontend integration.
     """
     return RadiologyAnalysisResponse(
         success=True,
         timestamp=datetime.utcnow().isoformat() + "Z",
         processing_time_ms=1250,
+        stages_completed=[
+            StageResult(stage="RECEIPT", status="success", time_ms=5),
+            StageResult(stage="VALIDATION", status="success", time_ms=45),
+            StageResult(stage="PREPROCESSING", status="success", time_ms=120),
+            StageResult(stage="ANALYSIS", status="success", time_ms=980),
+            StageResult(stage="SCORING", status="success", time_ms=100),
+        ],
         primary_finding=PrimaryFinding(
             condition="No Significant Abnormality",
             probability=87.5,
@@ -174,19 +253,22 @@ async def demo_analysis():
         },
         findings=[
             Finding(
+                id="finding_001",
                 condition="No Significant Abnormality",
                 probability=87.5,
                 severity="normal",
-                description="Lungs are clear. Heart size is normal."
+                description="Lungs are clear. Heart size is normal.",
+                is_critical=False
             )
         ],
         risk_level="low",
         risk_score=12.5,
         heatmap_base64=None,
         quality=QualityMetrics(
-            image_quality="good",
+            overall_quality="good",
+            quality_score=0.88,
             positioning="adequate",
-            technical_factors="satisfactory"
+            exposure="satisfactory"
         ),
         recommendations=[
             "No significant abnormalities detected",
@@ -198,7 +280,7 @@ async def demo_analysis():
 
 @router.get("/conditions", response_model=ConditionsResponse)
 async def list_conditions():
-    """List all 18 detectable conditions with metadata"""
+    """List all 18 detectable conditions with metadata."""
     conditions = [
         ConditionInfo(
             name=name,
@@ -218,7 +300,7 @@ async def list_conditions():
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check for radiology module"""
+    """Health check for radiology module."""
     try:
         import pytorch_grad_cam
         gradcam_available = True
@@ -228,109 +310,36 @@ async def health_check():
     return HealthResponse(
         status="healthy" if TORCHXRAY_AVAILABLE else "degraded",
         module="radiology",
+        version=RadiologyConfig.VERSION,
         model="TorchXRayVision DenseNet121" if TORCHXRAY_AVAILABLE else "Simulation Mode",
         torchxrayvision_available=TORCHXRAY_AVAILABLE,
         gradcam_available=gradcam_available,
-        pathologies_count=18
+        pathologies_count=RadiologyConfig.PATHOLOGY_COUNT
     )
 
 
 @router.get("/info")
 async def module_info():
-    """Get information about radiology module"""
+    """Get information about radiology module."""
     return {
         "name": "CXR-Insight AI",
+        "version": RadiologyConfig.VERSION,
         "description": "AI-powered chest X-ray analysis using TorchXRayVision",
         "model": "DenseNet121 trained on 8 merged datasets (800,000+ images)",
-        "pathologies": 18,
-        "datasets": [
-            "NIH ChestX-ray14 (112,120 images)",
-            "CheXpert (224,316 images)",
-            "MIMIC-CXR (377,110 images)",
-            "PadChest (160,000+ images)",
-            "COVID-Chestxray",
-            "RSNA Pneumonia",
-            "VinDr-CXR",
-            "Google NIH"
-        ],
+        "pathologies": RadiologyConfig.PATHOLOGY_COUNT,
+        "datasets": [d["name"] for d in TRAINING_DATASETS],
         "supported_formats": ["JPEG", "PNG"],
-        "max_file_size": "10MB",
-        "recommended_resolution": "512x512 minimum"
+        "max_file_size": f"{RadiologyConfig.MAX_FILE_SIZE_MB}MB",
+        "recommended_resolution": f"{RadiologyConfig.RECOMMENDED_RESOLUTION}x{RadiologyConfig.RECOMMENDED_RESOLUTION} minimum"
     }
 
 
 def _get_condition_description(condition: str) -> str:
-    """Get clinical description for a condition"""
-    if condition == "No Significant Abnormality" or condition == "No Significant Findings":
+    """Get clinical description for a condition."""
+    if condition in ["No Significant Abnormality", "No Significant Findings"]:
         return "Lungs are clear. Heart size is normal. No acute cardiopulmonary process."
     
     return PATHOLOGY_INFO.get(condition, {}).get(
-        "description", 
+        "description",
         "Finding detected - clinical correlation recommended"
     )
-
-
-def _calculate_risk_score(predictions: dict) -> float:
-    """Calculate overall risk score from predictions"""
-    # Critical conditions (highest weight)
-    CRITICAL = ["Pneumothorax", "Mass"]
-    HIGH = ["Pneumonia", "Consolidation", "Edema", "Effusion"]
-    MODERATE = ["Cardiomegaly", "Atelectasis", "Nodule", "Infiltration"]
-    
-    risk_score = 0.0
-    
-    for condition, prob in predictions.items():
-        if prob < 10:
-            continue
-        
-        if condition in CRITICAL:
-            risk_score += prob * 0.5
-        elif condition in HIGH:
-            risk_score += prob * 0.3
-        elif condition in MODERATE:
-            risk_score += prob * 0.15
-        else:
-            risk_score += prob * 0.05
-    
-    return min(100, round(risk_score, 1))
-
-
-def _generate_recommendations(
-    primary: str, 
-    risk_level: str,
-    findings: list
-) -> List[str]:
-    """Generate clinical recommendations based on findings"""
-    recommendations = []
-    
-    if risk_level == "critical":
-        recommendations.append("URGENT: Immediate physician review required")
-        recommendations.append("Consider emergency intervention if clinically indicated")
-    elif risk_level == "high":
-        recommendations.append("Priority consultation recommended")
-        recommendations.append("Consider CT scan for further evaluation")
-    elif risk_level == "moderate":
-        recommendations.append("Clinical correlation advised")
-        recommendations.append("Follow-up imaging may be warranted")
-    elif risk_level == "low":
-        recommendations.append("Minor findings noted")
-        recommendations.append("Routine follow-up if clinically indicated")
-    else:
-        recommendations.append("No significant abnormalities detected")
-        recommendations.append("Continue routine screening as indicated")
-    
-    recommendations.append("Correlate with clinical findings as appropriate")
-    
-    # Add condition-specific recommendations
-    for finding in findings[:2]:  # Top 2 findings
-        condition = finding.get("condition", "")
-        if condition == "Pneumonia":
-            recommendations.append("Consider antibiotic therapy if bacterial infection suspected")
-        elif condition == "Cardiomegaly":
-            recommendations.append("Echocardiogram recommended for cardiac evaluation")
-        elif condition == "Pneumothorax":
-            recommendations.append("Immediate chest tube placement may be required")
-        elif condition == "Effusion":
-            recommendations.append("Thoracentesis may be indicated for large effusions")
-    
-    return recommendations[:5]  # Limit to 5 recommendations

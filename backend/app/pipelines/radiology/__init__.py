@@ -1,6 +1,8 @@
 """
 Radiology/X-Ray Pipeline
-AI-powered chest X-ray analysis using TorchXRayVision
+
+AI-powered chest X-ray analysis using TorchXRayVision.
+Follows MediLens standardized pipeline architecture (v4.0).
 
 Detects 18 pulmonary and cardiac conditions:
 - Pneumonia (92% accuracy)
@@ -10,35 +12,95 @@ Detects 18 pulmonary and cardiac conditions:
 - And 14 more pathologies
 
 Model: DenseNet121 trained on 8 merged datasets (800,000+ images)
+
+Architecture Layers:
+- L0: Router (HTTP endpoints)
+- L1: Input (validation, reception)
+- L2: Preprocessing (normalization, enhancement)
+- L3: Detection (anatomical structures)
+- L4: Analysis (pathology detection)
+- L5: Clinical (risk scoring, recommendations)
+- L6: Output (formatting, visualization)
 """
 
-from .analyzer import XRayAnalyzer, TORCHXRAY_AVAILABLE
-from .quality import XRayQualityAssessor, assess_xray_quality
-from .visualization import XRayVisualizer, generate_xray_heatmap
-from .models import (
+from .router import router
+from .config import RadiologyConfig, PATHOLOGY_INFO, PATHOLOGIES
+from .schemas import (
+    RadiologyAnalysisRequest,
     RadiologyAnalysisResponse,
     PrimaryFinding,
     Finding,
     QualityMetrics,
+    RiskAssessment,
     HealthResponse,
-    PATHOLOGY_INFO,
+    ConditionInfo,
+    ConditionsResponse,
 )
 
+# Core components
+from .core import RadiologyOrchestrator, RadiologyService
+
+# Analysis components
+from .analysis import XRayAnalyzer, RadiologyResult, TORCHXRAY_AVAILABLE
+
+# Input/Output
+from .input import ImageValidator, ValidationResult
+from .output import OutputFormatter, HeatmapGenerator
+
+# Clinical
+from .clinical import RiskScorer, RecommendationGenerator
+
+# Errors
+from .errors import ErrorCode, PipelineError
+
+# Explanation
+from .explanation import RadiologyExplanationRules
+
+__version__ = "4.0.0"
+
 __all__ = [
-    # Analyzer
-    "XRayAnalyzer",
-    "TORCHXRAY_AVAILABLE",
-    # Quality
-    "XRayQualityAssessor",
-    "assess_xray_quality",
-    # Visualization
-    "XRayVisualizer",
-    "generate_xray_heatmap",
-    # Models
+    # Router
+    "router",
+    
+    # Config
+    "RadiologyConfig",
+    "PATHOLOGY_INFO",
+    "PATHOLOGIES",
+    
+    # Schemas
+    "RadiologyAnalysisRequest",
     "RadiologyAnalysisResponse",
     "PrimaryFinding",
     "Finding",
     "QualityMetrics",
+    "RiskAssessment",
     "HealthResponse",
-    "PATHOLOGY_INFO",
+    "ConditionInfo",
+    "ConditionsResponse",
+    
+    # Core
+    "RadiologyOrchestrator",
+    "RadiologyService",
+    
+    # Analysis
+    "XRayAnalyzer",
+    "RadiologyResult",
+    "TORCHXRAY_AVAILABLE",
+    
+    # Input/Output
+    "ImageValidator",
+    "ValidationResult",
+    "OutputFormatter",
+    "HeatmapGenerator",
+    
+    # Clinical
+    "RiskScorer",
+    "RecommendationGenerator",
+    
+    # Errors
+    "ErrorCode",
+    "PipelineError",
+    
+    # Explanation
+    "RadiologyExplanationRules",
 ]
