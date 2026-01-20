@@ -1,8 +1,8 @@
 /* MediLens Global Styles */
 
-@import '../styles/design-tokens.css';
-@import '../styles/base.css';
-@import '../styles/animations.css';
+@import "../styles/design-tokens.css";
+@import "../styles/base.css";
+@import "../styles/animations.css";
 
 @tailwind base;
 @tailwind components;
@@ -12,7 +12,9 @@
 
 /* Base Typography - Apple System Font Stack */
 html {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter",
+    system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -26,7 +28,7 @@ samp,
 .font-mono,
 .clinical-data,
 [data-clinical] {
-  font-family: 'SF Mono', 'Monaco', 'Menlo', 'JetBrains Mono', monospace;
+  font-family: "SF Mono", "Monaco", "Menlo", "JetBrains Mono", monospace;
 }
 
 /* ===== TYPOGRAPHY SCALE CLASSES ===== */
@@ -186,13 +188,16 @@ html {
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
+  background: linear-gradient(
+      to bottom,
       transparent,
-      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
   min-height: 100vh;
   font-feature-settings:
-    'rlig' 1,
-    'calt' 1;
+    "rlig" 1,
+    "calt" 1;
 }
 
 /* Scrollbar Styling */
@@ -265,11 +270,11 @@ body {
   }
 
   a[href]:after {
-    content: ' (' attr(href) ')';
+    content: " (" attr(href) ")";
   }
 
   abbr[title]:after {
-    content: ' (' attr(title) ')';
+    content: " (" attr(title) ")";
   }
 
   .no-print {
@@ -298,7 +303,6 @@ body {
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -319,10 +323,12 @@ body {
 
 /* Loading States */
 .loading-skeleton {
-  background: linear-gradient(90deg,
-      var(--neutral-800) 25%,
-      var(--neutral-700) 50%,
-      var(--neutral-800) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--neutral-800) 25%,
+    var(--neutral-700) 50%,
+    var(--neutral-800) 75%
+  );
   background-size: 200% 100%;
   animation: loading-shimmer 1.5s infinite;
 }
@@ -366,15 +372,17 @@ body {
 }
 
 .nri-score-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle,
-      rgba(59, 130, 246, 0.1) 0%,
-      transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.1) 0%,
+    transparent 70%
+  );
   animation: nri-glow 3s ease-in-out infinite alternate;
 }
 
@@ -396,16 +404,18 @@ body {
 }
 
 .assessment-progress::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(59, 130, 246, 0.1),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
   transform: translateX(-100%);
   animation: progress-shimmer 2s infinite;
 }
@@ -426,7 +436,6 @@ body {
 }
 
 @keyframes error-shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -498,7 +507,6 @@ body {
 
 /* Mobile-first responsive utilities */
 @media (max-width: 320px) {
-
   /* Extra small screens (iPhone SE, etc.) */
   .container {
     padding-left: 12px;
@@ -523,7 +531,6 @@ body {
 }
 
 @media (min-width: 320px) and (max-width: 480px) {
-
   /* Small mobile screens */
   .container {
     padding-left: 16px;
@@ -532,7 +539,6 @@ body {
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
-
   /* Tablets and larger phones */
   .container {
     padding-left: 20px;
@@ -592,8 +598,8 @@ input[type="radio"] {
 }
 
 /* Ensure checkbox/radio labels have adequate touch area */
-input[type="checkbox"]+label,
-input[type="radio"]+label {
+input[type="checkbox"] + label,
+input[type="radio"] + label {
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -625,7 +631,6 @@ nav:not([aria-label="Main navigation"]) a,
 
 /* Single column on very small screens */
 @media (max-width: 480px) {
-
   .grid-cols-2,
   .grid-cols-3,
   .grid-cols-4 {
@@ -635,7 +640,6 @@ nav:not([aria-label="Main navigation"]) a,
 
 /* Two columns on small tablets */
 @media (min-width: 481px) and (max-width: 768px) {
-
   .grid-cols-3,
   .grid-cols-4 {
     grid-template-columns: repeat(2, 1fr);
@@ -709,7 +713,6 @@ nav:not([aria-label="Main navigation"]) a,
 
 /* Mobile menu should not cause horizontal overflow */
 @media (max-width: 1024px) {
-
   .sidebar,
   [data-sidebar],
   nav[role="navigation"] {
@@ -771,11 +774,11 @@ object {
 
 /* Section Rhythm - Alternating backgrounds (Requirements 18.3) */
 .section-white {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 
 .section-secondary {
-  background-color: #F2F2F7;
+  background-color: #f2f2f7;
 }
 
 /* Section Padding - 80px desktop, 48px mobile (Requirements 18.4) */
@@ -792,22 +795,22 @@ object {
 }
 
 /* Section rhythm utility - auto-alternating backgrounds */
-.section-rhythm>section:nth-child(odd) {
-  background-color: #FFFFFF;
+.section-rhythm > section:nth-child(odd) {
+  background-color: #ffffff;
 }
 
-.section-rhythm>section:nth-child(even) {
-  background-color: #F2F2F7;
+.section-rhythm > section:nth-child(even) {
+  background-color: #f2f2f7;
 }
 
 /* Section rhythm with padding */
-.section-rhythm>section {
+.section-rhythm > section {
   padding-top: 48px;
   padding-bottom: 48px;
 }
 
 @media (min-width: 1024px) {
-  .section-rhythm>section {
+  .section-rhythm > section {
     padding-top: 80px;
     padding-bottom: 80px;
   }
@@ -856,7 +859,6 @@ object {
 }
 
 @media (max-width: 1023px) {
-
   .dashboard-grid,
   .dashboard-grid-collapsed {
     display: flex;
@@ -963,11 +965,11 @@ object {
 }
 
 /* Content spacing for readability */
-.content-spacing>*+* {
+.content-spacing > * + * {
   margin-top: 24px;
 }
 
-.content-spacing-lg>*+* {
+.content-spacing-lg > * + * {
   margin-top: 32px;
 }
 
@@ -1046,7 +1048,7 @@ textarea:focus-visible,
 select:focus,
 select:focus-visible {
   outline: none !important;
-  border-color: #007AFF;
+  border-color: #007aff;
   box-shadow: none;
 }
 
@@ -1055,4 +1057,300 @@ select:focus-visible {
 .card:focus-visible {
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* ===== CLINICAL-GRADE UI UTILITIES ===== */
+/* Following medical dashboard conventions from hospital monitoring systems */
+
+/* Risk Tier Badge Classes */
+.risk-low {
+  background-color: var(--clinical-normal-bg);
+  color: var(--clinical-normal);
+  border: 1px solid var(--clinical-normal-border);
+}
+
+.risk-moderate {
+  background-color: var(--clinical-warning-bg);
+  color: var(--clinical-warning);
+  border: 1px solid var(--clinical-warning-border);
+}
+
+.risk-elevated {
+  background-color: var(--clinical-elevated-bg);
+  color: var(--clinical-elevated);
+  border: 1px solid var(--clinical-elevated-border);
+}
+
+.risk-critical {
+  background-color: var(--clinical-critical-bg);
+  color: var(--clinical-critical);
+  border: 1px solid var(--clinical-critical-border);
+}
+
+/* Clinical Alert Classes */
+.alert-critical {
+  background-color: var(--clinical-critical-bg);
+  border: 1px solid var(--clinical-critical-border);
+  border-left: 4px solid var(--clinical-critical);
+}
+
+.alert-elevated {
+  background-color: var(--clinical-elevated-bg);
+  border: 1px solid var(--clinical-elevated-border);
+  border-left: 4px solid var(--clinical-elevated);
+}
+
+.alert-warning {
+  background-color: var(--clinical-warning-bg);
+  border: 1px solid var(--clinical-warning-border);
+  border-left: 4px solid var(--clinical-warning);
+}
+
+.alert-attention {
+  background-color: var(--clinical-attention-bg);
+  border: 1px solid var(--clinical-attention-border);
+  border-left: 4px solid var(--clinical-attention);
+}
+
+.alert-normal {
+  background-color: var(--clinical-normal-bg);
+  border: 1px solid var(--clinical-normal-border);
+  border-left: 4px solid var(--clinical-normal);
+}
+
+/* Pipeline Status Indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot-idle {
+  background-color: var(--status-idle);
+}
+.status-dot-running {
+  background-color: var(--status-running);
+  animation: pulse 2s infinite;
+}
+.status-dot-success {
+  background-color: var(--status-success);
+}
+.status-dot-failed {
+  background-color: var(--status-failed);
+}
+.status-dot-queued {
+  background-color: var(--status-queued);
+}
+
+/* Dashboard Card Styles - High Contrast */
+.dashboard-card {
+  background-color: var(--dashboard-card);
+  border: 1px solid var(--dashboard-card-border);
+  border-radius: 12px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dashboard-card:hover {
+  border-color: var(--dashboard-divider);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Clinical Text Hierarchy */
+.text-clinical-primary {
+  color: var(--clinical-text-primary);
+}
+
+.text-clinical-secondary {
+  color: var(--clinical-text-secondary);
+}
+
+.text-clinical-muted {
+  color: var(--clinical-text-muted);
+}
+
+.text-clinical-subtle {
+  color: var(--clinical-text-subtle);
+}
+
+/* Semantic Color Text */
+.text-risk-low {
+  color: var(--clinical-normal);
+}
+.text-risk-moderate {
+  color: var(--clinical-warning);
+}
+.text-risk-elevated {
+  color: var(--clinical-elevated);
+}
+.text-risk-critical {
+  color: var(--clinical-critical);
+}
+
+/* Module Accent Classes */
+.module-retinal {
+  color: var(--module-retinal);
+  background-color: var(--module-retinal-bg);
+}
+
+.module-speech {
+  color: var(--module-speech);
+  background-color: var(--module-speech-bg);
+}
+
+.module-cardiology {
+  color: var(--module-cardiology);
+  background-color: var(--module-cardiology-bg);
+}
+
+.module-radiology {
+  color: var(--module-radiology);
+  background-color: var(--module-radiology-bg);
+}
+
+.module-dermatology {
+  color: var(--module-dermatology);
+  background-color: var(--module-dermatology-bg);
+}
+
+/* Clinical Badge Styles */
+.badge-clinical {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+}
+
+/* Pending Review Badge */
+.badge-pending {
+  background-color: var(--clinical-warning-bg);
+  color: var(--clinical-warning);
+  border: 1px solid var(--clinical-warning-border);
+}
+
+/* Flagged Badge */
+.badge-flagged {
+  background-color: var(--clinical-critical-bg);
+  color: var(--clinical-critical);
+  border: 1px solid var(--clinical-critical-border);
+}
+
+/* Reviewed Badge */
+.badge-reviewed {
+  background-color: var(--clinical-normal-bg);
+  color: var(--clinical-normal);
+  border: 1px solid var(--clinical-normal-border);
+}
+
+/* Clinical Action Button */
+.btn-clinical-primary {
+  background-color: var(--primary-600);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.btn-clinical-primary:hover {
+  background-color: var(--primary-700);
+}
+
+.btn-clinical-primary:active {
+  transform: scale(0.98);
+}
+
+/* Progress Bar Animations */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Clinical Data Table Styles */
+.table-clinical {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-clinical th {
+  background-color: var(--neutral-50);
+  color: var(--clinical-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--dashboard-divider);
+}
+
+.table-clinical td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--clinical-text-primary);
+  border-bottom: 1px solid var(--dashboard-card-border);
+}
+
+.table-clinical tr:hover td {
+  background-color: var(--dashboard-card-hover);
+}
+
+/* Skeleton Loading for Clinical Components */
+.skeleton-clinical {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Empty State Styling */
+.empty-state-clinical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state-clinical svg {
+  color: var(--clinical-text-subtle);
+  margin-bottom: 16px;
+}
+
+.empty-state-clinical h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--clinical-text-primary);
+  margin-bottom: 4px;
+}
+
+.empty-state-clinical p {
+  font-size: 12px;
+  color: var(--clinical-text-muted);
+  max-width: 280px;
 }
