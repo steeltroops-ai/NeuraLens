@@ -90,11 +90,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [isClient]);
 
   // Handle Cmd/Ctrl+K keyboard shortcut for command palette
+  // Handle Ctrl+/ for chatbot
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         setCommandPaletteOpen((prev) => !prev);
+      }
+      // Ctrl+/ to toggle chatbot
+      if ((event.metaKey || event.ctrlKey) && event.key === "/") {
+        event.preventDefault();
+        // Dispatch custom event to toggle chatbot
+        window.dispatchEvent(new CustomEvent("toggle-chatbot"));
       }
       // Close on Escape
       if (event.key === "Escape" && commandPaletteOpen) {
@@ -123,7 +130,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <PipelineStatusProvider>
-      <div className="min-h-screen bg-[#f8fafc]">
+      <div className="min-h-screen bg-[#09090b]">
         {/* Sidebar Navigation - Fixed position (Requirements 1.1, 1.3) */}
         <DashboardSidebar
           mobileOpen={mobileOpen}
@@ -148,7 +155,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Main Content Area - Offset by header height, leave room for status bar */}
           <main
             id="main-content"
-            className="flex-1 bg-[#f8fafc] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide pt-14 pb-8"
+            className="flex-1 bg-[#09090b] w-full max-w-full overflow-x-hidden overflow-y-auto scrollbar-hide pt-14 pb-8"
             role="main"
             aria-labelledby="page-title"
           >

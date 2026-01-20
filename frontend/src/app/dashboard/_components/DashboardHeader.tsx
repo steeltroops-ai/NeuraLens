@@ -267,13 +267,13 @@ export function DashboardHeader({
             )}
           </button>
 
-          {/* Notifications Panel - Clean minimal design */}
+          {/* Notifications Panel - Dark theme design */}
           <div
             id="notifications-panel"
             className={`
                             absolute right-0 top-10 z-50 w-80 max-h-[420px]
-                            rounded-lg bg-white border border-[#e5e7eb]
-                            shadow-lg overflow-hidden
+                            rounded-xl bg-zinc-900 border border-zinc-700
+                            shadow-2xl shadow-black/50 overflow-hidden
                             transition-all duration-200 ease-out
                             origin-top-right
                             ${
@@ -289,23 +289,23 @@ export function DashboardHeader({
             data-testid="notifications-panel"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#f0f0f0]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium text-[#111827]">
+                <span className="text-[13px] font-medium text-zinc-100">
                   Notifications
                 </span>
                 {notificationCount > 0 && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-medium bg-[#fef2f2] text-[#ef4444] rounded">
+                  <span className="px-1.5 py-0.5 text-[10px] font-medium bg-blue-500/20 text-blue-400 rounded">
                     {notificationCount} new
                   </span>
                 )}
               </div>
               <button
                 onClick={() => setNotificationsOpen(false)}
-                className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#f3f4f6] transition-colors"
+                className="flex h-6 w-6 items-center justify-center rounded hover:bg-zinc-800 transition-colors"
                 aria-label="Close"
               >
-                <X size={14} className="text-[#9ca3af]" aria-hidden="true" />
+                <X size={14} className="text-zinc-400" aria-hidden="true" />
               </button>
             </div>
 
@@ -321,13 +321,13 @@ export function DashboardHeader({
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="animate-pulse rounded-lg bg-[#f9fafb] p-3"
+                        className="animate-pulse rounded-lg bg-zinc-800 p-3"
                       >
                         <div className="flex items-start gap-2">
-                          <div className="h-6 w-6 rounded-full bg-[#e5e7eb]" />
+                          <div className="h-6 w-6 rounded-full bg-zinc-700" />
                           <div className="flex-1 space-y-1.5">
-                            <div className="h-3 w-3/4 rounded bg-[#e5e7eb]" />
-                            <div className="h-2.5 w-1/2 rounded bg-[#e5e7eb]" />
+                            <div className="h-3 w-3/4 rounded bg-zinc-700" />
+                            <div className="h-2.5 w-1/2 rounded bg-zinc-700" />
                           </div>
                         </div>
                       </div>
@@ -340,15 +340,15 @@ export function DashboardHeader({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-[#f0f0f0] bg-[#fafafa]">
+            <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-900/80">
               <button
-                className="text-[12px] font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors"
+                className="text-[12px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
                 onClick={() => setNotificationsOpen(false)}
               >
                 View all
               </button>
               <button
-                className="text-[11px] text-[#9ca3af] hover:text-[#6b7280] transition-colors"
+                className="text-[11px] text-zinc-500 hover:text-zinc-400 transition-colors"
                 onClick={() => setNotificationsOpen(false)}
               >
                 Mark all read

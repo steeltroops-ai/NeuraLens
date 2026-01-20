@@ -1,17 +1,17 @@
 "use client";
 
 /**
- * MediLens Dashboard - Enterprise-Grade Clinical AI Platform
+ * MediLens Dashboard - Clinical AI Platform
  *
- * Premium dashboard inspired by Atlassian, Linear, and modern SaaS platforms:
- * - Gradient accents and depth
- * - Real-time system notifications via API
- * - Visual card differentiation with subtle shadows
- * - Modern, sleek enterprise aesthetics
+ * Doctor/Clinician focused dashboard with:
+ * - Quick access to diagnostic modules
+ * - Recent patient analyses
+ * - Clinical insights and alerts
+ * - Pending reviews and priorities
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -24,23 +24,31 @@ import {
   Clock,
   Shield,
   Brain,
-  Hand,
   ChevronRight,
   CheckCircle2,
   AlertTriangle,
   FileText,
   Zap,
   Sparkles,
-  Server,
-  TrendingUp,
-  Users,
   AlertCircle,
   Play,
   BarChart3,
   RefreshCw,
-  ExternalLink,
-  Bell,
-  X,
+  Users,
+  Calendar,
+  TrendingUp,
+  Stethoscope,
+  ClipboardList,
+  UserCheck,
+  AlertOctagon,
+  Bookmark,
+  Keyboard,
+  BookOpen,
+  Download,
+  HelpCircle,
+  Wifi,
+  Database,
+  ArrowUpRight,
 } from "lucide-react";
 
 // ============================================================================
@@ -50,7 +58,6 @@ import {
 interface SystemHealth {
   backend: "online" | "offline" | "checking";
   latency: number | null;
-  lastChecked: Date | null;
   pipelinesOnline: number;
   totalPipelines: number;
 }
@@ -58,106 +65,90 @@ interface SystemHealth {
 interface DiagnosticModule {
   id: string;
   name: string;
-  shortName: string;
   description: string;
   icon: React.ElementType;
   route: string;
+  color: string;
   gradient: string;
-  accentColor: string;
-  status: "active" | "idle" | "maintenance";
-  lastUsed?: string;
-  usageCount: number;
 }
 
-interface QuickStat {
-  label: string;
-  value: string | number;
-  change?: string;
-  changeType?: "positive" | "negative" | "neutral";
-  icon: React.ElementType;
-  gradient: string;
+interface RecentAnalysis {
+  id: string;
+  patientId: string;
+  patientName: string;
+  module: string;
+  moduleId: string;
+  result: "normal" | "abnormal" | "critical" | "pending";
+  timestamp: Date;
+  riskLevel?: "low" | "moderate" | "high";
+}
+
+interface ClinicalAlert {
+  id: string;
+  type: "urgent" | "followup" | "reminder";
+  title: string;
+  patient: string;
+  timestamp: Date;
 }
 
 // ============================================================================
-// Enterprise Module Data with Rich Gradients
+// Module Data
 // ============================================================================
 
 const diagnosticModules: DiagnosticModule[] = [
   {
     id: "retinal",
     name: "RetinaScan AI",
-    shortName: "Retinal",
-    description: "Diabetic retinopathy grading",
+    description: "Diabetic retinopathy detection & grading",
     icon: Eye,
     route: "/dashboard/retinal",
-    gradient: "from-cyan-500 to-blue-600",
-    accentColor: "#0EA5E9",
-    status: "active",
-    lastUsed: "2m ago",
-    usageCount: 1247,
+    color: "#0891b2",
+    gradient: "from-cyan-500 to-blue-500",
   },
   {
     id: "speech",
     name: "SpeechMD AI",
-    shortName: "Speech",
-    description: "Voice biomarker analysis",
+    description: "Voice biomarker & neurological analysis",
     icon: Mic,
     route: "/dashboard/speech",
-    gradient: "from-violet-500 to-purple-600",
-    accentColor: "#8B5CF6",
-    status: "active",
-    lastUsed: "15m ago",
-    usageCount: 892,
+    color: "#7c3aed",
+    gradient: "from-violet-500 to-purple-500",
   },
   {
     id: "cardiology",
     name: "CardioPredict AI",
-    shortName: "Cardio",
-    description: "ECG & arrhythmia detection",
+    description: "ECG analysis & arrhythmia detection",
     icon: Heart,
     route: "/dashboard/cardiology",
-    gradient: "from-rose-500 to-pink-600",
-    accentColor: "#F43F5E",
-    status: "active",
-    lastUsed: "1h ago",
-    usageCount: 1456,
+    color: "#dc2626",
+    gradient: "from-rose-500 to-red-500",
   },
   {
     id: "radiology",
     name: "ChestXplorer AI",
-    shortName: "Radiology",
-    description: "Chest X-ray pathology",
+    description: "Chest X-ray pathology detection",
     icon: Scan,
     route: "/dashboard/radiology",
-    gradient: "from-amber-500 to-orange-600",
-    accentColor: "#F59E0B",
-    status: "idle",
-    usageCount: 678,
+    color: "#d97706",
+    gradient: "from-amber-500 to-orange-500",
   },
   {
     id: "dermatology",
     name: "SkinSense AI",
-    shortName: "Dermatology",
-    description: "Skin lesion classification",
+    description: "Skin lesion classification & melanoma",
     icon: Sparkles,
     route: "/dashboard/dermatology",
-    gradient: "from-fuchsia-500 to-pink-600",
-    accentColor: "#D946EF",
-    status: "active",
-    lastUsed: "8m ago",
-    usageCount: 543,
+    color: "#c026d3",
+    gradient: "from-fuchsia-500 to-pink-500",
   },
   {
     id: "cognitive",
     name: "Cognitive Testing",
-    shortName: "Cognitive",
-    description: "Memory & cognition assessment",
+    description: "Memory & cognitive function assessment",
     icon: Brain,
     route: "/dashboard/cognitive",
-    gradient: "from-emerald-500 to-teal-600",
-    accentColor: "#10B981",
-    status: "idle",
-    usageCount: 234,
+    color: "#059669",
+    gradient: "from-emerald-500 to-teal-500",
   },
 ];
 
@@ -172,416 +163,530 @@ function getGreeting(): string {
   return "Good evening";
 }
 
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
+}
+
 // ============================================================================
-// Enterprise Components
+// Components
 // ============================================================================
 
-/**
- * Premium Header with Gradient Accent
- */
-function DashboardHero({
+function WelcomeCard({
   firstName,
   greeting,
-  systemHealth,
+  systemOnline,
 }: {
   firstName: string;
   greeting: string;
-  systemHealth: SystemHealth;
+  systemOnline: boolean;
 }) {
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 lg:p-8 border border-slate-700/50"
-    >
-      {/* Subtle animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 animate-pulse" />
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-full blur-3xl" />
-
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="relative overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-3xl" />
+      </div>
+      <div className="relative z-10 flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400 mb-1">{greeting}</p>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
-            {firstName}
+          <p className="text-xs text-zinc-500 font-mono uppercase tracking-wider">
+            {greeting}
+          </p>
+          <h1 className="text-lg font-semibold text-zinc-100 mt-1">
+            Welcome back, <span className="text-blue-400">{firstName}</span>
           </h1>
-          <p className="mt-2 text-slate-400 text-sm max-w-md">
-            Your clinical AI command center. Run diagnostics, monitor pipelines,
-            and review assessments.
+          <p className="text-sm text-zinc-400 mt-0.5">
+            AI-powered clinical diagnostics
           </p>
         </div>
-
-        {/* System Status Card */}
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 rounded-xl p-4 min-w-[180px]">
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-2.5 h-2.5 rounded-full ${systemHealth.backend === "online" ? "bg-emerald-500 shadow-lg shadow-emerald-500/50" : "bg-amber-500 animate-pulse"}`}
-              />
-              <span className="text-xs font-medium text-slate-300">
-                {systemHealth.backend === "online"
-                  ? "All Systems Go"
-                  : "Checking..."}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">
-                {systemHealth.pipelinesOnline}
-              </span>
-              <span className="text-sm text-slate-400">
-                / {systemHealth.totalPipelines} pipelines
-              </span>
-            </div>
-            {systemHealth.latency && (
-              <p className="text-xs text-slate-500 mt-1">
-                {systemHealth.latency}ms latency
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.header>
-  );
-}
-
-/**
- * Premium Stat Cards with Gradients
- */
-function StatCard({ stat, index }: { stat: QuickStat; index: number }) {
-  const Icon = stat.icon;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="relative overflow-hidden bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 group"
-    >
-      {/* Gradient accent bar on top */}
-      <div
-        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.gradient}`}
-      />
-
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            {stat.label}
-          </p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</p>
-          {stat.change && (
-            <p
-              className={`text-xs mt-1 font-medium ${
-                stat.changeType === "positive"
-                  ? "text-emerald-600"
-                  : stat.changeType === "negative"
-                    ? "text-red-600"
-                    : "text-slate-500"
-              }`}
-            >
-              {stat.change}
-            </p>
-          )}
-        </div>
-        <div
-          className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.gradient} shadow-lg`}
-        >
-          <Icon size={18} className="text-white" strokeWidth={2} />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/**
- * Premium Diagnostic Module Card
- */
-function ModuleCard({
-  module,
-  index,
-}: {
-  module: DiagnosticModule;
-  index: number;
-}) {
-  const Icon = module.icon;
-  const isActive = module.status === "active";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.03 }}
-    >
-      <Link href={module.route} className="group block">
-        <div className="relative overflow-hidden bg-white rounded-xl border border-slate-200 p-5 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-300 transition-all duration-300">
-          {/* Gradient accent on left */}
+        <div className="flex items-center gap-2 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
           <div
-            className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${module.gradient}`}
+            className={`w-2 h-2 rounded-full ${systemOnline ? "bg-emerald-500" : "bg-red-500"}`}
           />
-
-          <div className="flex items-start gap-4">
-            {/* Icon with gradient background */}
-            <div
-              className={`flex-shrink-0 p-3 rounded-xl bg-gradient-to-br ${module.gradient} shadow-lg shadow-slate-200`}
-            >
-              <Icon size={22} className="text-white" strokeWidth={1.5} />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-                  {module.name}
-                </h3>
-                {isActive && (
-                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-medium text-emerald-700">
-                      Active
-                    </span>
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 mb-2">
-                {module.description}
-              </p>
-              <div className="flex items-center gap-3 text-xs text-slate-400">
-                <span className="flex items-center gap-1">
-                  <BarChart3 size={12} />
-                  {module.usageCount.toLocaleString()} runs
-                </span>
-                {module.lastUsed && (
-                  <span className="flex items-center gap-1">
-                    <Clock size={12} />
-                    {module.lastUsed}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <ArrowRight
-              size={16}
-              className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1"
-            />
-          </div>
+          <span className="text-xs text-zinc-400">
+            {systemOnline ? "System Ready" : "Offline"}
+          </span>
         </div>
-      </Link>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
-/**
- * Quick Action Button
- */
-function QuickActionButton({
+function StatCard({
+  label,
+  value,
+  change,
+  changeType,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  change?: string;
+  changeType?: "positive" | "negative" | "neutral";
+  icon: React.ElementType;
+  color: string;
+}) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 hover:border-zinc-700 transition-colors">
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[10px] text-zinc-500 uppercase tracking-wide font-medium">
+          {label}
+        </p>
+        <div className="p-1 rounded" style={{ backgroundColor: `${color}15` }}>
+          <Icon size={12} style={{ color }} />
+        </div>
+      </div>
+      <p className="text-lg font-semibold text-zinc-100">{value}</p>
+      {change && (
+        <p
+          className={`text-[10px] mt-0.5 flex items-center gap-0.5 ${
+            changeType === "positive"
+              ? "text-emerald-500"
+              : changeType === "negative"
+                ? "text-red-500"
+                : "text-zinc-500"
+          }`}
+        >
+          {changeType === "positive" && <TrendingUp size={9} />}
+          {change}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ModuleCard({ module }: { module: DiagnosticModule }) {
+  const Icon = module.icon;
+  return (
+    <Link href={module.route} className="block group">
+      <div className="relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-lg p-3 hover:border-zinc-700 transition-all">
+        <div
+          className={`absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b ${module.gradient}`}
+        />
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: `linear-gradient(135deg, ${module.color}06 0%, transparent 50%)`,
+          }}
+        />
+        <div className="relative z-10 flex items-center gap-2.5 pl-1.5">
+          <div
+            className="p-1.5 rounded"
+            style={{ backgroundColor: `${module.color}15` }}
+          >
+            <Icon size={14} style={{ color: module.color }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xs font-medium text-zinc-200 truncate">
+              {module.name}
+            </h3>
+            <p className="text-[10px] text-zinc-500 truncate">
+              {module.description}
+            </p>
+          </div>
+          <ArrowRight
+            size={12}
+            className="text-zinc-600 group-hover:text-zinc-400 transition-all flex-shrink-0"
+          />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function QuickAction({
   icon: Icon,
   label,
   href,
+  color,
   gradient,
 }: {
   icon: React.ElementType;
   label: string;
   href: string;
+  color: string;
   gradient: string;
 }) {
   return (
-    <Link href={href}>
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className={`relative overflow-hidden p-4 rounded-xl bg-gradient-to-br ${gradient} text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
-      >
-        <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity" />
-        <div className="relative flex items-center gap-3">
-          <div className="p-2 bg-white/20 rounded-lg backdrop-blur">
-            <Icon size={18} strokeWidth={2} />
-          </div>
-          <span className="text-sm font-semibold">{label}</span>
-          <ChevronRight size={16} className="ml-auto" />
+    <Link href={href} className="group">
+      <div className="relative overflow-hidden flex items-center gap-2 p-2.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:border-zinc-700 transition-all">
+        <div
+          className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+        />
+        <div
+          className="relative z-10 p-1.5 rounded"
+          style={{ backgroundColor: `${color}20` }}
+        >
+          <Icon size={14} style={{ color }} />
         </div>
-      </motion.div>
+        <span className="relative z-10 text-xs font-medium text-zinc-200">
+          {label}
+        </span>
+        <ChevronRight
+          size={12}
+          className="relative z-10 text-zinc-500 ml-auto"
+        />
+      </div>
     </Link>
   );
 }
 
-/**
- * Pipeline Status Row
- */
-function PipelineStatusCard() {
-  const pipelines = [
-    {
-      name: "RetinaScan",
-      status: "healthy",
-      latency: "1.2s",
-      color: "bg-cyan-500",
-    },
-    {
-      name: "SpeechMD",
-      status: "healthy",
-      latency: "0.9s",
-      color: "bg-violet-500",
-    },
-    {
-      name: "CardioPredict",
-      status: "healthy",
-      latency: "1.5s",
-      color: "bg-rose-500",
-    },
-    {
-      name: "ChestXplorer",
-      status: "idle",
-      latency: "2.1s",
-      color: "bg-amber-500",
-    },
-    {
-      name: "SkinSense",
-      status: "healthy",
-      latency: "1.1s",
-      color: "bg-fuchsia-500",
-    },
-  ];
+function RecentPatientsCard({ analyses }: { analyses: RecentAnalysis[] }) {
+  const getResultBadge = (result: string) =>
+    ({
+      normal: "text-emerald-500 bg-emerald-500/10",
+      abnormal: "text-amber-500 bg-amber-500/10",
+      critical: "text-red-500 bg-red-500/10",
+      pending: "text-blue-500 bg-blue-500/10",
+    })[result] || "text-zinc-500 bg-zinc-500/10";
 
-  const healthyCount = pipelines.filter((p) => p.status === "healthy").length;
+  const getRiskBadge = (risk?: string) =>
+    ({
+      low: "text-emerald-500",
+      moderate: "text-amber-500",
+      high: "text-red-500",
+    })[risk || ""] || "text-zinc-500";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-shadow"
-    >
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
-            <Activity size={16} className="text-white" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">
-              Pipeline Health
-            </h3>
-            <p className="text-xs text-slate-500">
-              {healthyCount}/{pipelines.length} operational
-            </p>
-          </div>
-        </div>
-        <button className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1">
-          <RefreshCw size={12} />
-          Refresh
-        </button>
-      </div>
-
-      <div className="space-y-2">
-        {pipelines.map((pipeline, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors"
-          >
-            <div className={`w-2 h-2 rounded-full ${pipeline.color}`} />
-            <span className="text-sm text-slate-700 flex-1">
-              {pipeline.name}
-            </span>
-            <span
-              className={`text-xs px-2 py-0.5 rounded-full ${
-                pipeline.status === "healthy"
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-slate-100 text-slate-600 border border-slate-200"
-              }`}
-            >
-              {pipeline.status}
-            </span>
-            <span className="text-xs text-slate-400">{pipeline.latency}</span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-/**
- * Recent Activity Card
- */
-function RecentActivityCard() {
-  const activities = [
-    {
-      module: "Retinal",
-      action: "Analysis completed",
-      time: "2m ago",
-      status: "success",
-      gradient: "from-cyan-500 to-blue-600",
-    },
-    {
-      module: "Speech",
-      action: "New assessment",
-      time: "15m ago",
-      status: "success",
-      gradient: "from-violet-500 to-purple-600",
-    },
-    {
-      module: "Cardio",
-      action: "Report generated",
-      time: "1h ago",
-      status: "success",
-      gradient: "from-rose-500 to-pink-600",
-    },
-    {
-      module: "Dermatology",
-      action: "Review pending",
-      time: "2h ago",
-      status: "pending",
-      gradient: "from-fuchsia-500 to-pink-600",
-    },
-  ];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.25 }}
-      className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-shadow"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
-            <Clock size={16} className="text-white" />
-          </div>
-          <h3 className="text-sm font-semibold text-slate-900">
-            Recent Activity
-          </h3>
+          <Users size={14} className="text-zinc-400" />
+          <h3 className="text-sm font-medium text-zinc-200">Recent Patients</h3>
         </div>
         <Link
           href="/dashboard/reports"
-          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          className="text-[10px] text-blue-400 hover:text-blue-300"
         >
-          View all <ExternalLink size={10} />
+          View all
         </Link>
       </div>
-
-      <div className="space-y-3">
-        {activities.map((activity, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div
-              className={`w-8 h-8 rounded-lg bg-gradient-to-br ${activity.gradient} flex items-center justify-center shadow`}
+      <div className="space-y-2">
+        {analyses.length === 0 ? (
+          <p className="text-xs text-zinc-500 py-4 text-center">
+            No recent analyses
+          </p>
+        ) : (
+          analyses.map((analysis) => (
+            <Link
+              key={analysis.id}
+              href={`/dashboard/${analysis.moduleId}`}
+              className="flex items-center gap-3 p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors"
             >
-              <span className="text-xs font-bold text-white">
-                {activity.module[0]}
+              <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
+                <span className="text-xs text-zinc-300 font-medium">
+                  {analysis.patientName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-zinc-200 font-medium truncate">
+                  {analysis.patientName}
+                </p>
+                <p className="text-[10px] text-zinc-500">
+                  {analysis.module} - {formatTimeAgo(analysis.timestamp)}
+                </p>
+              </div>
+              <div className="text-right">
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded capitalize ${getResultBadge(analysis.result)}`}
+                >
+                  {analysis.result}
+                </span>
+                {analysis.riskLevel && (
+                  <p
+                    className={`text-[9px] mt-0.5 ${getRiskBadge(analysis.riskLevel)}`}
+                  >
+                    {analysis.riskLevel} risk
+                  </p>
+                )}
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ClinicalAlertsCard({ alerts }: { alerts: ClinicalAlert[] }) {
+  const getAlertStyle = (type: string) =>
+    ({
+      urgent: {
+        icon: AlertOctagon,
+        color: "text-red-500",
+        bg: "bg-red-500/10",
+      },
+      followup: {
+        icon: Calendar,
+        color: "text-amber-500",
+        bg: "bg-amber-500/10",
+      },
+      reminder: {
+        icon: Bookmark,
+        color: "text-blue-500",
+        bg: "bg-blue-500/10",
+      },
+    })[type] || {
+      icon: AlertCircle,
+      color: "text-zinc-500",
+      bg: "bg-zinc-500/10",
+    };
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={14} className="text-zinc-400" />
+          <h3 className="text-sm font-medium text-zinc-200">Clinical Alerts</h3>
+          {alerts.filter((a) => a.type === "urgent").length > 0 && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">
+              {alerts.filter((a) => a.type === "urgent").length} urgent
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="space-y-2">
+        {alerts.length === 0 ? (
+          <p className="text-xs text-zinc-500 py-4 text-center">No alerts</p>
+        ) : (
+          alerts.map((alert) => {
+            const style = getAlertStyle(alert.type);
+            const Icon = style.icon;
+            return (
+              <div
+                key={alert.id}
+                className="flex items-start gap-2 p-2 rounded-lg bg-zinc-800/50"
+              >
+                <div className={`p-1 rounded ${style.bg}`}>
+                  <Icon size={12} className={style.color} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-zinc-200 truncate">
+                    {alert.title}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">
+                    {alert.patient} - {formatTimeAgo(alert.timestamp)}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PendingReviewsCard({ analyses }: { analyses: RecentAnalysis[] }) {
+  const pending = analyses.filter(
+    (a) =>
+      a.result === "pending" ||
+      a.result === "abnormal" ||
+      a.result === "critical",
+  );
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <ClipboardList size={14} className="text-zinc-400" />
+          <h3 className="text-sm font-medium text-zinc-200">Pending Reviews</h3>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
+            {pending.length}
+          </span>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {pending.length === 0 ? (
+          <div className="flex items-center gap-2 py-4 justify-center">
+            <CheckCircle2 size={14} className="text-emerald-500" />
+            <p className="text-xs text-zinc-400">All caught up!</p>
+          </div>
+        ) : (
+          pending.slice(0, 3).map((analysis) => (
+            <Link
+              key={analysis.id}
+              href={`/dashboard/${analysis.moduleId}`}
+              className="flex items-center justify-between p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Stethoscope size={12} className="text-zinc-400" />
+                <div>
+                  <p className="text-xs text-zinc-200">
+                    {analysis.patientName}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">{analysis.module}</p>
+                </div>
+              </div>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded ${
+                  analysis.result === "critical"
+                    ? "bg-red-500/10 text-red-500"
+                    : analysis.result === "abnormal"
+                      ? "bg-amber-500/10 text-amber-500"
+                      : "bg-blue-500/10 text-blue-500"
+                }`}
+              >
+                {analysis.result === "pending" ? "Review" : "Verify"}
               </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-900 truncate">
-                {activity.action}
-              </p>
-              <p className="text-xs text-slate-500">
-                {activity.module} - {activity.time}
-              </p>
-            </div>
-            <span
-              className={`w-2 h-2 rounded-full ${
-                activity.status === "success"
-                  ? "bg-emerald-500"
-                  : "bg-amber-500"
-              }`}
+            </Link>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TodaySummaryCard({
+  stats,
+}: {
+  stats: { completed: number; pending: number; critical: number };
+}) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Activity size={14} className="text-zinc-400" />
+        <h3 className="text-sm font-medium text-zinc-200">Today's Summary</h3>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-emerald-500">
+            {stats.completed}
+          </p>
+          <p className="text-[10px] text-zinc-500">Completed</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-amber-500">
+            {stats.pending}
+          </p>
+          <p className="text-[10px] text-zinc-500">Pending</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-red-500">{stats.critical}</p>
+          <p className="text-[10px] text-zinc-500">Critical</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SystemStatusCard({
+  online,
+  latency,
+  pipelinesOnline = 0,
+}: {
+  online: boolean;
+  latency?: number;
+  pipelinesOnline?: number;
+}) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Database size={14} className="text-zinc-400" />
+        <h3 className="text-sm font-medium text-zinc-200">System Status</h3>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wifi
+              size={12}
+              className={online ? "text-emerald-500" : "text-red-500"}
             />
+            <span className="text-xs text-zinc-400">Backend API</span>
+          </div>
+          <span
+            className={`text-xs ${online ? "text-emerald-500" : "text-red-500"}`}
+          >
+            {online ? "Connected" : "Offline"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Zap size={12} className="text-amber-500" />
+            <span className="text-xs text-zinc-400">Response</span>
+          </div>
+          <span className="text-xs text-zinc-300">{latency || "--"}ms</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Activity size={12} className="text-blue-500" />
+            <span className="text-xs text-zinc-400">Active Pipelines</span>
+          </div>
+          <span className="text-xs text-emerald-500">{pipelinesOnline}/5</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KeyboardShortcutsCard() {
+  const shortcuts = [
+    { keys: ["Ctrl", "K"], action: "Search" },
+    { keys: ["Ctrl", "/"], action: "Chat" },
+  ];
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Keyboard size={11} className="text-zinc-400" />
+        <h3 className="text-[10px] font-medium text-zinc-300">Shortcuts</h3>
+      </div>
+      <div className="space-y-1">
+        {shortcuts.map((s, i) => (
+          <div key={i} className="flex items-center justify-between">
+            <div className="flex items-center gap-0.5">
+              {s.keys.map((key, j) => (
+                <span
+                  key={j}
+                  className="px-1.5 py-0.5 text-[10px] font-mono font-medium text-zinc-300 bg-zinc-800 rounded border border-zinc-700"
+                >
+                  {key}
+                </span>
+              ))}
+            </div>
+            <span className="text-[10px] text-zinc-500">{s.action}</span>
           </div>
         ))}
       </div>
-    </motion.div>
+    </div>
+  );
+}
+
+function QuickLinksCard() {
+  const links = [
+    { icon: BookOpen, label: "Docs", href: "#" },
+    { icon: HelpCircle, label: "Help", href: "#" },
+  ];
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <ArrowUpRight size={11} className="text-zinc-400" />
+        <h3 className="text-[10px] font-medium text-zinc-300">Links</h3>
+      </div>
+      <div className="space-y-0.5">
+        {links.map((link, i) => (
+          <Link
+            key={i}
+            href={link.href}
+            className="flex items-center gap-1.5 p-1.5 rounded hover:bg-zinc-800 transition-colors"
+          >
+            <link.icon size={11} className="text-zinc-400" />
+            <span className="text-[10px] text-zinc-300">{link.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -591,163 +696,265 @@ function RecentActivityCard() {
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const [systemHealth, setSystemHealth] = useState<SystemHealth>({
-    backend: "checking",
-    latency: null,
-    lastChecked: null,
-    pipelinesOnline: 4,
-    totalPipelines: 5,
-  });
+  const [systemOnline, setSystemOnline] = useState(false);
+  const [pipelinesOnline, setPipelinesOnline] = useState(0);
+  const [recentAnalyses, setRecentAnalyses] = useState<RecentAnalysis[]>([]);
+  const [clinicalAlerts, setClinicalAlerts] = useState<ClinicalAlert[]>([]);
 
   const checkHealth = useCallback(async () => {
-    const startTime = Date.now();
     try {
       const response = await fetch("/api/health", {
         method: "GET",
         cache: "no-store",
       });
-      const latency = Date.now() - startTime;
-      setSystemHealth({
-        backend: response.ok ? "online" : "offline",
-        latency: response.ok ? latency : null,
-        lastChecked: new Date(),
-        pipelinesOnline: 4,
-        totalPipelines: 5,
-      });
+      setSystemOnline(response.ok);
+
+      // Check pipeline health
+      const pipelineIds = [
+        "retinal",
+        "speech",
+        "cardiology",
+        "radiology",
+        "dermatology",
+      ];
+      let onlineCount = 0;
+      for (const id of pipelineIds) {
+        try {
+          const pRes = await fetch(`/api/${id}/health`, {
+            method: "GET",
+            cache: "no-store",
+          });
+          if (pRes.ok) onlineCount++;
+        } catch {
+          /* ignore */
+        }
+      }
+      setPipelinesOnline(onlineCount);
     } catch {
-      setSystemHealth({
-        backend: "offline",
-        latency: null,
-        lastChecked: new Date(),
-        pipelinesOnline: 0,
-        totalPipelines: 5,
-      });
+      setSystemOnline(false);
+      setPipelinesOnline(0);
     }
   }, []);
 
   useEffect(() => {
     checkHealth();
     const interval = setInterval(checkHealth, 30000);
+
+    // Mock clinical data (in production, fetch from API)
+    setRecentAnalyses([
+      {
+        id: "1",
+        patientId: "P001",
+        patientName: "Sarah Johnson",
+        module: "Retinal Scan",
+        moduleId: "retinal",
+        result: "normal",
+        timestamp: new Date(Date.now() - 1800000),
+        riskLevel: "low",
+      },
+      {
+        id: "2",
+        patientId: "P002",
+        patientName: "Michael Chen",
+        module: "Speech Analysis",
+        moduleId: "speech",
+        result: "abnormal",
+        timestamp: new Date(Date.now() - 3600000),
+        riskLevel: "moderate",
+      },
+      {
+        id: "3",
+        patientId: "P003",
+        patientName: "Emily Davis",
+        module: "ECG Analysis",
+        moduleId: "cardiology",
+        result: "critical",
+        timestamp: new Date(Date.now() - 7200000),
+        riskLevel: "high",
+      },
+      {
+        id: "4",
+        patientId: "P004",
+        patientName: "Robert Wilson",
+        module: "Skin Analysis",
+        moduleId: "dermatology",
+        result: "pending",
+        timestamp: new Date(Date.now() - 10800000),
+      },
+      {
+        id: "5",
+        patientId: "P005",
+        patientName: "Lisa Anderson",
+        module: "Chest X-ray",
+        moduleId: "radiology",
+        result: "normal",
+        timestamp: new Date(Date.now() - 14400000),
+        riskLevel: "low",
+      },
+    ]);
+
+    setClinicalAlerts([
+      {
+        id: "1",
+        type: "urgent",
+        title: "Critical ECG findings require immediate review",
+        patient: "Emily Davis",
+        timestamp: new Date(Date.now() - 7200000),
+      },
+      {
+        id: "2",
+        type: "followup",
+        title: "Speech assessment follow-up recommended",
+        patient: "Michael Chen",
+        timestamp: new Date(Date.now() - 86400000),
+      },
+      {
+        id: "3",
+        type: "reminder",
+        title: "Quarterly retinal screening due",
+        patient: "Sarah Johnson",
+        timestamp: new Date(Date.now() - 172800000),
+      },
+    ]);
+
     return () => clearInterval(interval);
   }, [checkHealth]);
 
-  const firstName = user?.firstName || user?.username || "there";
-  const greeting = getGreeting();
+  const firstName = user?.firstName || user?.username || "Doctor";
 
-  const quickStats: QuickStat[] = [
-    {
-      label: "Total Analyses",
-      value: "5,847",
-      change: "+12% this week",
-      changeType: "positive",
-      icon: BarChart3,
-      gradient: "from-blue-500 to-indigo-600",
-    },
-    {
-      label: "Active Pipelines",
-      value: "4/5",
-      change: "All healthy",
-      changeType: "positive",
-      icon: Activity,
-      gradient: "from-emerald-500 to-teal-600",
-    },
-    {
-      label: "Avg Response",
-      value: "1.2s",
-      change: "-0.3s from last week",
-      changeType: "positive",
-      icon: Zap,
-      gradient: "from-amber-500 to-orange-600",
-    },
-    {
-      label: "Pending Reviews",
-      value: "3",
-      change: "2 urgent",
-      changeType: "negative",
-      icon: AlertCircle,
-      gradient: "from-rose-500 to-pink-600",
-    },
-  ];
+  const todayStats = {
+    completed: recentAnalyses.filter((a) => a.result === "normal").length,
+    pending: recentAnalyses.filter((a) => a.result === "pending").length,
+    critical: recentAnalyses.filter((a) => a.result === "critical").length,
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-6 pb-8"
+      transition={{ duration: 0.2 }}
+      className="space-y-4 pb-6"
     >
-      {/* Hero Header */}
-      <DashboardHero
+      {/* Welcome */}
+      <WelcomeCard
         firstName={firstName}
-        greeting={greeting}
-        systemHealth={systemHealth}
+        greeting={getGreeting()}
+        systemOnline={systemOnline}
       />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {quickStats.map((stat, index) => (
-          <StatCard key={stat.label} stat={stat} index={index} />
-        ))}
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <StatCard
+          label="Today's Analyses"
+          value="24"
+          change="+8 from yesterday"
+          changeType="positive"
+          icon={BarChart3}
+          color="#3b82f6"
+        />
+        <StatCard
+          label="Patients Seen"
+          value="18"
+          change="+3 this week"
+          changeType="positive"
+          icon={Users}
+          color="#059669"
+        />
+        <StatCard
+          label="Pending Reviews"
+          value="3"
+          change="2 urgent"
+          changeType="negative"
+          icon={ClipboardList}
+          color="#d97706"
+        />
+        <StatCard
+          label="Accuracy Rate"
+          value="98.2%"
+          change="+0.5%"
+          changeType="positive"
+          icon={UserCheck}
+          color="#7c3aed"
+        />
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <QuickActionButton
+      <div className="grid grid-cols-3 gap-2">
+        <QuickAction
           icon={Play}
           label="New Analysis"
           href="/dashboard/retinal"
-          gradient="from-blue-600 to-indigo-700"
+          color="#3b82f6"
+          gradient="from-blue-500 to-indigo-500"
         />
-        <QuickActionButton
+        <QuickAction
           icon={FileText}
-          label="View Reports"
+          label="Patient Reports"
           href="/dashboard/reports"
-          gradient="from-violet-600 to-purple-700"
+          color="#7c3aed"
+          gradient="from-violet-500 to-purple-500"
         />
-        <QuickActionButton
+        <QuickAction
           icon={BarChart3}
           label="Analytics"
           href="/dashboard/analytics"
-          gradient="from-emerald-600 to-teal-700"
+          color="#059669"
+          gradient="from-emerald-500 to-teal-500"
         />
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Modules Grid */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
-              AI Diagnostic Modules
-            </h2>
-            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
-              {diagnosticModules.length} available
-            </span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {diagnosticModules.map((module, index) => (
-              <ModuleCard key={module.id} module={module} index={index} />
+      {/* Main 3-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Left: Modules + System */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-zinc-400">
+            Diagnostic Modules
+          </h2>
+          <div className="space-y-2">
+            {diagnosticModules.map((module) => (
+              <ModuleCard key={module.id} module={module} />
             ))}
           </div>
+          <SystemStatusCard
+            online={systemOnline}
+            pipelinesOnline={pipelinesOnline}
+          />
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          <PipelineStatusCard />
-          <RecentActivityCard />
+        {/* Center: Clinical Overview */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-zinc-400">
+            Clinical Overview
+          </h2>
+          <TodaySummaryCard stats={todayStats} />
+          <ClinicalAlertsCard alerts={clinicalAlerts} />
+        </div>
 
-          {/* Clinical Note */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-5 border border-slate-700">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Shield size={16} className="text-blue-400" />
-              </div>
+        {/* Right: Patients & Reviews + Shortcuts + Links */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-zinc-400">
+            Patient Activity
+          </h2>
+          <RecentPatientsCard analyses={recentAnalyses} />
+          <PendingReviewsCard analyses={recentAnalyses} />
+
+          {/* Shortcuts & Quick Links - Compact */}
+          <div className="grid grid-cols-2 gap-2">
+            <KeyboardShortcutsCard />
+            <QuickLinksCard />
+          </div>
+
+          {/* AI Disclaimer */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Shield size={14} className="text-blue-500 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-white mb-1">
-                  Clinical Reminder
-                </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  AI analysis results should always be reviewed by qualified
-                  healthcare professionals before clinical decisions.
+                <p className="text-xs font-medium text-zinc-300">
+                  AI-Assisted Diagnostics
+                </p>
+                <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed">
+                  All AI findings require clinical verification before
+                  diagnosis.
                 </p>
               </div>
             </div>
