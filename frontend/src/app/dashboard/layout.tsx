@@ -2,17 +2,27 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   DashboardSidebar,
   SIDEBAR_COLLAPSED_KEY,
 } from "./_components/DashboardSidebar";
 import { DashboardHeader } from "./_components/DashboardHeader";
-import { CommandPalette } from "./_components/CommandPalette";
-import { MedicalChatbot } from "@/components/chatbot";
 import {
   PipelineStatusBar,
   PipelineStatusProvider,
 } from "@/components/pipeline";
+
+// Lazy load non-critical components for faster initial load
+const MedicalChatbot = dynamic(
+  () => import("@/components/chatbot").then((m) => m.MedicalChatbot),
+  { ssr: false },
+);
+
+const CommandPalette = dynamic(
+  () => import("./_components/CommandPalette").then((m) => m.CommandPalette),
+  { ssr: false },
+);
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -64,28 +74,38 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     if (!isClient) return;
 
-    const handleStorageChange = () => {
+    const handleStorageChange = (e?: StorageEvent) => {
+      // Only respond to sidebar key changes
+      if (e && e.key !== SIDEBAR_COLLAPSED_KEY && e.key !== null) return;
+
       const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
       if (saved !== null) {
         setSidebarCollapsed(JSON.parse(saved));
       }
     };
 
+    // Debounced resize handler
+    let resizeTimer: NodeJS.Timeout;
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        setIsDesktop(window.innerWidth >= 1024);
+      }, 100);
     };
 
-    // Check for changes periodically (for same-tab updates)
-    const interval = setInterval(handleStorageChange, 100);
+    // Custom event for same-tab sidebar updates (instead of polling)
+    const handleSidebarChange = () => handleStorageChange();
 
-    // Also listen for storage events (cross-tab) and resize
+    // Listen for storage events (cross-tab) and resize
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebar-change", handleSidebarChange);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(resizeTimer);
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebar-change", handleSidebarChange);
     };
   }, [isClient]);
 

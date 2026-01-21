@@ -702,33 +702,32 @@ export default function DashboardPage() {
   const [clinicalAlerts, setClinicalAlerts] = useState<ClinicalAlert[]>([]);
 
   const checkHealth = useCallback(async () => {
-    try {
-      const response = await fetch("/api/health", {
-        method: "GET",
-        cache: "no-store",
-      });
-      setSystemOnline(response.ok);
+    const pipelineIds = [
+      "retinal",
+      "speech",
+      "cardiology",
+      "radiology",
+      "dermatology",
+    ];
 
-      // Check pipeline health
-      const pipelineIds = [
-        "retinal",
-        "speech",
-        "cardiology",
-        "radiology",
-        "dermatology",
-      ];
-      let onlineCount = 0;
-      for (const id of pipelineIds) {
-        try {
-          const pRes = await fetch(`/api/${id}/health`, {
-            method: "GET",
-            cache: "no-store",
-          });
-          if (pRes.ok) onlineCount++;
-        } catch {
-          /* ignore */
-        }
-      }
+    try {
+      // Parallel health checks using Promise.allSettled for better performance
+      const [mainHealthResult, ...pipelineResults] = await Promise.allSettled([
+        fetch("/api/health", { method: "GET", cache: "no-store" }),
+        ...pipelineIds.map((id) =>
+          fetch(`/api/${id}/health`, { method: "GET", cache: "no-store" }),
+        ),
+      ]);
+
+      // Check main backend health
+      const isMainOnline =
+        mainHealthResult.status === "fulfilled" && mainHealthResult.value.ok;
+      setSystemOnline(isMainOnline);
+
+      // Count online pipelines
+      const onlineCount = pipelineResults.filter(
+        (result) => result.status === "fulfilled" && result.value.ok,
+      ).length;
       setPipelinesOnline(onlineCount);
     } catch {
       setSystemOnline(false);

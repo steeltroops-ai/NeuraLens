@@ -351,6 +351,8 @@ export function DashboardSidebar({
     setCollapsed(newState);
     if (isClient && typeof window !== "undefined") {
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(newState));
+      // Dispatch custom event for layout to listen (avoids polling)
+      window.dispatchEvent(new CustomEvent("sidebar-change"));
     }
   }, [collapsed, isClient]);
 

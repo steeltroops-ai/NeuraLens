@@ -1,79 +1,205 @@
 """
-MediLens Cognitive Assessment Router
-Simplified, standalone implementation
+Cognitive Pipeline API Router - Production Grade
+Complete API specification with proper error handling.
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import time
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+import logging
+from datetime import datetime
 
-router = APIRouter()
+from .schemas import (
+    CognitiveSessionInput, CognitiveResponse, 
+    HealthResponse, ErrorResponse, ValidationErrorDetail
+)
+from .core.service import CognitiveService
+from .errors.codes import ErrorCode, PipelineError
 
+logger = logging.getLogger(__name__)
 
-class CognitiveRequest(BaseModel):
-    test_battery: List[str] = ["memory", "attention", "executive"]
-    test_results: Dict[str, Any]
-    difficulty: str = "standard"
-
-
-class CognitiveResponse(BaseModel):
-    success: bool
-    session_id: str
-    risk_score: float
-    confidence: float
-    biomarkers: Dict[str, float]
-    recommendations: List[str]
-    processing_time_ms: int
+router = APIRouter(prefix="/api/cognitive", tags=["Cognitive Assessment"])
+service = CognitiveService()
 
 
-@router.post("/analyze")
-async def analyze_cognitive(request: CognitiveRequest) -> CognitiveResponse:
-    """Analyze cognitive test results"""
-    start = time.time()
+# =============================================================================
+# API ENDPOINTS
+# =============================================================================
+
+@router.post(
+    "/analyze",
+    response_model=CognitiveResponse,
+    summary="Analyze Cognitive Assessment Session",
+    description="""
+    Process a completed cognitive assessment session.
     
-    # Calculate scores from test results
-    scores = {}
-    for test in request.test_battery:
-        if test in request.test_results:
-            data = request.test_results[test]
-            if isinstance(data, dict):
-                scores[test] = sum(data.values()) / len(data) if data else 0.5
-            else:
-                scores[test] = float(data) if data else 0.5
+    **Input:**
+    - Session ID (must start with 'sess_')
+    - List of completed tasks with event logs
+    
+    **Output:**
+    - Risk assessment with confidence intervals
+    - Domain-specific scores
+    - Clinical recommendations
+    - Explainability artifacts
+    
+    **Status Codes:**
+    - 200: Success (full or partial)
+    - 400: Validation error (recoverable)
+    - 500: Internal error (may not be recoverable)
+    """,
+    responses={
+        200: {"description": "Analysis completed successfully"},
+        400: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal processing error"}
+    }
+)
+async def analyze_session(data: CognitiveSessionInput) -> CognitiveResponse:
+    """
+    Main analysis endpoint.
+    Accepts raw session data, returns clinical-grade assessment.
+    """
+    logger.info(f"[API] Received analysis request: {data.session_id}")
+    
+    try:
+        result = await service.process_session(data)
+        
+        # Log outcome
+        if result.status == "failed":
+            logger.error(f"[API] Analysis failed: {result.error_code}")
+        elif result.status == "partial":
+            logger.warning(f"[API] Partial analysis: {result.error_message}")
         else:
-            scores[test] = 0.5
-    
-    # Calculate overall risk
-    avg_score = sum(scores.values()) / len(scores) if scores else 0.5
-    risk_score = (1 - avg_score) * 100
-    
-    # Generate recommendations
-    recs = []
-    if risk_score < 30:
-        recs.append("Cognitive function within normal range")
-    elif risk_score < 60:
-        recs.append("Mild cognitive concerns - follow-up in 6 months")
-    else:
-        recs.append("Consider comprehensive neurological evaluation")
-    
-    return CognitiveResponse(
-        success=True,
-        session_id=f"cog_{int(time.time())}",
-        risk_score=round(risk_score, 1),
-        confidence=0.85,
-        biomarkers={
-            "memory_score": scores.get("memory", 0.7),
-            "attention_score": scores.get("attention", 0.75),
-            "executive_score": scores.get("executive", 0.72),
-            "processing_speed": 0.78,
-            "cognitive_flexibility": 0.74
-        },
-        recommendations=recs,
-        processing_time_ms=int((time.time() - start) * 1000)
+            logger.info(f"[API] Analysis complete: risk={result.risk_assessment.overall_risk_score:.2f}")
+        
+        return result
+        
+    except PipelineError as e:
+        logger.error(f"[API] Pipeline error: {e}")
+        raise HTTPException(
+            status_code=e.http_status,
+            detail=e.to_dict()
+        )
+    except ValidationError as e:
+        logger.error(f"[API] Validation error: {e}")
+        details = []
+        for error in e.errors():
+            details.append({
+                "field": ".".join(str(loc) for loc in error["loc"]),
+                "message": error["msg"],
+                "code": "VALIDATION_ERROR"
+            })
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error_code": "E_HTTP_001",
+                "error_message": "Request validation failed",
+                "details": details,
+                "recoverable": True
+            }
+        )
+    except Exception as e:
+        logger.exception(f"[API] Unexpected error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "E_HTTP_500",
+                "error_message": "Internal server error",
+                "recoverable": False
+            }
+        )
+
+
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    summary="Health Check",
+    description="Returns service health status and version information."
+)
+async def health_check() -> HealthResponse:
+    """Health check endpoint for monitoring"""
+    health = service.get_health()
+    return HealthResponse(
+        status=health.get("status", "ok"),
+        service=health.get("service", "cognitive-pipeline"),
+        version=health.get("version", "2.0.0"),
+        uptime_seconds=None,
+        last_request_at=datetime.fromisoformat(health["last_request_at"]) if health.get("last_request_at") else None
     )
 
 
-@router.get("/health")
-async def health():
-    return {"status": "ok", "module": "cognitive"}
+@router.get(
+    "/schema",
+    summary="Get API Schema",
+    description="Returns the expected request/response schema for integration."
+)
+async def get_schema():
+    """Return schema information for frontend integration"""
+    return {
+        "request": {
+            "session_id": "string (required, must start with 'sess_')",
+            "patient_id": "string (optional)",
+            "tasks": [
+                {
+                    "task_id": "string (e.g., 'reaction_time_v1', 'n_back_2')",
+                    "start_time": "ISO datetime",
+                    "end_time": "ISO datetime",
+                    "events": [
+                        {
+                            "timestamp": "number (ms from task start)",
+                            "event_type": "string (stimulus_shown, response_received, trial_result)",
+                            "payload": "object (varies by event type)"
+                        }
+                    ],
+                    "metadata": "object (optional)"
+                }
+            ],
+            "user_metadata": "object (optional)"
+        },
+        "response": {
+            "session_id": "string",
+            "status": "success | partial | failed",
+            "stages": "array of stage progress objects",
+            "risk_assessment": {
+                "overall_risk_score": "number (0-1)",
+                "risk_level": "low | moderate | high | critical",
+                "confidence_score": "number (0-1)",
+                "confidence_interval": "[lower, upper]",
+                "domain_risks": "object mapping domain to DomainRiskDetail"
+            },
+            "features": {
+                "domain_scores": "object mapping domain to score (0-1)",
+                "raw_metrics": "array of TaskMetrics",
+                "fatigue_index": "number (0-1)",
+                "consistency_score": "number (0-1)"
+            },
+            "recommendations": "array of ClinicalRecommendation",
+            "explainability": {
+                "summary": "string",
+                "key_factors": "array of strings",
+                "domain_contributions": "object mapping domain to contribution weight"
+            },
+            "error_code": "string (null on success)",
+            "error_message": "string (null on success)"
+        }
+    }
+
+
+@router.post(
+    "/validate",
+    summary="Validate Session Data (Dry Run)",
+    description="Validate session data without processing. Returns validation status."
+)
+async def validate_session(data: CognitiveSessionInput):
+    """Validate input without full processing"""
+    from .input.validator import CognitiveValidator
+    
+    validator = CognitiveValidator()
+    result = validator.validate_detailed(data)
+    
+    return {
+        "valid": result.is_valid,
+        "errors": result.errors,
+        "warnings": result.warnings,
+        "task_validity": result.task_validity
+    }
