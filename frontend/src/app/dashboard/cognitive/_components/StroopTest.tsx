@@ -79,7 +79,7 @@ export default function StroopTest({ onComplete, onCancel }: StroopTestProps) {
     for (let i = 0; i < TOTAL_TRIALS; i++) {
       const isCongruent = i < congruentCount;
       const wordColorIndex = Math.floor(Math.random() * COLORS.length);
-      const wordColor = COLORS[wordColorIndex] ?? COLORS[0];
+      const wordColor = COLORS[wordColorIndex]!;
 
       let inkColor: (typeof COLORS)[0];
       if (isCongruent) {
@@ -88,7 +88,7 @@ export default function StroopTest({ onComplete, onCancel }: StroopTestProps) {
         // Pick a different color for ink
         const others = COLORS.filter((c) => c.name !== wordColor.name);
         const otherIndex = Math.floor(Math.random() * others.length);
-        inkColor = others[otherIndex] ?? COLORS[0];
+        inkColor = others[otherIndex]!;
       }
 
       generated.push({
@@ -101,7 +101,9 @@ export default function StroopTest({ onComplete, onCancel }: StroopTestProps) {
     // Shuffle
     for (let i = generated.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [generated[i], generated[j]] = [generated[j], generated[i]];
+      const temp = generated[i]!;
+      generated[i] = generated[j]!;
+      generated[j] = temp;
     }
 
     trials.current = generated;
