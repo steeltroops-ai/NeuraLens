@@ -18,7 +18,7 @@ from .errors.codes import ErrorCode, PipelineError
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/cognitive", tags=["Cognitive Assessment"])
+router = APIRouter(tags=["Cognitive Assessment"])
 service = CognitiveService()
 
 

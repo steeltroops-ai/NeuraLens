@@ -113,7 +113,7 @@ export default function TrailMakingTest({
 
       nodeList.push({
         id: `node_${i}`,
-        label: labels[i],
+        label: labels[i]!,
         x: x!,
         y: y!,
         order: i,
