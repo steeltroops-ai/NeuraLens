@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for layer caching
-COPY requirements.txt .
+# Copy requirements structure
+COPY requirements/ /build/requirements/
 
 # Install Python dependencies to a virtual environment
 RUN python -m venv /opt/venv
@@ -25,8 +25,11 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Upgrade pip, setuptools, wheel first (fixes use_2to3 errors)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install base dependencies first (changes rarely)
+RUN pip install --no-cache-dir -r requirements/base.txt
+
+# Install ML dependencies (changes occasionally)
+RUN pip install --no-cache-dir -r requirements/ml.txt
 
 # Stage 2: Production stage
 FROM python:3.11-slim as production
