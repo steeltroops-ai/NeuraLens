@@ -56,7 +56,7 @@ type TestType =
   | "stroop";
 
 interface TestInfo {
-  id: TestType;
+  id: Exclude<TestType, "none">;
   name: string;
   description: string;
   duration: string;
@@ -219,19 +219,19 @@ export default function CognitiveAssessment({
     setActiveTest(type);
   };
 
-  const getCompletedTestIds = () => {
+  const getCompletedTestIds = (): Exclude<TestType, "none">[] => {
     return state.tasks
       .map((t) => {
-        if (t.task_id.includes("reaction")) return "reaction";
-        if (t.task_id.includes("n_back")) return "memory";
-        if (t.task_id.includes("go_no_go")) return "go_no_go";
-        if (t.task_id.includes("trail_making_a")) return "trail_a";
-        if (t.task_id.includes("trail_making_b")) return "trail_b";
-        if (t.task_id.includes("digit_symbol")) return "digit_symbol";
-        if (t.task_id.includes("stroop")) return "stroop";
+        if (t.task_id.includes("reaction")) return "reaction" as const;
+        if (t.task_id.includes("n_back")) return "memory" as const;
+        if (t.task_id.includes("go_no_go")) return "go_no_go" as const;
+        if (t.task_id.includes("trail_making_a")) return "trail_a" as const;
+        if (t.task_id.includes("trail_making_b")) return "trail_b" as const;
+        if (t.task_id.includes("digit_symbol")) return "digit_symbol" as const;
+        if (t.task_id.includes("stroop")) return "stroop" as const;
         return null;
       })
-      .filter(Boolean);
+      .filter((id): id is Exclude<TestType, "none"> => id !== null);
   };
 
   const completedTests = getCompletedTestIds();
@@ -487,7 +487,7 @@ export default function CognitiveAssessment({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {TEST_BATTERY.map((test) => {
-            const colors = colorClasses[test.color];
+            const colors = colorClasses[test.color]!;
             const isCompleted = completedTests.includes(test.id);
 
             return (

@@ -90,8 +90,8 @@ class RealtimeCognitiveAnalyzer:
             )
             
         except Exception as e:
-            logger.error(f"Real-time cognitive analysis failed: {str(e)}")
-            raise Exception(f"Real-time analysis failed: {str(e)}")
+            logger.exception(f"Real-time cognitive analysis failed: {str(e)}")
+            raise
     
     async def _fast_result_preprocessing(self, test_results: Dict[str, Any], difficulty_level: str) -> Dict[str, Dict[str, float]]:
         """Real test result preprocessing with response time analysis"""

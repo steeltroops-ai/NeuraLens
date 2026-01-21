@@ -21,6 +21,7 @@ pool_class = NullPool if is_sqlite else AsyncAdaptedQueuePool
 # Engine with connection pooling configuration
 engine_kwargs = {
     "echo": settings.db_echo,
+    "poolclass": pool_class,
 }
 
 if not is_sqlite:
@@ -31,9 +32,6 @@ if not is_sqlite:
         "pool_recycle": settings.DB_POOL_RECYCLE,
         "pool_pre_ping": settings.DB_POOL_PRE_PING,
     })
-else:
-    # SQLite doesn't support connection pooling
-    engine_kwargs["poolclass"] = NullPool
 
 engine = create_async_engine(url, **engine_kwargs)
 SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)

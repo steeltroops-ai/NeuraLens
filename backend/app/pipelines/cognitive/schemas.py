@@ -45,13 +45,15 @@ class TaskEvent(BaseModel):
     @field_validator('event_type')
     @classmethod
     def validate_event_type(cls, v: str) -> str:
+        import logging
+        logger = logging.getLogger(__name__)
         allowed = {
             'test_start', 'stimulus_shown', 'response_received', 
             'response_early', 'trial_result', 'user_response', 'test_end'
         }
         if v not in allowed:
             # Allow but log unknown types for extensibility
-            pass
+            logger.debug(f"Unknown event_type '{v}' in TaskEvent (field: event_type, allowed: {allowed})")
         return v
 
 class TaskSession(BaseModel):

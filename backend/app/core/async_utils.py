@@ -91,8 +91,8 @@ async def run_with_timeout(
     """
     try:
         return await asyncio.wait_for(coro, timeout=timeout)
-    except asyncio.TimeoutError:
-        raise TimeoutError(error_message)
+    except asyncio.TimeoutError as e:
+        raise TimeoutError(error_message) from e
 
 
 def shutdown_executors():

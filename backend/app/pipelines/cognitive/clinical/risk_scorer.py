@@ -3,7 +3,7 @@ Cognitive Clinical Risk Scorer - Production Grade
 With explainability artifacts and uncertainty quantification.
 """
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import numpy as np
 
 from ..schemas import (
@@ -209,7 +209,7 @@ class RiskScorer:
         self, 
         domain: str, 
         level: RiskLevel
-    ) -> ClinicalRecommendation:
+    ) -> Optional[ClinicalRecommendation]:
         """Get domain-specific recommendation"""
         recs = {
             "memory": ClinicalRecommendation(

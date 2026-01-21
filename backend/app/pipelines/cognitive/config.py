@@ -2,11 +2,13 @@
 Cognitive Pipeline Configuration - Production Grade
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class CognitiveConfig(BaseSettings):
     """Configuration for cognitive assessment pipeline."""
+    
+    model_config = SettingsConfigDict(env_prefix="COGNITIVE_")
     
     # Pipeline Identity
     PIPELINE_NAME: str = "cognitive"
@@ -35,8 +37,5 @@ class CognitiveConfig(BaseSettings):
     # Timeouts
     PROCESSING_TIMEOUT_MS: int = 30000
     
-    class Config:
-        env_prefix = "COGNITIVE_"
-
 
 config = CognitiveConfig()

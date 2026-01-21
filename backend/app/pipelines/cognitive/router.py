@@ -70,7 +70,10 @@ async def analyze_session(data: CognitiveSessionInput) -> CognitiveResponse:
         elif result.status == "partial":
             logger.warning(f"[API] Partial analysis: {result.error_message}")
         else:
-            logger.info(f"[API] Analysis complete: risk={result.risk_assessment.overall_risk_score:.2f}")
+            if result.risk_assessment and result.risk_assessment.overall_risk_score is not None:
+                logger.info(f"[API] Analysis complete: risk={result.risk_assessment.overall_risk_score:.2f}")
+            else:
+                logger.info(f"[API] Analysis complete: no risk_assessment available")
         
         return result
         
@@ -119,12 +122,20 @@ async def analyze_session(data: CognitiveSessionInput) -> CognitiveResponse:
 async def health_check() -> HealthResponse:
     """Health check endpoint for monitoring"""
     health = service.get_health()
+    
+    last_request_at = None
+    if health.get("last_request_at"):
+        try:
+            last_request_at = datetime.fromisoformat(health["last_request_at"])
+        except (ValueError, TypeError) as e:
+            logger.error(f"[API] Failed to parse last_request_at: {e}")
+    
     return HealthResponse(
         status=health.get("status", "ok"),
         service=health.get("service", "cognitive-pipeline"),
         version=health.get("version", "2.0.0"),
         uptime_seconds=None,
-        last_request_at=datetime.fromisoformat(health["last_request_at"]) if health.get("last_request_at") else None
+        last_request_at=last_request_at
     )
 
 

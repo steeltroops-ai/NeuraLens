@@ -3,6 +3,7 @@ Cognitive Pipeline Service - Production Grade
 Orchestrates all pipeline stages with logging, timing, and error propagation.
 """
 
+import asyncio
 import time
 import logging
 import uuid
@@ -43,6 +44,7 @@ class CognitiveService:
         self.formatter = OutputFormatter()
         self._request_count = 0
         self._last_request_at: Optional[datetime] = None
+        self._request_lock = asyncio.Lock()
     
     async def process_session(self, data: CognitiveSessionInput) -> CognitiveResponse:
         """
@@ -50,8 +52,10 @@ class CognitiveService:
         Returns structured response even on partial failure.
         """
         start_time = time.time()
-        self._request_count += 1
-        self._last_request_at = datetime.now()
+        
+        async with self._request_lock:
+            self._request_count += 1
+            self._last_request_at = datetime.now()
         
         stages: List[StageProgress] = []
         features: Optional[CognitiveFeatures] = None

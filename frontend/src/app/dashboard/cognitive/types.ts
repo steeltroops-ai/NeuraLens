@@ -194,5 +194,11 @@ export async function checkCognitiveHealth(): Promise<{
   version: string;
 }> {
   const res = await fetch(`${API_BASE}/api/cognitive/health`);
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "Unknown error");
+    throw new Error(`Health check failed (${res.status}): ${errorText}`);
+  }
+
   return res.json();
 }

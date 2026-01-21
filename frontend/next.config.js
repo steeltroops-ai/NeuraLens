@@ -122,13 +122,13 @@ const nextConfig = {
           },
         ],
       },
-      // Cache API responses with shorter TTL
+      // Cache API responses with shorter TTL (note: sensitive endpoints should use private)
       {
         source: "/api/(.*)",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=300, s-maxage=300",
+            value: "private, max-age=0, s-maxage=0",
           },
         ],
       },

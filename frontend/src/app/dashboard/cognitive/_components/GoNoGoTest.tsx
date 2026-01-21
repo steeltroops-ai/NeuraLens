@@ -81,7 +81,7 @@ export default function GoNoGoTest({
     // Fisher-Yates shuffle
     for (let i = sequence.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+      [sequence[i]!, sequence[j]!] = [sequence[j]!, sequence[i]!];
     }
 
     trialSequence.current = sequence;

@@ -127,8 +127,12 @@ export function useCognitiveSession() {
 
     dispatch({ type: "SUBMIT_START" });
 
+    // Wait for the dispatch to update state, then use the generated sessionId
+    // Note: Because dispatch is sync, we need to generate the ID here to match the reducer
+    const newSessionId = `sess_${Date.now()}`;
+
     const payload: CognitiveSessionInput = {
-      session_id: `sess_${Date.now()}`,
+      session_id: newSessionId,
       tasks: state.tasks,
       user_metadata: {
         userAgent: navigator.userAgent,
