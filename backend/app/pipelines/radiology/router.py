@@ -43,6 +43,15 @@ SUPPORTED_TYPES = list(RadiologyConfig.SUPPORTED_CONTENT_TYPES)
 MAX_FILE_SIZE = RadiologyConfig.MAX_FILE_SIZE_BYTES
 
 
+from app.core import run_in_thread, cached_analysis
+
+# Helper for cached async analysis
+@cached_analysis(ttl=3600)
+async def run_radiology_analysis(image_bytes: bytes):
+    """Run analysis in thread pool with caching"""
+    return await run_in_thread(analyzer.analyze, image_bytes)
+
+
 @router.post("/analyze", response_model=RadiologyAnalysisResponse)
 async def analyze_xray(
     file: UploadFile = File(..., description="Chest X-ray image (JPEG/PNG)")
@@ -127,9 +136,10 @@ async def analyze_xray(
             time_ms=round((time.time() - stage_start) * 1000, 1)
         ))
         
-        # Stage 4: Analysis
+        # Stage 4: Analysis (Async & Cached)
         stage_start = time.time()
-        result = analyzer.analyze(image_bytes)
+        # Use simple wrapper or the cached one
+        result = await run_radiology_analysis(image_bytes)
         
         stages_completed.append(StageResult(
             stage="ANALYSIS",
@@ -151,6 +161,7 @@ async def analyze_xray(
             status="success",
             time_ms=round((time.time() - stage_start) * 1000, 1)
         ))
+
         
         # Format response
         processing_time = int((time.time() - start_time) * 1000)

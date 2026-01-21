@@ -7,26 +7,19 @@ import numpy as np
 from PIL import Image
 import io
 import base64
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-# Try importing torchxrayvision
-try:
+# Lazy import flags
+TORCHXRAY_AVAILABLE = False
+TIMM_AVAILABLE = False
+CV2_AVAILABLE = False
+
+if TYPE_CHECKING:
     import torch
     import torchxrayvision as xrv
     import torchvision.transforms as transforms
-    TORCHXRAY_AVAILABLE = True
-except ImportError:
-    TORCHXRAY_AVAILABLE = False
-    print("WARNING: torchxrayvision not installed. pip install torchxrayvision")
-
-# Try importing timm as backup
-try:
-    import timm
-    TIMM_AVAILABLE = True
-except ImportError:
-    TIMM_AVAILABLE = False
 
 # For heatmaps
 try:
@@ -88,35 +81,54 @@ class XRayAnalyzer:
     def __init__(self):
         self.model = None
         self.transform = None
-        
-        if TORCHXRAY_AVAILABLE:
-            self._load_torchxray_model()
-        elif TIMM_AVAILABLE:
-            self._load_timm_model()
-        else:
-            print("No model backend available. Using simulation mode.")
+        self._model_loaded = False
+        self._backend = "simulation"  # simulation, torchxray, timm
     
-    def _load_torchxray_model(self):
-        """Load TorchXRayVision DenseNet model"""
+    def _ensure_loaded(self):
+        """Lazy load the model on first use"""
+        if self._model_loaded:
+            return
+
+        global TORCHXRAY_AVAILABLE, TIMM_AVAILABLE
+        
+        # Try loading TorchXRayVision
         try:
-            # Load model trained on all datasets
+            import torch
+            import torchxrayvision as xrv
+            import torchvision.transforms as transforms
+            self._torch = torch
+            self._xrv = xrv
+            self._transforms = transforms
+            TORCHXRAY_AVAILABLE = True
+            
+            # Load model
+            print("[LAZY] Loading TorchXRayVision model...")
             self.model = xrv.models.DenseNet(weights="densenet121-res224-all")
             self.model.eval()
             
-            # TorchXRayVision specific transforms
+            # specific transforms
             self.transform = transforms.Compose([
                 xrv.datasets.XRayCenterCrop(),
                 xrv.datasets.XRayResizer(224)
             ])
-            
-            print("TorchXRayVision model loaded successfully")
+            self._backend = "torchxray"
+            self._model_loaded = True
+            print("[LAZY] TorchXRayVision loaded successfully")
+            return
+        except ImportError:
+            print("[LAZY] torchxrayvision not found")
         except Exception as e:
-            print(f"Failed to load TorchXRayVision: {e}")
-            self.model = None
-    
-    def _load_timm_model(self):
-        """Backup: Load timm EfficientNet"""
+            print(f"[LAZY] Failed to load TorchXRayVision: {e}")
+
+        # Try TIMM backup
         try:
+            import timm
+            import torch
+            import torchvision.transforms as transforms
+            self._torch = torch
+            TIMM_AVAILABLE = True
+            
+            print("[LAZY] Loading TIMM EfficientNet...")
             self.model = timm.create_model(
                 'efficientnet_b0',
                 pretrained=True,
@@ -129,22 +141,29 @@ class XRayAnalyzer:
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485], std=[0.229])
             ])
-            
-            print("timm EfficientNet loaded as backup")
+            self._backend = "timm"
+            self._model_loaded = True
+            print("[LAZY] TIMM loaded as backup")
+            return
+        except ImportError:
+            pass
         except Exception as e:
-            print(f"Failed to load timm: {e}")
-            self.model = None
-    
+            print(f"[LAZY] Failed to load TIMM: {e}")
+
+        self._model_loaded = True
+        print("[LAZY] Using simulation mode")
+
     def analyze(self, image_bytes: bytes) -> RadiologyResult:
         """Analyze chest X-ray image"""
+        self._ensure_loaded()
         
         # Load image
         image = Image.open(io.BytesIO(image_bytes))
         
         # Get predictions
-        if TORCHXRAY_AVAILABLE and self.model is not None:
+        if self._backend == "torchxray" and self.model is not None:
             predictions = self._predict_torchxray(image)
-        elif TIMM_AVAILABLE and self.model is not None:
+        elif self._backend == "timm" and self.model is not None:
             predictions = self._predict_timm(image)
         else:
             predictions = self._simulate_predictions(image)
@@ -188,7 +207,7 @@ class XRayAnalyzer:
         img = np.array(image.convert('L'))
         
         # Normalize to [0, 255] range expected by xrv
-        img = xrv.datasets.normalize(img, 255)
+        img = self._xrv.datasets.normalize(img, 255)
         
         # Add channel dimension if needed
         if len(img.shape) == 2:
@@ -196,12 +215,12 @@ class XRayAnalyzer:
         
         # Apply transforms
         img = self.transform(img)
-        img = torch.from_numpy(img).unsqueeze(0).float()
+        img = self._torch.from_numpy(img).unsqueeze(0).float()
         
         # Predict
-        with torch.no_grad():
+        with self._torch.no_grad():
             outputs = self.model(img)
-            probs = torch.sigmoid(outputs).numpy()[0]
+            probs = self._torch.sigmoid(outputs).numpy()[0]
         
         # Map to pathology names
         predictions = {}
@@ -216,9 +235,9 @@ class XRayAnalyzer:
         img = image.convert('L')
         img_tensor = self.transform(img).unsqueeze(0)
         
-        with torch.no_grad():
+        with self._torch.no_grad():
             outputs = self.model(img_tensor)
-            probs = torch.softmax(outputs, dim=1).numpy()[0]
+            probs = self._torch.softmax(outputs, dim=1).numpy()[0]
         
         return {PATHOLOGIES[i]: float(probs[i]) for i in range(len(PATHOLOGIES))}
     
@@ -271,7 +290,7 @@ class XRayAnalyzer:
                 "condition": "No Significant Abnormality",
                 "probability": round((1 - max(predictions.values())) * 100, 1),
                 "severity": "normal",
-                "description": "Lungs appear clear. Heart size normal. No acute findings."
+                "description": "Lungs appear clear. Heart size is normal. No acute findings."
             })
         
         return findings
