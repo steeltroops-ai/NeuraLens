@@ -4,16 +4,16 @@
 # =============================================
 
 # Framework
-fastapi==0.115.0
-uvicorn[standard]==0.30.0
-pydantic==2.9.0
-pydantic-settings==2.5.0
+fastapi==0.128.0
+uvicorn[standard]==0.40.0
+pydantic==2.10.6
+pydantic-settings==2.7.1
 python-multipart==0.0.21
 
 # Database
-sqlalchemy==2.0.35
+sqlalchemy==2.0.37
 aiosqlite==0.20.0
-asyncpg==0.29.0  # Pure Python async driver for Postgres/Neon
+asyncpg==0.31.0  # Pure Python async driver for Postgres/Neon
 alembic==1.13.1
 tenacity==8.2.3  # Retry logic for database connections
 
