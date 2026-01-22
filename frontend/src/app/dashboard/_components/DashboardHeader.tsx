@@ -3,13 +3,29 @@
 import { useState, useEffect, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, X, ChevronRight, Search, Menu } from "lucide-react";
+import {
+  Bell,
+  X,
+  ChevronRight,
+  Search,
+  Menu,
+  UserPlus,
+  User,
+  Phone,
+  Hash,
+  Plus,
+  LogOut,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   sidebarItems,
   sidebarGroups,
   SIDEBAR_COLLAPSED_KEY,
 } from "./DashboardSidebar";
 import dynamic from "next/dynamic";
+import { usePatient } from "@/context/PatientContext";
+import { PatientSelector } from "@/components/patient/PatientSelector";
+import { NewPatientModal } from "@/components/patient/NewPatientModal";
 
 // Lazy load AI Insights Panel for notifications
 const AIInsightsPanel = dynamic(() => import("./shared/AIInsightsPanel"), {
@@ -56,6 +72,11 @@ export function DashboardHeader({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+
+  // Patient Context
+  const { activePatient, setActivePatient } = usePatient();
+  const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
+  const [isPatientDropdownOpen, setIsPatientDropdownOpen] = useState(false);
 
   // Initialize client-side state and listen for sidebar changes
   useEffect(() => {
@@ -222,6 +243,104 @@ export function DashboardHeader({
         role="group"
         aria-label="User actions"
       >
+        {/* Patient Selection (Desktop) */}
+        <div className="hidden md:flex items-center gap-2 mr-2 border-r border-zinc-800 pr-2">
+          <PatientSelector />
+          {activePatient ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsPatientDropdownOpen(!isPatientDropdownOpen)}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-all ${isPatientDropdownOpen ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/10"}`}
+                title="Active Patient Profile"
+              >
+                <div className="relative">
+                  <User size={16} strokeWidth={1.5} />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-black" />
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {isPatientDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsPatientDropdownOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    >
+                      {/* Grid Pattern Background */}
+                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+                      <div className="relative z-10 p-1">
+                        <div className="px-3 py-2.5 border-b border-white/5 bg-white/[0.02] rounded-t-lg">
+                          <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-1">
+                            Current Patient
+                          </p>
+                          <p className="text-[13px] font-medium text-white truncate">
+                            {activePatient.full_name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {activePatient.phone_number && (
+                              <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+                                <Phone size={10} />
+                                <span>{activePatient.phone_number}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1 text-[11px] text-zinc-500">
+                              <Hash size={10} />
+                              <span className="font-mono">
+                                ID-{activePatient.id.slice(0, 4)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-1 space-y-0.5">
+                          <button
+                            onClick={() => {
+                              setIsPatientDropdownOpen(false);
+                              setIsNewPatientModalOpen(true);
+                            }}
+                            className="w-full flex items-center gap-2 px-2 py-2 text-[12px] text-zinc-300 hover:text-white hover:bg-white/10 rounded-md transition-colors text-left"
+                          >
+                            <Plus size={14} />
+                            Add New Patient
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setActivePatient(null);
+                              setIsPatientDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-2 py-2 text-[12px] text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-md transition-colors text-left"
+                          >
+                            <LogOut size={14} />
+                            Clear Selection
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsNewPatientModalOpen(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-md transition-all text-zinc-400 hover:text-white hover:bg-white/10"
+              title="Add New Patient"
+            >
+              <UserPlus size={16} strokeWidth={1.5} />
+            </button>
+          )}
+        </div>
+
+        {/* Search Trigger */}
         {/* Search Trigger */}
         {showSearch && (
           <button
@@ -359,6 +478,12 @@ export function DashboardHeader({
 
         {/* User Profile removed - relocated to sidebar */}
       </div>
+
+      {/* Patient Modal */}
+      <NewPatientModal
+        isOpen={isNewPatientModalOpen}
+        onClose={() => setIsNewPatientModalOpen(false)}
+      />
     </header>
   );
 }

@@ -11,6 +11,7 @@ const nextConfig = {
       "framer-motion",
       "@clerk/nextjs",
       "react-markdown",
+      "mermaid",
     ],
   },
 

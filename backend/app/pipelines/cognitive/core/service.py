@@ -16,6 +16,10 @@ from ..schemas import (
     StageProgress, PipelineStage, ExplainabilityArtifact,
     TaskCompletionStatus
 )
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.database.repositories import AssessmentRepository
+from app.database.models import User
 from ..input.validator import CognitiveValidator
 from ..features.extractor import FeatureExtractor
 from ..clinical.risk_scorer import RiskScorer
@@ -46,7 +50,7 @@ class CognitiveService:
         self._last_request_at: Optional[datetime] = None
         self._request_lock = asyncio.Lock()
     
-    async def process_session(self, data: CognitiveSessionInput) -> CognitiveResponse:
+    async def process_session(self, data: CognitiveSessionInput, db: AsyncSession) -> CognitiveResponse:
         """
         Main entry point. Processes session through all pipeline stages.
         Returns structured response even on partial failure.
@@ -196,7 +200,7 @@ class CognitiveService:
             recommendations = []
         
         # =====================================================================
-        # STAGE 4: OUTPUT GENERATION
+        # STAGE 4: OUTPUT GENERATION & PERSISTENCE
         # =====================================================================
         stage_start = time.time()
         stages.append(StageProgress(
@@ -207,6 +211,66 @@ class CognitiveService:
         ))
         
         total_duration_ms = (time.time() - start_time) * 1000
+        
+        # PERSISTENCE (Added)
+        try:
+            repo = AssessmentRepository(db)
+            
+            # Resolve user_id
+            user_id = None
+            if data.patient_id:
+                try:
+                    user_id = uuid.UUID(data.patient_id)
+                except ValueError:
+                    logger.warning(f"[COGNITIVE] Invalid patient_id format: {data.patient_id}")
+            
+            if not user_id:
+                # Try to find a fallback user (e.g. first user in DB)
+                result = await db.execute(select(User.id).limit(1))
+                user_id = result.scalar_one_or_none()
+            
+            if user_id:
+                # Create Assessment
+                assessment = await repo.create_assessment(
+                    user_id=user_id,
+                    pipeline_type="cognitive",
+                    session_id=data.session_id,
+                    status="completed" if final_status == "success" else final_status,
+                    risk_score=risk_assessment.overall_risk_score if risk_assessment else None,
+                    risk_level=risk_assessment.risk_level.value if risk_assessment else None,
+                    confidence=risk_assessment.confidence_score if risk_assessment else None,
+                    processing_time_ms=int(total_duration_ms),
+                    results={
+                        "features": features.model_dump() if features else None,
+                        "explainability": explainability.model_dump() if explainability else None,
+                        "recommendations": [r.model_dump() for r in recommendations]
+                    }
+                )
+                
+                # Save Cognitive Result
+                if features and risk_assessment:
+                    await repo.save_cognitive_result(
+                        assessment_id=assessment.id,
+                        overall_risk_score=risk_assessment.overall_risk_score,
+                        risk_level=risk_assessment.risk_level.value,
+                        confidence_score=risk_assessment.confidence_score,
+                        attention_score=features.domain_scores.get("attention"),
+                        memory_score=features.domain_scores.get("memory"),
+                        executive_function_score=features.domain_scores.get("executive") or features.domain_scores.get("inhibition"),
+                        processing_speed_score=features.domain_scores.get("processing_speed"),
+                        tasks_completed=features.total_task_count,
+                        valid_tasks=features.valid_task_count,
+                        fatigue_index=features.fatigue_index,
+                        consistency_score=features.consistency_score
+                    )
+                
+                logger.info(f"[COGNITIVE] Results saved for session {data.session_id} (Assessment ID: {assessment.id})")
+            else:
+                logger.warning("[COGNITIVE] No user found to save assessment results")
+                
+        except Exception as e:
+            logger.error(f"[COGNITIVE] Failed to save results to database: {e}")
+            # Do not fail the request if persistence fails, but log it
         
         stages[-1].completed_at = datetime.now()
         stages[-1].duration_ms = (time.time() - stage_start) * 1000

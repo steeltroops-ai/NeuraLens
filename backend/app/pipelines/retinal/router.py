@@ -38,6 +38,12 @@ from datetime import datetime
 from PIL import Image
 import numpy as np
 
+# Database imports
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
+from app.database import get_db
+from app.database.repositories.assessment_repository import AssessmentRepository
+
 # Import from pipeline modules (using proper subfolder structure)
 from .utils.constants import ClinicalConstants as CC, BIOMARKER_REFERENCES, ICD10_CODES
 from .schemas import (
@@ -473,7 +479,7 @@ class OutputLayer:
     """Response formatting and persistence"""
     
     @staticmethod
-    def process(
+    async def process(
         state: PipelineState,
         patient_id: str,
         image_quality,
@@ -486,7 +492,8 @@ class OutputLayer:
         recommendations,
         summary,
         heatmap_b64,
-        total_time_ms: int
+        total_time_ms: int,
+        db: Optional[AsyncSession] = None
     ) -> RetinalAnalysisResponse:
         
         """Format final response"""
@@ -520,7 +527,38 @@ class OutputLayer:
                 heatmap_base64=heatmap_b64
             )
             
-            # Persist
+            # Persist to database if db session provided
+            if db:
+                try:
+                    repo = AssessmentRepository(db)
+                    
+                    # Resolve patient_id UUID if possible, otherwise keep as None if "ANONYMOUS"
+                    # The frontend passes UUID or "ANONYMOUS"
+                    pid_uuid = None
+                    if patient_id and patient_id != "ANONYMOUS":
+                        try:
+                            pid_uuid = uuid.UUID(patient_id)
+                        except ValueError:
+                            logger.warning(f"Invalid UUID for patient_id: {patient_id}")
+
+                    # Create assessment record
+                    assessment = await repo.create_assessment(
+                        user_id=uuid.UUID("00000000-0000-0000-0000-000000000000"), # Placeholder or get from context if auth enabled
+                        pipeline_type="retinal",
+                        session_id=state.session_id,
+                        patient_id=pid_uuid,
+                        status="completed"
+                    )
+                    
+                    # Save specific retinal results could be added here if expanded models exist
+                    # For now we rely on the generic result storage or json/blob if implemented
+                    # But minimally we link the Assessment to the Patient
+                    
+                    logger.info(f"[{state.session_id}] DATABASE: Assessment saved with ID {assessment.id}")
+                except Exception as db_err:
+                    logger.error(f"[{state.session_id}] DATABASE ERROR: {db_err}")
+
+            # Persist to memory (legacy/fallback)
             _result_storage[state.session_id] = response.model_dump()
             
             state.stages_completed.append(PipelineStage.OUTPUT_FORMATTING)
@@ -565,7 +603,8 @@ class RetinalPipeline:
         image: UploadFile,
         session_id: Optional[str] = None,
         patient_id: str = "ANONYMOUS",
-        patient_age: Optional[int] = None
+        patient_age: Optional[int] = None,
+        db: Optional[AsyncSession] = None
     ) -> RetinalAnalysisResponse:
         """Execute complete pipeline with enhanced tracking"""
         
@@ -719,7 +758,7 @@ class RetinalPipeline:
         # LAYER 8: OUTPUT (always runs)
         total_time = int((time.time() - start_time) * 1000)
         
-        response = OutputLayer.process(
+        response = await OutputLayer.process(
             state=state,
             patient_id=patient_id,
             image_quality=image_quality,
@@ -732,7 +771,8 @@ class RetinalPipeline:
             recommendations=recommendations,
             summary=summary,
             heatmap_b64=heatmap,
-            total_time_ms=total_time
+            total_time_ms=total_time,
+            db=db
         )
         
         # Log session end
@@ -753,7 +793,8 @@ async def analyze_retinal_image(
     image: UploadFile = File(..., description="Fundus image (JPEG, PNG)"),
     session_id: Optional[str] = Form(default=None),
     patient_id: str = Form(default="ANONYMOUS"),
-    patient_age: Optional[int] = Form(default=None)
+    patient_age: Optional[int] = Form(default=None),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Analyze retinal fundus image using 8-layer pipeline.
@@ -771,7 +812,7 @@ async def analyze_retinal_image(
     **Returns:** Complete clinical assessment with ICD-10 codes
     """
     logger.info(f"API: Received analyze request for patient: {patient_id}")
-    return await RetinalPipeline.execute(image, session_id, patient_id, patient_age)
+    return await RetinalPipeline.execute(image, session_id, patient_id, patient_age, db)
 
 
 @router.get("/results/{session_id}")

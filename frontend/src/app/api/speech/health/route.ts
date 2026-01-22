@@ -1,5 +1,5 @@
 /**
- * Radiology Pipeline API Route - Health Check
+ * Speech Pipeline API Route - Health Check
  */
 
 import { NextResponse } from "next/server";
@@ -11,7 +11,7 @@ export async function GET() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`${BACKEND_URL}/api/radiology/health`, {
+    const response = await fetch(`${BACKEND_URL}/api/speech/health`, {
       method: "GET",
       cache: "no-store",
       signal: controller.signal,

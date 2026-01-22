@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { ExplanationPanel } from "@/components/explanation/ExplanationPanel";
 import { usePipelineStatus } from "@/components/pipeline";
+import { usePatient } from "@/context/PatientContext";
 
 // ============================================================================
 // Types matching backend v4.0 structure
@@ -737,6 +738,7 @@ export default function RetinalAssessment({
   const [showSegmentation, setShowSegmentation] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { activePatient } = usePatient();
 
   // Pipeline status bar integration
   const { startPipeline, updatePipeline, completePipeline } =
@@ -775,7 +777,7 @@ export default function RetinalAssessment({
       try {
         const formData = new FormData();
         formData.append("image", imageFile);
-        formData.append("patient_id", "ANONYMOUS");
+        formData.append("patient_id", activePatient?.id || "ANONYMOUS");
 
         addLog("Sending to backend API...");
         updatePipeline("retinal", { currentStage: "Analyzing..." });

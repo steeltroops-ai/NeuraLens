@@ -3,8 +3,10 @@ Cognitive Pipeline API Router - Production Grade
 Complete API specification with proper error handling.
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_db
 from pydantic import ValidationError
 import logging
 from datetime import datetime
@@ -54,7 +56,10 @@ service = CognitiveService()
         500: {"model": ErrorResponse, "description": "Internal processing error"}
     }
 )
-async def analyze_session(data: CognitiveSessionInput) -> CognitiveResponse:
+async def analyze_session(
+    data: CognitiveSessionInput,
+    db: AsyncSession = Depends(get_db)
+) -> CognitiveResponse:
     """
     Main analysis endpoint.
     Accepts raw session data, returns clinical-grade assessment.
@@ -62,7 +67,7 @@ async def analyze_session(data: CognitiveSessionInput) -> CognitiveResponse:
     logger.info(f"[API] Received analysis request: {data.session_id}")
     
     try:
-        result = await service.process_session(data)
+        result = await service.process_session(data, db)
         
         # Log outcome
         if result.status == "failed":

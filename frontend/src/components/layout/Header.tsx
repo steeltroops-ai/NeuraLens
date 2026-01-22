@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import {
   SignInButton,
   SignUpButton,
   SignedIn,
   SignedOut,
   UserButton,
-} from '@clerk/nextjs';
+} from "@clerk/nextjs";
 
-import { cn } from '@/components/ui';
-import { useSafeNavigation } from '@/components/common/SafeNavigation';
-import { Logo } from '@/components/common/Logo';
+import { cn } from "@/components/ui";
+import { useSafeNavigation } from "@/components/common/SafeNavigation";
+import { Logo } from "@/components/common/Logo";
 
 interface NavigationItem {
   id: string;
@@ -22,10 +22,10 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-  { id: 'home', label: 'Home', href: '/' },
-  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  { id: 'vision', label: 'Vision', href: '/vision' },
-  { id: 'about', label: 'About', href: '/about' },
+  { id: "home", label: "Home", href: "/" },
+  { id: "dashboard", label: "Dashboard", href: "/dashboard" },
+  { id: "vision", label: "Vision", href: "/vision" },
+  { id: "about", label: "About", href: "/about" },
 ];
 
 export const Header: React.FC = () => {
@@ -35,7 +35,10 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { preload } = useSafeNavigation();
 
-  const isTransparentPage = pathname === '/' || pathname?.startsWith('/about') || pathname === '/vision';
+  const isTransparentPage =
+    pathname === "/" ||
+    pathname?.startsWith("/about") ||
+    pathname === "/vision";
 
   useEffect(() => {
     setMounted(true);
@@ -49,8 +52,8 @@ export const Header: React.FC = () => {
     };
 
     handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [mounted]);
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export const Header: React.FC = () => {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       setIsMobileMenuOpen(false);
     }
   };
@@ -72,10 +75,10 @@ export const Header: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
+        "fixed left-0 right-0 top-0 z-50 transition-all duration-300",
         isTransparent
-          ? 'bg-transparent'
-          : 'bg-black/95 backdrop-blur-md border-b border-zinc-800',
+          ? "bg-transparent"
+          : "bg-black/95 backdrop-blur-md border-b border-zinc-800",
       )}
       onKeyDown={handleKeyDown}
       suppressHydrationWarning
@@ -98,7 +101,7 @@ export const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:gap-1">
-            {navigationItems.map(item => {
+            {navigationItems.map((item) => {
               const isActive = pathname === item.href;
 
               return (
@@ -106,16 +109,16 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={item.href}
                   className={cn(
-                      'px-3 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200',
-                      isTransparent
-                        ? isActive
-                          ? 'text-white bg-white/10 backdrop-blur-sm'
-                          : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                        : isActive
-                          ? 'text-white bg-white/10'
-                          : 'text-zinc-400 hover:text-white hover:bg-white/5',
-                    )}
-                  aria-current={isActive ? 'page' : undefined}
+                    "px-3 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200",
+                    isTransparent
+                      ? isActive
+                        ? "text-white bg-white/10 backdrop-blur-sm"
+                        : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      : isActive
+                        ? "text-white bg-white/10"
+                        : "text-zinc-400 hover:text-white hover:bg-white/5",
+                  )}
+                  aria-current={isActive ? "page" : undefined}
                   onMouseEnter={() => preload(item.href)}
                 >
                   {item.label}
@@ -142,7 +145,7 @@ export const Header: React.FC = () => {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: 'w-6 h-6',
+                    avatarBox: "w-6 h-6",
                   },
                 }}
               />
@@ -155,21 +158,43 @@ export const Header: React.FC = () => {
               onClick={toggleMobileMenu}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
-              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               className={cn(
-                'flex h-8 w-8 items-center justify-center rounded transition-colors',
+                "flex h-8 w-8 items-center justify-center rounded transition-colors",
                 isTransparent
-                  ? 'text-white hover:bg-white/10'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white',
+                  ? "text-white hover:bg-white/10"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white",
               )}
             >
               {isMobileMenuOpen ? (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -180,16 +205,22 @@ export const Header: React.FC = () => {
         <div
           id="mobile-menu"
           className={cn(
-            'overflow-hidden transition-all duration-300 ease-in-out md:hidden',
-            isMobileMenuOpen ? 'max-h-[400px] pb-4 opacity-100' : 'max-h-0 opacity-0',
+            "overflow-hidden transition-all duration-300 ease-in-out md:hidden",
+            isMobileMenuOpen
+              ? "max-h-[400px] pb-4 opacity-100"
+              : "max-h-0 opacity-0",
           )}
           aria-hidden={!isMobileMenuOpen}
         >
-          <div className={cn(
-            'space-y-1 pt-3',
-            isTransparent ? 'border-t border-white/10' : 'border-t border-zinc-800',
-          )}>
-            {navigationItems.map(item => {
+          <div
+            className={cn(
+              "space-y-1 pt-3",
+              isTransparent
+                ? "border-t border-white/10"
+                : "border-t border-zinc-800",
+            )}
+          >
+            {navigationItems.map((item) => {
               const isActive = pathname === item.href;
 
               return (
@@ -197,14 +228,14 @@ export const Header: React.FC = () => {
                   key={item.id}
                   href={item.href}
                   className={cn(
-                    'block rounded px-3 py-2 text-[13px] font-medium transition-colors',
+                    "block rounded px-3 py-2 text-[13px] font-medium transition-colors",
                     isActive
-                      ? 'bg-blue-900/50 text-blue-400'
+                      ? "bg-blue-900/50 text-blue-400"
                       : isTransparent
-                        ? 'text-white/80 hover:bg-white/10 hover:text-white'
-                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-white',
+                        ? "text-white/80 hover:bg-white/10 hover:text-white"
+                        : "text-zinc-400 hover:bg-zinc-800 hover:text-white",
                   )}
-                  aria-current={isActive ? 'page' : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   onMouseEnter={() => preload(item.href)}
                 >
                   {item.label}
@@ -216,12 +247,14 @@ export const Header: React.FC = () => {
             <div className="pt-3 space-y-2">
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className={cn(
-                    'block w-full rounded border px-3 py-2 text-center text-[13px] font-medium transition-colors',
-                    isTransparent
-                      ? 'border-white/20 text-white hover:bg-white/10'
-                      : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800',
-                  )}>
+                  <button
+                    className={cn(
+                      "block w-full rounded border px-3 py-2 text-center text-[13px] font-medium transition-colors",
+                      isTransparent
+                        ? "border-white/20 text-white hover:bg-white/10"
+                        : "border-zinc-700 text-zinc-300 hover:bg-zinc-800",
+                    )}
+                  >
                     Sign In
                   </button>
                 </SignInButton>
@@ -242,7 +275,7 @@ export const Header: React.FC = () => {
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox: 'w-8 h-8',
+                        avatarBox: "w-8 h-8",
                       },
                     }}
                   />

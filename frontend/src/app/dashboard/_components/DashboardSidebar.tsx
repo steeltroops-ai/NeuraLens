@@ -478,17 +478,19 @@ export function DashboardSidebar({
           <div
             className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}
           >
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8",
-                  userButtonTrigger: "focus:shadow-none focus:outline-none",
-                },
-              }}
-            />
+            {isClient && (
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8",
+                    userButtonTrigger: "focus:shadow-none focus:outline-none",
+                  },
+                }}
+              />
+            )}
 
-            {!collapsed && user && (
+            {!collapsed && isClient && user && (
               <div className="flex flex-col overflow-hidden">
                 <span className="text-[13px] font-medium text-zinc-200 truncate">
                   {user.fullName || user.username || "User"}
@@ -499,7 +501,7 @@ export function DashboardSidebar({
               </div>
             )}
 
-            {!collapsed && !user && (
+            {!collapsed && isClient && !user && (
               <div className="flex flex-col">
                 <span className="text-[13px] font-medium text-zinc-200">
                   Guest

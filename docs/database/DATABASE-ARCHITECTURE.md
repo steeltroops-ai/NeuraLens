@@ -830,9 +830,10 @@ CREATE INDEX idx_assessments_cohort_analysis
 ### 5.1 Connection Architecture
 
 ```typescript
-// backend/app/database/neon.py
+# backend/app/database/neon.py
+# Note: Neon supports standard PostgreSQL drivers (asyncpg, psycopg2)
+# No special client library is required for basic connectivity
 import os
-from neon import NeonClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -1006,27 +1007,44 @@ class AssessmentRepository:
 ```python
 # backend/app/pipelines/retinal/core/service.py
 from app.database.repositories import AssessmentRepository
-from app.database import get_db
 from uuid import uuid4
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class RetinalService:
-    async def analyze(self, user_id: UUID, image_data: bytes):
-        """Full pipeline with database integration"""
+    async def analyze(self, user_id: UUID, image_data: bytes, db: AsyncSession):
+        """Full pipeline with database integration via DI"""
         session_id = f"retinal_{uuid4().hex}"
         
-        async with get_db() as db:
-            repo = AssessmentRepository(db)
+        repo = AssessmentRepository(db)
+        
+        # 1. Create assessment record
+        assessment = await repo.create_assessment(
+            user_id=user_id,
+            pipeline_type='retinal',
+            session_id=session_id,
+            status='processing'
+        )
+        
+        try:
+            # 2. Run pipeline stages
+            # ... processing logic ...
             
-            # 1. Create assessment record
-            assessment = await repo.create_assessment(
-                user_id=user_id,
-                pipeline_type='retinal',
-                session_id=session_id,
-                status='processing'
-            )
+            await db.commit()
+            return assessment
             
-            try:
-                # 2. Run pipeline stages
+        except Exception as e:
+            await db.rollback()
+            raise e
+
+# Usage in Router
+# @router.post("/analyze")
+# async def analyze_endpoint(
+#     request: AnalyzeRequest, 
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     service = RetinalService()
+#     return await service.analyze(request.user_id, request.image, db)
+
                 preprocessed = await self.preprocess(image_data)
                 features = await self.extract_features(preprocessed)
                 risk_score = await self.calculate_risk(features)

@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.config import settings
-from app.database import init_db
+from app.database import db, lifespan_manager as db_lifespan_manager
 from app.routers import router
 from app.middleware import TimeoutMiddleware, RequestTimingMiddleware
 
@@ -29,26 +29,27 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifecycle manager."""
+    """Application lifecycle manager with Neon database."""
     logger.info(f"[START] {settings.APP_NAME} v{settings.VERSION}")
     logger.info(f"[ENV] {settings.ENVIRONMENT} (DEBUG={settings.DEBUG})")
     
-    # Initialize database
-    await init_db()
-    
-    yield
-    
-    # Cleanup
-    logger.info("[STOP] Shutting down...")
-    
-    # Shutdown thread executors
-    try:
-        from app.core.async_utils import shutdown_executors
-        shutdown_executors()
-    except ImportError:
-        pass
-    
-    logger.info("[STOP] Shutdown complete")
+    # Initialize Neon database
+    async with db_lifespan_manager(app):
+        logger.info("[DB] Neon Postgres connected")
+        
+        yield
+        
+        # Cleanup
+        logger.info("[STOP] Shutting down...")
+        
+        # Shutdown thread executors
+        try:
+            from app.core.async_utils import shutdown_executors
+            shutdown_executors()
+        except ImportError:
+            pass
+        
+        logger.info("[STOP] Shutdown complete")
 
 
 app = FastAPI(

@@ -11,6 +11,12 @@ router = APIRouter()
 pipelines = {}
 
 try:
+    from app.routers.patients import router as patients
+    router.include_router(patients, prefix="/patients", tags=["Patients"])
+except Exception as e:
+    print(f"[ERROR] Patients Router: {e}")
+
+try:
     from app.pipelines.speech.router import router as speech
     router.include_router(speech, prefix="/speech", tags=["Speech"])
     pipelines["speech"] = True
