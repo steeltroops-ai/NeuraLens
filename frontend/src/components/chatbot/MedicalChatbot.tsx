@@ -187,11 +187,11 @@ export function MedicalChatbot({ context }: MedicalChatbotProps) {
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className={`
               fixed z-[1050]
-              ${
-                isExpanded
-                  ? "bottom-4 right-4 w-[calc(100vw-2rem)] h-[calc(100vh-2rem)] md:w-[600px] md:h-[700px] max-h-[calc(100vh-2rem)]"
-                  : "bottom-12 right-6 w-[380px] h-[480px]"
-              }
+                ${
+                  isExpanded
+                    ? "inset-2 w-auto h-auto md:inset-auto md:bottom-4 md:right-4 md:w-[600px] md:h-[700px] md:max-h-[calc(100vh-2rem)]"
+                    : "bottom-4 left-4 right-4 w-auto h-[60vh] md:left-auto md:bottom-12 md:right-6 md:w-[380px] md:h-[480px]"
+                }
               flex flex-col
               bg-zinc-950
               border border-zinc-800

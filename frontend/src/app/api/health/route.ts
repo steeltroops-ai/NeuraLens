@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 
+const BACKEND_URL =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8000";
+
 export async function GET() {
   try {
     // Check backend health with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const backendResponse = await fetch("http://localhost:8000/health", {
+    const backendResponse = await fetch(`${BACKEND_URL}/health`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
