@@ -216,18 +216,19 @@ class CognitiveService:
         try:
             repo = AssessmentRepository(db)
             
-            # Resolve user_id
-            user_id = None
+            # Resolve patient_id (The subject of the assessment)
+            patient_uuid = None
             if data.patient_id:
                 try:
-                    user_id = uuid.UUID(data.patient_id)
+                    patient_uuid = uuid.UUID(data.patient_id)
                 except ValueError:
                     logger.warning(f"[COGNITIVE] Invalid patient_id format: {data.patient_id}")
-            
-            if not user_id:
-                # Try to find a fallback user (e.g. first user in DB)
-                result = await db.execute(select(User.id).limit(1))
-                user_id = result.scalar_one_or_none()
+
+            # Resolve user_id (The clinician/operator)
+            # TODO: Get actual logged-in user from context. For now, fallback to first admin/user.
+            user_id = None
+            result = await db.execute(select(User.id).limit(1))
+            user_id = result.scalar_one_or_none()
             
             if user_id:
                 # Create Assessment
@@ -235,6 +236,7 @@ class CognitiveService:
                     user_id=user_id,
                     pipeline_type="cognitive",
                     session_id=data.session_id,
+                    patient_id=patient_uuid,
                     status="completed" if final_status == "success" else final_status,
                     risk_score=risk_assessment.overall_risk_score if risk_assessment else None,
                     risk_level=risk_assessment.risk_level.value if risk_assessment else None,

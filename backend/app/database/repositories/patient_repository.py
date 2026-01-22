@@ -21,6 +21,9 @@ class PatientRepository:
 
     async def create_patient(self, full_name: str, phone_number: str, **kwargs) -> Patient:
         """Create a new patient record"""
+        # Remove legacy 'age' field if present to avoid unexpected argument error
+        kwargs.pop('age', None)
+        
         patient = Patient(
             full_name=full_name,
             phone_number=phone_number,

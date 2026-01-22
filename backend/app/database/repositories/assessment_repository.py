@@ -35,6 +35,7 @@ class AssessmentRepository:
         pipeline_type: str,
         session_id: str,
         organization_id: Optional[UUID] = None,
+        patient_id: Optional[UUID] = None,
         **kwargs
     ) -> Assessment:
         """Create new assessment"""
@@ -43,6 +44,7 @@ class AssessmentRepository:
             pipeline_type=pipeline_type,
             session_id=session_id,
             organization_id=organization_id,
+            patient_id=patient_id,
             status='pending',
             **kwargs
         )

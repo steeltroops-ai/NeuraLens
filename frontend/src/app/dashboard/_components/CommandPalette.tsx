@@ -16,8 +16,12 @@ import {
   Home,
   Command,
   X,
+  User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePatient } from "@/context/PatientContext";
+import { PatientService } from "@/lib/api/services";
+import { Patient } from "@/lib/api/types";
 
 interface CommandItem {
   id: string;
@@ -47,6 +51,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const { setActivePatient } = usePatient();
+  const [patientResults, setPatientResults] = useState<Patient[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Define command items
   const commands: CommandItem[] = [
@@ -170,13 +178,65 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     },
   ];
 
+  // Debounced search for patients
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!searchQuery.trim()) {
+        setPatientResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        // Only search if query is at least 2 chars to avoid flooding
+        if (searchQuery.length >= 2) {
+          const response = await PatientService.search(searchQuery);
+          if (response.data) {
+            setPatientResults(response.data);
+          }
+        } else {
+          setPatientResults([]);
+        }
+      } catch (error) {
+        console.error("Patient search failed:", error);
+        setPatientResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Convert patients to CommandItems
+  const patientCommands: CommandItem[] = patientResults.map((patient) => ({
+    id: `patient-${patient.id}`,
+    label: patient.full_name,
+    description: `MRN: ${patient.id.slice(0, 8)}... • DOB: ${patient.date_of_birth ?? "N/A"} • ${patient.phone_number}`,
+    icon: <User className="h-4 w-4" />,
+    action: () => {
+      setActivePatient(patient);
+      router.push(`/dashboard`); // Navigate to main dashboard
+      onClose();
+    },
+    category: "Patients",
+  }));
+
+  const allCommands = [...patientCommands, ...commands];
+
   // Filter commands based on search query
-  const filteredCommands = commands.filter(
-    (cmd) =>
-      cmd.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cmd.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cmd.category.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Note: Patients are already filtered by the API search, but we apply local filter for static commands
+  // and just concat patients. However, if searchQuery matches a static command, we want both.
+
+  const filteredCommands = [
+    ...patientCommands, // Patients are already filtered by API
+    ...commands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cmd.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cmd.category.toLowerCase().includes(searchQuery.toLowerCase()),
+    ),
+  ];
 
   // Group commands by category
   const groupedCommands = filteredCommands.reduce<
@@ -192,16 +252,17 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   // Focus input when opened
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      // Small timeout ensuring element is visible
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    }
-    // Reset state when opened
     if (isOpen) {
       setSearchQuery("");
       setSelectedIndex(0);
+
+      if (inputRef.current) {
+        // Small timeout ensuring element is visible
+        const timer = setTimeout(() => inputRef.current?.focus(), 50);
+        return () => clearTimeout(timer);
+      }
     }
+    return undefined;
   }, [isOpen]);
 
   // Handle keyboard navigation
@@ -382,6 +443,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         </div>
                       </div>
                     ))
+                  ) : isSearching ? (
+                    <div className="py-12 text-center flex flex-col items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin"></div>
+                      <p className="text-[11px] text-zinc-600">
+                        Searching patients...
+                      </p>
+                    </div>
                   ) : (
                     <div className="py-12 text-center">
                       <p className="text-[13px] text-zinc-400 font-medium">

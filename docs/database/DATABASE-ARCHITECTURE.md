@@ -220,6 +220,49 @@ CREATE TABLE user_roles (
 
 CREATE INDEX idx_user_roles_user ON user_roles(user_id);
 CREATE INDEX idx_user_roles_role ON user_roles(role_id);
+
+### 3.2 Patient Management
+
+```sql
+-- Patients (Clinical profiles distinct from App Users)
+CREATE TABLE patients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- Identity
+    full_name VARCHAR(255) NOT NULL,
+    date_of_birth DATE,
+    gender VARCHAR(20),
+    phone_number VARCHAR(50),
+    email VARCHAR(255),
+    
+    -- Contact & Admin
+    address JSONB DEFAULT '{}',
+    emergency_contact JSONB DEFAULT '{}',
+    insurance_provider VARCHAR(100),
+    insurance_policy_number VARCHAR(100),
+    
+    -- Clinical Context (JSONB for flexibility)
+    medical_notes TEXT,
+    medical_history JSONB DEFAULT '[]', -- Past conditions, surgeries
+    medications JSONB DEFAULT '[]', -- Current Rx
+    allergies JSONB DEFAULT '[]',
+    family_history JSONB DEFAULT '[]',
+    
+    -- Multi-tenancy
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    assigned_doctor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- Timestamps
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    last_visit_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ -- Soft delete
+);
+
+CREATE INDEX idx_patients_org ON patients(organization_id, full_name) WHERE deleted_at IS NULL;
+CREATE INDEX idx_patients_phone ON patients(phone_number) WHERE deleted_at IS NULL;
+CREATE INDEX idx_patients_dob ON patients(date_of_birth);
+CREATE INDEX idx_patients_last_visit ON patients(last_visit_at DESC);
 ```
 
 ### 3.2 Assessment Core

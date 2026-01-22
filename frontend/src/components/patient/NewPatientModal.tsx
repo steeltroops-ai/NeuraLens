@@ -14,10 +14,15 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
 }) => {
   const { setActivePatient } = usePatient();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    phone_number: string;
+    date_of_birth: string;
+    gender: string;
+  }>({
     full_name: "",
     phone_number: "", // ID
-    age: "",
+    date_of_birth: "",
     gender: "",
   });
   const [loading, setLoading] = useState(false);
@@ -62,7 +67,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...formData,
-            age: formData.age ? parseInt(formData.age) : undefined,
+            // remove empty string date
+            date_of_birth: formData.date_of_birth || null,
           }),
         },
       );
@@ -87,7 +93,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
     setFormData({
       full_name: "",
       phone_number: "",
-      age: "",
+      date_of_birth: "",
       gender: "",
     });
   };
@@ -185,15 +191,15 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[13px] font-medium text-zinc-400">
-                        Age
+                        Date of Birth
                       </label>
                       <input
-                        type="number"
-                        min="0"
-                        max="120"
-                        value={formData.age}
-                        onChange={(e) => handleChange("age", e.target.value)}
-                        placeholder="0"
+                        type="date"
+                        required
+                        value={formData.date_of_birth}
+                        onChange={(e) =>
+                          handleChange("date_of_birth", e.target.value)
+                        }
                         className="w-full h-9 px-3 bg-[#18181b] border border-[#27272a] rounded-lg text-[13px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 transition-all"
                       />
                     </div>

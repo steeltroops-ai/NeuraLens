@@ -52,6 +52,7 @@ class User(Base):
     user_roles = relationship("UserRole", back_populates="user", foreign_keys="[UserRole.user_id]")
     chat_threads = relationship("ChatThread", back_populates="user")
     uploaded_files = relationship("UploadedFile", back_populates="user")
+    assigned_patients = relationship("Patient", back_populates="assigned_doctor")
     
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
@@ -83,6 +84,7 @@ class Organization(Base):
     # Relationships
     users = relationship("User", back_populates="organization")
     assessments = relationship("Assessment", back_populates="organization")
+    patients = relationship("Patient", back_populates="organization")
     
     def __repr__(self):
         return f"<Organization(id={self.id}, name={self.name})>"
