@@ -7,7 +7,7 @@ This is a THIN layer - business logic is in core/service.py
 Errors from this module have prefix: E_HTTP_
 """
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Depends
 from typing import Optional
 import uuid
 import logging
@@ -19,6 +19,11 @@ from .errors.codes import LayerError
 
 # Use the shared schema from app.schemas for backward compatibility
 from app.schemas.assessment import EnhancedSpeechAnalysisResponse
+
+# Database imports
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.neon_connection import get_db
+from app.database.persistence import PersistenceService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -60,7 +65,9 @@ except ImportError:
 @router.post("/analyze", response_model=EnhancedSpeechAnalysisResponse)
 async def analyze_speech(
     audio: UploadFile = File(..., description="Audio file for analysis"),
-    session_id: Optional[str] = Form(None)
+    session_id: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db)
 ) -> EnhancedSpeechAnalysisResponse:
     """
     Analyze speech for neurological biomarkers.
@@ -96,6 +103,29 @@ async def analyze_speech(
             filename=audio.filename,
             content_type=audio.content_type
         )
+        
+        # Persist to database
+        try:
+            persistence = PersistenceService(db)
+            result_data = {
+                "duration_seconds": result.file_info.duration_seconds if result.file_info else 0,
+                "sample_rate": result.file_info.sample_rate if result.file_info else 16000,
+                "quality_score": result.quality_metrics.voice_quality if hasattr(result, 'quality_metrics') and result.quality_metrics else 0.8,
+                "jitter": result.biomarkers.jitter.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.jitter else None,
+                "shimmer": result.biomarkers.shimmer.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.shimmer else None,
+                "hnr": result.biomarkers.hnr.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.hnr else None,
+                "cpps": result.biomarkers.cpps.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.cpps else None,
+                "speech_rate": result.biomarkers.speech_rate.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.speech_rate else None,
+                "pd_probability": result.risk_assessment.risk_score / 100.0 if hasattr(result, 'risk_assessment') and result.risk_assessment else None,
+            }
+            await persistence.save_speech_assessment(
+                session_id=s_id,
+                patient_id=patient_id,
+                result_data=result_data
+            )
+        except Exception as db_err:
+            logger.error(f"[{s_id}] DATABASE ERROR: {db_err}")
+            # Don't fail the request if DB save fails
         
         return result
     

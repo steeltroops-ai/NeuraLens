@@ -11,9 +11,10 @@ Architecture Guide: Root file - only router.py, schemas.py, config.py, __init__.
 
 import time
 import logging
+import uuid
 import numpy as np
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, HTTPException, UploadFile, File, Query, Form, Depends
 from typing import List, Optional
 
 # Import from core (following architecture guide)
@@ -41,6 +42,11 @@ from .schemas import (
 )
 from .input.ecg_parser import ECGParser
 from .output.visualization import ECGVisualizer
+
+# Database imports
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.neon_connection import get_db
+from app.database.persistence import PersistenceService
 
 # Demo generation utilities
 try:
@@ -86,7 +92,10 @@ DETECTABLE_CONDITIONS = [
 async def analyze_ecg(
     file: UploadFile = File(..., description="ECG file (CSV/JSON/TXT)"),
     sample_rate: int = Query(500, ge=100, le=1000, description="Sample rate in Hz"),
-    include_waveform: bool = Query(False, description="Include waveform data for visualization")
+    include_waveform: bool = Query(False, description="Include waveform data for visualization"),
+    session_id: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Analyze uploaded ECG file for cardiac abnormalities.
@@ -104,6 +113,7 @@ async def analyze_ecg(
     - Clinical recommendations
     """
     start_time = time.time()
+    s_id = session_id or str(uuid.uuid4())
     
     # Validate file type
     filename = file.filename or "data.csv"
@@ -158,6 +168,33 @@ async def analyze_ecg(
                     ],
                 ),
             )
+        
+        # Persist to database
+        if response.success:
+            try:
+                persistence = PersistenceService(db)
+                result_data = {}
+                if response.ecg_analysis:
+                    if response.ecg_analysis.rhythm_analysis:
+                        result_data["rhythm_classification"] = response.ecg_analysis.rhythm_analysis.classification
+                        result_data["heart_rate"] = response.ecg_analysis.rhythm_analysis.heart_rate_bpm
+                        result_data["regularity"] = response.ecg_analysis.rhythm_analysis.regularity
+                    if response.ecg_analysis.hrv_metrics and response.ecg_analysis.hrv_metrics.time_domain:
+                        result_data["rmssd"] = response.ecg_analysis.hrv_metrics.time_domain.rmssd
+                        result_data["sdnn"] = response.ecg_analysis.hrv_metrics.time_domain.sdnn
+                        result_data["pnn50"] = response.ecg_analysis.hrv_metrics.time_domain.pnn50
+                    if response.ecg_analysis.arrhythmia:
+                        result_data["arrhythmia_detected"] = response.ecg_analysis.arrhythmia.detected
+                        result_data["arrhythmia_types"] = response.ecg_analysis.arrhythmia.types or []
+                    
+                await persistence.save_cardiology_assessment(
+                    session_id=s_id,
+                    patient_id=patient_id,
+                    result_data=result_data
+                )
+            except Exception as db_err:
+                logger.error(f"[{s_id}] DATABASE ERROR: {db_err}")
+                # Don't fail the request if DB save fails
         
         return response
         

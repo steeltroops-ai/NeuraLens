@@ -5,13 +5,19 @@ FastAPI endpoints for skin lesion analysis.
 """
 
 import logging
+import uuid
 from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
 from .core import DermatologyService
 from .schemas import DermatologyRequest, ImageSource, BodyLocation
+
+# Database imports
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.neon_connection import get_db
+from app.database.persistence import PersistenceService
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +48,10 @@ async def analyze_lesion(
     lesion_duration: Optional[str] = Form(None),
     has_changed: Optional[bool] = Form(None),
     session_id: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
     generate_explanation: bool = Form(True),
-    include_visualizations: bool = Form(True)
+    include_visualizations: bool = Form(True),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Analyze a skin lesion image.
@@ -58,6 +66,7 @@ async def analyze_lesion(
     - lesion_duration: How long the lesion has been present
     - has_changed: Whether the lesion has changed recently
     - session_id: Session identifier for tracking
+    - patient_id: Patient identifier for persistence
     - generate_explanation: Whether to generate AI explanation
     - include_visualizations: Whether to include visualization images
     
@@ -65,6 +74,8 @@ async def analyze_lesion(
     - Complete analysis results including risk assessment, ABCDE analysis,
       classification results, and recommendations
     """
+    s_id = session_id or str(uuid.uuid4())
+    
     try:
         # Read image data
         image_data = await image.read()
@@ -91,7 +102,7 @@ async def analyze_lesion(
             skin_type=skin_type,
             lesion_duration=lesion_duration,
             has_changed=has_changed,
-            session_id=session_id,
+            session_id=s_id,
             generate_explanation=generate_explanation,
             include_visualizations=include_visualizations
         )
@@ -104,6 +115,28 @@ async def analyze_lesion(
         )
         
         if success:
+            # Persist to database
+            try:
+                persistence = PersistenceService(db)
+                abcde = response.get("abcde_details", {})
+                result_data = {
+                    "primary_classification": response.get("primary_subtype"),
+                    "melanoma_classification": response.get("melanoma_classification"),
+                    "asymmetry_score": abcde.get("asymmetry", {}).get("score"),
+                    "border_score": abcde.get("border", {}).get("score"),
+                    "color_score": abcde.get("color", {}).get("score"),
+                    "diameter_mm": response.get("geometry", {}).get("diameter_mm"),
+                    "body_location": body_location,
+                }
+                await persistence.save_dermatology_assessment(
+                    session_id=s_id,
+                    patient_id=patient_id,
+                    result_data=result_data
+                )
+            except Exception as db_err:
+                logger.error(f"[{s_id}] DATABASE ERROR: {db_err}")
+                # Don't fail the request if DB save fails
+            
             return JSONResponse(content=response)
         else:
             # Return failure response with appropriate status code

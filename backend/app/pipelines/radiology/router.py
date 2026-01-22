@@ -7,8 +7,9 @@ Business logic is in core/service.py per architecture guidelines.
 
 import time
 import logging
+import uuid
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from typing import List, Optional
 
 from .config import RadiologyConfig, PATHOLOGY_INFO, TRAINING_DATASETS
@@ -27,6 +28,11 @@ from .analysis import XRayAnalyzer, TORCHXRAY_AVAILABLE
 from .input import ImageValidator
 from .clinical import RiskScorer, RecommendationGenerator
 from .output import HeatmapGenerator
+
+# Database imports
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.neon_connection import get_db
+from app.database.persistence import PersistenceService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/radiology", tags=["Radiology"])
@@ -54,7 +60,10 @@ async def run_radiology_analysis(image_bytes: bytes):
 
 @router.post("/analyze", response_model=RadiologyAnalysisResponse)
 async def analyze_xray(
-    file: UploadFile = File(..., description="Chest X-ray image (JPEG/PNG)")
+    file: UploadFile = File(..., description="Chest X-ray image (JPEG/PNG)"),
+    session_id: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Analyze chest X-ray for 18 pulmonary and cardiac conditions.
@@ -78,6 +87,7 @@ async def analyze_xray(
     """
     start_time = time.time()
     stages_completed = []
+    s_id = session_id or str(uuid.uuid4())
     
     # Stage 1: Receipt
     stage_start = time.time()
@@ -166,7 +176,7 @@ async def analyze_xray(
         # Format response
         processing_time = int((time.time() - start_time) * 1000)
         
-        return RadiologyAnalysisResponse(
+        response = RadiologyAnalysisResponse(
             success=True,
             timestamp=datetime.utcnow().isoformat() + "Z",
             processing_time_ms=processing_time,
@@ -210,6 +220,27 @@ async def analyze_xray(
             
             recommendations=recommendations
         )
+        
+        # Persist to database
+        try:
+            persistence = PersistenceService(db)
+            result_data = {
+                "primary_condition": result.primary_finding,
+                "primary_probability": result.confidence,
+                "severity": result.risk_level,
+                "findings": [{"condition": f["condition"], "probability": f["probability"]} for f in result.findings],
+                "quality_score": quality_result.get("quality_score", 0.8),
+            }
+            await persistence.save_radiology_assessment(
+                session_id=s_id,
+                patient_id=patient_id,
+                result_data=result_data
+            )
+        except Exception as db_err:
+            logger.error(f"[{s_id}] DATABASE ERROR: {db_err}")
+            # Don't fail the request if DB save fails
+        
+        return response
         
     except HTTPException:
         raise
