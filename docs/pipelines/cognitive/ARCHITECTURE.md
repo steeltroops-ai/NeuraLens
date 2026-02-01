@@ -4,10 +4,10 @@
 | Field | Value |
 |-------|-------|
 | Pipeline | Cognitive Assessment (Digital Testing) |
-| Version | 2.0.0 |
-| Last Updated | 2026-01-17 |
+| Version | 2.1.0 |
+| Last Updated | 2026-01-22 |
 | Clinical Accuracy Target | 82%+ |
-| Domains Assessed | Memory, Attention, Executive, Processing Speed, Language, Visuospatial |
+| Domains Assessed | Memory, Attention, Executive, Processing Speed, Inhibition |
 
 ---
 
@@ -688,22 +688,79 @@ Web Audio API
 ## 8. File Structure
 
 ```
-app/pipelines/cognitive/
+backend/app/pipelines/cognitive/
 ├── __init__.py
-├── ARCHITECTURE.md         # This document
-├── router.py               # FastAPI endpoints
-├── analyzer.py             # Scoring algorithms
-├── normative_data.py       # Age norms tables
-├── patterns.py             # Clinical pattern detection
-└── models.py               # Pydantic schemas
+├── config.py                   # Pipeline configuration (VERSION, thresholds)
+├── schemas.py                  # Pydantic models (CognitiveSessionInput, etc.)
+├── router.py                   # FastAPI endpoints
+│
+├── input/                      # Input Layer
+│   ├── __init__.py
+│   └── validator.py            # Session/task validation
+│
+├── features/                   # Feature Extraction
+│   ├── __init__.py
+│   └── extractor.py            # Task-specific feature extraction
+│
+├── analysis/                   # NEW: Research-grade Analysis
+│   ├── __init__.py
+│   ├── statistics.py           # SDT, MAD, RT analysis (PhD-grade)
+│   └── normative.py            # Age-adjusted norms (Tombaugh, Wechsler, etc.)
+│
+├── clinical/                   # Clinical Scoring
+│   ├── __init__.py
+│   └── risk_scorer.py          # Risk assessment with normative comparison
+│
+├── output/                     # Output Formatting
+│   ├── __init__.py
+│   └── formatter.py            # Response formatting
+│
+├── reporting/                  # NEW: Report Generation
+│   ├── __init__.py
+│   └── pdf_generator.py        # Clinical PDF reports (reportlab)
+│
+├── core/                       # Core Orchestration
+│   ├── __init__.py
+│   └── service.py              # Pipeline orchestrator
+│
+└── errors/                     # Error Handling
+    ├── __init__.py
+    └── codes.py                # Error definitions
+
+docs/pipelines/cognitive/
+├── ARCHITECTURE.md             # This document
+├── API_SPECIFICATION.md        # API contract
+└── RESEARCH_METHODOLOGY.md     # NEW: PhD-grade methods documentation
 ```
 
 ---
 
 ## 9. Clinical References
 
+### Core References
 1. **Weintraub et al. (2009)** - "The Alzheimer's Disease Centers' Uniform Data Set (UDS)"
 2. **Nasreddine et al. (2005)** - "The Montreal Cognitive Assessment (MoCA)"
 3. **Reitan (1958)** - "Trail Making Test: Manual for Administration"
 4. **Stroop (1935)** - "Studies of interference in serial verbal reactions"
 5. **NACC** - National Alzheimer's Coordinating Center Normative Database
+
+### v2.1.0 Research Methodology References
+6. **Leys et al. (2013)** - MAD-based outlier detection for RT data
+7. **Stanislaw & Todorov (1999)** - Signal Detection Theory (d-prime calculation)
+8. **Hautus (1995)** - Log-linear correction for extreme hit/FA rates
+9. **Tombaugh (2004)** - Trail Making Test normative data
+10. **Scarpina & Tagini (2017)** - Stroop effect meta-analysis
+11. **Wechsler (2008)** - WAIS-IV Digit Symbol norms
+12. **Jaeggi et al. (2010)** - N-back working memory validation
+13. **Verbruggen & Logan (2008)** - Go/No-Go inhibition paradigm
+14. **Ratcliff (1993)** - Ex-Gaussian RT distribution modeling
+
+---
+
+## 10. Version History
+
+| Version | Date | Changes |
+|---------|------|--------|
+| 1.0.0 | 2025-10-01 | Initial pipeline |
+| 2.0.0 | 2026-01-17 | Production-grade refactor |
+| 2.1.0 | 2026-01-22 | PhD-grade research upgrade: SDT, MAD, normative data, PDF reports |

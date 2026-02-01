@@ -117,4 +117,26 @@ __all__ = [
     "TortuosityCalculator",
     "RetinalZones",
     "deep_vessel_analyzer",
+    
+    # v5.1 Enhanced Biomarker Extraction (actual computed values)
+    "EnhancedBiomarkerExtractor",
+    "enhanced_biomarker_extractor",
 ]
+
+# v5.1 Enhanced biomarker extraction (computes actual values)
+try:
+    from .enhanced_biomarker_extractor import (
+        EnhancedBiomarkerExtractor,
+        enhanced_biomarker_extractor,
+        VesselSegmenter,
+        VesselGraphExtractor,
+        TortuosityCalculator as TortuosityCalculatorV2,
+        AVClassifier as AVClassifierV2,
+        KnudtsonCalculator as KnudtsonCalculatorV2,
+        FractalCalculator,
+        OpticDiscDetector,
+        LesionDetector as LesionDetectorV2,
+    )
+except ImportError as e:
+    import logging
+    logging.getLogger(__name__).warning(f"Enhanced biomarker extractor not available: {e}")

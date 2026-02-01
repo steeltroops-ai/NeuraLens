@@ -1,5 +1,5 @@
 """
-Cognitive Pipeline Configuration - Production Grade
+Cognitive Pipeline Configuration - Research Grade v2.1.0
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,7 +12,7 @@ class CognitiveConfig(BaseSettings):
     
     # Pipeline Identity
     PIPELINE_NAME: str = "cognitive"
-    VERSION: str = "2.0.0"
+    VERSION: str = "2.1.0"
     
     # Thresholds
     MIN_REACTION_TIME_MS: float = 100.0  # Faster is physiologically impossible

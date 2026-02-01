@@ -219,3 +219,137 @@ async def validate_session(data: CognitiveSessionInput):
         "warnings": result.warnings,
         "task_validity": result.task_validity
     }
+
+
+@router.post(
+    "/export/pdf",
+    summary="Export Assessment Report as PDF",
+    description="""
+    Generate a clinical-quality PDF report from a cognitive assessment response.
+    
+    **Input:**
+    - CognitiveResponse from a previous /analyze call
+    - Optional patient information for personalization
+    
+    **Output:**
+    - PDF file as binary response
+    
+    **Dependencies:**
+    - Requires reportlab to be installed
+    """,
+    responses={
+        200: {"description": "PDF generated successfully", "content": {"application/pdf": {}}},
+        400: {"description": "Invalid response data"},
+        500: {"description": "PDF generation failed"}
+    }
+)
+async def export_pdf(
+    response: CognitiveResponse,
+    patient_age: int = None,
+    patient_education: int = None
+):
+    """
+    Generate PDF report from assessment response.
+    """
+    from fastapi.responses import Response
+    
+    try:
+        from .reporting.pdf_generator import generate_cognitive_report
+        
+        patient_info = {}
+        if patient_age:
+            patient_info["age"] = patient_age
+        if patient_education:
+            patient_info["education"] = patient_education
+        
+        pdf_bytes = generate_cognitive_report(
+            response=response,
+            patient_info=patient_info if patient_info else None
+        )
+        
+        # Generate filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"cognitive_report_{response.session_id}_{timestamp}.pdf"
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"'
+            }
+        )
+        
+    except ImportError as e:
+        logger.error(f"[API] PDF generation dependency missing: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "E_DEP_001",
+                "error_message": "reportlab not installed. Run: pip install reportlab",
+                "recoverable": False
+            }
+        )
+    except Exception as e:
+        logger.exception(f"[API] PDF generation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "E_PDF_001",
+                "error_message": f"PDF generation failed: {str(e)}",
+                "recoverable": False
+            }
+        )
+
+
+@router.get(
+    "/normative/{test_type}",
+    summary="Get Normative Data",
+    description="Returns normative reference data for a specific test type."
+)
+async def get_normative_data(test_type: str, age: int = None):
+    """
+    Get age-adjusted normative reference data for a test.
+    
+    Useful for frontend percentile displays.
+    """
+    from .analysis.normative import (
+        get_age_group, RT_NORMS, TMT_A_NORMS, TMT_B_NORMS,
+        STROOP_EFFECT_NORMS, NBACK_DPRIME_NORMS, DIGIT_SYMBOL_NORMS
+    )
+    
+    age_group = get_age_group(age) if age else "50-59"
+    
+    norm_maps = {
+        "reaction_time": RT_NORMS,
+        "trail_making_a": TMT_A_NORMS,
+        "trail_making_b": TMT_B_NORMS,
+        "stroop": STROOP_EFFECT_NORMS,
+        "n_back": NBACK_DPRIME_NORMS,
+        "digit_symbol": DIGIT_SYMBOL_NORMS
+    }
+    
+    if test_type not in norm_maps:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error_code": "E_NORM_001",
+                "error_message": f"Unknown test type: {test_type}. Valid types: {list(norm_maps.keys())}",
+                "recoverable": True
+            }
+        )
+    
+    norms = norm_maps[test_type]
+    age_norms = norms.get(age_group, norms.get("50-59", {"all": (0, 1)}))
+    
+    return {
+        "test_type": test_type,
+        "age_group": age_group,
+        "normative_data": {
+            "mean": age_norms.get("all", (0, 0))[0],
+            "sd": age_norms.get("all", (0, 0))[1],
+            "high_education": age_norms.get("high", age_norms.get("all", (0, 0))),
+            "low_education": age_norms.get("low", age_norms.get("all", (0, 0)))
+        },
+        "all_age_groups": list(norms.keys())
+    }
+

@@ -163,18 +163,53 @@ class CognitiveService:
             )
         
         # =====================================================================
-        # STAGE 3: CLINICAL SCORING
+        # STAGE 3: CLINICAL SCORING (with Age-Adjusted Norms)
         # =====================================================================
         stage_start = time.time()
         try:
             stages.append(StageProgress(
                 stage=PipelineStage.SCORING,
                 stage_index=2,
-                message="Calculating clinical risk scores",
+                message="Calculating clinical risk scores with normative comparison",
                 started_at=datetime.now()
             ))
             
-            risk_assessment, explainability = self.scorer.score_with_explanation(features)
+            # Extract patient demographics for age-adjusted scoring
+            patient_age = None
+            education_years = None
+            if data.user_metadata:
+                patient_age = data.user_metadata.get("age") or data.user_metadata.get("patient_age")
+                education_years = data.user_metadata.get("education") or data.user_metadata.get("education_years")
+                
+                # Validate age
+                if patient_age is not None:
+                    try:
+                        patient_age = int(patient_age)
+                        if patient_age < 18 or patient_age > 100:
+                            logger.warning(f"[COGNITIVE] Invalid patient age: {patient_age}, ignoring")
+                            patient_age = None
+                    except (ValueError, TypeError):
+                        logger.warning(f"[COGNITIVE] Invalid patient age format: {patient_age}")
+                        patient_age = None
+                
+                # Validate education
+                if education_years is not None:
+                    try:
+                        education_years = int(education_years)
+                        if education_years < 0 or education_years > 25:
+                            logger.warning(f"[COGNITIVE] Invalid education years: {education_years}, ignoring")
+                            education_years = None
+                    except (ValueError, TypeError):
+                        logger.warning(f"[COGNITIVE] Invalid education format: {education_years}")
+                        education_years = None
+            
+            logger.info(f"[COGNITIVE] Scoring with demographics: age={patient_age}, education={education_years}")
+            
+            risk_assessment, explainability = self.scorer.score_with_explanation(
+                features,
+                patient_age=patient_age,
+                education_years=education_years
+            )
             recommendations = self.scorer.generate_recommendations(risk_assessment)
             
             stages[-1].completed_at = datetime.now()

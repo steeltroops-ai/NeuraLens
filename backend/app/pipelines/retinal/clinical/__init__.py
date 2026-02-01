@@ -147,4 +147,30 @@ __all__ = [
     "ConsistencyGate",
     "CriticalBiomarkerGate",
     "clinical_safety_checker",
+    
+    # v5.1 Enhanced Uncertainty (research-grade)
+    "EnhancedUncertaintyEstimator",
+    "UncertaintyEstimateV2",
+    "SafetyGateResultV2",
+    "SafetyLevel",
+    "DRConformalPredictor",
+    "enhanced_uncertainty_estimator",
 ]
+
+# v5.1 Enhanced uncertainty (research-grade upgrade)
+try:
+    from .enhanced_uncertainty import (
+        EnhancedUncertaintyEstimator,
+        UncertaintyEstimate as UncertaintyEstimateV2,
+        SafetyGateResult as SafetyGateResultV2,
+        SafetyLevel,
+        MCDropoutEstimator as MCDropoutEstimatorV2,
+        ConformalPredictor as ConformalPredictorV2,
+        DRConformalPredictor,
+        TemperatureScaler as TemperatureScalerV2,
+        ClinicalSafetyGates,
+        enhanced_uncertainty_estimator,
+    )
+except ImportError as e:
+    import logging
+    logging.getLogger(__name__).warning(f"Enhanced uncertainty module not available: {e}")
