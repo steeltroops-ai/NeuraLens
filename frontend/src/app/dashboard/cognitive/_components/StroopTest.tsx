@@ -198,7 +198,7 @@ export default function StroopTest({ onComplete, onCancel }: StroopTestProps) {
     setPhase("complete");
 
     const result: TaskResult = {
-      task_id: "stroop_v1",
+      task_id: "stroop",
       start_time: startTime.current,
       end_time: new Date().toISOString(),
       events: events.current,

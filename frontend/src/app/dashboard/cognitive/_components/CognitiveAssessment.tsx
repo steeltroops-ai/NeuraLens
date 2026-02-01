@@ -222,13 +222,27 @@ export default function CognitiveAssessment({
   const getCompletedTestIds = (): Exclude<TestType, "none">[] => {
     return state.tasks
       .map((t) => {
-        if (t.task_id.includes("reaction")) return "reaction" as const;
-        if (t.task_id.includes("n_back")) return "memory" as const;
-        if (t.task_id.includes("go_no_go")) return "go_no_go" as const;
-        if (t.task_id.includes("trail_making_a")) return "trail_a" as const;
-        if (t.task_id.includes("trail_making_b")) return "trail_b" as const;
-        if (t.task_id.includes("digit_symbol")) return "digit_symbol" as const;
-        if (t.task_id.includes("stroop")) return "stroop" as const;
+        // Match standardized task IDs (without version suffix)
+        if (t.task_id === "reaction_time" || t.task_id.startsWith("reaction"))
+          return "reaction" as const;
+        if (t.task_id === "n_back" || t.task_id.includes("n_back"))
+          return "memory" as const;
+        if (t.task_id === "go_no_go" || t.task_id.includes("go_no_go"))
+          return "go_no_go" as const;
+        if (
+          t.task_id === "trail_making_a" ||
+          t.task_id.includes("trail_making_a")
+        )
+          return "trail_a" as const;
+        if (
+          t.task_id === "trail_making_b" ||
+          t.task_id.includes("trail_making_b")
+        )
+          return "trail_b" as const;
+        if (t.task_id === "digit_symbol" || t.task_id.includes("digit_symbol"))
+          return "digit_symbol" as const;
+        if (t.task_id === "stroop" || t.task_id.includes("stroop"))
+          return "stroop" as const;
         return null;
       })
       .filter((id): id is Exclude<TestType, "none"> => id !== null);

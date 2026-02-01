@@ -83,7 +83,40 @@ export interface TaskMetrics {
   task_id: string;
   completion_status: TaskCompletionStatus;
   performance_score: number;
-  parameters: Record<string, number>;
+  parameters: Record<string, number> & {
+    // Reaction Time metrics
+    mean_rt?: number;
+    median_rt?: number;
+    trimmed_mean_rt?: number;
+    std_rt?: number;
+    cv_rt?: number;
+    iqr_rt?: number;
+    inverse_efficiency_score?: number;
+    lapse_count?: number;
+    lapse_rate?: number;
+    skewness?: number;
+    fatigue_index?: number;
+    // SDT metrics
+    d_prime?: number;
+    criterion_c?: number;
+    beta?: number;
+    hit_rate?: number;
+    false_alarm_rate?: number;
+    balanced_accuracy?: number;
+    learning_slope?: number;
+    learning_r2?: number;
+    // Go/No-Go
+    inhibition_rate?: number;
+    commission_errors?: number;
+    omission_errors?: number;
+    // Trail Making
+    completion_time_ms?: number;
+    errors?: number;
+    // Stroop
+    stroop_effect_ms?: number;
+    avg_congruent_rt?: number;
+    avg_incongruent_rt?: number;
+  };
   validity_flag: boolean;
   quality_warnings: string[];
 }

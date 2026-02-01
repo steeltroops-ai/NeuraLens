@@ -1382,14 +1382,14 @@ export default function RetinalAssessment({
             </div>
           </motion.div>
         ) : (
-          /* Input State - Matches Speech Analysis Clean Card Style */
+          /* Input State - Two Column Layout with Info Panel */
           <motion.div
             key="upload"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="max-w-2xl mx-auto"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
           >
-            {/* Left: Input Card */}
+            {/* Left: Upload Card */}
             <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col h-full">
               <h2 className="text-[14px] font-semibold text-zinc-100 mb-4">
                 Upload Fundus Image
@@ -1418,7 +1418,7 @@ export default function RetinalAssessment({
 
               {/* Upload Zone */}
               <div
-                className={`flex-1 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                className={`flex-1 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[280px] ${
                   isDragging
                     ? "border-cyan-500 bg-cyan-500/10"
                     : error
@@ -1475,13 +1475,117 @@ export default function RetinalAssessment({
                       <Upload className="h-6 w-6 text-zinc-400" />
                     </div>
                     <div className="text-[14px] font-medium text-zinc-200">
-                      Click to Browse or Drag File
+                      {isDragging
+                        ? "Drop your fundus image here"
+                        : "Click to Browse or Drag File"}
                     </div>
                     <div className="text-[11px] text-zinc-500 mt-2">
                       Secure HIPAA-Compliant Upload
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Right: Capabilities & Info Card */}
+            <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+              <h3 className="text-[13px] font-semibold text-zinc-100 mb-4 flex items-center gap-2">
+                <Eye className="h-4 w-4 text-cyan-400" />
+                Analysis Capabilities
+              </h3>
+
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-500/15">
+                    <Target className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-medium text-zinc-200">
+                      DR Grading (ETDRS)
+                    </div>
+                    <div className="text-[11px] text-zinc-500 mt-0.5">
+                      5-level diabetic retinopathy classification
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-cyan-500/15">
+                    <Activity className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-medium text-zinc-200">
+                      Vessel Analysis
+                    </div>
+                    <div className="text-[11px] text-zinc-500 mt-0.5">
+                      Tortuosity, AV ratio, density & fractal analysis
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-violet-500/15">
+                    <Brain className="h-4 w-4 text-violet-400" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-medium text-zinc-200">
+                      Lesion Detection
+                    </div>
+                    <div className="text-[11px] text-zinc-500 mt-0.5">
+                      Microaneurysms, hemorrhages, exudates & more
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-amber-500/15">
+                    <ImageIcon className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-medium text-zinc-200">
+                      Explainability
+                    </div>
+                    <div className="text-[11px] text-zinc-500 mt-0.5">
+                      Attention heatmaps & vessel segmentation
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Model Info */}
+              <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+                <div className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">
+                  AI Model
+                </div>
+                <div className="text-[13px] font-semibold text-zinc-100">
+                  RetinaScan v4.0 Pipeline
+                </div>
+                <div className="text-[11px] text-zinc-500 mt-1">
+                  Multi-stage deep learning pipeline for comprehensive retinal
+                  analysis with biomarker extraction
+                </div>
+                <div className="flex items-center gap-4 mt-3">
+                  <div className="text-[10px]">
+                    <span className="text-zinc-500">DR Accuracy: </span>
+                    <span className="font-medium text-emerald-400">93%</span>
+                  </div>
+                  <div className="text-[10px]">
+                    <span className="text-zinc-500">Processing: </span>
+                    <span className="font-medium text-cyan-400">&lt;2s</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Clinical Note */}
+              <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                <div className="flex items-start gap-2">
+                  <Info className="h-3.5 w-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-[10px] text-blue-400 leading-relaxed">
+                    <span className="font-medium">Clinical Note:</span> This
+                    analysis follows ETDRS standards and should be reviewed by
+                    an ophthalmologist. Not for primary diagnostic use.
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

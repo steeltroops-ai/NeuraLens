@@ -129,7 +129,7 @@ export default function MotorPage() {
       </ErrorBoundary>
 
       {/* Info Panel */}
-      <div className="bg-zinc-800/50 rounded-lg border border-zinc-700/50 border border-zinc-200 p-6">
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
         <div className="flex items-start gap-3">
           <Info className="h-4 w-4 text-zinc-500 flex-shrink-0 mt-0.5" />
           <div className="text-[12px] text-zinc-500">

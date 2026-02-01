@@ -87,7 +87,7 @@ export default function ReactionTest({
   const finishTest = () => {
     setState("complete");
     const result: TaskResult = {
-      task_id: "reaction_time_v1",
+      task_id: "reaction_time",
       start_time: startTime.current,
       end_time: new Date().toISOString(),
       events: events.current,

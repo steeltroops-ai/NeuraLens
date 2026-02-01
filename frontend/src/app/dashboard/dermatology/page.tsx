@@ -14,7 +14,7 @@
 import React, { Suspense, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
+  Fingerprint,
   Target,
   Clock,
   Shield,
@@ -97,7 +97,7 @@ export default function DermatologyPage() {
         <div className="relative z-10">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-lg bg-fuchsia-500/15">
-              <Sparkles
+              <Fingerprint
                 className="h-6 w-6 text-fuchsia-400"
                 strokeWidth={1.5}
               />
