@@ -1,18 +1,72 @@
 """
-Speech Pipeline - Core Module
+Speech Pipeline Core Module v4.0
+Research-grade orchestration and base interfaces.
 
-Main orchestration and service entry for speech analysis.
+Contains:
+- Base interfaces for all major pipeline components
+- Enhanced service orchestration (v3 and v4)
+- Abstract base classes for extensibility
 """
 
 from .service import ResearchGradeSpeechService, PipelineConfig
+from .service_v4 import (
+    ResearchGradeSpeechServiceV4,
+    AnalysisResult,
+)
+from .interfaces import (
+    BaseFeatureExtractor,
+    BaseQualityGate,
+    BaseRiskAssessor,
+    BaseExplainer,
+    BaseStreamProcessor,
+    FeatureExtractionResult,
+    QualityCheckResult,
+    RiskAssessmentResult as BaseRiskAssessmentResult,
+    ExplanationResult,
+    StreamingUpdate,
+)
+from .data_models import (
+    ComprehensiveFeatureSet,
+    ClinicalRiskReport,
+    StreamingSessionContext,
+    ExplanationPackage,
+    AudioMetadata,
+    PatientContext,
+    ProcessingMetadata,
+)
 
-# Alias for backward compatibility
+# Backward compatibility
 SpeechPipelineService = ResearchGradeSpeechService
-SpeechAnalysisService = ResearchGradeSpeechService
 
 __all__ = [
-    'ResearchGradeSpeechService',
-    'SpeechPipelineService',
-    'SpeechAnalysisService',
-    'PipelineConfig',
+    # Service (v3)
+    "ResearchGradeSpeechService",
+    "SpeechPipelineService",
+    "PipelineConfig",
+    
+    # Service (v4)
+    "ResearchGradeSpeechServiceV4",
+    "AnalysisResult",
+    
+    # Interfaces
+    "BaseFeatureExtractor",
+    "BaseQualityGate",
+    "BaseRiskAssessor",
+    "BaseExplainer",
+    "BaseStreamProcessor",
+    "FeatureExtractionResult",
+    "QualityCheckResult",
+    "BaseRiskAssessmentResult",
+    "ExplanationResult",
+    "StreamingUpdate",
+    
+    # Data Models
+    "ComprehensiveFeatureSet",
+    "ClinicalRiskReport",
+    "StreamingSessionContext",
+    "ExplanationPackage",
+    "AudioMetadata",
+    "PatientContext",
+    "ProcessingMetadata",
 ]
+

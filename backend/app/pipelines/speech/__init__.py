@@ -1,5 +1,5 @@
 """
-Speech Analysis Pipeline v3.0
+Speech Analysis Pipeline v4.0
 Research-grade voice biomarker extraction for neurological screening.
 
 Detects early signs of:
@@ -9,24 +9,36 @@ Detects early signs of:
 - Dysarthria (85-95% sensitivity)
 
 Architecture (Standard Pipeline Structure):
-- config.py: Configuration values
+- config.py: Configuration values (with ResearchPipelineConfig)
 - schemas.py: Pydantic request/response models
 - router.py: FastAPI endpoints (thin layer)
-- core/: Main orchestration service
-- input/: Input validation and reception
-- preprocessing/: Audio preprocessing
-- features/: Feature extraction modules
-- clinical/: Clinical risk scoring
+- core/: Main orchestration service (v3 and v4)
+- quality/: Enhanced quality gate system
+- features/: Unified feature extraction pipeline
+- clinical/: Clinical risk scoring with uncertainty
+- streaming/: Real-time WebSocket streaming
 - output/: Response formatting
 - monitoring/: Quality, drift, audit
-- errors/: Error codes and handlers
-- explanation/: AI explanation rules
+- errors/: Enhanced error codes and handlers
+
+v4.0 Major Upgrades:
+- Enhanced quality gate with multi-format support
+- Unified feature extraction with parallel processing
+- Monte Carlo uncertainty quantification
+- SHAP-style risk explanations
+- Age/sex-adjusted normative comparisons
+- Real-time WebSocket streaming
 
 Usage:
-    from app.pipelines.speech import ResearchGradeSpeechService
+    from app.pipelines.speech import ResearchGradeSpeechServiceV4
     
-    service = ResearchGradeSpeechService()
+    service = ResearchGradeSpeechServiceV4()
     result = await service.analyze(audio_bytes, session_id, filename)
+    
+    # Streaming
+    session = service.create_streaming_session()
+    chunk_result = await service.process_streaming_chunk(session.session_id, audio)
+    final = await service.finalize_streaming_session(session.session_id)
 """
 
 # Root config
@@ -37,26 +49,62 @@ from .config import (
     SUPPORTED_MIME_TYPES,
     BIOMARKER_ABNORMAL_THRESHOLDS,
     CONDITION_PATTERNS,
-    RECOMMENDATIONS
+    RECOMMENDATIONS,
+    ResearchPipelineConfig,
 )
 
 # Router (for app.main registration)
 from .router import router
 
-# Core service
+# Core services
 from .core.service import ResearchGradeSpeechService, PipelineConfig
+from .core.service_v4 import ResearchGradeSpeechServiceV4, AnalysisResult
 
 # Backward compatibility aliases
 SpeechPipelineService = ResearchGradeSpeechService
 
-# Feature extractors (for advanced usage)
-from .features.acoustic import AcousticFeatureExtractor, AcousticFeatures
-from .features.prosodic import ProsodicFeatureExtractor, ProsodicFeatures
-from .features.composite import CompositeFeatureExtractor, CompositeBiomarkers
+# Quality gate system (v4)
+from .quality import (
+    EnhancedQualityGate,
+    SignalQualityAnalyzer,
+    SpeechContentDetector,
+    FormatValidator,
+    RealTimeQualityMonitor,
+    QualityReport,
+)
+
+# Feature extractors
+from .features import (
+    AcousticFeatureExtractor,
+    AcousticFeatures,
+    ProsodicFeatureExtractor,
+    ProsodicFeatures,
+    CompositeFeatureExtractor,
+    CompositeBiomarkers,
+    UnifiedFeatureExtractor,
+    UnifiedFeatures,
+)
 
 # Clinical components
-from .clinical.risk_scorer import ClinicalRiskScorer, RiskAssessmentResult
-from .clinical.uncertainty import UncertaintyEstimator
+from .clinical import (
+    ClinicalRiskScorer,
+    RiskAssessmentResult,
+    UncertaintyEstimator,
+    UncertaintyResult,
+    RiskExplainer,
+    RiskExplanation,
+    NormativeDataManager,
+)
+
+# Streaming (v4)
+from .streaming import (
+    StreamingSessionManager,
+    StreamingSession,
+    StreamProcessor,
+    StreamingAnalyzer,
+    StreamingResult,
+    WebSocketHandler,
+)
 
 # Input layer
 from .input.validator import AudioValidator, ValidationResult
@@ -66,7 +114,7 @@ from .input.receiver import AudioReceiver, ReceivedAudio
 from .output.formatter import OutputFormatter
 
 # Monitoring
-from .monitoring.quality_checker import QualityChecker, QualityReport
+from .monitoring.quality_checker import QualityChecker, QualityReport as LegacyQualityReport
 from .monitoring.drift_detector import DriftDetector, DriftReport
 from .monitoring.audit_logger import AuditLogger, AuditEntry
 
@@ -85,11 +133,24 @@ __all__ = [
     "BIOMARKER_ABNORMAL_THRESHOLDS",
     "CONDITION_PATTERNS",
     "RECOMMENDATIONS",
+    "ResearchPipelineConfig",
     
-    # Services
+    # Services (v3)
     "ResearchGradeSpeechService",
     "SpeechPipelineService",  # Legacy alias
     "PipelineConfig",
+    
+    # Services (v4)
+    "ResearchGradeSpeechServiceV4",
+    "AnalysisResult",
+    
+    # Quality gate (v4)
+    "EnhancedQualityGate",
+    "SignalQualityAnalyzer",
+    "SpeechContentDetector",
+    "FormatValidator",
+    "RealTimeQualityMonitor",
+    "QualityReport",
     
     # Input layer
     "AudioValidator",
@@ -107,15 +168,29 @@ __all__ = [
     "ProsodicFeatures",
     "CompositeFeatureExtractor",
     "CompositeBiomarkers",
+    "UnifiedFeatureExtractor",
+    "UnifiedFeatures",
     
     # Clinical
     "ClinicalRiskScorer",
     "RiskAssessmentResult",
     "UncertaintyEstimator",
+    "UncertaintyResult",
+    "RiskExplainer",
+    "RiskExplanation",
+    "NormativeDataManager",
+    
+    # Streaming (v4)
+    "StreamingSessionManager",
+    "StreamingSession",
+    "StreamProcessor",
+    "StreamingAnalyzer",
+    "StreamingResult",
+    "WebSocketHandler",
     
     # Monitoring
     "QualityChecker",
-    "QualityReport",
+    "LegacyQualityReport",
     "DriftDetector",
     "DriftReport",
     "AuditLogger",
@@ -125,6 +200,9 @@ __all__ = [
     "ErrorCode",
     "LayerError",
     "PipelineLayer",
+    
+    # Version
+    "__version__",
 ]
 
-__version__ = "3.0.0"
+__version__ = "4.0.0"

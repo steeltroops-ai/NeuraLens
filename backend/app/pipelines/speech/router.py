@@ -108,15 +108,15 @@ async def analyze_speech(
         try:
             persistence = PersistenceService(db)
             result_data = {
-                "duration_seconds": result.file_info.duration_seconds if result.file_info else 0,
+                "duration_seconds": result.file_info.duration if result.file_info else 0,
                 "sample_rate": result.file_info.sample_rate if result.file_info else 16000,
-                "quality_score": result.quality_metrics.voice_quality if hasattr(result, 'quality_metrics') and result.quality_metrics else 0.8,
+                "quality_score": result.quality_score if hasattr(result, 'quality_score') else 0.8,
                 "jitter": result.biomarkers.jitter.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.jitter else None,
                 "shimmer": result.biomarkers.shimmer.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.shimmer else None,
                 "hnr": result.biomarkers.hnr.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.hnr else None,
                 "cpps": result.biomarkers.cpps.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.cpps else None,
                 "speech_rate": result.biomarkers.speech_rate.value if hasattr(result, 'biomarkers') and result.biomarkers and result.biomarkers.speech_rate else None,
-                "pd_probability": result.risk_assessment.risk_score / 100.0 if hasattr(result, 'risk_assessment') and result.risk_assessment else None,
+                "pd_probability": result.risk_score if hasattr(result, 'risk_score') else None,
             }
             await persistence.save_speech_assessment(
                 session_id=s_id,
@@ -151,7 +151,7 @@ async def health_check():
         "parselmouth_available": PARSELMOUTH_AVAILABLE,
         "librosa_available": LIBROSA_AVAILABLE,
         "conditions_detected": DETECTABLE_CONDITIONS,
-        "version": "3.0.0",
+        "version": "4.0.0",
     }
 
 
@@ -160,7 +160,7 @@ async def module_info():
     """Get information about speech module"""
     return {
         "name": "NeuraSpeech AI",
-        "version": "3.0.0",
+        "version": "4.0.0",
         "description": "AI-powered speech analysis for neurological biomarkers",
         "supported_conditions": DETECTABLE_CONDITIONS,
         "biomarkers": {

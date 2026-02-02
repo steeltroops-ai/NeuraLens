@@ -1,34 +1,52 @@
 """
-Clinical Risk Calculator - Research Grade
-Enhanced risk scoring with uncertainty estimation and calibration.
+Clinical Risk Assessment Module v4.0
+Research-grade risk scoring with uncertainty quantification.
+
+Components:
+- ClinicalRiskScorer: Base risk calculation with normative data
+- UncertaintyEstimator: Monte Carlo uncertainty quantification
+- ConditionClassifier: Multi-condition probability estimation
+- RiskExplainer: Feature-based explanations (LIME/SHAP-style)
 """
 
 from .risk_scorer import (
     ClinicalRiskScorer,
-    RiskAssessmentResult,
     RiskResult,
-    RiskLevel,
-    BiomarkerDeviation,
+    RiskAssessmentResult,
     ConditionRiskResult,
+    BiomarkerDeviation,
+    RiskLevel,
     calculate_speech_risk,
     get_biomarker_status,
-    get_risk_category,
-    normalize_to_risk
+    get_risk_category
 )
-from .condition_classifier import ConditionClassifier
-from .uncertainty import UncertaintyEstimator
+from .uncertainty import UncertaintyEstimator, UncertaintyResult
+from .explainer import RiskExplainer, RiskExplanation
+from .normative import NormativeDataManager, NormativeReference
 
 __all__ = [
+    # Core scoring
     "ClinicalRiskScorer",
-    "RiskAssessmentResult",
     "RiskResult",
-    "RiskLevel",
-    "BiomarkerDeviation",
+    "RiskAssessmentResult",
     "ConditionRiskResult",
+    "BiomarkerDeviation",
+    "RiskLevel",
+    
+    # Utility functions
     "calculate_speech_risk",
     "get_biomarker_status",
     "get_risk_category",
-    "normalize_to_risk",
-    "ConditionClassifier",
-    "UncertaintyEstimator"
+    
+    # Uncertainty
+    "UncertaintyEstimator",
+    "UncertaintyResult",
+    
+    # Explainability
+    "RiskExplainer",
+    "RiskExplanation",
+    
+    # Normative data
+    "NormativeDataManager",
+    "NormativeReference",
 ]

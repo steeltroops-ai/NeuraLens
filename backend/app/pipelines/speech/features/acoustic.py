@@ -164,11 +164,21 @@ class AcousticFeatureExtractor:
             point_process = self._extract_point_process(sound)
             features.num_periods = self._get_num_periods(point_process)
             
-            # Only extract perturbation if sufficient periods
-            if features.num_periods > 10:
+            # Extract perturbation measures if we have enough periods
+            # 3 periods minimum for jitter/shimmer (Praat requirement)
+            if features.num_periods >= 3:
                 features.jitter = self._extract_jitter(point_process)
                 features.shimmer = self._extract_shimmer(sound, point_process)
                 features.hnr = self._extract_hnr(sound)
+                if features.num_periods < 10:
+                    logger.warning(
+                        f"Low period count ({features.num_periods}), "
+                        "perturbation values may have reduced reliability"
+                    )
+            else:
+                logger.warning(
+                    f"Insufficient periods ({features.num_periods}) for perturbation extraction"
+                )
             
             # CPPS - always try to extract (robust measure)
             features.cpps = self._extract_cpps(sound)

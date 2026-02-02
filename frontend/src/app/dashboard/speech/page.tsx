@@ -104,7 +104,7 @@ export default function SpeechAnalysisPage() {
                   SpeechMD AI
                 </h1>
                 <span className="px-2 py-0.5 bg-violet-500/20 text-violet-400 text-[10px] font-medium rounded-full">
-                  v2.0
+                  v4.0
                 </span>
                 {isProcessing && (
                   <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-medium rounded-full animate-pulse">
@@ -142,7 +142,7 @@ export default function SpeechAnalysisPage() {
             <div className="flex items-center gap-2 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
               <Brain className="h-4 w-4 text-violet-500" />
               <div>
-                <div className="text-[13px] font-medium text-zinc-100">9</div>
+                <div className="text-[13px] font-medium text-zinc-100">10</div>
                 <div className="text-[10px] text-zinc-500">Biomarkers</div>
               </div>
             </div>

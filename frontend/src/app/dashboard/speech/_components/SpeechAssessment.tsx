@@ -265,10 +265,10 @@ export default function SpeechAssessment({
                 </div>
                 <div>
                   <div className="text-[12px] font-medium text-zinc-200">
-                    9 Voice Biomarkers
+                    10 Voice Biomarkers
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">
-                    Jitter, shimmer, HNR, MFCCs & prosodic features
+                    Jitter, shimmer, HNR, CPPS, NII, VFMT & prosodic features
                   </div>
                 </div>
               </div>
@@ -322,11 +322,11 @@ export default function SpeechAssessment({
                 AI Model
               </div>
               <div className="text-[13px] font-semibold text-zinc-100">
-                SpeechMD v2.0 Pipeline
+                SpeechMD v4.0 Pipeline
               </div>
               <div className="text-[11px] text-zinc-500 mt-1">
-                Deep learning models trained on clinical speech datasets for
-                neurological assessment
+                Research-grade pipeline with uncertainty quantification and
+                age-adjusted normative data
               </div>
               <div className="flex items-center gap-4 mt-3">
                 <div className="text-[10px]">

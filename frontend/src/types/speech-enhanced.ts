@@ -1,7 +1,13 @@
 /**
- * Enhanced Speech Analysis Types v3.0
+ * Enhanced Speech Analysis Types v4.0
  * Matches backend EnhancedSpeechAnalysisResponse schema
  * Includes research-grade biomarkers and condition risks
+ *
+ * v4.0 Features:
+ * - Uncertainty quantification (95% CI)
+ * - SHAP-style risk explanations
+ * - Age/sex-adjusted normative comparisons
+ * - Real-time streaming support
  */
 
 // Individual biomarker with clinical metadata
